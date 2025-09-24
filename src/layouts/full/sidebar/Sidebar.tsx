@@ -14,13 +14,13 @@ const SidebarLayout = () => {
     <>
       <div className="xl:block hidden">
         <Sidebar
-          className="fixed menu-sidebar  bg-white dark:bg-darkgray rtl:pe-4 rtl:ps-0 top-[72px]"
+          className="fixed menu-sidebar  bg-white dark:bg-darkgray rtl:pe-4 rtl:ps-0 top-[2px]"
           aria-label="Sidebar with multi-level dropdown example"
         >
           <div className="px-5 py-4 flex items-center sidebarlogo">
             <FullLogo />
           </div>
-          <SimpleBar className="h-[calc(100vh_-_294px)]">
+          <SimpleBar className="h-[calc(100vh_-_94px)]">
             <SidebarItems className=" mt-2">
               <SidebarItemGroup
                className="sidebar-nav hide-menu">
