@@ -153,7 +153,6 @@ const Dashboard = () => {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-12 gap-6">
-        {/* Statistics Cards - Updated with #0085db background */}
         <div className="lg:col-span-3 col-span-12">
           <div className="bg-[#0085db] rounded-lg shadow-lg p-6 relative overflow-hidden border-0">
             <img
