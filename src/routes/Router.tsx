@@ -2,6 +2,9 @@
 // @ts-ignore
 import  { lazy } from 'react';
 import { Navigate, createBrowserRouter } from "react-router";
+import Apply from 'src/Frontend/Main/Apply';
+import Confirmation from 'src/Frontend/Main/Confirmation';
+import FormView from 'src/Frontend/Main/FormView';
 import Home from 'src/Frontend/Main/Home';
 import TypePage from 'src/Frontend/Main/Typepage';
 import Loadable from 'src/layouts/full/shared/loadable/Loadable';
@@ -59,6 +62,9 @@ const Router = [
       { path: '*', element: <Navigate to="/auth/404" /> },
       { path: '/Frontend/:institute_id', element: <Home /> },
       { path: '/page/:pageType', element: <TypePage /> },
+      { path: '/apply', element: <Apply /> },
+      { path: '/Form-view', element: <FormView /> },
+      { path: '/Confirmation', element: <Confirmation /> },
       
     ],
   }
