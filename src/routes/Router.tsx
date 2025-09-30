@@ -1,6 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import  { lazy } from 'react';
+
+import { lazy } from 'react';
 import { Navigate, createBrowserRouter } from "react-router";
 import Apply from 'src/Frontend/Main/Apply';
 import Confirmation from 'src/Frontend/Main/Confirmation';
@@ -8,13 +7,17 @@ import FormView from 'src/Frontend/Main/FormView';
 import Home from 'src/Frontend/Main/Home';
 import TypePage from 'src/Frontend/Main/Typepage';
 import Loadable from 'src/layouts/full/shared/loadable/Loadable';
-
+const AccountTable = Loadable(lazy(() => import('../views/accounts/components/AccountTable')));
+const AccountForm = Loadable(lazy(() => import('../views/applicationForm/components/AccountForm')));
+const AccountTab = Loadable(lazy(() => import('../views/buttons/components/AccountTab')));
+const StatePage = Loadable(lazy(() => import('../views/dataManager/state/components/State'))); 
 
 
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
+
 
 // Dashboard
 const Dashboard = Loadable(lazy(() => import('../views/dashboards/Dashboard')));
@@ -41,13 +44,20 @@ const Router = [
     element: <FullLayout />,
     children: [
       { path: '/', exact: true, element: <Dashboard/> },
+      { path: '/dashboard', exact: true, element: <Dashboard/> },
       { path: '/ui/typography', exact: true, element: <Typography/> },
       { path: '/ui/table', exact: true, element: <Table/> },
       { path: '/ui/form', exact: true, element: <Form/> },
       { path: '/ui/alert', exact: true, element: <Alert/> },
-      { path: '/ui/buttons', exact: true, element: <Buttons/> },
+      { path: '/ui/buttons', exact: true, element: <AccountTab/> },
+      { path: '/profile', exact: true, element: <AccountTab/> },
+      
       { path: '/icons/solar', exact: true, element: <Solar /> },
       { path: '/sample-page', exact: true, element: <SamplePage /> },
+      { path: '/accounts', exact: true, element: <AccountTable /> },
+      { path: '/application-form', exact: true, element: <AccountForm /> },
+      { path: '/states', exact: true, element: <StatePage /> }, 
+
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
@@ -56,8 +66,7 @@ const Router = [
     element: <BlankLayout />,
     children: [
       { path: '/auth/login', element: <Login /> },
-      { path: '/auth/register', element: <Register /> },
-      { path: '404', element: <Error /> },
+    { path: '404', element: <Error /> },
       { path: '/auth/404', element: <Error /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
       { path: '/Frontend/:institute_id', element: <Home /> },

@@ -31,7 +31,7 @@ const SidebarContent: MenuItem[] = [
         name: 'Dashboard',
         icon: 'solar:pie-chart-line-duotone',
         id: uniqueId(),
-        url: '/',
+        url: '/dashboard',
         isPro: false,
       },
     ],
@@ -47,7 +47,7 @@ const SidebarContent: MenuItem[] = [
           {
             name: 'Demo Accounts',
             id: uniqueId(),
-            url: 'https://spike-react-tailwind-main.netlify.app/frontend-pages/homepage',
+            url: '/accounts',
             isPro: false,
           },
           {
@@ -66,7 +66,7 @@ const SidebarContent: MenuItem[] = [
           {
             name: 'School Application',
             id: uniqueId(),
-            url: 'https://spike-react-tailwind-main.netlify.app/frontend-pages/homepage',
+            url: '/application-form',
             isPro: false,
           },
           {
@@ -299,7 +299,7 @@ const SidebarContent: MenuItem[] = [
           {
             name: 'State',
             id: uniqueId(),
-            url: 'https://spike-react-tailwind-main.netlify.app/frontend-pages/homepage',
+            url: '/states',
             isPro: false,
           },
           {
@@ -362,7 +362,7 @@ const SidebarContent: MenuItem[] = [
         name: 'Profile',
         icon: 'solar:user-circle-line-duotone',
         id: uniqueId(),
-        url: '/ui/buttons',
+        url: '/profile',
         isPro: false,
       },
     ],
