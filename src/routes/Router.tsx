@@ -119,7 +119,6 @@ const Router = [
       { path: '/apply', element: <Apply /> },
       { path: '/Form-view', element: <FormView /> },
       { path: '/Confirmation', element: <Confirmation /> },
-      // Redirect root to appropriate dashboard based on role
       { 
         path: '/', 
         element: <RoleBasedRedirect /> 
@@ -127,10 +126,6 @@ const Router = [
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
-];
-
-const router = createBrowserRouter(Router);
-export default router;
 
 
 
