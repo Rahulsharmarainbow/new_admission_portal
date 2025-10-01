@@ -14,6 +14,9 @@ import { ForgotPassword } from 'src/views/auth/forgot-password/ForgotPassword';
 import { TwoStepVerification } from 'src/views/auth/two-step/TwoStepVerification';
 import { useAuth } from 'src/hook/useAuth';
 import { ProtectedRoute } from 'src/utils/ProtectedRoute';
+import AccountTable from 'src/views/accounts/components/AccountTable';
+import DemoAccounts from 'src/views/accounts/demo/DemoAccounts';
+import LiveAccounts from 'src/views/accounts/live/LiveAccounts';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -52,6 +55,8 @@ const Router = [
     ),
     children: [
       { path: 'dashboard', element: <Dashboard /> },
+      { path: '/SuperAdmin/demo-accounts', element: <DemoAccounts /> },
+      { path: '/SuperAdmin/live-accounts', element: <LiveAccounts /> },
       { path: 'ui/typography', element: <Typography /> },
       { path: 'ui/table', element: <Table /> },
       { path: 'ui/form', element: <Form /> },

@@ -1,16 +1,38 @@
+
+import { uniqueId } from 'lodash';
+
 const SidebarContent: Record<number, MenuItem[]> = {
   1: [ // SuperAdmin Menu
     {
       heading: "Home",
       children: [
         { name: "Dashboard", url: "/SuperAdmin/dashboard", icon: "solar:pie-chart-line-duotone" },
+         { name: "Manage Users", url: "/SuperAdmin/users", icon: "solar:user-id-line-duotone" },
       ],
     },
-    {
-      heading: "Admin",
-      children: [
-        { name: "Manage Users", url: "/SuperAdmin/users", icon: "solar:user-id-line-duotone" },
-      ],
+      {
+    heading: 'Apps',
+    children: [
+      {
+        name: 'Accounts',
+        id: uniqueId(),
+        icon: 'solar:user-id-line-duotone',
+        children: [
+          {
+            name: 'Demo Accounts',
+            id: uniqueId(),
+            url: '/SuperAdmin/demo-accounts',
+            isPro: false,
+          },
+          {
+            name: 'Live Accounts',
+            id: uniqueId(),
+            url: '/SuperAdmin/live-accounts',
+            isPro: false,
+          }
+        ],
+      },
+    ]
     },
   ],
   2: [ // SupportAdmin Menu
@@ -21,7 +43,22 @@ const SidebarContent: Record<number, MenuItem[]> = {
       ],
     },
   ],
-  // Similarly add for role 3 & 4
+  3: [ // SalesAdmin Menu
+    {
+      heading: "Home",
+      children: [
+        { name: "Dashboard", url: "/SupportAdmin/dashboard", icon: "solar:pie-chart-line-duotone" },
+      ],
+    },
+  ],
+  4: [ // CustomerAdmin Menu
+    {
+      heading: "Home",
+      children: [
+        { name: "Dashboard", url: "/SupportAdmin/dashboard", icon: "solar:pie-chart-line-duotone" },
+      ],
+    },
+  ],
 };
 
 export default SidebarContent;

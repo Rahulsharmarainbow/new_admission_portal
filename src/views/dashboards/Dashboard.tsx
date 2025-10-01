@@ -9,6 +9,18 @@ import { useAuth } from 'src/hook/useAuth';
 import { useDebounce } from 'src/hook/useDebounce';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 
+// Flowbite React Components
+import {
+  Card,
+  Select,
+  Button,
+  Spinner,
+  Table,
+  Badge,
+  TextInput,
+  Grid
+} from 'flowbite-react';
+
 // Chart data interfaces
 interface ChartData {
   labels: string[];
@@ -73,7 +85,7 @@ const Dashboard = () => {
     setFilters(prev => ({ ...prev, rowsPerPage, page: 0 }));
   };
 
-  // Prepare chart data
+  // Prepare chart data for Degree Wise
   const degreeWiseData: ChartData = useMemo(() => {
     if (!dashboardData?.degreeWisePaidApplications) {
       return {
@@ -125,6 +137,7 @@ const Dashboard = () => {
     };
   }, [dashboardData?.degreeWisePaidApplications]);
 
+  // Prepare chart data for Class Wise
   const classWiseData: ChartData = useMemo(() => {
     if (!dashboardData?.classWisePaidApplications) {
       return {
@@ -132,9 +145,9 @@ const Dashboard = () => {
         datasets: [{
           label: 'Paid Applications',
           data: [],
-          backgroundColor: ['rgba(79, 70, 229, 0.6)'],
-          borderColor: ['rgb(79, 70, 229)'],
-          borderWidth: 2
+          backgroundColor: [],
+          borderColor: [],
+          borderWidth: 1
         }]
       };
     }
@@ -147,19 +160,38 @@ const Dashboard = () => {
       datasets: [{
         label: 'Paid Applications',
         data,
-        backgroundColor: 'rgba(79, 70, 229, 0.6)',
-        borderColor: 'rgb(79, 70, 229)',
-        borderWidth: 2
+        backgroundColor: [
+          'rgba(79, 70, 229, 0.8)',
+          'rgba(99, 102, 241, 0.8)',
+          'rgba(129, 140, 248, 0.8)',
+          'rgba(165, 180, 252, 0.8)',
+          'rgba(199, 210, 254, 0.8)',
+          'rgba(224, 231, 255, 0.8)'
+        ],
+        borderColor: [
+          'rgb(79, 70, 229)',
+          'rgb(99, 102, 241)',
+          'rgb(129, 140, 248)',
+          'rgb(165, 180, 252)',
+          'rgb(199, 210, 254)',
+          'rgb(224, 231, 255)'
+        ],
+        borderWidth: 1
       }]
     };
   }, [dashboardData?.classWisePaidApplications]);
 
-  // Chart rendering function
-  const renderChart = (data: ChartData, isBarChart = false) => {
+  // Horizontal Bar Chart Component
+  const HorizontalBarChart = ({ data, title, subtitle }: { data: ChartData, title: string, subtitle: string }) => {
     if (data.labels.length === 0) {
       return (
         <div className="h-80 flex items-center justify-center text-gray-500">
-          No data available
+          <div className="text-center">
+            <svg className="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 17v-2m0 0V9m0 8h6m-6 0H7m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="mt-2 text-gray-500">No data available</p>
+          </div>
         </div>
       );
     }
@@ -167,65 +199,145 @@ const Dashboard = () => {
     const maxValue = Math.max(...data.datasets[0].data);
 
     return (
-      <div className="h-80 p-4">
-        {isBarChart ? (
-          // Bar chart visualization
-          <div className="h-full flex items-end justify-between space-x-2">
-            {data.datasets[0].data.map((value, index) => (
-              <div key={index} className="flex flex-col items-center flex-1">
-                <div
-                  className="w-full bg-blue-500 rounded-t transition-all duration-500 hover:bg-blue-600"
-                  style={{ height: `${(value / maxValue) * 100}%` }}
-                ></div>
-                <span className="text-xs mt-2 text-gray-600 truncate w-full text-center">
-                  {data.labels[index]}
-                </span>
-                <span className="text-xs font-semibold">{value}</span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          // Pie chart visualization
-          <div className="h-full flex flex-col lg:flex-row items-center justify-center">
-            <div className="relative w-48 h-48 rounded-full border-4 border-gray-200">
-              {data.datasets[0].data.map((value, index) => {
-                const total = data.datasets[0].data.reduce((sum, current) => sum + current, 0);
-                const percentage = (value / total) * 100;
-                const rotation = data.datasets[0].data
-                  .slice(0, index)
-                  .reduce((sum, current) => sum + (current / total) * 360, 0);
-
-                return (
-                  <div
-                    key={index}
-                    className="absolute top-0 left-0 w-full h-full"
-                    style={{
-                      clipPath: `conic-gradient(from ${rotation}deg, transparent 0%, transparent ${percentage}%, ${data.datasets[0].backgroundColor[index]} ${percentage}%, ${data.datasets[0].backgroundColor[index]} 100%)`
-                    }}
-                  ></div>
-                );
-              })}
-              <div className="absolute inset-0 m-auto w-32 h-32 bg-white rounded-full flex items-center justify-center flex-col">
-                <span className="text-lg font-bold">{data.datasets[0].data.reduce((sum, current) => sum + current, 0)}</span>
-                <span className="text-xs">Total</span>
-              </div>
-            </div>
-            <div className="ml-0 lg:ml-8 mt-4 lg:mt-0">
-              {data.labels.map((label, index) => (
-                <div key={index} className="flex items-center mb-2">
-                  <div
-                    className="w-4 h-4 rounded mr-2"
-                    style={{ backgroundColor: data.datasets[0].backgroundColor[index] }}
-                  ></div>
-                  <span className="text-sm truncate max-w-[120px]">
-                    {label}: {data.datasets[0].data[index]}
-                  </span>
+      <div className="p-6">
+        <div className="mb-6">
+          <h5 className="text-xl font-bold text-gray-900">{title}</h5>
+          <p className="text-sm text-gray-600">{subtitle}</p>
+        </div>
+        
+        <div className="space-y-4">
+          {data.labels.map((label, index) => {
+            const value = data.datasets[0].data[index];
+            const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
+            
+            return (
+              <div key={index} className="flex items-center space-x-4">
+                <div className="w-40 text-sm font-medium text-gray-700 truncate">
+                  {label}
                 </div>
-              ))}
+                
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold text-gray-900">{value}</span>
+                    <span className="text-xs text-gray-500">{percentage.toFixed(1)}%</span>
+                  </div>
+                  
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="h-3 rounded-full transition-all duration-700 ease-out shadow-sm"
+                      style={{
+                        width: `${percentage}%`,
+                        backgroundColor: data.datasets[0].backgroundColor[index],
+                        borderColor: data.datasets[0].borderColor[index]
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Vertical Bar Chart Component
+  const VerticalBarChart = ({ data, title, subtitle }: { data: ChartData, title: string, subtitle: string }) => {
+    if (data.labels.length === 0) {
+      return (
+        <div className="h-80 flex items-center justify-center text-gray-500">
+          <div className="text-center">
+            <svg className="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 17v-2m0 0V9m0 8h6m-6 0H7m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="mt-2 text-gray-500">No data available</p>
+          </div>
+        </div>
+      );
+    }
+
+    const maxValue = Math.max(...data.datasets[0].data);
+
+    return (
+      <div className="p-6">
+        <div className="mb-6">
+          <h5 className="text-xl font-bold text-gray-900">{title}</h5>
+          <p className="text-sm text-gray-600">{subtitle}</p>
+        </div>
+
+        <div className="h-64 flex items-end justify-between space-x-3 px-4">
+          {data.datasets[0].data.map((value, index) => (
+            <div key={index} className="flex flex-col items-center flex-1 space-y-3 group">
+              <div className="text-sm font-semibold text-gray-700 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                {value}
+              </div>
+              <div
+                className="w-full rounded-t-lg transition-all duration-500 hover:shadow-lg relative"
+                style={{
+                  height: `${maxValue > 0 ? (value / maxValue) * 85 : 0}%`,
+                  backgroundColor: data.datasets[0].backgroundColor[index],
+                  borderColor: data.datasets[0].borderColor[index],
+                  minHeight: value > 0 ? '20px' : '0px'
+                }}
+              >
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  {value}
+                </div>
+              </div>
+              <span className="text-xs font-medium text-gray-600 truncate w-full text-center mt-2">
+                {data.labels[index]}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Statistics Card Component
+  const StatCard = ({ 
+    title, 
+    value, 
+    icon, 
+    image, 
+    color = 'blue' 
+  }: { 
+    title: string; 
+    value: number; 
+    icon: React.ReactNode; 
+    image: any;
+    color?: 'blue' | 'green' | 'yellow' | 'red';
+  }) => {
+    const colorClasses = {
+      blue: 'bg-[#0085db]',
+      green: 'bg-green-500',
+      yellow: 'bg-yellow-500',
+      red: 'bg-red-500'
+    };
+
+    return (
+      <Card className={`${colorClasses[color]} text-white relative overflow-hidden border-0 shadow-lg`}>
+        <img
+          alt="decoration"
+          loading="lazy"
+          width="59"
+          height="81"
+          decoding="async"
+          className="absolute top-0 right-0 opacity-20"
+          src={image}
+        />
+        <div className="relative z-10">
+          <div className="flex items-center mb-4">
+            <div className="w-12 h-12 rounded-lg bg-white bg-opacity-20 flex items-center justify-center mr-4 backdrop-blur-sm">
+              {icon}
             </div>
           </div>
-        )}
-      </div>
+          <h4 className="text-2xl font-bold text-white mb-1">
+            {value}
+          </h4>
+          <span className="text-sm text-white text-opacity-90 font-medium">{title}</span>
+        </div>
+      </Card>
     );
   };
 
@@ -233,285 +345,216 @@ const Dashboard = () => {
   if (loading && !dashboardData) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <Spinner aria-label="Loading dashboard data" size="xl" />
       </div>
     );
   }
 
   return (
-    <>
+    <div className="space-y-6">
       {/* Filter Section */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-          <div className="relative w-full sm:w-auto">
-            <select 
-              value={filters.year}
-              onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value, page: 0 }))}
-              className="w-full sm:w-auto min-w-[120px] p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
-            >
-              <option value="2025">2025</option>
-              <option value="2024">2024</option>
-              <option value="2023">2023</option>
-              <option value="2022">2022</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
+      <Card className="shadow-sm">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+            <div className="w-full sm:w-48">
+              <Select
+                value={filters.year}
+                onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value, page: 0 }))}
+              >
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+              </Select>
+            </div>
+
+            <div className="w-full sm:w-64">
+              <Select
+                value={filters.academic}
+                onChange={(e) => setFilters(prev => ({ ...prev, academic: e.target.value, page: 0 }))}
+              >
+                <option value="">All Academic</option>
+                {/* You can populate this dynamically from API if needed */}
+              </Select>
             </div>
           </div>
 
-          <div className="relative w-full sm:w-auto">
-            <select 
-              value={filters.academic}
-              onChange={(e) => setFilters(prev => ({ ...prev, academic: e.target.value, page: 0 }))}
-              className="w-full sm:w-auto min-w-[180px] p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
-            >
-              <option value="">All Academic</option>
-              {/* You can populate this dynamically from API if needed */}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full sm:w-auto">
-          <button 
+          <Button
             onClick={fetchDashboardData}
             disabled={loading}
-            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm"
+            className="w-full lg:w-auto"
           >
-            {loading ? 'Refreshing...' : 'Refresh'}
-          </button>
+            {loading ? (
+              <>
+                <Spinner aria-label="Refreshing data" size="sm" className="mr-2" />
+                Refreshing...
+              </>
+            ) : (
+              'Refresh'
+            )}
+          </Button>
         </div>
-      </div>
+      </Card>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-12 gap-6 mb-6">
-        <div className="lg:col-span-3 col-span-12">
-          <div className="bg-[#0085db] rounded-lg shadow-lg p-6 relative overflow-hidden border-0">
-            <img
-              alt="img"
-              loading="lazy"
-              width="59"
-              height="81"
-              decoding="async"
-              className="absolute top-0 right-0"
-              src={img2}
-            />
-            <div className="relative z-10">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path strokeLinecap="round" d="M9 14h3m-2-2V8.2c0-.186 0-.279.012-.356a1 1 0 0 1 .832-.832C10.92 7 11.014 7 11.2 7h2.3a2.5 2.5 0 0 1 0 5zm0 0v5m0-5H9"></path>
-                  </svg>
-                </div>
-              </div>
-              <h4 className="text-2xl font-bold text-white mb-1">
-                {dashboardData?.paymentStatusCounts?.total_applications || 0}
-              </h4>
-              <span className="text-sm text-white text-opacity-90 font-medium">Total Applications</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-3 col-span-12">
-          <div className="bg-[#0085db] rounded-lg shadow-lg p-6 relative overflow-hidden border-0">
-            <img
-              alt="img"
-              loading="lazy"
-              width="59"
-              height="81"
-              decoding="async"
-              className="absolute top-0 right-0"
-              src={img1}
-            />
-            <div className="relative z-10">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                    <path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12" opacity="0.5"></path>
-                    <path d="M2 14c0-2.8 0-4.2.545-5.27A5 5 0 0 1 4.73 6.545C5.8 6 7.2 6 10 6h4c2.8 0 4.2 0 5.27.545a5 5 0 0 1 2.185 2.185C22 9.8 22 11.2 22 14s0 4.2-.545 5.27a5 5 0 0 1-2.185 2.185C18.2 22 16.8 22 14 22h-4c-2.8 0-4.2 0-5.27-.545a5 5 0 0 1-2.185-2.185C2 18.2 2 16.8 2 14Z"></path>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 11v6m0 0l2.5-2.5M12 17l-2.5-2.5"></path>
-                  </svg>
-                </div>
-              </div>
-              <h4 className="text-2xl font-bold text-white mb-1">
-                {dashboardData?.paymentStatusCounts?.paid_applications || 0}
-              </h4>
-              <span className="text-sm text-white text-opacity-90 font-medium">Paid Applications</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-3 col-span-12">
-          <div className="bg-[#0085db] rounded-lg shadow-lg p-6 relative overflow-hidden border-0">
-            <img
-              alt="img"
-              loading="lazy"
-              width="59"
-              height="81"
-              decoding="async"
-              className="absolute top-0 right-0"
-              src={img2}
-            />
-            <div className="relative z-10">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path strokeLinecap="round" d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"></path>
-                  </svg>
-                </div>
-              </div>
-              <h4 className="text-2xl font-bold text-white mb-1">
-                {dashboardData?.paymentStatusCounts?.failed_applications || 0}
-              </h4>
-              <span className="text-sm text-white text-opacity-90 font-medium">Failed Applications</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-3 col-span-12">
-          <div className="bg-[#0085db] rounded-lg shadow-lg p-6 relative overflow-hidden border-0">
-            <img
-              alt="img"
-              loading="lazy"
-              width="59"
-              height="81"
-              decoding="async"
-              className="absolute top-0 right-0"
-              src={img3}
-            />
-            <div className="relative z-10">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path strokeLinecap="round" d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"></path>
-                  </svg>
-                </div>
-              </div>
-              <h4 className="text-2xl font-bold text-white mb-1">
-                {dashboardData?.paymentStatusCounts?.incomplete_applications || 0}
-              </h4>
-              <span className="text-sm text-white text-opacity-90 font-medium">Incomplete Applications</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Grid className="gap-6">
+        <Grid.Col sm={12} lg={3}>
+          <StatCard
+            title="Total Applications"
+            value={dashboardData?.paymentStatusCounts?.total_applications || 0}
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path strokeLinecap="round" d="M9 14h3m-2-2V8.2c0-.186 0-.279.012-.356a1 1 0 0 1 .832-.832C10.92 7 11.014 7 11.2 7h2.3a2.5 2.5 0 0 1 0 5zm0 0v5m0-5H9"></path>
+              </svg>
+            }
+            image={img2}
+            color="blue"
+          />
+        </Grid.Col>
+        
+        <Grid.Col sm={12} lg={3}>
+          <StatCard
+            title="Paid Applications"
+            value={dashboardData?.paymentStatusCounts?.paid_applications || 0}
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                <path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12" opacity="0.5"></path>
+                <path d="M2 14c0-2.8 0-4.2.545-5.27A5 5 0 0 1 4.73 6.545C5.8 6 7.2 6 10 6h4c2.8 0 4.2 0 5.27.545a5 5 0 0 1 2.185 2.185C22 9.8 22 11.2 22 14s0 4.2-.545 5.27a5 5 0 0 1-2.185 2.185C18.2 22 16.8 22 14 22h-4c-2.8 0-4.2 0-5.27-.545a5 5 0 0 1-2.185-2.185C2 18.2 2 16.8 2 14Z"></path>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 11v6m0 0l2.5-2.5M12 17l-2.5-2.5"></path>
+              </svg>
+            }
+            image={img1}
+            color="green"
+          />
+        </Grid.Col>
+        
+        <Grid.Col sm={12} lg={3}>
+          <StatCard
+            title="Failed Applications"
+            value={dashboardData?.paymentStatusCounts?.failed_applications || 0}
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path strokeLinecap="round" d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"></path>
+              </svg>
+            }
+            image={img2}
+            color="red"
+          />
+        </Grid.Col>
+        
+        <Grid.Col sm={12} lg={3}>
+          <StatCard
+            title="Incomplete Applications"
+            value={dashboardData?.paymentStatusCounts?.incomplete_applications || 0}
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path strokeLinecap="round" d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"></path>
+              </svg>
+            }
+            image={img3}
+            color="yellow"
+          />
+        </Grid.Col>
+      </Grid>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-12 gap-6 mb-6">
-        <div className="lg:col-span-6 col-span-12">
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h5 className="text-lg font-semibold text-gray-900">Degree Wise Paid Application</h5>
-                <p className="text-sm text-gray-500">Distribution of paid applications by degree</p>
-              </div>
-            </div>
-            <div className="bg-gray-50 rounded-xl border border-gray-200">
-              {renderChart(degreeWiseData)}
-            </div>
-          </div>
-        </div>
+      <Grid className="gap-6">
+        <Grid.Col sm={12} lg={6}>
+          <Card className="shadow-lg">
+            <HorizontalBarChart
+              data={degreeWiseData}
+              title="Degree Wise Paid Application"
+              subtitle="Distribution of paid applications by degree"
+            />
+          </Card>
+        </Grid.Col>
 
-        <div className="lg:col-span-6 col-span-12">
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h5 className="text-lg font-semibold text-gray-900">Class Wise Paid Application</h5>
-                <p className="text-sm text-gray-500">Distribution of paid applications by class</p>
-              </div>
-            </div>
-            <div className="bg-gray-50 rounded-xl border border-gray-200">
-              {renderChart(classWiseData, true)}
-            </div>
-          </div>
-        </div>
-      </div>
+        <Grid.Col sm={12} lg={6}>
+          <Card className="shadow-lg">
+            <VerticalBarChart
+              data={classWiseData}
+              title="Class Wise Paid Application"
+              subtitle="Distribution of paid applications by class"
+            />
+          </Card>
+        </Grid.Col>
+      </Grid>
 
       {/* Applications Table */}
-      <div className="col-span-12">
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-            <div>
-              <h5 className="text-lg font-semibold text-gray-900">Recently Added Application</h5>
-              <h6 className="text-sm text-gray-600">Application List across all Academic</h6>
-            </div>
-            <div className="relative w-full lg:w-auto">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <Card className="shadow-lg">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+          <div>
+            <h5 className="text-xl font-bold text-gray-900">Recently Added Application</h5>
+            <p className="text-sm text-gray-600">Application List across all Academic</p>
+          </div>
+          <div className="w-full lg:w-80">
+            <TextInput
+              type="text"
+              placeholder="Search Applications..."
+              value={filters.search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              icon={() => (
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
                   <path d="M21 21l-6 -6"></path>
                 </svg>
-              </div>
-              <input
-                type="text"
-                placeholder="Search Applications..."
-                value={filters.search}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full lg:w-64"
-              />
-            </div>
+              )}
+            />
           </div>
+        </div>
 
-          {loading ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        {loading ? (
+          <div className="flex items-center justify-center h-32">
+            <Spinner aria-label="Loading applications" size="lg" />
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto rounded-lg">
+              <Table hoverable>
+                <Table.Head>
+                  <Table.HeadCell className="bg-gray-50">S.No</Table.HeadCell>
+                  <Table.HeadCell className="bg-gray-50">Applicant Name</Table.HeadCell>
+                  <Table.HeadCell className="bg-gray-50">Academic Name</Table.HeadCell>
+                  <Table.HeadCell className="bg-gray-50">Roll No</Table.HeadCell>
+                  <Table.HeadCell className="bg-gray-50">Degree/Class</Table.HeadCell>
+                  <Table.HeadCell className="bg-gray-50">Status</Table.HeadCell>
+                </Table.Head>
+                <Table.Body className="divide-y">
+                  {dashboardData?.latestApplications?.map((app: any, index: number) => (
+                    <Table.Row key={app.id} className="bg-white hover:bg-gray-50">
+                      <Table.Cell className="whitespace-nowrap font-medium text-gray-900">
+                        {(filters.page || 0) * (filters.rowsPerPage || 10) + index + 1}
+                      </Table.Cell>
+                      <Table.Cell className="font-medium text-gray-900">
+                        {app.applicant_name}
+                      </Table.Cell>
+                      <Table.Cell className="max-w-xs truncate">
+                        {app.academic_name}
+                      </Table.Cell>
+                      <Table.Cell className="font-medium text-blue-600">
+                        {app.roll_no}
+                      </Table.Cell>
+                      <Table.Cell>
+                        {app.degree_name || app.class_name || 'N/A'}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Badge
+                          color={app.payment_status === 1 ? "success" : "warning"}
+                          className="w-20 justify-center"
+                        >
+                          {app.payment_status === 1 ? 'Paid' : 'Pending'}
+                        </Badge>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
             </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto rounded-lg border border-gray-200">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.No</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Academic Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll No</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Degree/Class</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {dashboardData?.latestApplications?.map((app: any, index: number) => (
-                      <tr key={app.id} className="hover:bg-gray-50 transition-colors duration-150">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {(filters.page || 0) * (filters.rowsPerPage || 10) + index + 1}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                          {app.applicant_name}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
-                          {app.academic_name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
-                          <span className="cursor-default">{app.roll_no}</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {app.degree_name || app.class_name || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                            app.payment_status === 1 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {app.payment_status === 1 ? 'Paid' : 'Pending'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
 
+            <div className="mt-4">
               <Pagination
                 currentPage={(filters.page || 0) + 1}
                 totalPages={Math.ceil((dashboardData?.totalLatestApplications || 0) / (filters.rowsPerPage || 10))}
@@ -520,11 +563,11 @@ const Dashboard = () => {
                 onPageChange={(page) => handlePageChange(page - 1)}
                 onRowsPerPageChange={handleRowsPerPageChange}
               />
-            </>
-          )}
-        </div>
-      </div>
-    </>
+            </div>
+          </>
+        )}
+      </Card>
+    </div>
   );
 };
 
