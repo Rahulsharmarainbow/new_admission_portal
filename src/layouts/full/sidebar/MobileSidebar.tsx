@@ -6,8 +6,11 @@ import SimpleBar from "simplebar-react";
 import React from "react";
 import FullLogo from "../shared/logo/FullLogo";
 import 'simplebar-react/dist/simplebar.min.css';
+import { useAuth } from "src/hook/useAuth";
 
 const MobileSidebar = () => {
+  const { user } = useAuth();
+  const SidebarContents = SidebarContent[user?.login_type] || [];
   return (
     <>
       <div>
@@ -21,8 +24,8 @@ const MobileSidebar = () => {
           <SimpleBar className="h-[calc(100vh_-_242px)]">
             <SidebarItems className=" mt-2">
               <SidebarItemGroup className="sidebar-nav hide-menu">
-                {SidebarContent &&
-                  SidebarContent?.map((item, index) => (
+                {SidebarContents &&
+                  SidebarContents?.map((item, index) => (
                     <div className="caption" key={item.heading}>
                       <React.Fragment key={index}>
                         <h5 className="text-dark/60 uppercase font-medium leading-6 text-xs pb-2 ps-6">

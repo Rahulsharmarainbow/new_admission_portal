@@ -1,15 +1,17 @@
 
 import {  Sidebar, SidebarItemGroup, SidebarItems } from "flowbite-react";
-import SidebarContent from "./Sidebaritems";
 import NavItems from "./NavItems";
 import SimpleBar from "simplebar-react";
 import React from "react";
 import FullLogo from "../shared/logo/FullLogo";
 import NavCollapse from "./NavCollapse";
+import SidebarContent from "./Sidebaritems";
+import { useAuth } from "src/hook/useAuth";
 
 const SidebarLayout = () => {
-
-
+const { user } = useAuth();
+const SidebarContents = SidebarContent[user?.login_type] || [];
+console.log(SidebarContents);
   return (
     <>
       <div className="xl:block hidden">
@@ -24,8 +26,8 @@ const SidebarLayout = () => {
             <SidebarItems className=" mt-2">
               <SidebarItemGroup
                className="sidebar-nav hide-menu">
-                {SidebarContent &&
-                  SidebarContent?.map((item, index) => (
+                {SidebarContents &&
+                  SidebarContents?.map((item, index) => (
                     <div className="caption" key={item.heading}>
                       <React.Fragment key={index}>
                         <h5 className="text-dark/60 uppercase font-medium leading-6 text-xs pb-2 ps-6">

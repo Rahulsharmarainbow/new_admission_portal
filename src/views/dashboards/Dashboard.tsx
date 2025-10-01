@@ -1,55 +1,169 @@
-import ProductCards from 'src/components/dashboard/ProductCards';
-import ProductSales from 'src/components/dashboard/ProductSales';
-import RecentTransactionCard from 'src/components/dashboard/RecentTransactions';
-import SalesProfit from 'src/components/dashboard/SalesProfit';
-import TopPayingClients from 'src/components/dashboard/TopPayingClients';
-import TrafficDistribution from 'src/components/dashboard/TrafficDistribution';
-import img1 from "../../../public/Images/top-error-shape.png"
-import img2 from "../../../public/Images/top-info-shape.png"
-import img3 from "../../../public/Images/top-warning-shape.png"
+// views/dashboards/Dashboard.tsx
+import React, { useState, useEffect, useMemo } from 'react';
+import { toast } from 'react-hot-toast';
+import { dashboardService, DashboardFilters } from 'src/services/dashboardService';
+import img1 from "../../../public/Images/top-error-shape.png";
+import img2 from "../../../public/Images/top-info-shape.png";
+import img3 from "../../../public/Images/top-warning-shape.png";
+import { useAuth } from 'src/hook/useAuth';
+import { useDebounce } from 'src/hook/useDebounce';
+import { Pagination } from 'src/Frontend/Common/Pagination';
+
+// Chart data interfaces
+interface ChartData {
+  labels: string[];
+  datasets: {
+    label: string;
+    data: number[];
+    backgroundColor: string[];
+    borderColor: string[];
+    borderWidth: number;
+  }[];
+}
 
 const Dashboard = () => {
-  // Sample data for charts
-  const degreeWiseData = {
-    labels: ['B.Tech', 'MBA', 'B.Sc', 'M.Tech', 'B.Com'],
-    datasets: [
-      {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [filters, setFilters] = useState<DashboardFilters>({
+    page: 0,
+    rowsPerPage: 10,
+    order: 'desc',
+    orderBy: 'id',
+    search: '',
+    year: '2025',
+    academic: '',
+  });
+
+  // Debounced search
+  const debouncedSearch = useDebounce(filters.search, 500);
+
+  // Fetch dashboard data
+  const fetchDashboardData = async () => {
+    if (!user?.id || !user?.token) return;
+
+    setLoading(true);
+    try {
+      const data = await dashboardService.getDashboardData(filters, user.id, user.token);
+      setDashboardData(data);
+    } catch (error: any) {
+      console.error('Error fetching dashboard data:', error);
+      toast.error(error.response?.data?.message || 'Failed to fetch dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [filters.page, filters.rowsPerPage, filters.order, filters.orderBy, debouncedSearch, filters.year, filters.academic]);
+
+  // Update search filter
+  const handleSearchChange = (value: string) => {
+    setFilters(prev => ({ ...prev, search: value, page: 0 }));
+  };
+
+  // Update page
+  const handlePageChange = (page: number) => {
+    setFilters(prev => ({ ...prev, page }));
+  };
+
+  // Update rows per page
+  const handleRowsPerPageChange = (rowsPerPage: number) => {
+    setFilters(prev => ({ ...prev, rowsPerPage, page: 0 }));
+  };
+
+  // Prepare chart data
+  const degreeWiseData: ChartData = useMemo(() => {
+    if (!dashboardData?.degreeWisePaidApplications) {
+      return {
+        labels: [],
+        datasets: [{
+          label: 'Paid Applications',
+          data: [],
+          backgroundColor: [],
+          borderColor: [],
+          borderWidth: 1
+        }]
+      };
+    }
+
+    const labels = dashboardData.degreeWisePaidApplications.map((item: any) => item.name);
+    const data = dashboardData.degreeWisePaidApplications.map((item: any) => item.paid_applications_count);
+
+    return {
+      labels,
+      datasets: [{
         label: 'Paid Applications',
-        data: [25, 18, 12, 8, 7],
+        data,
         backgroundColor: [
           'rgba(59, 130, 246, 0.8)',
           'rgba(16, 185, 129, 0.8)',
           'rgba(245, 158, 11, 0.8)',
           'rgba(139, 92, 246, 0.8)',
-          'rgba(236, 72, 153, 0.8)'
+          'rgba(236, 72, 153, 0.8)',
+          'rgba(6, 182, 212, 0.8)',
+          'rgba(249, 115, 22, 0.8)',
+          'rgba(20, 184, 166, 0.8)',
+          'rgba(168, 85, 247, 0.8)',
+          'rgba(240, 101, 67, 0.8)'
         ],
         borderColor: [
           'rgb(59, 130, 246)',
           'rgb(16, 185, 129)',
           'rgb(245, 158, 11)',
           'rgb(139, 92, 246)',
-          'rgb(236, 72, 153)'
+          'rgb(236, 72, 153)',
+          'rgb(6, 182, 212)',
+          'rgb(249, 115, 22)',
+          'rgb(20, 184, 166)',
+          'rgb(168, 85, 247)',
+          'rgb(240, 101, 67)'
         ],
         borderWidth: 1
-      }
-    ]
-  };
+      }]
+    };
+  }, [dashboardData?.degreeWisePaidApplications]);
 
-  const classWiseData = {
-    labels: ['Class I', 'Class II', 'Class III', 'Class IV', 'Class V'],
-    datasets: [
-      {
+  const classWiseData: ChartData = useMemo(() => {
+    if (!dashboardData?.classWisePaidApplications) {
+      return {
+        labels: [],
+        datasets: [{
+          label: 'Paid Applications',
+          data: [],
+          backgroundColor: ['rgba(79, 70, 229, 0.6)'],
+          borderColor: ['rgb(79, 70, 229)'],
+          borderWidth: 2
+        }]
+      };
+    }
+
+    const labels = dashboardData.classWisePaidApplications.map((item: any) => item.class_name);
+    const data = dashboardData.classWisePaidApplications.map((item: any) => item.paid_applications_count);
+
+    return {
+      labels,
+      datasets: [{
         label: 'Paid Applications',
-        data: [15, 22, 18, 10, 5],
+        data,
         backgroundColor: 'rgba(79, 70, 229, 0.6)',
         borderColor: 'rgb(79, 70, 229)',
         borderWidth: 2
-      }
-    ]
-  };
+      }]
+    };
+  }, [dashboardData?.classWisePaidApplications]);
 
-  // Function to render a simple chart (in a real app, you'd use a charting library)
-  const renderChart = (data, isBarChart = false) => {
+  // Chart rendering function
+  const renderChart = (data: ChartData, isBarChart = false) => {
+    if (data.labels.length === 0) {
+      return (
+        <div className="h-80 flex items-center justify-center text-gray-500">
+          No data available
+        </div>
+      );
+    }
+
     const maxValue = Math.max(...data.datasets[0].data);
 
     return (
@@ -63,20 +177,23 @@ const Dashboard = () => {
                   className="w-full bg-blue-500 rounded-t transition-all duration-500 hover:bg-blue-600"
                   style={{ height: `${(value / maxValue) * 100}%` }}
                 ></div>
-                <span className="text-xs mt-2 text-gray-600">{data.labels[index]}</span>
+                <span className="text-xs mt-2 text-gray-600 truncate w-full text-center">
+                  {data.labels[index]}
+                </span>
                 <span className="text-xs font-semibold">{value}</span>
               </div>
             ))}
           </div>
         ) : (
           // Pie chart visualization
-          <div className="h-full flex items-center justify-center">
+          <div className="h-full flex flex-col lg:flex-row items-center justify-center">
             <div className="relative w-48 h-48 rounded-full border-4 border-gray-200">
               {data.datasets[0].data.map((value, index) => {
-                const percentage = (value / 70) * 100; // 70 is total paid applications
+                const total = data.datasets[0].data.reduce((sum, current) => sum + current, 0);
+                const percentage = (value / total) * 100;
                 const rotation = data.datasets[0].data
                   .slice(0, index)
-                  .reduce((sum, current) => sum + (current / 70) * 360, 0);
+                  .reduce((sum, current) => sum + (current / total) * 360, 0);
 
                 return (
                   <div
@@ -88,19 +205,21 @@ const Dashboard = () => {
                   ></div>
                 );
               })}
-              <div className="absolute inset-0 m-auto w-32 h-32 bg-white rounded-full flex items-center justify-center">
-                <span className="text-lg font-bold">70</span>
-                <span className="text-xs block">Total</span>
+              <div className="absolute inset-0 m-auto w-32 h-32 bg-white rounded-full flex items-center justify-center flex-col">
+                <span className="text-lg font-bold">{data.datasets[0].data.reduce((sum, current) => sum + current, 0)}</span>
+                <span className="text-xs">Total</span>
               </div>
             </div>
-            <div className="ml-8">
+            <div className="ml-0 lg:ml-8 mt-4 lg:mt-0">
               {data.labels.map((label, index) => (
                 <div key={index} className="flex items-center mb-2">
                   <div
                     className="w-4 h-4 rounded mr-2"
                     style={{ backgroundColor: data.datasets[0].backgroundColor[index] }}
                   ></div>
-                  <span className="text-sm">{label}: {data.datasets[0].data[index]}</span>
+                  <span className="text-sm truncate max-w-[120px]">
+                    {label}: {data.datasets[0].data[index]}
+                  </span>
                 </div>
               ))}
             </div>
@@ -110,13 +229,26 @@ const Dashboard = () => {
     );
   };
 
+  // Loading state
+  if (loading && !dashboardData) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Filter Section */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
           <div className="relative w-full sm:w-auto">
-            <select className="w-full sm:w-auto min-w-[120px] p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm">
+            <select 
+              value={filters.year}
+              onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value, page: 0 }))}
+              className="w-full sm:w-auto min-w-[120px] p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
+            >
               <option value="2025">2025</option>
               <option value="2024">2024</option>
               <option value="2023">2023</option>
@@ -130,11 +262,13 @@ const Dashboard = () => {
           </div>
 
           <div className="relative w-full sm:w-auto">
-            <select className="w-full sm:w-auto min-w-[180px] p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm">
-              <option value="">All</option>
-              <option value="paid">Paid Applications</option>
-              <option value="incomplete">Incomplete Applications</option>
-              <option value="failed">Failed Applications</option>
+            <select 
+              value={filters.academic}
+              onChange={(e) => setFilters(prev => ({ ...prev, academic: e.target.value, page: 0 }))}
+              className="w-full sm:w-auto min-w-[180px] p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
+            >
+              <option value="">All Academic</option>
+              {/* You can populate this dynamically from API if needed */}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -145,14 +279,18 @@ const Dashboard = () => {
         </div>
 
         <div className="w-full sm:w-auto">
-          <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm">
-            Search
+          <button 
+            onClick={fetchDashboardData}
+            disabled={loading}
+            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm"
+          >
+            {loading ? 'Refreshing...' : 'Refresh'}
           </button>
         </div>
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-12 gap-6">
+      <div className="grid grid-cols-12 gap-6 mb-6">
         <div className="lg:col-span-3 col-span-12">
           <div className="bg-[#0085db] rounded-lg shadow-lg p-6 relative overflow-hidden border-0">
             <img
@@ -173,7 +311,9 @@ const Dashboard = () => {
                   </svg>
                 </div>
               </div>
-              <h4 className="text-2xl font-bold text-white mb-1">92</h4>
+              <h4 className="text-2xl font-bold text-white mb-1">
+                {dashboardData?.paymentStatusCounts?.total_applications || 0}
+              </h4>
               <span className="text-sm text-white text-opacity-90 font-medium">Total Applications</span>
             </div>
           </div>
@@ -200,7 +340,9 @@ const Dashboard = () => {
                   </svg>
                 </div>
               </div>
-              <h4 className="text-2xl font-bold text-white mb-1">70</h4>
+              <h4 className="text-2xl font-bold text-white mb-1">
+                {dashboardData?.paymentStatusCounts?.paid_applications || 0}
+              </h4>
               <span className="text-sm text-white text-opacity-90 font-medium">Paid Applications</span>
             </div>
           </div>
@@ -226,7 +368,9 @@ const Dashboard = () => {
                   </svg>
                 </div>
               </div>
-              <h4 className="text-2xl font-bold text-white mb-1">0</h4>
+              <h4 className="text-2xl font-bold text-white mb-1">
+                {dashboardData?.paymentStatusCounts?.failed_applications || 0}
+              </h4>
               <span className="text-sm text-white text-opacity-90 font-medium">Failed Applications</span>
             </div>
           </div>
@@ -252,28 +396,23 @@ const Dashboard = () => {
                   </svg>
                 </div>
               </div>
-              <h4 className="text-2xl font-bold text-white mb-1">22</h4>
+              <h4 className="text-2xl font-bold text-white mb-1">
+                {dashboardData?.paymentStatusCounts?.incomplete_applications || 0}
+              </h4>
               <span className="text-sm text-white text-opacity-90 font-medium">Incomplete Applications</span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Charts Section - Background remains white */}
+      {/* Charts Section */}
+      <div className="grid grid-cols-12 gap-6 mb-6">
         <div className="lg:col-span-6 col-span-12">
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h5 className="text-lg font-semibold text-gray-900">Degree Wise Paid Application</h5>
                 <p className="text-sm text-gray-500">Distribution of paid applications by degree</p>
-              </div>
-              <div className="flex space-x-2">
-                <button className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                    <path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                    <path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                  </svg>
-                </button>
               </div>
             </div>
             <div className="bg-gray-50 rounded-xl border border-gray-200">
@@ -289,108 +428,100 @@ const Dashboard = () => {
                 <h5 className="text-lg font-semibold text-gray-900">Class Wise Paid Application</h5>
                 <p className="text-sm text-gray-500">Distribution of paid applications by class</p>
               </div>
-              <div className="flex space-x-2">
-                <button className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                    <path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                    <path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                  </svg>
-                </button>
-              </div>
             </div>
             <div className="bg-gray-50 rounded-xl border border-gray-200">
               {renderChart(classWiseData, true)}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Applications Table - Background remains white */}
-        <div className="col-span-12">
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h5 className="text-lg font-semibold text-gray-900">Recently Added Application</h5>
-                <h6 className="text-sm text-gray-600">Application List across all Academic</h6>
-              </div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
-                    <path d="M21 21l-6 -6"></path>
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search Applications"
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+      {/* Applications Table */}
+      <div className="col-span-12">
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+            <div>
+              <h5 className="text-lg font-semibold text-gray-900">Recently Added Application</h5>
+              <h6 className="text-sm text-gray-600">Application List across all Academic</h6>
             </div>
-
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.No</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Academic Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll No</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Degree/Class</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {[
-                    { id: 1, name: "Gopal s Sharma", academic: "New Genius Academy High School Sanwer", rollNo: "2025000001", degree: "II", status: "Captured" },
-                    { id: 2, name: "Test", academic: "Avantika University Ujjain", rollNo: "2025070004", degree: "ME", status: "Captured" },
-                    { id: 3, name: "shaan", academic: "Avantika University Ujjain", rollNo: "2025070003", degree: "ME", status: "Captured" },
-                    { id: 4, name: "Gopal sharma", academic: "Avantika University Ujjain", rollNo: "2025070002", degree: "ME", status: "Captured" },
-                    { id: 5, name: "Gopal", academic: "Avantika University Ujjain", rollNo: "2025070001", degree: "ME", status: "Captured" }
-                  ].map((app) => (
-                    <tr key={app.id} className="hover:bg-gray-50 transition-colors duration-150">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{app.id}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{app.name}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">{app.academic}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
-                        <span className="cursor-default">{app.rollNo}</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{app.degree}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          {app.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-700">Rows per page:</span>
-                <select className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>10</option>
-                  <option>25</option>
-                  <option>50</option>
-                </select>
+            <div className="relative w-full lg:w-auto">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
+                  <path d="M21 21l-6 -6"></path>
+                </svg>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-700">1–5 of 5</span>
-                <button className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled>
-                  <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                <button className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled>
-                  <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
-                </button>
-              </div>
+              <input
+                type="text"
+                placeholder="Search Applications..."
+                value={filters.search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full lg:w-64"
+              />
             </div>
           </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto rounded-lg border border-gray-200">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.No</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Academic Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll No</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Degree/Class</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {dashboardData?.latestApplications?.map((app: any, index: number) => (
+                      <tr key={app.id} className="hover:bg-gray-50 transition-colors duration-150">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {(filters.page || 0) * (filters.rowsPerPage || 10) + index + 1}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                          {app.applicant_name}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                          {app.academic_name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
+                          <span className="cursor-default">{app.roll_no}</span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {app.degree_name || app.class_name || 'N/A'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                            app.payment_status === 1 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {app.payment_status === 1 ? 'Paid' : 'Pending'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <Pagination
+                currentPage={(filters.page || 0) + 1}
+                totalPages={Math.ceil((dashboardData?.totalLatestApplications || 0) / (filters.rowsPerPage || 10))}
+                totalItems={dashboardData?.totalLatestApplications || 0}
+                rowsPerPage={filters.rowsPerPage || 10}
+                onPageChange={(page) => handlePageChange(page - 1)}
+                onRowsPerPageChange={handleRowsPerPageChange}
+              />
+            </>
+          )}
         </div>
       </div>
     </>
