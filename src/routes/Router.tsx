@@ -126,7 +126,7 @@ const Router = [
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
-
+];
 
 
 
@@ -210,6 +210,6 @@ const Router = [
 //   ,
 // ];
 
-// const router = createBrowserRouter(Router)
+const router = createBrowserRouter(Router)
 
-// export default router;
+export default router;
