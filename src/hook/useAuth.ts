@@ -55,6 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     removeCookie('user', { path: '/' });
     removeCookie('token', { path: '/' });
+    window.location.href = '/login';
   };
 
   const hasRole = (roles: string | string[]): boolean => {

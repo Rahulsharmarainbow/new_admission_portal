@@ -18,11 +18,11 @@ export const VerifyOtp: React.FC = () => {
   const [otp, setOtp] = useState<string[]>(['', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  
+
   const location = useLocation();
   const navigate = useNavigate();
   const { login } = useAuth();
-  
+
   const { userData, method, mode = 'login', adminId } = location.state as LocationState;
 
   useEffect(() => {
@@ -50,8 +50,8 @@ export const VerifyOtp: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (otp.some(digit => digit === '')) {
+
+    if (otp.some((digit) => digit === '')) {
       toast.error('Please enter complete OTP');
       return;
     }
@@ -75,19 +75,19 @@ export const VerifyOtp: React.FC = () => {
           };
           login(userWithToken);
           redirectToDashboard(userData.login_type);
+        }else{
+          toast.error(response.message);
         }
       } else {
         // Forgot password flow
-        const response = await authService.verifyOtpForForget(
-          otpCode,
-          method,
-          adminId!
-        );
+        const response = await authService.verifyOtpForForget(otpCode, method, adminId!);
 
         if (response.status) {
-          const token = response.changepasswordurl.split("/").pop() || "";
+          const token = response.changepasswordurl.split('/').pop() || '';
           const id = response.Data.id;
           navigate(`/auth/forget-password/${token}`, { state: { id } });
+        }else{
+          toast.error(response.message);
         }
       }
     } catch (error: any) {
@@ -125,9 +125,11 @@ export const VerifyOtp: React.FC = () => {
       });
 
       if (response.status) {
-        toast.success('OTP resent successfully');
+        toast.success(response.message || 'OTP resent successfully');
         setOtp(['', '', '', '']);
         otpInputRefs.current[0]?.focus();
+      }else{
+        toast.error(response.message);
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to resend OTP');
@@ -147,65 +149,82 @@ export const VerifyOtp: React.FC = () => {
     }
   };
 
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').trim();
+    if (!/^\d+$/.test(pastedData)) return; // only digits
+
+    const otpDigits = pastedData.split('').slice(0, 4);
+    const newOtp = [...otp];
+
+    otpDigits.forEach((digit, i) => {
+      if (i < 4) {
+        newOtp[i] = digit;
+      }
+    });
+
+    setOtp(newOtp);
+
+    // Focus last filled input
+    const lastIndex = otpDigits.length - 1;
+    if (lastIndex >= 0) {
+      otpInputRefs.current[lastIndex]?.focus();
+    }
+  };
+
   return (
     <AuthLayout>
-    <form onSubmit={handleSubmit}>
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          {mode === "login" ? "Enter OTP" : "Reset Password - Enter OTP"}
-        </h3>
-        <p className="text-sm text-gray-600 mb-6">
-          We've sent a 4-digit OTP to your {getMethodDisplay()}
-        </p>
-        
-        <div className="flex justify-center gap-3 mb-6">
-          {[0, 1, 2, 3].map((index) => (
-            <TextInput
-              key={index}
-              id={`otp-${index}`}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={otp[index]}
-              onChange={(e) => handleOtpChange(index, e.target.value)}
-              onKeyDown={(e) => handleOtpKeyDown(index, e)}
-              ref={(el) => otpInputRefs.current[index] = el}
-              className="w-14 h-14 text-center text-xl font-semibold"
-              required
-            />
-          ))}
+      <form onSubmit={handleSubmit}>
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            {mode === 'login' ? 'Enter OTP' : 'Reset Password - Enter OTP'}
+          </h3>
+          <p className="text-sm text-gray-600 mb-6">
+            We've sent a 4-digit OTP to your {getMethodDisplay()}
+          </p>
+
+          <div className="flex justify-center gap-3 mb-6">
+            {[0, 1, 2, 3].map((index) => (
+              <input
+                key={index}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={otp[index]}
+                onChange={(e) => handleOtpChange(index, e.target.value)}
+                onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                onPaste={handleOtpPaste}
+                ref={(el) => (otpInputRefs.current[index] = el)}
+                className="w-14 h-14 text-center text-xl font-semibold border rounded-full focus:ring-2 focus:ring-primary"
+              />
+            ))}
+          </div>
+
+          <div className="text-center">
+            <button
+              type="button"
+              className="text-primary text-sm font-medium"
+              onClick={handleResendOtp}
+            >
+              Resend OTP
+            </button>
+          </div>
         </div>
-        
-        <div className="text-center">
-          <button 
-            type="button" 
-            className="text-primary text-sm font-medium"
-            onClick={handleResendOtp}
+
+        <div className="flex gap-3">
+          <Button type="button" color="gray" className="flex-1" onClick={() => navigate(-1)}>
+            Back
+          </Button>
+          <Button
+            type="submit"
+            color="primary"
+            className="flex-1 bg-primary text-white"
+            disabled={otp.some((digit) => digit === '') || isLoading}
           >
-            Resend OTP
-          </button>
+            {isLoading ? 'Verifying...' : 'Verify OTP'}
+          </Button>
         </div>
-      </div>
-      
-      <div className="flex gap-3">
-        <Button 
-          type="button" 
-          color="gray" 
-          className="flex-1"
-          onClick={() => navigate(-1)}
-        >
-          Back
-        </Button>
-        <Button 
-          type="submit" 
-          color="primary" 
-          className="flex-1 bg-primary text-white"
-          disabled={otp.some(digit => digit === "") || isLoading}
-        >
-          {isLoading ? 'Verifying...' : 'Verify OTP'}
-        </Button>
-      </div>
-    </form>
+      </form>
     </AuthLayout>
   );
 };
