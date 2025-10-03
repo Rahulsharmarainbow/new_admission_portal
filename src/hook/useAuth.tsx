@@ -1,6 +1,5 @@
-// hooks/useAuth.ts - Updated
-import { useState, useEffect, createContext, useContext } from 'react';
-import { useCookies } from 'react-cookie';
+import { useState, useEffect, createContext, useContext } from "react";
+import { useCookies } from "react-cookie";
 
 interface User {
   id: number;
@@ -15,7 +14,7 @@ interface User {
   token?: string;
 }
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
   login: (userData: User) => void;
   logout: () => void;
@@ -23,18 +22,18 @@ interface AuthContextType {
   hasRole: (roles: string | string[]) => boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [cookies, setCookie, removeCookie] = useCookies(['user', 'token']);
+  const [cookies, setCookie, removeCookie] = useCookies(["user", "token"]);
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -45,33 +44,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = (userData: User) => {
     setUser(userData);
-    setCookie('user', userData, { path: '/', maxAge: 30 * 24 * 60 * 60 });
+    setCookie("user", userData, { path: "/", maxAge: 30 * 24 * 60 * 60 });
     if (userData.token) {
-      setCookie('token', userData.token, { path: '/', maxAge: 30 * 24 * 60 * 60 });
+      setCookie("token", userData.token, { path: "/", maxAge: 30 * 24 * 60 * 60 });
     }
   };
 
   const logout = () => {
     setUser(null);
-    removeCookie('user', { path: '/' });
-    removeCookie('token', { path: '/' });
-    window.location.href = '/login';
+    removeCookie("user", { path: "/" });
+    removeCookie("token", { path: "/" });
+    window.location.href = "/login";
   };
 
   const hasRole = (roles: string | string[]): boolean => {
     if (!user) return false;
-    
     const roleArray = Array.isArray(roles) ? roles : [roles];
     return roleArray.includes(user.role);
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     login,
     logout,
-    isAuthenticated: user?.token ? true : false,
+    isAuthenticated: !!user?.token,
     hasRole,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

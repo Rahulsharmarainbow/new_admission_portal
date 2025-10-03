@@ -42,9 +42,9 @@ export interface DashboardFilters {
 }
 
 export const dashboardService = {
-  getDashboardData: async (filters: DashboardFilters, userId: number, token: string): Promise<DashboardData> => {
+  getDashboardData: async (filters: DashboardFilters, userId: number, token: string, role: string): Promise<DashboardData> => {
     const params = new URLSearchParams();
-    
+
     // Add filters to params
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== '') {
@@ -55,7 +55,7 @@ export const dashboardService = {
     params.append('s_id', userId.toString());
 
     const response = await axios.post(
-      `${apiUrl}/SuperAdmin/dashboard-data?${params.toString()}`,
+      `${apiUrl}/${role}/dashboard-data?${params.toString()}`,
       {},
       {
         headers: {
