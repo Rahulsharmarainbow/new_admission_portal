@@ -23,7 +23,7 @@ interface ChartData {
 }
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [filters, setFilters] = useState<DashboardFilters>({
@@ -35,6 +35,7 @@ const Dashboard = () => {
     year: '2025',
     academic: '',
   });
+    console.log("oooooooooooooooo", user);
 
   // Debounced search
   const debouncedSearch = useDebounce(filters.search, 500);
@@ -45,7 +46,7 @@ const Dashboard = () => {
 
     setLoading(true);
     try {
-      const data = await dashboardService.getDashboardData(filters, user.id, user.token);
+      const data = await dashboardService.getDashboardData(filters, user.id, user.token, user.role);
       setDashboardData(data);
     } catch (error: any) {
       console.error('Error fetching dashboard data:', error);
