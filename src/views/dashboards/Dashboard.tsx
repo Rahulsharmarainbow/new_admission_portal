@@ -1,5 +1,5 @@
 // views/dashboards/Dashboard.tsx
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { dashboardService, DashboardFilters } from 'src/services/dashboardService';
 import img1 from "../../../public/Images/top-error-shape.png";
@@ -10,20 +10,8 @@ import { useDebounce } from 'src/hook/useDebounce';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import BarChart from './BarChart';
 
-// Chart data interfaces
-interface ChartData {
-  labels: string[];
-  datasets: {
-    label: string;
-    data: number[];
-    backgroundColor: string[];
-    borderColor: string[];
-    borderWidth: number;
-  }[];
-}
-
 const Dashboard = () => {
-  const { user, hasRole } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [filters, setFilters] = useState<DashboardFilters>({
@@ -35,8 +23,7 @@ const Dashboard = () => {
     year: '2025',
     academic: '',
   });
-    console.log("oooooooooooooooo", user);
-
+  
   // Debounced search
   const debouncedSearch = useDebounce(filters.search, 500);
 
@@ -74,234 +61,6 @@ const Dashboard = () => {
   const handleRowsPerPageChange = (rowsPerPage: number) => {
     setFilters(prev => ({ ...prev, rowsPerPage, page: 0 }));
   };
-
-  // Prepare chart data for Degree Wise
-  const degreeWiseData: ChartData = useMemo(() => {
-    if (!dashboardData?.degreeWisePaidApplications) {
-      return {
-        labels: [],
-        datasets: [{
-          label: 'Paid Applications',
-          data: [],
-          backgroundColor: [],
-          borderColor: [],
-          borderWidth: 1
-        }]
-      };
-    }
-
-    const labels = dashboardData.degreeWisePaidApplications.map((item: any) => item.name);
-    const data = dashboardData.degreeWisePaidApplications.map((item: any) => item.paid_applications_count);
-
-    return {
-      labels,
-      datasets: [{
-        label: 'Paid Applications',
-        data,
-        backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(245, 158, 11, 0.8)',
-          'rgba(139, 92, 246, 0.8)',
-          'rgba(236, 72, 153, 0.8)',
-          'rgba(6, 182, 212, 0.8)',
-          'rgba(249, 115, 22, 0.8)',
-          'rgba(20, 184, 166, 0.8)',
-          'rgba(168, 85, 247, 0.8)',
-          'rgba(240, 101, 67, 0.8)'
-        ],
-        borderColor: [
-          'rgb(59, 130, 246)',
-          'rgb(16, 185, 129)',
-          'rgb(245, 158, 11)',
-          'rgb(139, 92, 246)',
-          'rgb(236, 72, 153)',
-          'rgb(6, 182, 212)',
-          'rgb(249, 115, 22)',
-          'rgb(20, 184, 166)',
-          'rgb(168, 85, 247)',
-          'rgb(240, 101, 67)'
-        ],
-        borderWidth: 1
-      }]
-    };
-  }, [dashboardData?.degreeWisePaidApplications]);
-
-  // Prepare chart data for Class Wise
-  const classWiseData: ChartData = useMemo(() => {
-    if (!dashboardData?.classWisePaidApplications) {
-      return {
-        labels: [],
-        datasets: [{
-          label: 'Paid Applications',
-          data: [],
-          backgroundColor: [],
-          borderColor: [],
-          borderWidth: 1
-        }]
-      };
-    }
-
-    const labels = dashboardData.classWisePaidApplications.map((item: any) => item.class_name);
-    const data = dashboardData.classWisePaidApplications.map((item: any) => item.paid_applications_count);
-
-    return {
-      labels,
-      datasets: [{
-        label: 'Paid Applications',
-        data,
-        backgroundColor: [
-          'rgba(79, 70, 229, 0.8)',
-          'rgba(99, 102, 241, 0.8)',
-          'rgba(129, 140, 248, 0.8)',
-          'rgba(165, 180, 252, 0.8)',
-          'rgba(199, 210, 254, 0.8)',
-          'rgba(224, 231, 255, 0.8)'
-        ],
-        borderColor: [
-          'rgb(79, 70, 229)',
-          'rgb(99, 102, 241)',
-          'rgb(129, 140, 248)',
-          'rgb(165, 180, 252)',
-          'rgb(199, 210, 254)',
-          'rgb(224, 231, 255)'
-        ],
-        borderWidth: 1
-      }]
-    };
-  }, [dashboardData?.classWisePaidApplications]);
-
-  // Bar chart rendering function
- // Horizontal Bar Chart
-const renderBarChart = (data: ChartData, title: string, subtitle: string) => {
-  if (data.labels.length === 0) {
-    return (
-      <div className="h-80 flex items-center justify-center text-gray-500">
-        No data available
-      </div>
-    );
-  }
-
-  const maxValue = Math.max(...data.datasets[0].data);
-
-  return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h5 className="text-base font-semibold text-gray-900">{title}</h5>
-          <p className="text-xs text-gray-500">{subtitle}</p>
-        </div>
-        <button className="text-gray-400 hover:text-gray-600">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <circle cx="12" cy="6" r="1" />
-            <circle cx="12" cy="12" r="1" />
-            <circle cx="12" cy="18" r="1" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Bars */}
-      <div className="space-y-4">
-        {data.labels.map((label, index) => {
-          const value = data.datasets[0].data[index];
-          const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
-
-          return (
-            <div key={index} className="flex items-center space-x-4">
-              <span className="w-32 text-sm font-medium text-gray-700 truncate">
-                {label}
-              </span>
-              <div className="flex-1 relative">
-                <div className="w-full bg-gray-100 rounded-full h-6 overflow-hidden">
-                  <div
-                    className="h-6 rounded-full text-white text-xs flex items-center justify-center font-medium"
-                    style={{
-                      width: `${percentage}%`,
-                      backgroundColor: data.datasets[0].backgroundColor[index],
-                    }}
-                  >
-                    {value}
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-// Vertical Bar Chart
-const renderVerticalBarChart = (data: ChartData, title: string, subtitle: string) => {
-  if (data.labels.length === 0) {
-    return (
-      <div className="h-80 flex items-center justify-center text-gray-500">
-        No data available
-      </div>
-    );
-  }
-
-  const maxValue = Math.max(...data.datasets[0].data);
-
-  return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h5 className="text-base font-semibold text-gray-900">{title}</h5>
-          <p className="text-xs text-gray-500">{subtitle}</p>
-        </div>
-        <button className="text-gray-400 hover:text-gray-600">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <circle cx="12" cy="6" r="1" />
-            <circle cx="12" cy="12" r="1" />
-            <circle cx="12" cy="18" r="1" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Bars */}
-      <div className="h-80 flex items-end justify-between px-4 space-x-4">
-        {data.datasets[0].data.map((value, index) => {
-          const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
-
-          return (
-            <div key={index} className="flex flex-col items-center flex-1">
-              <div
-                className="w-6 rounded-t-lg text-white text-xs flex items-center justify-center font-medium"
-                style={{
-                  height: `${percentage}%`,
-                  backgroundColor: data.datasets[0].backgroundColor[index],
-                  minHeight: value > 0 ? "20px" : "0px",
-                }}
-              >
-                {value}
-              </div>
-              <span className="mt-2 text-xs text-gray-600 truncate w-full text-center">
-                {data.labels[index]}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
 
   // Loading state
   if (loading && !dashboardData) {
