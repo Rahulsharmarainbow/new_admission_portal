@@ -17,6 +17,7 @@ import { ProtectedRoute } from 'src/utils/ProtectedRoute';
 import AccountTable from 'src/views/accounts/components/AccountTable';
 import DemoAccounts from 'src/views/accounts/demo/DemoAccounts';
 import LiveAccounts from 'src/views/accounts/live/LiveAccounts';
+import DetailsAccount from 'src/views/DetailsAccount/DetailsAccount';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -64,6 +65,7 @@ const Router = [
       { path: 'ui/buttons', element: <Buttons /> },
       { path: 'icons/solar', element: <Solar /> },
       { path: 'sample-page', element: <SamplePage /> },
+      { path: "details-account", element: <DetailsAccount />},
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
