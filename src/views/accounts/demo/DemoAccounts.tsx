@@ -118,8 +118,14 @@ const AccountTable: React.FC = () => {
     );
   };
 
+  // Handler for "Make it Live" button
+  const handleMakeLive = (id: number) => {
+    alert(`Making account with ID: ${id} live. This would trigger a live deployment.`);
+    // Add your make live logic here
+  };
+
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md relative">
+    <div className="p-4 bg-white rounded-lg shadow-md relative overflow-x-auto">
       {/* Search bar is at the top */}
       <div className="flex justify-end mb-4">
         <div className="relative w-full sm:w-1/3">
@@ -140,8 +146,8 @@ const AccountTable: React.FC = () => {
       </div>
 
       {/* Table Body */}
-      <div className="shadow-md rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200 table-fixed">
+      <div className="shadow-md rounded-lg min-w-full">
+        <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th scope="col" className="w-12 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -166,7 +172,7 @@ const AccountTable: React.FC = () => {
               <th scope="col" className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Website
               </th>
-              <th scope="col" className="w-56 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="w-64 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Action
               </th>
             </tr>
@@ -201,10 +207,17 @@ const AccountTable: React.FC = () => {
                     <div className="flex items-center space-x-2">
                       <Button 
                         color={account.isActive ? 'success' : 'light'} 
-                        className="text-xs"
+                        className="text-xs px-3 py-1"
                         onClick={() => toggleActiveStatus(account.id)}
                       >
                         {account.isActive ? 'Deactivate Now' : 'Activate Now'}
+                      </Button>
+                      <Button 
+                        color="blue" 
+                        className="text-xs px-3 py-1"
+                        onClick={() => handleMakeLive(account.id)}
+                      >
+                        Make it Live
                       </Button>
                       <button className="text-blue-500 hover:text-blue-700" onClick={() => handleEdit(account.id)}>
                         <MdEdit size={20} />
@@ -227,8 +240,8 @@ const AccountTable: React.FC = () => {
         </table>
       </div>
 
-      {/* Pagination Controls below the table on the right */}
-      <div className="flex flex-col sm:flex-row items-center justify-end mt-4 space-y-4 sm:space-y-0 text-sm">
+      {/* Pagination Controls moved to the left */}
+      <div className="flex flex-col sm:flex-row items-center justify-between mt-4 space-y-4 sm:space-y-0 text-sm">
         <div className="flex items-center space-x-2">
           <label className="text-gray-600">Rows per page:</label>
           <select
@@ -243,7 +256,10 @@ const AccountTable: React.FC = () => {
             <option value={10}>10</option>
             <option value={20}>20</option>
           </select>
-          <span className="text-gray-600 ml-4">
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <span className="text-gray-600">
             {`${(currentPage - 1) * itemsPerPage + 1}-${Math.min(currentPage * itemsPerPage, sortedAccounts.length)} of ${sortedAccounts.length}`}
           </span>
           <button
