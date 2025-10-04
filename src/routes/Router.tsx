@@ -17,7 +17,7 @@ import { ProtectedRoute } from 'src/utils/ProtectedRoute';
 import AccountTable from 'src/views/accounts/components/AccountTable';
 import DemoAccounts from 'src/views/accounts/demo/DemoAccounts';
 import LiveAccounts from 'src/views/accounts/live/LiveAccounts';
-import DetailsAccount from 'src/views/DetailsAccount/DetailsAccount';
+import DetailsAccount from 'src/views/accounts/components/DetailsAccount';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -58,6 +58,7 @@ const Router = [
       { path: 'dashboard', element: <Dashboard /> },
       { path: '/SuperAdmin/demo-accounts', element: <DemoAccounts /> },
       { path: '/SuperAdmin/live-accounts', element: <LiveAccounts /> },
+      { path: "/SuperAdmin/Academic/:id", element: <DetailsAccount />},
       { path: 'ui/typography', element: <Typography /> },
       { path: 'ui/table', element: <Table /> },
       { path: 'ui/form', element: <Form /> },
@@ -65,7 +66,6 @@ const Router = [
       { path: 'ui/buttons', element: <Buttons /> },
       { path: 'icons/solar', element: <Solar /> },
       { path: 'sample-page', element: <SamplePage /> },
-      { path: "details-account", element: <DetailsAccount />},
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },

@@ -1,9 +1,13 @@
-import React from 'react'
+import React from 'react';
+import AccountTable from '../components/AccountTable';
 
-const LiveAccounts = () => {
+const LiveAccount: React.FC = () => {
   return (
-    <div>LiveAccounts</div>
-  )
-}
+    <div className="p-6">
+      <h1 className="text-2xl font-bold text-gray-900 mb-4">Live Accounts</h1>
+      <AccountTable type="live" />
+    </div>
+  );
+};
 
-export default LiveAccounts
+export default LiveAccount;
