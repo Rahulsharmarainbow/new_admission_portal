@@ -18,6 +18,7 @@ import AccountTable from 'src/views/accounts/components/AccountTable';
 import DemoAccounts from 'src/views/accounts/demo/DemoAccounts';
 import LiveAccounts from 'src/views/accounts/live/LiveAccounts';
 import DetailsAccount from 'src/views/accounts/components/DetailsAccount';
+import FormWizard from 'src/views/newForm/components/FormWizard';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -59,6 +60,7 @@ const Router = [
       { path: '/SuperAdmin/demo-accounts', element: <DemoAccounts /> },
       { path: '/SuperAdmin/live-accounts', element: <LiveAccounts /> },
       { path: "/SuperAdmin/Academic/:id", element: <DetailsAccount />},
+      { path: "/SuperAdmin/Accounts/Edit/:id", element: <FormWizard /> },
       { path: 'ui/typography', element: <Typography /> },
       { path: 'ui/table', element: <Table /> },
       { path: 'ui/form', element: <Form /> },
