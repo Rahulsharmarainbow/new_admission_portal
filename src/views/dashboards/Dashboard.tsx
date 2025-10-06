@@ -9,10 +9,13 @@ import { useAuth } from 'src/hook/useAuth';
 import { useDebounce } from 'src/hook/useDebounce';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import BarChart from './BarChart';
+import { useAcademics } from 'src/hook/useAcademics';
+import { BsSearch } from 'react-icons/bs';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
+  const { academics, loading: academicLoading } = useAcademics();
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [filters, setFilters] = useState<DashboardFilters>({
     page: 0,
@@ -76,6 +79,8 @@ const Dashboard = () => {
       {/* Filter Section */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+
+          {/* Year Dropdown */}
           <div className="relative w-full sm:w-auto">
             <select 
               value={filters.year}
@@ -94,14 +99,17 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Academic Dropdown */}
           <div className="relative w-full sm:w-auto">
             <select 
               value={filters.academic}
               onChange={(e) => setFilters(prev => ({ ...prev, academic: e.target.value, page: 0 }))}
-              className="w-full sm:w-auto min-w-[180px] p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
+              className="w-full sm:w-auto min-w-[80px] p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
             >
               <option value="">All Academic</option>
-              {/* You can populate this dynamically from API if needed */}
+              {academics.map((a) => (
+                <option key={a.id} value={a.id}>{a.academic_name}</option>
+              ))}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -111,13 +119,14 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="w-full sm:w-auto">
+        {/* Refresh button हटाकर Search Icon */}
+        <div className="w-full sm:w-auto flex items-center">
           <button 
             onClick={fetchDashboardData}
             disabled={loading}
-            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm"
+            className="p-2 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
-            {loading ? 'Refreshing...' : 'Refresh'}
+            <BsSearch size={18} />
           </button>
         </div>
       </div>
