@@ -32,9 +32,45 @@ const SidebarContent: Record<number, MenuItem[]> = {
           }
         ],
       },
+      {
+        name: 'User Management',
+        id: uniqueId(),
+        icon: 'solar:user-id-line-duotone',
+        children: [
+          // {
+          //   name: 'Super Admin',
+          //   id: uniqueId(),
+          //   url: '/SuperAdmin/admin',
+          //   isPro: false,
+          // },
+          {
+            name: 'Support Admin',
+            id: uniqueId(),
+            url: '/SuperAdmin/support-admin',
+            isPro: false,
+          },
+          {
+            name: 'Sales Admin',
+            id: uniqueId(),
+            url: '/SuperAdmin/sales-admin',
+            isPro: false,
+          },
+          {
+            name: 'Customer Admin',
+            id: uniqueId(),
+            url: '/SuperAdmin/customer-admin',
+            isPro: false,
+          }
+        ],
+      },
+               { name: "Profile", url: "/SuperAdmin/profile", icon: "solar:user-id-line-duotone" },
+
     ]
     },
+
   ],
+
+  
   2: [ // SupportAdmin Menu
     {
       heading: "Home",
@@ -62,6 +98,22 @@ const SidebarContent: Record<number, MenuItem[]> = {
 };
 
 export default SidebarContent;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

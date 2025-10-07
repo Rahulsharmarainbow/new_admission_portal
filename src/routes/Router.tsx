@@ -18,8 +18,15 @@ import AccountTable from 'src/views/accounts/components/AccountTable';
 import DemoAccounts from 'src/views/accounts/demo/DemoAccounts';
 import LiveAccounts from 'src/views/accounts/live/LiveAccounts';
 import DetailsAccount from 'src/views/accounts/components/DetailsAccount';
-import FormWizard from 'src/views/newForm/components/FormWizard';
+//import FormWizard from 'src/views/newForm/components/FormWizard';
 import MakeItLive from 'src/views/newForm/MakeItLive';
+import Add from 'src/views/accounts/components/AddAccount';
+import AddAccount from 'src/views/accounts/components/AddAccount';
+import UserTable from 'src/views/Admin/components/UserTable';
+import UserForm from 'src/views/Admin/components/UserForm';
+import AdminManagement from 'src/views/Admin/AdminManagement';
+import AccountProfile from 'src/views/profile/AccountProfile';
+
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -60,8 +67,18 @@ const Router = [
       { path: 'dashboard', element: <Dashboard /> },
       { path: '/SuperAdmin/demo-accounts', element: <DemoAccounts /> },
       { path: '/SuperAdmin/live-accounts', element: <LiveAccounts /> },
+      { path: '/SuperAdmin/live-accounts/add', element: <AddAccount /> },
+      { path: '/SuperAdmin/live-accounts/edit/:id', element: <AddAccount /> },
       { path: "/SuperAdmin/Academic/:id", element: <DetailsAccount />},
-      { path: "/SuperAdmin/Accounts/Edit/:id", element: <MakeItLive /> },
+      { path: "/SuperAdmin/customer-admin", element: <AdminManagement /> },
+      { path: "/SuperAdmin/sales-admin", element: <AdminManagement /> },
+      { path: "/SuperAdmin/support-admin", element: <AdminManagement /> },
+      { path: "/SuperAdmin/super-admin", element: <AdminManagement /> },
+      { path: "/SuperAdmin/profile", element: <AccountProfile /> },
+      // { path: "/SuperAdmin/customer-admin/add/:type", element: <UserForm /> },
+      // { path: "/SuperAdmin/admin/customer-admin/edit/:type/:id", element: <UserForm /> },
+      { path: "/SuperAdmin/admin/add/:type", element: <UserForm /> },
+      { path: "/SuperAdmin/admin/edit/:type/:id", element: <UserForm /> },
       { path: 'ui/typography', element: <Typography /> },
       { path: 'ui/table', element: <Table /> },
       { path: 'ui/form', element: <Form /> },
@@ -69,6 +86,7 @@ const Router = [
       { path: 'ui/buttons', element: <Buttons /> },
       { path: 'icons/solar', element: <Solar /> },
       { path: 'sample-page', element: <SamplePage /> },
+      { path: '/SuperAdmin/demo-accounts/add', element: <Add /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },

@@ -81,9 +81,9 @@ const CustomBreadcrumb = () => {
             <svg className="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
               <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
             </svg>
-            <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">
-              Live Account Onboarding
-            </span>
+             <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">
+              Live Account Onboarding 
+            </span> 
           </div>
         </li>
       </ol>
@@ -436,7 +436,7 @@ const MakeItLive: React.FC = () => {
 
         <Card className="overflow-hidden">
           <div className="p-6">
-            <h5 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 break-words">Live Account Onboarding</h5>
+            {/* <h5 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 break-words">Live Account Onboarding</h5> */}
 
             <CustomStepper steps={steps} activeStep={activeStep} />
 
