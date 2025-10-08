@@ -63,7 +63,22 @@ const SidebarContent: Record<number, MenuItem[]> = {
           }
         ],
       },
-               { name: "Profile", url: "/SuperAdmin/profile", icon: "solar:user-id-line-duotone" },
+      
+       {
+          name: 'Fees Structure',
+          id: uniqueId(),
+          icon: 'solar:cardholder-line-duotone',
+          children: [
+            {
+              name: 'Fees',
+              id: uniqueId(),
+              url: '/SuperAdmin/fees',
+              isPro: false,
+            },
+          ],
+        },
+      
+      { name: "Profile", url: "/SuperAdmin/profile", icon: "solar:user-id-line-duotone" },
 
     ]
     },

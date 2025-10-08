@@ -27,6 +27,7 @@ import UserForm from 'src/views/Admin/components/UserForm';
 import AdminManagement from 'src/views/Admin/AdminManagement';
 import AccountProfile from 'src/views/profile/AccountProfile';
 import Demo from 'src/views/profile/Demo';
+import FormVertical from 'src/views/feesStructure/components/FormVertical';
 
 
 /* ***Layouts**** */
@@ -68,8 +69,10 @@ const Router = [
       { path: 'dashboard', element: <Dashboard /> },
       { path: '/SuperAdmin/demo-accounts', element: <DemoAccounts /> },
       { path: '/SuperAdmin/live-accounts', element: <LiveAccounts /> },
-      { path: '/SuperAdmin/live-accounts/add', element: <AddAccount /> },
       { path: '/SuperAdmin/live-accounts/edit/:id', element: <AddAccount /> },
+      { path: '/SuperAdmin/live-accounts/edit/:id', element: <AddAccount /> },
+      { path: '/SuperAdmin/Accounts/Edit/:id', element: <MakeItLive /> },
+
       { path: "/SuperAdmin/Academic/:id", element: <DetailsAccount />},
       { path: "/SuperAdmin/customer-admin", element: <AdminManagement /> },
       { path: "/SuperAdmin/sales-admin", element: <AdminManagement /> },
@@ -77,7 +80,7 @@ const Router = [
       { path: "/SuperAdmin/super-admin", element: <AdminManagement /> },
       { path: "/SuperAdmin/profile", element: <AccountProfile /> },
        { path: "/SuperAdmin/Demo", element: <Demo/> },
-      // { path: "/SuperAdmin/admin/customer-admin/edit/:type/:id", element: <UserForm /> },
+       { path: "/SuperAdmin/fees", element: <FormVertical/> },
       { path: "/SuperAdmin/admin/add/:type", element: <UserForm /> },
       { path: "/SuperAdmin/admin/edit/:type/:id", element: <UserForm /> },
       { path: 'ui/typography', element: <Typography /> },
