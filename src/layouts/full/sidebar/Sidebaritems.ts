@@ -7,7 +7,7 @@ const SidebarContent: Record<number, MenuItem[]> = {
       heading: "Home",
       children: [
         { name: "Dashboard", url: "/SuperAdmin/dashboard", icon: "solar:pie-chart-line-duotone" },
-         { name: "Manage Users", url: "/SuperAdmin/users", icon: "solar:user-id-line-duotone" },
+        // { name: "Manage Users", url: "/SuperAdmin/users", icon: "solar:user-id-line-duotone" },
       ],
     },
       {
@@ -76,25 +76,201 @@ const SidebarContent: Record<number, MenuItem[]> = {
       heading: "Home",
       children: [
         { name: "Dashboard", url: "/SupportAdmin/dashboard", icon: "solar:pie-chart-line-duotone" },
+
       ],
     },
+     {
+    heading: 'Apps',
+    children: [
+      {
+        name: 'Accounts',
+        id: uniqueId(),
+        icon: 'solar:user-id-line-duotone',
+        children: [
+          {
+            name: 'Demo Accounts',
+            id: uniqueId(),
+            url: '/SupportAdmin/demo-accounts',
+            isPro: false,
+          },
+          {
+            name: 'Live Accounts',
+            id: uniqueId(),
+            url: '/SupportAdmin/live-accounts',
+            isPro: false,
+          }
+        ],
+      },
+      // {
+      //   name: 'User Management',
+      //   id: uniqueId(),
+      //   icon: 'solar:user-id-line-duotone',
+      //   children: [
+      //     // {
+      //     //   name: 'Super Admin',
+      //     //   id: uniqueId(),
+      //     //   url: '/SuperAdmin/admin',
+      //     //   isPro: false,
+      //     // },
+      //     {
+      //       name: 'Support Admin',
+      //       id: uniqueId(),
+      //       url: '/SuperAdmin/support-admin',
+      //       isPro: false,
+      //     },
+      //     {
+      //       name: 'Sales Admin',
+      //       id: uniqueId(),
+      //       url: '/SuperAdmin/sales-admin',
+      //       isPro: false,
+      //     },
+      //     {
+      //       name: 'Customer Admin',
+      //       id: uniqueId(),
+      //       url: '/SuperAdmin/customer-admin',
+      //       isPro: false,
+      //     }
+      //   ],
+      // },
+               { name: "Profile", url: "/SupportAdmin/profile", icon: "solar:user-id-line-duotone" },
+
+    ]
+    },
+    
   ],
-  3: [ // SalesAdmin Menu
+  4: [ // SalesAdmin Menu
     {
       heading: "Home",
       children: [
-        { name: "Dashboard", url: "/SupportAdmin/dashboard", icon: "solar:pie-chart-line-duotone" },
+        { name: "Dashboard", url: "/SalesAdmin/dashboard", icon: "solar:pie-chart-line-duotone" },
+
       ],
     },
+     {
+    heading: 'Apps',
+    children: [
+      {
+        name: 'Accounts',
+        id: uniqueId(),
+        icon: 'solar:user-id-line-duotone',
+        children: [
+          {
+            name: 'Demo Accounts',
+            id: uniqueId(),
+            url: '/SalesAdmin/demo-accounts',
+            isPro: false,
+          },
+          {
+            name: 'Live Accounts',
+            id: uniqueId(),
+            url: '/SalesAdmin/live-accounts',
+            isPro: false,
+          }
+        ],
+      },
+      // {
+      //   name: 'User Management',
+      //   id: uniqueId(),
+      //   icon: 'solar:user-id-line-duotone',
+      //   children: [
+      //     // {
+      //     //   name: 'Super Admin',
+      //     //   id: uniqueId(),
+      //     //   url: '/SuperAdmin/admin',
+      //     //   isPro: false,
+      //     // },
+      //     {
+      //       name: 'Support Admin',
+      //       id: uniqueId(),
+      //       url: '/SuperAdmin/support-admin',
+      //       isPro: false,
+      //     },
+      //     {
+      //       name: 'Sales Admin',
+      //       id: uniqueId(),
+      //       url: '/SuperAdmin/sales-admin',
+      //       isPro: false,
+      //     },
+      //     {
+      //       name: 'Customer Admin',
+      //       id: uniqueId(),
+      //       url: '/SuperAdmin/customer-admin',
+      //       isPro: false,
+      //     }
+      //   ],
+      // },
+               { name: "Profile", url: "/SalesAdmin/profile", icon: "solar:user-id-line-duotone" },
+
+    ]
+    },
   ],
-  4: [ // CustomerAdmin Menu
+  3: [ // CustomerAdmin Menu
     {
       heading: "Home",
       children: [
-        { name: "Dashboard", url: "/SupportAdmin/dashboard", icon: "solar:pie-chart-line-duotone" },
+        { name: "Dashboard", url: "/CustomerAdmin/dashboard", icon: "solar:pie-chart-line-duotone" },
+
       ],
     },
+     {
+    heading: 'Apps',
+    children: [
+      {
+        name: 'Accounts',
+        id: uniqueId(),
+        icon: 'solar:user-id-line-duotone',
+        children: [
+          {
+            name: 'Demo Accounts',
+            id: uniqueId(),
+            url: '/CustomerAdmin/demo-accounts',
+            isPro: false,
+          },
+          {
+            name: 'Live Accounts',
+            id: uniqueId(),
+            url: '/CustomerAdmin/live-accounts',
+            isPro: false,
+          }
+        ],
+      },
+      // {
+      //   name: 'User Management',
+      //   id: uniqueId(),
+      //   icon: 'solar:user-id-line-duotone',
+      //   children: [
+      //     // {
+      //     //   name: 'Super Admin',
+      //     //   id: uniqueId(),
+      //     //   url: '/SuperAdmin/admin',
+      //     //   isPro: false,
+      //     // },
+      //     {
+      //       name: 'Support Admin',
+      //       id: uniqueId(),
+      //       url: '/SuperAdmin/support-admin',
+      //       isPro: false,
+      //     },
+      //     {
+      //       name: 'Sales Admin',
+      //       id: uniqueId(),
+      //       url: '/SuperAdmin/sales-admin',
+      //       isPro: false,
+      //     },
+      //     {
+      //       name: 'Customer Admin',
+      //       id: uniqueId(),
+      //       url: '/SuperAdmin/customer-admin',
+      //       isPro: false,
+      //     }
+      //   ],
+      // },
+               { name: "Profile", url: "/CustomerAdmin/profile", icon: "solar:user-id-line-duotone" },
+
+    ]
+    },
   ],
+  
 };
 
 export default SidebarContent;

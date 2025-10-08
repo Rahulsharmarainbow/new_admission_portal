@@ -26,6 +26,7 @@ import UserTable from 'src/views/Admin/components/UserTable';
 import UserForm from 'src/views/Admin/components/UserForm';
 import AdminManagement from 'src/views/Admin/AdminManagement';
 import AccountProfile from 'src/views/profile/AccountProfile';
+import Demo from 'src/views/profile/Demo';
 
 
 /* ***Layouts**** */
@@ -75,7 +76,7 @@ const Router = [
       { path: "/SuperAdmin/support-admin", element: <AdminManagement /> },
       { path: "/SuperAdmin/super-admin", element: <AdminManagement /> },
       { path: "/SuperAdmin/profile", element: <AccountProfile /> },
-      // { path: "/SuperAdmin/customer-admin/add/:type", element: <UserForm /> },
+       { path: "/SuperAdmin/Demo", element: <Demo/> },
       // { path: "/SuperAdmin/admin/customer-admin/edit/:type/:id", element: <UserForm /> },
       { path: "/SuperAdmin/admin/add/:type", element: <UserForm /> },
       { path: "/SuperAdmin/admin/edit/:type/:id", element: <UserForm /> },
@@ -99,6 +100,12 @@ const Router = [
     ),
     children: [
       { path: 'dashboard', element: <Dashboard /> },
+       { path: '/SupportAdmin/demo-accounts', element: <DemoAccounts /> },
+      { path: '/SupportAdmin/live-accounts', element: <LiveAccounts /> },
+      { path: '/SupportAdmin/live-accounts/add', element: <AddAccount /> },
+      { path: '/SupportAdmin/live-accounts/edit/:id', element: <AddAccount /> },
+      { path: "/SupportAdmin/Academic/:id", element: <DetailsAccount />},
+      { path: "/SupportAdmin/profile", element: <AccountProfile /> },
       { path: 'ui/typography', element: <Typography /> },
       { path: 'ui/table', element: <Table /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
@@ -113,6 +120,7 @@ const Router = [
     ),
     children: [
       { path: 'dashboard', element: <Dashboard /> },
+      { path: "/CustomerAdmin/profile", element: <AccountProfile /> },
       { path: 'ui/typography', element: <Typography /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
@@ -126,6 +134,7 @@ const Router = [
     ),
     children: [
       { path: 'dashboard', element: <Dashboard /> },
+      { path: "/SalesAdmin/profile", element: <AccountProfile /> },
       { path: 'ui/typography', element: <Typography /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],

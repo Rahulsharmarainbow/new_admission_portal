@@ -3,10 +3,13 @@ import { Icon } from "@iconify/react";
 import user1 from "/src/assets/images/profile/user-1.jpg";
 import { Link } from "react-router";
 import { useAuth } from "src/hook/useAuth";
+const assetUrl = import.meta.env.VITE_ASSET_URL;
+
 
 const Profile = () => {
-  const { logout } = useAuth();
+  const { logout , user} = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  console.log(user);
 
   const handleLogout = () => {
     setIsOpen(false);
@@ -21,7 +24,7 @@ const Profile = () => {
         className="h-10 w-10 hover:text-primary hover:bg-lightprimary rounded-full flex justify-center items-center cursor-pointer"
       >
         <img
-          src={user1}
+         src={`${assetUrl}/${user?.profile}`}
           alt="logo"
           height="35"
           width="35"
@@ -33,7 +36,7 @@ const Profile = () => {
       {isOpen && (
         <div className="absolute right-0 top-12 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden">
           <Link
-            to="#"
+            to={`profile`}
             className="px-4 py-3 flex items-center hover:bg-gray-100 w-full gap-3 text-sm"
             onClick={() => setIsOpen(false)}
           >
