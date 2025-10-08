@@ -71,7 +71,7 @@ const UserForm: React.FC = () => {
       );
 
       if (response.data) {
-        const userData = response.data;
+        const userData = response.data.data;
         setFormData(prev => ({
           ...prev,
           name: userData.name || '',

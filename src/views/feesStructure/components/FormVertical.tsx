@@ -1,16 +1,13 @@
-
-
-
-
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import { Breadcrumb, Button, Card, Label, TextInput, Select, Spinner } from 'flowbite-react';
 import { FaHome, FaMoneyBillWave } from 'react-icons/fa';
-import { MdDateRange } from 'react-icons/md';
 import { useAcademics } from 'src/hook/useAcademics';
-import toast from 'react-hot-toast';
+import { useCaste } from 'src/hook/useCaste';
+import { useStates } from 'src/hook/useStates';
+import { toast } from 'react-hot-toast';
 import { useAuth } from 'src/hook/useAuth';
+import axios from 'axios';
+import ReactSelect from 'react-select';
 
 const BCrumb = [
   {
@@ -23,16 +20,77 @@ const BCrumb = [
   },
 ];
 
+interface FeesData {
+  id?: number;
+  academic_id: number;
+  special_caste_fee_states?: string;
+  special_caste?: string;
+  special_cast_fee?: number;
+  actual_fee?: number;
+  late_fee?: number;
+  admission_state_date?: string;
+  admission_end_date?: string;
+  extend_date?: string;
+  status?: number;
+  last_updated_at?: string;
+}
+
+// Custom styles for react-select to match Flowbite design
+const customStyles = {
+  control: (base: any, state: any) => ({
+    ...base,
+    backgroundColor: '#f9fafb',
+    borderColor: state.isFocused ? '#3b82f6' : '#d1d5db',
+    borderRadius: '0.5rem',
+    padding: '0.25rem',
+    boxShadow: state.isFocused ? '0 0 0 2px rgba(59, 130, 246, 0.2)' : 'none',
+    '&:hover': {
+      borderColor: state.isFocused ? '#3b82f6' : '#9ca3af',
+    },
+    minHeight: '42px',
+  }),
+  menu: (base: any) => ({
+    ...base,
+    borderRadius: '0.5rem',
+    zIndex: 50,
+  }),
+  multiValue: (base: any) => ({
+    ...base,
+    backgroundColor: '#3b82f6',
+    borderRadius: '0.375rem',
+  }),
+  multiValueLabel: (base: any) => ({
+    ...base,
+    color: 'white',
+    fontWeight: '500',
+  }),
+  multiValueRemove: (base: any) => ({
+    ...base,
+    color: 'white',
+    ':hover': {
+      backgroundColor: '#ef4444',
+      color: 'white',
+    },
+  }),
+  option: (base: any, state: any) => ({
+    ...base,
+    backgroundColor: state.isSelected ? '#3b82f6' : state.isFocused ? '#dbeafe' : 'white',
+    color: state.isSelected ? 'white' : '#374151',
+    ':active': {
+      backgroundColor: state.isSelected ? '#3b82f6' : '#bfdbfe',
+    },
+  }),
+};
+
 const FormVertical = () => {
-  // Use Vite's import.meta.env instead of process.env
   const apiUrl = import.meta.env.VITE_API_URL;
   const { academics, loading: academicLoading } = useAcademics();
+  const { caste: castelist, loading: casteLoading } = useCaste();
+  const { states: statelist, loading: statesLoading } = useStates();
+  const { user } = useAuth();
 
-  const {user} = useAuth()
   const [state, setState] = useState<string[]>([]);
   const [caste, setCaste] = useState<string[]>([]);
-  const [statelist, setStateList] = useState<any[]>([]);
-  const [castelist, setCasteList] = useState<any[]>([]);
   const [applicableFee, setApplicableFee] = useState('');
   const [actualFee, setActualFee] = useState('');
   const [extendFee, setExtendFee] = useState('');
@@ -45,19 +103,29 @@ const FormVertical = () => {
   const [loadingButton1, setLoadingButton1] = useState(false);
   const [loadingButton2, setLoadingButton2] = useState(false);
 
+  // Convert states and castes to react-select format
+  const stateOptions = statelist.map(state => ({
+    value: state.state_id.toString(),
+    label: state.state_title
+  }));
+
+  const casteOptions = castelist.map(caste => ({
+    value: caste.id.toString(),
+    label: caste.name
+  }));
+
   const handleInputChange = (setStateFunction: React.Dispatch<React.SetStateAction<any>>) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setStateFunction(event.target.value);
   };
 
-  const handleMultiSelectChange = (setStateFunction: React.Dispatch<React.SetStateAction<string[]>>) => (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const options = event.target.options;
-    const selectedValues: string[] = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selectedValues.push(options[i].value);
-      }
-    }
-    setStateFunction(selectedValues);
+  const handleStateChange = (selectedOptions: any) => {
+    const selectedValues = selectedOptions ? selectedOptions.map((option: any) => option.value) : [];
+    setState(selectedValues);
+  };
+
+  const handleCasteChange = (selectedOptions: any) => {
+    const selectedValues = selectedOptions ? selectedOptions.map((option: any) => option.value) : [];
+    setCaste(selectedValues);
   };
 
   const handleAcademicSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -68,135 +136,164 @@ const FormVertical = () => {
     getFeesData(selectedId);
   };
 
-  const MainhandleSubmit = (e: React.FormEvent) => {
-    setLoadingButton2(true);
+  const SpecialhandleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const submitdata = {
-      actual_fee: actualFee,
-      late_fee: extendFee,
-      admission_state_date: admissionStartDate,
-      admission_end_date: admissionEndDate,
-      extend_date: extendedDate,
-      academic_id: selectedAcademic,
-    };
-    updateFeesData(submitdata);
-  };
-
-  const SpecialhandleSubmit = (e: React.FormEvent) => {
     setLoadingButton1(true);
-    e.preventDefault();
-    const submitdata = {
-      special_caste_fee_states: state,
-      special_caste: caste,
-      special_cast_fee: applicableFee,
-      academic_id: selectedAcademic,
-    };
-    updateFeesData(submitdata);
-  };
 
-  const updateFeesData = (data: any) => {
-    // You'll need to implement the update API call here
-    // For now, just show a success message
-    toast.success('Fees data updated successfully!');
-    setLoadingButton1(false);
-    setLoadingButton2(false);
-    
-    // Example API call structure:
-    /*
-    fetch(apiUrl + 'api/SuperAdmin/Fees/update-Fees', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer YOUR_TOKEN_HERE' // You'll need to handle auth
-      },
-      body: JSON.stringify(data),
-    })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.status) {
-        toast.success('Fees data updated successfully!');
-      } else {
-        toast.error(data.message || 'Failed to update fees data');
+    try {
+      // Validate required fields
+      if (state.length === 0 || caste.length === 0 || !applicableFee) {
+        toast.error('Please fill all required fields in Special Caste Fees Setting');
+        return;
       }
+
+      const submitdata = {
+        academic_id: parseInt(selectedAcademic),
+        state: state.map(id => parseInt(id)),
+        caste: caste.map(id => parseInt(id)),
+        applicableFee: parseFloat(applicableFee),
+        actualFee: parseFloat(actualFee) || 0,
+        extendFee: parseFloat(extendFee) || 0,
+        admission_state_date: admissionStartDate || null,
+        admission_end_date: admissionEndDate || null,
+        extend_date: extendedDate || null
+      };
+
+      await updateFeesData(submitdata);
+    } catch (error) {
+      console.error('Error in SpecialhandleSubmit:', error);
+    } finally {
       setLoadingButton1(false);
-      setLoadingButton2(false);
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-      toast.error('An error occurred while updating fees data');
-      setLoadingButton1(false);
-      setLoadingButton2(false);
-    });
-    */
+    }
   };
 
-  const getFeesData = (academicId: string) => {
-    fetch(apiUrl + '/SuperAdmin/Fees/get-Fees', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${user?.token}` 
-      },
-      body: JSON.stringify({
-        academic_id: parseInt(academicId)
-      }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+  const MainhandleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoadingButton2(true);
+
+    try {
+      // Validate required fields
+      if (!actualFee || !extendFee) {
+        toast.error('Please fill all required fields in Other Settings');
+        return;
+      }
+
+      const submitdata = {
+        academic_id: parseInt(selectedAcademic),
+        actualFee: parseFloat(actualFee),
+        extendFee: parseFloat(extendFee),
+        admission_state_date: admissionStartDate || null,
+        admission_end_date: admissionEndDate || null,
+        extend_date: extendedDate || null
+      };
+
+      await updateFeesData(submitdata);
+    } catch (error) {
+      console.error('Error in MainhandleSubmit:', error);
+    } finally {
+      setLoadingButton2(false);
+    }
+  };
+
+  const updateFeesData = async (data: any) => {
+    try {
+      const response = await axios.post(
+        `${apiUrl}/SuperAdmin/Fees/Update-Fees`,
+        data,
+        {
+          headers: {
+            'Authorization': `Bearer ${user?.token}`,
+            'Content-Type': 'application/json'
+          }
         }
-        return response.json();
-      })
-      .then((data) => {
-        if (data.status) {
-          const feesData = data.data;
-          setFormError(false);
-          
-          // Parse and set states
-          if (feesData.special_caste_fee_states) {
-            try {
-              const statesArray = JSON.parse(feesData.special_caste_fee_states);
-              setState(statesArray.map((id: number) => id.toString()));
-            } catch (e) {
-              console.error('Error parsing states:', e);
-              setState([]);
-            }
+      );
+
+      if (response.data.status) {
+        toast.success('Fees data updated successfully!');
+        // Refresh the data after update
+        getFeesData(selectedAcademic);
+      } else {
+        toast.error(response.data.message || 'Failed to update fees data');
+      }
+    } catch (error: any) {
+      console.error('Error updating fees data:', error);
+      toast.error(error.response?.data?.message || 'An error occurred while updating fees data');
+    }
+  };
+
+  const getFeesData = async (academicId: string) => {
+    try {
+      const response = await axios.post(
+        `${apiUrl}/SuperAdmin/Fees/get-Fees`,
+        {
+          academic_id: parseInt(academicId)
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user?.token}`,
+            'Content-Type': 'application/json'
           }
-          
-          // Parse and set castes
-          if (feesData.special_caste) {
-            try {
-              const castesArray = JSON.parse(feesData.special_caste);
-              setCaste(castesArray.map((id: number) => id.toString()));
-            } catch (e) {
-              console.error('Error parsing castes:', e);
-              setCaste([]);
-            }
+        }
+      );
+
+      if (response.data.status) {
+        const feesData: FeesData = response.data.data;
+        setFormError(false);
+        
+        // Parse and set states
+        if (feesData.special_caste_fee_states) {
+          try {
+            const statesArray = JSON.parse(feesData.special_caste_fee_states);
+            setState(statesArray.map((id: number) => id.toString()));
+          } catch (e) {
+            console.error('Error parsing states:', e);
+            setState([]);
           }
-          
-          // Set other fields
-          setApplicableFee(feesData.special_cast_fee?.toString() || '');
-          setActualFee(feesData.actual_fee?.toString() || '');
-          setExtendFee(feesData.late_fee?.toString() || '');
-          setAdmissionStartDate(feesData.admission_state_date || '');
-          setAdmissionEndDate(feesData.admission_end_date || '');
-          setExtendedDate(feesData.extend_date || '');
         } else {
-          setFormError(true);
-          // If no data found, show empty form but don't show error
-          if (data.message?.includes('not found')) {
-            setFormError(false);
-            resetForm();
-          } else {
-            toast.error(data.message || 'Failed to fetch fees data');
-          }
+          setState([]);
         }
-      })
-      .catch((error) => {
-        console.error('Error during API call:', error);
+        
+        // Parse and set castes
+        if (feesData.special_caste) {
+          try {
+            const castesArray = JSON.parse(feesData.special_caste);
+            setCaste(castesArray.map((id: number) => id.toString()));
+          } catch (e) {
+            console.error('Error parsing castes:', e);
+            setCaste([]);
+          }
+        } else {
+          setCaste([]);
+        }
+        
+        // Set other fields
+        setApplicableFee(feesData.special_cast_fee?.toString() || '');
+        setActualFee(feesData.actual_fee?.toString() || '');
+        setExtendFee(feesData.late_fee?.toString() || '');
+        setAdmissionStartDate(feesData.admission_state_date || '');
+        setAdmissionEndDate(feesData.admission_end_date || '');
+        setExtendedDate(feesData.extend_date || '');
+      } else {
         setFormError(true);
-        toast.error('An error occurred while fetching fees data');
-      });
+        // If no data found, show empty form but don't show error
+        if (response.data.message?.includes('not found')) {
+          setFormError(false);
+          resetForm();
+        } else {
+          toast.error(response.data.message || 'Failed to fetch fees data');
+        }
+      }
+    } catch (error: any) {
+      console.error('Error fetching fees data:', error);
+      setFormError(true);
+      // If it's a 404 or similar, treat as new form
+      if (error.response?.status === 404) {
+        setFormError(false);
+        resetForm();
+      } else {
+        toast.error(error.response?.data?.message || 'An error occurred while fetching fees data');
+      }
+    }
   };
 
   const resetForm = () => {
@@ -210,38 +307,9 @@ const FormVertical = () => {
     setExtendedDate('');
   };
 
-  useEffect(() => {
-    // Fetch state and caste lists
-    fetch(apiUrl + 'api/getStateList', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setStateList(data);
-      })
-      .catch((error) => {
-        console.error('Error fetching state list:', error);
-      });
+  const loading = academicLoading || casteLoading || statesLoading;
 
-    fetch(apiUrl + 'api/getCasteList', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setCasteList(data);
-      })
-      .catch((error) => {
-        console.error('Error fetching caste list:', error);
-      });
-  }, [apiUrl]);
-
-  if (academicLoading) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Spinner size="xl" />
@@ -293,49 +361,66 @@ const FormVertical = () => {
               <h2 className="text-xl font-semibold mb-4">Special Caste Fees Setting</h2>
               <form onSubmit={SpecialhandleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                  {/* State Dropdown - Increased size */}
+                  {/* State Dropdown - React Select Multi */}
                   <div className="md:col-span-5">
-                    <Label htmlFor="state">State *</Label>
-                    <Select
-                      value={state}
-                      onChange={handleMultiSelectChange(setState)}
-                      multiple
+                    <Label htmlFor="state" className="block mb-2">
+                      State *
+                    </Label>
+                    <ReactSelect
+                      id="state"
+                      isMulti
+                      options={stateOptions}
+                      value={stateOptions.filter(option => state.includes(option.value))}
+                      onChange={handleStateChange}
+                      styles={customStyles}
+                      placeholder="Select states..."
+                      isSearchable
+                      isClearable
                       required
-                      className="h-32" // Increased height
-                      size={8} // Show more options at once
-                    >
-                      <option value="" disabled>Select State</option>
-                      {statelist.map((option: any) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </Select>
-                    <div className="text-xs text-gray-500 mt-1">
-                      Hold Ctrl/Cmd to select multiple states
-                    </div>
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      noOptionsMessage={({ inputValue }) =>
+                        inputValue ? `No states found for "${inputValue}"` : "No states available"
+                      }
+                    />
+                    {state.length > 0 && (
+                      <div className="mt-2">
+                        <span className="text-sm text-blue-600 font-medium">
+                          Selected: {state.length} state(s)
+                        </span>
+                      </div>
+                    )}
                   </div>
                   
-                  {/* Caste Dropdown - Increased size */}
+                  {/* Caste Dropdown - React Select Multi */}
                   <div className="md:col-span-4">
-                    <Label htmlFor="caste">Caste *</Label>
-                    <Select
-                      value={caste}
-                      onChange={handleMultiSelectChange(setCaste)}
-                      multiple
+                    <Label htmlFor="caste" className="block mb-2">
+                      Caste *
+                    </Label>
+                    <ReactSelect
+                      id="caste"
+                      isMulti
+                      options={casteOptions}
+                      value={casteOptions.filter(option => caste.includes(option.value))}
+                      onChange={handleCasteChange}
+                      styles={customStyles}
+                      placeholder="Select castes..."
+                      isSearchable
+                      isClearable
                       required
-                      className="h-32" // Increased height
-                      size={8} // Show more options at once
-                    >
-                      {castelist.map((option: any) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </Select>
-                    <div className="text-xs text-gray-500 mt-1">
-                      Hold Ctrl/Cmd to select multiple castes
-                    </div>
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      noOptionsMessage={({ inputValue }) =>
+                        inputValue ? `No castes found for "${inputValue}"` : "No castes available"
+                      }
+                    />
+                    {caste.length > 0 && (
+                      <div className="mt-2">
+                        <span className="text-sm text-blue-600 font-medium">
+                          Selected: {caste.length} caste(s)
+                        </span>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="md:col-span-2">
@@ -395,6 +480,7 @@ const FormVertical = () => {
                       step="1"
                       value={extendFee}
                       onChange={handleInputChange(setExtendFee)}
+                      required
                     />
                   </div>
                   <div className="md:col-span-4">
@@ -448,12 +534,3 @@ const FormVertical = () => {
 };
 
 export default FormVertical;
-
-
-
-
-
-
-
-
-

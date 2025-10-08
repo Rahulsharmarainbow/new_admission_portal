@@ -225,7 +225,7 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
   // Navigate to edit user
   const handleEdit = (userId: number) => {
    // navigate(`/${user?.role}/user-management/edit/${type}/${userId}`);
-    navigate(`/${user?.role}/admin/edit/${type}/${userId}`);
+    navigate(`/${user?.role}/admin/edit/${userId}`);
   };
 
   // Get admin type label
