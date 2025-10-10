@@ -9,7 +9,7 @@ import { useAuth } from 'src/hook/useAuth';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import DeleteConfirmationModal from 'src/Frontend/Common/DeleteConfirmationModal';
 import AddCasteModal from '../components/AddCastleModel';
-//import EditCasteModal from './EditCasteModal';
+import EditCasteModal from './EditCasteModal';
 
 interface CasteItem {
   id: number;
@@ -172,52 +172,102 @@ console.log(data)
   };
 
   // Handle delete confirm
-  const handleDeleteConfirm = async () => {
-    if (!selectedItem) return;
+//   const handleDeleteConfirm = async () => {
+//     if (!selectedItem) return;
 
-    try {
-      const headers = {
-        'accept': '*/*',
-        'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
-        'origin': 'http://localhost:3010',
-        'priority': 'u=1, i',
-        'referer': 'http://localhost:3010/',
-        'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'cross-site',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
-        'Authorization': `Bearer ${user?.token}`,
-        'Content-Type': 'application/json'
-      };
+//     try {
+//       const headers = {
+//         'accept': '*/*',
+//         'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
+//         'origin': 'http://localhost:3010',
+//         'priority': 'u=1, i',
+//         'referer': 'http://localhost:3010/',
+//         'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
+//         'sec-ch-ua-mobile': '?0',
+//         'sec-ch-ua-platform': '"Windows"',
+//         'sec-fetch-dest': 'empty',
+//         'sec-fetch-mode': 'cors',
+//         'sec-fetch-site': 'cross-site',
+//         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+//         'Authorization': `Bearer ${user?.token}`,
+//         'Content-Type': 'application/json'
+//       };
 
-      const requestBody = {
-        id: [selectedItem.id],
-        s_id: user?.id,
-      };
+//       const requestBody = {
+//         id: [selectedItem.id],
+//         s_id: user?.id,
+//       };
 
-      const response = await axios.post(
-        `${apiUrl}/SuperAdmin/StateDistrict/Delete-Data`,
-        requestBody,
-        { headers }
-      );
+//       const response = await axios.post(
+//         `${apiUrl}/SuperAdmin/StateDistrict/Delete-Data`,
+//         requestBody,
+//         { headers }
+//       );
 
-      if (response.data?.status) {
-        alert('Caste deleted successfully!');
-        fetchData();
-      } else {
-        alert(response.data?.message || 'Failed to delete caste');
-      }
-    } catch (error: any) {
-      console.error('Error deleting caste:', error);
-      alert(error.response?.data?.message || 'Failed to delete caste. Please try again.');
-    } finally {
-      setShowDeleteModal(false);
-      setSelectedItem(null);
+//       if (response.data?.status) {
+//         alert('Caste deleted successfully!');
+//         fetchData();
+//       } else {
+//         alert(response.data?.message || 'Failed to delete caste');
+//       }
+//     } catch (error: any) {
+//       console.error('Error deleting caste:', error);
+//       alert(error.response?.data?.message || 'Failed to delete caste. Please try again.');
+//     } finally {
+//       setShowDeleteModal(false);
+//       setSelectedItem(null);
+//     }
+//   };
+
+
+   // Handle delete confirm
+const handleDeleteConfirm = async () => {
+  if (!selectedItem) return;
+
+  try {
+    const headers = {
+      'accept': '*/*',
+      'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
+      'origin': 'http://localhost:3010',
+      'priority': 'u=1, i',
+      'referer': 'http://localhost:3010/',
+      'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
+      'sec-ch-ua-mobile': '?0',
+      'sec-ch-ua-platform': '"Windows"',
+      'sec-fetch-dest': 'empty',
+      'sec-fetch-mode': 'cors',
+      'sec-fetch-site': 'cross-site',
+      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+      'Authorization': `Bearer ${user?.token}`,
+      'Content-Type': 'application/json'
+    };
+
+    const requestBody = {
+      type: 2, // Caste/District ke liye type 2
+      ids: [selectedItem.id],
+      s_id: user?.id,
+    };
+
+    const response = await axios.post(
+      `${apiUrl}/SuperAdmin/StateDistrict/Delete-StateDistrict`,
+      requestBody,
+      { headers }
+    );
+
+    if (response.data?.status) {
+      alert('Caste deleted successfully!');
+      fetchData();
+    } else {
+      alert(response.data?.message || 'Failed to delete caste');
     }
-  };
+  } catch (error: any) {
+    console.error('Error deleting caste:', error);
+    alert(error.response?.data?.message || 'Failed to delete caste. Please try again.');
+  } finally {
+    setShowDeleteModal(false);
+    setSelectedItem(null);
+  }
+};
 
   // Handle add success
   const handleAddSuccess = () => {
@@ -367,7 +417,7 @@ console.log(data)
       />
 
       {/* Edit Caste Modal */}
-      {/* <EditCasteModal
+      <EditCasteModal
         isOpen={showEditModal}
         onClose={() => {
           setShowEditModal(false);
@@ -375,7 +425,7 @@ console.log(data)
         }}
         onSuccess={handleEditSuccess}
         selectedItem={selectedItem}
-      /> */}
+      />
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
