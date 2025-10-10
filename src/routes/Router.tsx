@@ -28,6 +28,10 @@ import AdminManagement from 'src/views/Admin/AdminManagement';
 import AccountProfile from 'src/views/profile/AccountProfile';
 import Demo from 'src/views/profile/Demo';
 import FormVertical from 'src/views/feesStructure/components/FormVertical';
+import YourComponent from 'src/views/dataManager/typeOfConnection/components/YourComponent';
+import DataManagerPage from 'src/views/dataManager/typeOfConnection/components/DataManagerPage';
+import StateTable from 'src/views/dataManager/state/components/State';
+import CasteTable from 'src/views/dataManager/district/components/District';
 
 
 /* ***Layouts**** */
@@ -79,11 +83,13 @@ const Router = [
       // { path: "/SuperAdmin/support-admin", element: <AdminManagement /> },
       // { path: "/SuperAdmin/super-admin", element: <AdminManagement /> },
       { path: "/SuperAdmin/profile", element: <AccountProfile /> },
-       { path: "/SuperAdmin/Demo", element: <Demo/> },
-       { path: "/SuperAdmin/fees", element: <FormVertical/> },
+      { path: "/SuperAdmin/Demo", element: <Demo/> },
+      { path: "/SuperAdmin/fees", element: <FormVertical/> },
       { path: "/SuperAdmin/admin/add/:type", element: <UserForm /> },
       { path: "/SuperAdmin/admin/edit/:id", element: <UserForm /> },
-      { path: 'ui/typography', element: <Typography /> },
+      { path: '/SuperAdmin/data-manager/State', element: <StateTable/> },
+      { path: '/SuperAdmin/data-manager/District', element: <CasteTable/> },      // data manager ki District ka component
+      { path: '/SuperAdmin/data-manager/type-of-connection', element: <DataManagerPage/> },
       { path: 'ui/table', element: <Table /> },
       { path: 'ui/form', element: <Form /> },
       { path: 'ui/alert', element: <Alert /> },

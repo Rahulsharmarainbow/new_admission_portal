@@ -156,7 +156,8 @@ const FormVertical = () => {
         extendFee: parseFloat(extendFee) || 0,
         admission_state_date: admissionStartDate || null,
         admission_end_date: admissionEndDate || null,
-        extend_date: extendedDate || null
+        extend_date: extendedDate || null,
+        s_id: user?.id || ""
       };
 
       await updateFeesData(submitdata);
@@ -184,7 +185,8 @@ const FormVertical = () => {
         extendFee: parseFloat(extendFee),
         admission_state_date: admissionStartDate || null,
         admission_end_date: admissionEndDate || null,
-        extend_date: extendedDate || null
+        extend_date: extendedDate || null,
+        s_id: user?.id || ""
       };
 
       await updateFeesData(submitdata);

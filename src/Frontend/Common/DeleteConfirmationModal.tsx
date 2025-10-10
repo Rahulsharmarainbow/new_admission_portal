@@ -32,7 +32,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
           <Button color="failure" onClick={onConfirm}>
             {confirmText}
           </Button>
-          <Button color="light" onClick={onClose}>
+          <Button color="light" onClick={onClose} >
             {cancelText}
           </Button>
         </div>

@@ -16,7 +16,7 @@ const SidebarContent: Record<number, MenuItem[]> = {
       {
         name: 'Accounts',
         id: uniqueId(),
-        icon: 'solar:user-id-line-duotone',
+        icon: 'solar:cardholder-line-duotone',
         children: [
           {
             name: 'Demo Accounts',
@@ -77,8 +77,42 @@ const SidebarContent: Record<number, MenuItem[]> = {
             },
           ],
         },
+
+        
+        {
+        name: 'Data Manager',
+        id: uniqueId(),
+        icon: 'solar:database-line-duotone',
+        children: [
+          // {
+          //   name: 'Super Admin',
+          //   id: uniqueId(),
+          //   url: '/SuperAdmin/admin',
+          //   isPro: false,
+          // },
+          {
+            name: 'State',
+            id: uniqueId(),
+            url: '/SuperAdmin/data-manager/State',
+            isPro: false,
+          },
+          {
+            name: 'District',
+            id: uniqueId(),
+            url: '/SuperAdmin/data-manager/District',
+            isPro: false,
+          },
+          {
+            name: 'Type of Connection',
+            id: uniqueId(),
+            url: '/SuperAdmin/data-manager/type-of-connection',
+            isPro: false,
+          }
+        ],
+      },
+
       
-      { name: "Profile", url: "/SuperAdmin/profile", icon: "solar:user-id-line-duotone" },
+      { name: "Profile", url: "/SuperAdmin/profile", icon: "solar:user-circle-line-duotone" },
 
     ]
     },
