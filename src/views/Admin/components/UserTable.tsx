@@ -11,6 +11,7 @@ import { useDebounce } from 'src/hook/useDebounce';
 import { useAuth } from 'src/hook/useAuth';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import { useAcademics } from 'src/hook/useAcademics';
+import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
 
 interface User {
   id: number;
@@ -270,25 +271,16 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
 
           {/* Academic Dropdown - Only for Customer Admin */}
           {type === 3 && (
-            <div className="relative w-full sm:w-64">
-              <select 
-                value={filters.academic}
-                onChange={(e) => setFilters(prev => ({ ...prev, academic: e.target.value, page: 0 }))}
-                className="w-full p-2 pl-3 pr-8 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-                disabled={academicLoading}
-              >
-                <option value="">All Academic</option>
-                {academics.map((a) => (
-                  <option key={a.id} value={a.id}>{a.academic_name}</option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </div>
-          )}
+  <AcademicDropdown
+    name="academic"
+    formData={filters}
+    setFormData={setFilters}
+    label=""
+    includeAllOption
+    className="sm:w-64"
+  />
+)}
+
         </div>
 
         {/* Add Button */}

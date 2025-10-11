@@ -21,6 +21,7 @@ import toast from "react-hot-toast";
 import profilebg from "src/assets/images/backgrounds/profilebg-2.jpg"
 import Loader from "src/Frontend/Common/Loader";
 import { useAuth } from "src/hook/useAuth";
+import BreadcrumbHeader from "src/Frontend/Common/BreadcrumbHeader";
 
 // Types
 interface Contact {
@@ -185,6 +186,16 @@ const CollegeDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+
+      {/* Breadcrumb Header */}
+              <BreadcrumbHeader
+                title={'Account Details'}
+                paths={[
+                  { name: 'Accounts', link: `/${user?.role}/demo-accounts` },
+                  { name: 'Account Details', link: '#' },
+                ]}
+              />
+
       {/* Cover Photo Section */}
       <div 
         className="w-full h-64 bg-cover bg-center bg-no-repeat rounded-lg shadow-lg"
@@ -194,7 +205,7 @@ const CollegeDashboard = () => {
       />
 
       {/* Main Content Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 -mt-16 relative z-10">
+      <div className="max-w-7xl mx-auto p-5 sm:px-6 -mt-16 relative z-10">
         <Card className="border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-xl">
           
           {/* Header Section - Logo + College Info */}

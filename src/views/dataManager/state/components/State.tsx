@@ -10,6 +10,7 @@ import { Pagination } from 'src/Frontend/Common/Pagination';
 import DeleteConfirmationModal from 'src/Frontend/Common/DeleteConfirmationModal';
 import AddStateModal from './AddStateModal';
 import EditStateModal from './EditStateModal';
+import BreadcrumbHeader from 'src/Frontend/Common/BreadcrumbHeader';
 
 interface StateItem {
   id: number;
@@ -171,56 +172,6 @@ const StateTable: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  // Handle delete confirm
-//   const handleDeleteConfirm = async () => {
-//     if (!selectedItem) return;
-
-//     try {
-//       const headers = {
-//         'accept': '*/*',
-//         'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
-//         'origin': 'http://localhost:3010',
-//         'priority': 'u=1, i',
-//         'referer': 'http://localhost:3010/',
-//         'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
-//         'sec-ch-ua-mobile': '?0',
-//         'sec-ch-ua-platform': '"Windows"',
-//         'sec-fetch-dest': 'empty',
-//         'sec-fetch-mode': 'cors',
-//         'sec-fetch-site': 'cross-site',
-//         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
-//         'Authorization': `Bearer ${user?.token}`,
-//         'Content-Type': 'application/json'
-//       };
-
-//       const requestBody = {
-//         id: [selectedItem.id],
-//         s_id: user?.id,
-//       };
-
-//       const response = await axios.post(
-//         `${apiUrl}/SuperAdmin/StateDistrict/Delete-Data`,
-//         requestBody,
-//         { headers }
-//       );
-
-//       if (response.data?.status) {
-//         alert('State deleted successfully!');
-//         fetchData();
-//       } else {
-//         alert(response.data?.message || 'Failed to delete state');
-//       }
-//     } catch (error: any) {
-//       console.error('Error deleting state:', error);
-//       alert(error.response?.data?.message || 'Failed to delete state. Please try again.');
-//     } finally {
-//       setShowDeleteModal(false);
-//       setSelectedItem(null);
-//     }
-//   };
-
-
-  // In StateTable.tsx and CasteTable.tsx, update the handleDeleteConfirm function:
 
 const handleDeleteConfirm = async () => {
   if (!selectedItem) return;
@@ -285,6 +236,11 @@ const handleDeleteConfirm = async () => {
   }
 
   return (
+    <>  
+      <BreadcrumbHeader
+              title="States"
+              paths={[{ name: "States", link: "/" + user?.role + "/data-manager/State" }]}
+            />
     <div className="bg-white rounded-lg shadow-md relative overflow-x-auto">
       {/* Table Header with Search and Add Button */}
       <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -444,6 +400,7 @@ const handleDeleteConfirm = async () => {
         message={`Are you sure you want to delete "${selectedItem?.state_title}"? This action cannot be undone.`}
       />
     </div>
+    </>
   );
 };
 

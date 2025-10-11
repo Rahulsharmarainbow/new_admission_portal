@@ -5,6 +5,7 @@ import { Button } from 'flowbite-react';
 import { useAuth } from 'src/hook/useAuth';
 import { useAcademics } from 'src/hook/useAcademics';
 import axios from 'axios';
+import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
 
 interface FormData {
   name: string;
@@ -339,29 +340,16 @@ const UserForm: React.FC = () => {
 
             {/* Academic Dropdown - Only for Customer Admin */}
             {type === '3' && (
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Academic Institution *
-                </label>
-                <div className="border border-gray-400 rounded-md">
-                  <select
-                    name="academic_id"
-                    value={formData.academic_id}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2.5 text-sm border-none outline-none bg-transparent"
-                    required={type === '3'}
-                    disabled={loading || academicLoading}
-                  >
-                    <option value="">Select Academic Institution</option>
-                    {academics.map((academic) => (
-                      <option key={academic.id} value={academic.id}>
-                        {academic.academic_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
+  <AcademicDropdown
+    name="academic_id"
+    label="Academic Institution *"
+    formData={formData}
+    setFormData={setFormData}
+    isRequired={type === '3'}
+    disabled={loading || academicLoading}
+  />
+)}
+
 
             {/* Profile Image Upload */}
             <div className="mb-6">

@@ -32,6 +32,10 @@ import YourComponent from 'src/views/dataManager/typeOfConnection/components/You
 import DataManagerPage from 'src/views/dataManager/typeOfConnection/components/DataManagerPage';
 import StateTable from 'src/views/dataManager/state/components/State';
 import CasteTable from 'src/views/dataManager/district/components/District';
+import AddEditAccount from 'src/views/accounts/components/AddAccount';
+import OpenTickets from 'src/views/ticket/components/OpenTickets';
+import AcceptedTickets from 'src/views/ticket/components/AcceptedTickets';
+import ResolvedTickets from 'src/views/ticket/components/ResolvedTickets';
 
 
 /* ***Layouts**** */
@@ -72,6 +76,8 @@ const Router = [
     children: [
       { path: 'dashboard', element: <Dashboard /> },
       { path: '/SuperAdmin/demo-accounts', element: <DemoAccounts /> },
+      { path: '/SuperAdmin/demo-accounts/add', element: <AddEditAccount /> },
+      { path: '/SuperAdmin/demo-accounts/edit/:id', element: <AddEditAccount /> },
       { path: '/SuperAdmin/live-accounts', element: <LiveAccounts /> },
       { path: '/SuperAdmin/live-accounts/edit/:id', element: <AddAccount /> },
       { path: '/SuperAdmin/live-accounts/edit/:id', element: <AddAccount /> },
@@ -90,6 +96,9 @@ const Router = [
       { path: '/SuperAdmin/data-manager/State', element: <StateTable/> },
       { path: '/SuperAdmin/data-manager/District', element: <CasteTable/> },      // data manager ki District ka component
       { path: '/SuperAdmin/data-manager/type-of-connection', element: <DataManagerPage/> },
+      { path: '/SuperAdmin/Ticket/open', element: <OpenTickets/> },
+       { path: '/SuperAdmin/Ticket/Accepted', element: <AcceptedTickets /> },
+      { path: '/SuperAdmin/Ticket/Resolved', element: <ResolvedTickets /> },
       { path: 'ui/table', element: <Table /> },
       { path: 'ui/form', element: <Form /> },
       { path: 'ui/alert', element: <Alert /> },

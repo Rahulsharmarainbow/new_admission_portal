@@ -11,6 +11,7 @@ import RollBasedAccess from "./components/RollBasedAccess";
 import DnsConfiguration from "./components/DnsConfiguration";
 import ContactInformation from "./components/ContactInformation";
 import Loader from "src/Frontend/Common/Loader";
+import BreadcrumbHeader from "src/Frontend/Common/BreadcrumbHeader";
 
 // Custom Stepper Component
 interface StepperProps {
@@ -427,12 +428,19 @@ const MakeItLive: React.FC = () => {
         <Loader />
       ) : (
         <div className="max-w-7xl mx-auto">
-        <CustomBreadcrumb />
+        {/* Breadcrumb Header */}
+              <BreadcrumbHeader
+                title={'Live Account Onboarding'}
+                paths={[
+                  { name: 'Demo Accounts', link: `/${user?.role}/demo-accounts` },
+                  { name: 'Live Account Onboarding', link: '#' },
+                ]}
+              />
 
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white break-words">Live Account Onboarding</h1>
           <p className="text-gray-600 dark:text-gray-400 break-words">Complete the onboarding process for live accounts</p>
-        </div>
+        </div> */}
 
         <Card className="overflow-hidden">
           <div className="p-6">

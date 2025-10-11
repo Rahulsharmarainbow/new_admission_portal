@@ -1215,7 +1215,7 @@ const handleDeleteConfirm = async () => {
         {/* Add Button - Table ke andar */}
         <Button
           onClick={onAddClick}
-          color="blue"
+          color="primary"
           className="whitespace-nowrap px-4 py-2.5"
         >
           <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

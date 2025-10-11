@@ -2,20 +2,20 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { dashboardService, DashboardFilters } from 'src/services/dashboardService';
-import img1 from "../../../public/Images/top-error-shape.png";
-import img2 from "../../../public/Images/top-info-shape.png";
-import img3 from "../../../public/Images/top-warning-shape.png";
+import img1 from '../../../public/Images/top-error-shape.png';
+import img2 from '../../../public/Images/top-info-shape.png';
+import img3 from '../../../public/Images/top-warning-shape.png';
 import { useAuth } from 'src/hook/useAuth';
 import { useDebounce } from 'src/hook/useDebounce';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import BarChart from './BarChart';
-import { useAcademics } from 'src/hook/useAcademics';
-import { BsSearch } from 'react-icons/bs';
+import { BsFillSearchHeartFill, BsSearch } from 'react-icons/bs';
+import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
+import { HiChevronDown } from 'react-icons/hi';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const { academics, loading: academicLoading } = useAcademics();
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [filters, setFilters] = useState<DashboardFilters>({
     page: 0,
@@ -26,7 +26,7 @@ const Dashboard = () => {
     year: '2025',
     academic: '',
   });
-  
+
   // Debounced search
   const debouncedSearch = useDebounce(filters.search, 500);
 
@@ -48,21 +48,29 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, [filters.page, filters.rowsPerPage, filters.order, filters.orderBy, debouncedSearch, filters.year, filters.academic]);
+  }, [
+    filters.page,
+    filters.rowsPerPage,
+    filters.order,
+    filters.orderBy,
+    debouncedSearch,
+    filters.year,
+    filters.academic,
+  ]);
 
   // Update search filter
   const handleSearchChange = (value: string) => {
-    setFilters(prev => ({ ...prev, search: value, page: 0 }));
+    setFilters((prev) => ({ ...prev, search: value, page: 0 }));
   };
 
   // Update page
   const handlePageChange = (page: number) => {
-    setFilters(prev => ({ ...prev, page }));
+    setFilters((prev) => ({ ...prev, page }));
   };
 
   // Update rows per page
   const handleRowsPerPageChange = (rowsPerPage: number) => {
-    setFilters(prev => ({ ...prev, rowsPerPage, page: 0 }));
+    setFilters((prev) => ({ ...prev, rowsPerPage, page: 0 }));
   };
 
   // Loading state
@@ -79,12 +87,11 @@ const Dashboard = () => {
       {/* Filter Section */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-
           {/* Year Dropdown */}
           <div className="relative w-full sm:w-auto">
-            <select 
+            <select
               value={filters.year}
-              onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value, page: 0 }))}
+              onChange={(e) => setFilters((prev) => ({ ...prev, year: e.target.value, page: 0 }))}
               className="w-full sm:w-auto min-w-[120px] p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
             >
               <option value="2025">2025</option>
@@ -93,42 +100,32 @@ const Dashboard = () => {
               <option value="2022">2022</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </div>
+      <HiChevronDown className="w-4 h-4" />
+    </div>
           </div>
 
           {/* Academic Dropdown */}
           <div className="relative w-full sm:w-auto">
-            <select 
-              value={filters.academic}
-              onChange={(e) => setFilters(prev => ({ ...prev, academic: e.target.value, page: 0 }))}
-              className="w-full sm:w-auto min-w-[80px] p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
-            >
-              <option value="">All Academic</option>
-              {academics.map((a) => (
-                <option key={a.id} value={a.id}>{a.academic_name}</option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </div>
+            <AcademicDropdown
+              name="academic"
+              formData={filters}
+              setFormData={setFilters}
+              includeAllOption
+              label=""
+              className="min-w-[80px] text-sm"
+            />
           </div>
         </div>
 
-        {/* Refresh button हटाकर Search Icon */}
-        <div className="w-full sm:w-auto flex items-center">
-          <button 
+        {/* <div className="w-full sm:w-auto flex items-center">
+          <button
             onClick={fetchDashboardData}
             disabled={loading}
-            className="p-2 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="p-2 rounded-full bg-[#0084DA] hover:bg-blue-700 disabled:bg-blue-400 text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             <BsSearch size={18} />
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Statistics Cards */}
@@ -147,16 +144,29 @@ const Dashboard = () => {
             <div className="relative z-10">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1.5"
+                  >
                     <circle cx="12" cy="12" r="10"></circle>
-                    <path strokeLinecap="round" d="M9 14h3m-2-2V8.2c0-.186 0-.279.012-.356a1 1 0 0 1 .832-.832C10.92 7 11.014 7 11.2 7h2.3a2.5 2.5 0 0 1 0 5zm0 0v5m0-5H9"></path>
+                    <path
+                      strokeLinecap="round"
+                      d="M9 14h3m-2-2V8.2c0-.186 0-.279.012-.356a1 1 0 0 1 .832-.832C10.92 7 11.014 7 11.2 7h2.3a2.5 2.5 0 0 1 0 5zm0 0v5m0-5H9"
+                    ></path>
                   </svg>
                 </div>
               </div>
               <h4 className="text-2xl font-bold text-white mb-1">
                 {dashboardData?.paymentStatusCounts?.total_applications || 0}
               </h4>
-              <span className="text-sm text-white text-opacity-90 font-medium">Total Applications</span>
+              <span className="text-sm text-white text-opacity-90 font-medium">
+                Total Applications
+              </span>
             </div>
           </div>
         </div>
@@ -175,17 +185,34 @@ const Dashboard = () => {
             <div className="relative z-10">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                    <path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12" opacity="0.5"></path>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1.5"
+                  >
+                    <path
+                      d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12"
+                      opacity="0.5"
+                    ></path>
                     <path d="M2 14c0-2.8 0-4.2.545-5.27A5 5 0 0 1 4.73 6.545C5.8 6 7.2 6 10 6h4c2.8 0 4.2 0 5.27.545a5 5 0 0 1 2.185 2.185C22 9.8 22 11.2 22 14s0 4.2-.545 5.27a5 5 0 0 1-2.185 2.185C18.2 22 16.8 22 14 22h-4c-2.8 0-4.2 0-5.27-.545a5 5 0 0 1-2.185-2.185C2 18.2 2 16.8 2 14Z"></path>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 11v6m0 0l2.5-2.5M12 17l-2.5-2.5"></path>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 11v6m0 0l2.5-2.5M12 17l-2.5-2.5"
+                    ></path>
                   </svg>
                 </div>
               </div>
               <h4 className="text-2xl font-bold text-white mb-1">
                 {dashboardData?.paymentStatusCounts?.paid_applications || 0}
               </h4>
-              <span className="text-sm text-white text-opacity-90 font-medium">Paid Applications</span>
+              <span className="text-sm text-white text-opacity-90 font-medium">
+                Paid Applications
+              </span>
             </div>
           </div>
         </div>
@@ -204,16 +231,29 @@ const Dashboard = () => {
             <div className="relative z-10">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1.5"
+                  >
                     <circle cx="12" cy="12" r="10"></circle>
-                    <path strokeLinecap="round" d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"></path>
+                    <path
+                      strokeLinecap="round"
+                      d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"
+                    ></path>
                   </svg>
                 </div>
               </div>
               <h4 className="text-2xl font-bold text-white mb-1">
                 {dashboardData?.paymentStatusCounts?.failed_applications || 0}
               </h4>
-              <span className="text-sm text-white text-opacity-90 font-medium">Failed Applications</span>
+              <span className="text-sm text-white text-opacity-90 font-medium">
+                Failed Applications
+              </span>
             </div>
           </div>
         </div>
@@ -232,16 +272,29 @@ const Dashboard = () => {
             <div className="relative z-10">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1.5"
+                  >
                     <circle cx="12" cy="12" r="10"></circle>
-                    <path strokeLinecap="round" d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"></path>
+                    <path
+                      strokeLinecap="round"
+                      d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"
+                    ></path>
                   </svg>
                 </div>
               </div>
               <h4 className="text-2xl font-bold text-white mb-1">
                 {dashboardData?.paymentStatusCounts?.incomplete_applications || 0}
               </h4>
-              <span className="text-sm text-white text-opacity-90 font-medium">Incomplete Applications</span>
+              <span className="text-sm text-white text-opacity-90 font-medium">
+                Incomplete Applications
+              </span>
             </div>
           </div>
         </div>
@@ -249,37 +302,35 @@ const Dashboard = () => {
 
       {/* Charts Section */}
       <div className="grid grid-cols-12 gap-6 mb-6">
-  <div className="lg:col-span-6 col-span-12">
-    <BarChart
-      labels={[
-        "BSC-CS",
-        "FFFF",
-        "BE",
-        "BA",
-        "BFA (All)",
-        "BFA (Photography)",
-        "B. Design (I.D)",
-        "Testing Degree",
-        "Testing",
-        "ME",
-      ]}
-      values={[4, 1, 2, 1, 15, 18, 14, 1, 2, 4]}
-      title="Degree Wise Paid Application"
-      subtitle="Distribution of paid applications by degree"
-    />
-  </div>
+        <div className="lg:col-span-6 col-span-12">
+          <BarChart
+            labels={[
+              'BSC-CS',
+              'FFFF',
+              'BE',
+              'BA',
+              'BFA (All)',
+              'BFA (Photography)',
+              'B. Design (I.D)',
+              'Testing Degree',
+              'Testing',
+              'ME',
+            ]}
+            values={[4, 1, 2, 1, 15, 18, 14, 1, 2, 4]}
+            title="Degree Wise Paid Application"
+            subtitle="Distribution of paid applications by degree"
+          />
+        </div>
 
-  <div className="lg:col-span-6 col-span-12">
-    <BarChart
-      labels={["Class IV", "I", "I", "II", "II"]}
-      values={[1, 4, 2, 1, 1]}
-      title="Class Wise Paid Application"
-      subtitle="Distribution of paid applications by class"
-    />
-  </div>
-</div>
-
-
+        <div className="lg:col-span-6 col-span-12">
+          <BarChart
+            labels={['Class IV', 'I', 'I', 'II', 'II']}
+            values={[1, 4, 2, 1, 1]}
+            title="Class Wise Paid Application"
+            subtitle="Distribution of paid applications by class"
+          />
+        </div>
+      </div>
 
       {/* Applications Table */}
       <div className="col-span-12">
@@ -289,21 +340,18 @@ const Dashboard = () => {
               <h5 className="text-lg font-semibold text-gray-900">Recently Added Application</h5>
               <h6 className="text-sm text-gray-600">Application List across all Academic</h6>
             </div>
-            <div className="relative w-full lg:w-auto">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
-                  <path d="M21 21l-6 -6"></path>
-                </svg>
-              </div>
-              <input
-                type="text"
-                placeholder="Search Applications..."
-                value={filters.search}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full lg:w-64"
-              />
-            </div>
+           <div className="relative w-full lg:w-auto">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <BsFillSearchHeartFill className="w-5 h-5 text-blue-400" />
+      </div>
+      <input
+        type="text"
+        placeholder="Search Applications..."
+        value={filters.search}
+        onChange={(e) => handleSearchChange(e.target.value)}
+        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full lg:w-64"
+      />
+    </div>
           </div>
 
           {loading ? (
@@ -316,12 +364,24 @@ const Dashboard = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.No</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Academic Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll No</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Degree/Class</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        S.No
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Applicant Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Academic Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Roll No
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Degree/Class
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -343,11 +403,13 @@ const Dashboard = () => {
                           {app.degree_name || app.class_name || 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                            app.payment_status === 1 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
+                          <span
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                              app.payment_status === 1
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                          >
                             {app.payment_status === 1 ? 'Paid' : 'Pending'}
                           </span>
                         </td>
@@ -359,7 +421,9 @@ const Dashboard = () => {
 
               <Pagination
                 currentPage={(filters.page || 0) + 1}
-                totalPages={Math.ceil((dashboardData?.totalLatestApplications || 0) / (filters.rowsPerPage || 10))}
+                totalPages={Math.ceil(
+                  (dashboardData?.totalLatestApplications || 0) / (filters.rowsPerPage || 10),
+                )}
                 totalItems={dashboardData?.totalLatestApplications || 0}
                 rowsPerPage={filters.rowsPerPage || 10}
                 onPageChange={(page) => handlePageChange(page - 1)}

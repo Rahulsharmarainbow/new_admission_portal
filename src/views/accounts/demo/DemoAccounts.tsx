@@ -1,10 +1,16 @@
 import React from 'react';
 import AccountTable from '../components/AccountTable';
+import BreadcrumbHeader from 'src/Frontend/Common/BreadcrumbHeader';
+import { useAuth } from 'src/hook/useAuth';
 
 const DemoAccount: React.FC = () => {
+  const { user } = useAuth();
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">Demo Accounts</h1>
+       <BreadcrumbHeader
+        title="Demo Accounts"
+        paths={[{ name: "Demo Accounts", link: "/" + user?.role + "/demo-accounts" }]}
+      />
       <AccountTable type="demo" />
     </div>
   );

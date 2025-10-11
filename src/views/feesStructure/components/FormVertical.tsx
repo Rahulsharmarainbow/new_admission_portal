@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 import { useAuth } from 'src/hook/useAuth';
 import axios from 'axios';
 import ReactSelect from 'react-select';
+import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
 
 const BCrumb = [
   {
@@ -104,27 +105,33 @@ const FormVertical = () => {
   const [loadingButton2, setLoadingButton2] = useState(false);
 
   // Convert states and castes to react-select format
-  const stateOptions = statelist.map(state => ({
+  const stateOptions = statelist.map((state) => ({
     value: state.state_id.toString(),
-    label: state.state_title
+    label: state.state_title,
   }));
 
-  const casteOptions = castelist.map(caste => ({
+  const casteOptions = castelist.map((caste) => ({
     value: caste.id.toString(),
-    label: caste.name
+    label: caste.name,
   }));
 
-  const handleInputChange = (setStateFunction: React.Dispatch<React.SetStateAction<any>>) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setStateFunction(event.target.value);
-  };
+  const handleInputChange =
+    (setStateFunction: React.Dispatch<React.SetStateAction<any>>) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      setStateFunction(event.target.value);
+    };
 
   const handleStateChange = (selectedOptions: any) => {
-    const selectedValues = selectedOptions ? selectedOptions.map((option: any) => option.value) : [];
+    const selectedValues = selectedOptions
+      ? selectedOptions.map((option: any) => option.value)
+      : [];
     setState(selectedValues);
   };
 
   const handleCasteChange = (selectedOptions: any) => {
-    const selectedValues = selectedOptions ? selectedOptions.map((option: any) => option.value) : [];
+    const selectedValues = selectedOptions
+      ? selectedOptions.map((option: any) => option.value)
+      : [];
     setCaste(selectedValues);
   };
 
@@ -149,15 +156,15 @@ const FormVertical = () => {
 
       const submitdata = {
         academic_id: parseInt(selectedAcademic),
-        state: state.map(id => parseInt(id)),
-        caste: caste.map(id => parseInt(id)),
+        state: state.map((id) => parseInt(id)),
+        caste: caste.map((id) => parseInt(id)),
         applicableFee: parseFloat(applicableFee),
         actualFee: parseFloat(actualFee) || 0,
         extendFee: parseFloat(extendFee) || 0,
         admission_state_date: admissionStartDate || null,
         admission_end_date: admissionEndDate || null,
         extend_date: extendedDate || null,
-        s_id: user?.id || ""
+        s_id: user?.id || '',
       };
 
       await updateFeesData(submitdata);
@@ -186,7 +193,7 @@ const FormVertical = () => {
         admission_state_date: admissionStartDate || null,
         admission_end_date: admissionEndDate || null,
         extend_date: extendedDate || null,
-        s_id: user?.id || ""
+        s_id: user?.id || '',
       };
 
       await updateFeesData(submitdata);
@@ -199,16 +206,12 @@ const FormVertical = () => {
 
   const updateFeesData = async (data: any) => {
     try {
-      const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Fees/Update-Fees`,
-        data,
-        {
-          headers: {
-            'Authorization': `Bearer ${user?.token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const response = await axios.post(`${apiUrl}/SuperAdmin/Fees/Update-Fees`, data, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
       if (response.data.status) {
         toast.success('Fees data updated successfully!');
@@ -228,20 +231,20 @@ const FormVertical = () => {
       const response = await axios.post(
         `${apiUrl}/SuperAdmin/Fees/get-Fees`,
         {
-          academic_id: parseInt(academicId)
+          academic_id: parseInt(academicId),
         },
         {
           headers: {
-            'Authorization': `Bearer ${user?.token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+            Authorization: `Bearer ${user?.token}`,
+            'Content-Type': 'application/json',
+          },
+        },
       );
 
       if (response.data.status) {
         const feesData: FeesData = response.data.data;
         setFormError(false);
-        
+
         // Parse and set states
         if (feesData.special_caste_fee_states) {
           try {
@@ -254,7 +257,7 @@ const FormVertical = () => {
         } else {
           setState([]);
         }
-        
+
         // Parse and set castes
         if (feesData.special_caste) {
           try {
@@ -267,7 +270,7 @@ const FormVertical = () => {
         } else {
           setCaste([]);
         }
-        
+
         // Set other fields
         setApplicableFee(feesData.special_cast_fee?.toString() || '');
         setActualFee(feesData.actual_fee?.toString() || '');
@@ -334,28 +337,16 @@ const FormVertical = () => {
 
       {/* Select Academic Section */}
       <Card className="mb-6">
-        <div className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Select Academic</h2>
-          <div className="space-y-2">
-            <Label htmlFor="academic">Select Academic *</Label>
-            <Select
-              value={selectedAcademic}
-              onChange={handleAcademicSelect}
-              required
-            >
-              <option value="">Select Academic</option>
-              {academics.map((option: any) => (
-                <option key={option.id} value={option.id}>
-                  {option.academic_name}
-                </option>
-              ))}
-            </Select>
-          </div>
-        </div>
+        <AcademicDropdown
+          value={selectedAcademic}
+          onChange={handleAcademicSelect}
+          label="Select Academic *"
+          isRequired
+        />
       </Card>
 
       {/* Conditional Forms */}
-      {(!formError && formVisible) && (
+      {!formError && formVisible && (
         <>
           {/* Special Caste Fees Setting */}
           <Card className="mb-6">
@@ -372,7 +363,7 @@ const FormVertical = () => {
                       id="state"
                       isMulti
                       options={stateOptions}
-                      value={stateOptions.filter(option => state.includes(option.value))}
+                      value={stateOptions.filter((option) => state.includes(option.value))}
                       onChange={handleStateChange}
                       styles={customStyles}
                       placeholder="Select states..."
@@ -382,7 +373,7 @@ const FormVertical = () => {
                       className="react-select-container"
                       classNamePrefix="react-select"
                       noOptionsMessage={({ inputValue }) =>
-                        inputValue ? `No states found for "${inputValue}"` : "No states available"
+                        inputValue ? `No states found for "${inputValue}"` : 'No states available'
                       }
                     />
                     {state.length > 0 && (
@@ -393,7 +384,7 @@ const FormVertical = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Caste Dropdown - React Select Multi */}
                   <div className="md:col-span-4">
                     <Label htmlFor="caste" className="block mb-2">
@@ -403,7 +394,7 @@ const FormVertical = () => {
                       id="caste"
                       isMulti
                       options={casteOptions}
-                      value={casteOptions.filter(option => caste.includes(option.value))}
+                      value={casteOptions.filter((option) => caste.includes(option.value))}
                       onChange={handleCasteChange}
                       styles={customStyles}
                       placeholder="Select castes..."
@@ -413,7 +404,7 @@ const FormVertical = () => {
                       className="react-select-container"
                       classNamePrefix="react-select"
                       noOptionsMessage={({ inputValue }) =>
-                        inputValue ? `No castes found for "${inputValue}"` : "No castes available"
+                        inputValue ? `No castes found for "${inputValue}"` : 'No castes available'
                       }
                     />
                     {caste.length > 0 && (
@@ -424,7 +415,7 @@ const FormVertical = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="md:col-span-2">
                     <Label htmlFor="applicableFee">Applicable Fee *</Label>
                     <TextInput
@@ -437,11 +428,7 @@ const FormVertical = () => {
                     />
                   </div>
                   <div className="md:col-span-1 flex items-end">
-                    <Button 
-                      type="submit" 
-                      className="w-full"
-                      disabled={loadingButton1}
-                    >
+                    <Button type="submit" className="w-full" disabled={loadingButton1}>
                       {loadingButton1 ? (
                         <>
                           <Spinner size="sm" className="mr-2" />
@@ -452,7 +439,7 @@ const FormVertical = () => {
                       )}
                     </Button>
                   </div>
-                </div> 
+                </div>
               </form>
             </div>
           </Card>
@@ -510,11 +497,7 @@ const FormVertical = () => {
                     />
                   </div>
                   <div className="md:col-span-2 flex items-end">
-                    <Button 
-                      type="submit" 
-                      className="w-full"
-                      disabled={loadingButton2}
-                    >
+                    <Button type="submit" className="w-full" disabled={loadingButton2}>
                       {loadingButton2 ? (
                         <>
                           <Spinner size="sm" className="mr-2" />
