@@ -36,6 +36,7 @@ import AddEditAccount from 'src/views/accounts/components/AddAccount';
 import OpenTickets from 'src/views/ticket/components/OpenTickets';
 import AcceptedTickets from 'src/views/ticket/components/AcceptedTickets';
 import ResolvedTickets from 'src/views/ticket/components/ResolvedTickets';
+import ClassTable from 'src/views/schoolServices/components/classes/components/ClassTable';
 
 
 /* ***Layouts**** */
@@ -99,7 +100,6 @@ const Router = [
       { path: '/SuperAdmin/Ticket/open', element: <OpenTickets/> },
        { path: '/SuperAdmin/Ticket/Accepted', element: <AcceptedTickets /> },
       { path: '/SuperAdmin/Ticket/Resolved', element: <ResolvedTickets /> },
-      { path: 'ui/table', element: <Table /> },
       { path: 'ui/form', element: <Form /> },
       { path: 'ui/alert', element: <Alert /> },
       { path: 'ui/buttons', element: <Buttons /> },
