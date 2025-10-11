@@ -132,32 +132,32 @@ const SidebarContent: Record<number, MenuItem[]> = {
       },
 
        {
-        name: 'User Management',
+        name: 'School Services',
         id: uniqueId(),
         icon: 'solar:user-id-line-duotone',
         children: [
-          // {
-          //   name: 'Super Admin',
-          //   id: uniqueId(),
-          //   url: '/SuperAdmin/admin',
-          //   isPro: false,
-          // },
           {
-            name: 'Support Admin',
+            name: 'Classes',
             id: uniqueId(),
-            url: '/SuperAdmin/support-admin',
+            url: '/SuperAdmin/classes',
             isPro: false,
           },
           {
-            name: 'Sales Admin',
+            name: 'Transportation',
             id: uniqueId(),
-            url: '/SuperAdmin/sales-admin',
+            url: '/SuperAdmin/transportation',
             isPro: false,
           },
           {
-            name: 'Customer Admin',
+            name: 'Setting',
             id: uniqueId(),
-            url: '/SuperAdmin/customer-admin',
+            url: '/SuperAdmin/setting',
+            isPro: false,
+          },
+          {
+            name: 'Content Management',
+            id: uniqueId(),
+            url: '/SuperAdmin/content-Management',
             isPro: false,
           }
         ],
