@@ -84,12 +84,6 @@ const SidebarContent: Record<number, MenuItem[]> = {
         id: uniqueId(),
         icon: 'solar:database-line-duotone',
         children: [
-          // {
-          //   name: 'Super Admin',
-          //   id: uniqueId(),
-          //   url: '/SuperAdmin/admin',
-          //   isPro: false,
-          // },
           {
             name: 'State',
             id: uniqueId(),
@@ -106,6 +100,64 @@ const SidebarContent: Record<number, MenuItem[]> = {
             name: 'Type of Connection',
             id: uniqueId(),
             url: '/SuperAdmin/data-manager/type-of-connection',
+            isPro: false,
+          }
+        ],
+      },
+
+       {
+        name: 'Ticket',
+        id: uniqueId(),
+        icon: 'solar:ticket-line-duotone',
+        children: [
+          {
+            name: 'Open Ticket',
+            id: uniqueId(),
+            url: '/SuperAdmin/Ticket/open',
+            isPro: false,
+          },
+          {
+            name: 'Accepted Ticket',
+            id: uniqueId(),
+            url: '/SuperAdmin/Ticket/Accepted',
+            isPro: false,
+          },
+          {
+            name: 'Resolved Ticket',
+            id: uniqueId(),
+            url: '/SuperAdmin/Ticket/Resolved',
+            isPro: false,
+          }
+        ],
+      },
+
+       {
+        name: 'User Management',
+        id: uniqueId(),
+        icon: 'solar:user-id-line-duotone',
+        children: [
+          // {
+          //   name: 'Super Admin',
+          //   id: uniqueId(),
+          //   url: '/SuperAdmin/admin',
+          //   isPro: false,
+          // },
+          {
+            name: 'Support Admin',
+            id: uniqueId(),
+            url: '/SuperAdmin/support-admin',
+            isPro: false,
+          },
+          {
+            name: 'Sales Admin',
+            id: uniqueId(),
+            url: '/SuperAdmin/sales-admin',
+            isPro: false,
+          },
+          {
+            name: 'Customer Admin',
+            id: uniqueId(),
+            url: '/SuperAdmin/customer-admin',
             isPro: false,
           }
         ],
