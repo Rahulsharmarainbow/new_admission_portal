@@ -12,17 +12,18 @@ import { Pagination } from 'src/Frontend/Common/Pagination';
 import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
 import SchoolDropdown from 'src/Frontend/Common/SchoolDropdown';
-import ContentForm from './ContentForm';
+import TransportationForm from './TransportationForm';
 
 
-interface Content {
+interface Transportation {
   id: number;
-  academic_id: string;
-  page_name: string;
-  page_route: string;
-  html_content: string;
-  created_at: string;
+  distance: string;
+  fee1: string;
+  fee2: string;
+  fee3: string;
   academic_name: string;
+  creation_date: string;
+  academic_id: number;
 }
 
 interface Filters {
@@ -38,9 +39,9 @@ interface FormData {
   academic_id: string;
 }
 
-const ContentTable: React.FC = () => {
+const TransportationTable: React.FC = () => {
   const { user } = useAuth();
-  const [contents, setContents] = useState<Content[]>([]);
+  const [transportations, setTransportations] = useState<Transportation[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     page: 0,
@@ -55,11 +56,11 @@ const ContentTable: React.FC = () => {
   });
   const [total, setTotal] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [contentToDelete, setContentToDelete] = useState<number | null>(null);
+  const [transportationToDelete, setTransportationToDelete] = useState<number | null>(null);
   const [sort, setSort] = useState({ key: 'id', direction: 'desc' as 'asc' | 'desc' });
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const [showFormModal, setShowFormModal] = useState(false);
-  const [editingContent, setEditingContent] = useState<Content | null>(null);
+  const [editingTransportation, setEditingTransportation] = useState<Transportation | null>(null);
   const dropdownRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number }>({
     top: 0,
@@ -92,8 +93,8 @@ const ContentTable: React.FC = () => {
     };
   }, []);
 
-  // Fetch contents data
-  const fetchContents = async () => {
+  // Fetch transportations data
+  const fetchTransportations = async () => {
     setLoading(true);
     try {
       const payload = {
@@ -106,7 +107,7 @@ const ContentTable: React.FC = () => {
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/SchoolManagement/Content/list-Content`,
+        `${apiUrl}/SuperAdmin/SchoolManagement/Transportation/list`,
         payload,
         {
           headers: {
@@ -119,19 +120,19 @@ const ContentTable: React.FC = () => {
       );
 
       if (response.data) {
-        setContents(response.data.data || []);
+        setTransportations(response.data.data || []);
         setTotal(response.data.total || 0);
       }
     } catch (error) {
-      console.error('Error fetching contents:', error);
-      toast.error('Failed to load contents');
+      console.error('Error fetching transportations:', error);
+      toast.error('Failed to load transportations');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchContents();
+    fetchTransportations();
   }, [filters.page, filters.rowsPerPage, filters.order, filters.orderBy, debouncedSearch, filters.academic_id]);
 
   // Handle search
@@ -188,40 +189,33 @@ const ContentTable: React.FC = () => {
     setFilters((prev) => ({ ...prev, rowsPerPage, page: 0 }));
   };
 
-  // Handle add new content
-  const handleAddContent = () => {
-    setEditingContent(null);
+  // Handle add new transportation
+  const handleAddTransportation = () => {
+    setEditingTransportation(null);
     setShowFormModal(true);
   };
 
-  // Handle edit content
-  const handleEdit = (content: Content) => {
-    setEditingContent(content);
+  // Handle edit transportation
+  const handleEdit = (transportation: Transportation) => {
+    setEditingTransportation(transportation);
     setShowFormModal(true);
-    setActiveDropdown(null);
-  };
-
-  // Handle view content
-  const handleView = (content: Content) => {
-    // You can implement a view modal here if needed
-    console.log('View content:', content);
     setActiveDropdown(null);
   };
 
   // Handle delete
   const handleDeleteClick = (id: number) => {
-    setContentToDelete(id);
+    setTransportationToDelete(id);
     setShowDeleteModal(true);
     setActiveDropdown(null);
   };
 
   const confirmDelete = async () => {
-    if (contentToDelete !== null) {
+    if (transportationToDelete !== null) {
       try {
         const response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/Content/delete-Content`,
+          `${apiUrl}/SuperAdmin/SchoolManagement/Transportation/delete`,
           {
-            ids: [contentToDelete],
+            ids: [transportationToDelete],
             s_id: user?.id,
           },
           {
@@ -233,17 +227,17 @@ const ContentTable: React.FC = () => {
         );
 
         if (response.data.status === true) {
-          toast.success(response.data.message || 'Content deleted successfully!');
-          fetchContents();
+          toast.success(response.data.message || 'Transportation deleted successfully!');
+          fetchTransportations();
         } else {
-          toast.error(response.data.message || 'Failed to delete content');
+          toast.error(response.data.message || 'Failed to delete transportation');
         }
       } catch (error: any) {
-        console.error('Error deleting content:', error);
-        toast.error('Failed to delete content');
+        console.error('Error deleting transportation:', error);
+        toast.error('Failed to delete transportation');
       } finally {
         setShowDeleteModal(false);
-        setContentToDelete(null);
+        setTransportationToDelete(null);
       }
     }
   };
@@ -251,15 +245,15 @@ const ContentTable: React.FC = () => {
   // Handle form success
   const handleFormSuccess = () => {
     setShowFormModal(false);
-    setEditingContent(null);
-    fetchContents();
+    setEditingTransportation(null);
+    fetchTransportations();
   };
 
   // Toggle dropdown
-  const toggleDropdown = (contentId: number, event: React.MouseEvent) => {
+  const toggleDropdown = (transportationId: number, event: React.MouseEvent) => {
     event.stopPropagation();
 
-    if (activeDropdown === contentId) {
+    if (activeDropdown === transportationId) {
       setActiveDropdown(null);
     } else {
       const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
@@ -272,20 +266,13 @@ const ContentTable: React.FC = () => {
       }
 
       setDropdownPosition({ top: rect.bottom + window.scrollY, left });
-      setActiveDropdown(contentId);
+      setActiveDropdown(transportationId);
     }
   };
 
   // Set dropdown ref for each row
-  const setDropdownRef = (contentId: number, el: HTMLDivElement | null) => {
-    dropdownRefs.current[contentId] = el;
-  };
-
-  // Strip HTML tags for preview
-  const stripHtml = (html: string) => {
-    const tmp = document.createElement('DIV');
-    tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || '';
+  const setDropdownRef = (transportationId: number, el: HTMLDivElement | null) => {
+    dropdownRefs.current[transportationId] = el;
   };
 
   if (loading) {
@@ -296,42 +283,43 @@ const ContentTable: React.FC = () => {
     <div className="p-4 bg-white rounded-lg shadow-md">
       {/* Search Bar with Filters and Add Button */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-        <div className="flex flex-col sm:flex-row gap-4 w-full items-start sm:items-center">
-          {/* Search Input */}
-          <div className="relative w-full sm:w-80 order-1 sm:order-none">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <BsSearch className="w-4 h-4 text-gray-500" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search by page name..."
-              value={filters.search}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg 
-                         bg-white focus:ring-blue-500 focus:border-blue-500 
-                         placeholder-gray-400 transition-all duration-200"
-            />
-          </div>
+       <div className="flex flex-col sm:flex-row gap-4 w-full items-start sm:items-center">
+  {/* Search Input */}
+  <div className="relative w-full sm:w-80 order-1 sm:order-none">
+    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+      <BsSearch className="w-4 h-4 text-gray-500" />
+    </div>
+    <input
+      type="text"
+      placeholder="Search by distance..."
+      value={filters.search}
+      onChange={(e) => handleSearch(e.target.value)}
+      className="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg 
+                 bg-white focus:ring-blue-500 focus:border-blue-500 
+                 placeholder-gray-400 transition-all duration-200"
+    />
+  </div>
 
-          {/* School Dropdown */}
-          <div className="w-full sm:w-64">
-            <SchoolDropdown
-              formData={formData}
-              setFormData={setFormData}
-              onChange={handleAcademicChange}
-              includeAllOption
-            />
-          </div>
-        </div>
+  {/* School Dropdown */}
+  <div className="w-full sm:w-64">
+    <SchoolDropdown
+      formData={formData}
+      setFormData={setFormData}
+      onChange={handleAcademicChange}
+      includeAllOption
+    />
+  </div>
+</div>
+
 
         {/* Add Button */}
         <Button
-          onClick={handleAddContent}
+          onClick={handleAddTransportation}
           gradientDuoTone="cyanToBlue"
           className="whitespace-nowrap w-full lg:w-auto"
         >
           <BsPlusLg className="mr-2 w-4 h-4" />
-          Add Content
+          Add Transportation
         </Button>
       </div>
 
@@ -355,32 +343,29 @@ const ContentTable: React.FC = () => {
                 </th>
                 <th
                   className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
-                  onClick={() => handleSort('page_name')}
+                  onClick={() => handleSort('distance')}
                 >
                   <div className="flex items-center space-x-1">
-                    <span>Page Name</span>
-                    {getSortIcon('page_name')}
-                  </div>
-                </th>
-                <th
-                  className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
-                  onClick={() => handleSort('page_route')}
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>Page Route</span>
-                    {getSortIcon('page_route')}
+                    <span>Distance</span>
+                    {getSortIcon('distance')}
                   </div>
                 </th>
                 <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Content Preview
+                  Fee 1
                 </th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Fee 2
+                </th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Fee 3
+                </th>                
                 <th
                   className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
-                  onClick={() => handleSort('created_at')}
+                  onClick={() => handleSort('creation_date')}
                 >
                   <div className="flex items-center space-x-1">
                     <span>Created Date</span>
-                    {getSortIcon('created_at')}
+                    {getSortIcon('creation_date')}
                   </div>
                 </th>
                 <th className="w-20 py-3 px-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -389,63 +374,64 @@ const ContentTable: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {contents.length > 0 ? (
-                contents.map((content, index) => (
-                  <tr key={content.id} className="hover:bg-gray-50 transition-colors duration-150">
+              {transportations.length > 0 ? (
+                transportations.map((transportation, index) => (
+                  <tr key={transportation.id} className="hover:bg-gray-50 transition-colors duration-150">
                     <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {filters.page * filters.rowsPerPage + index + 1}
                     </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                     <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
                       <Tooltip
-                        content={content.academic_name}
+                        content={transportation.academic_name}
                         placement="top"
                         style="light"
                         animation="duration-300"
                       >
                         <span className="truncate max-w-[180px] block">
-                          {content.academic_name.length > 25
-                            ? `${content.academic_name.substring(0, 25)}...`
-                            : content.academic_name}
+                          {transportation.academic_name.length > 25
+                            ? `${transportation.academic_name.substring(0, 25)}...`
+                            : transportation.academic_name}
                         </span>
                       </Tooltip>
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-700">
-                      {content.page_name}
-                    </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
-                      <Badge color="gray" className="font-mono text-xs">
-                        {content.page_route}
-                      </Badge>
-                    </td>
-                    <td className="py-4 px-4 text-sm text-gray-600 max-w-[300px]">
                       <Tooltip
-                        content={stripHtml(content.html_content)}
+                        content={transportation.distance}
                         placement="top"
                         style="light"
                         animation="duration-300"
                       >
-                        <span className="truncate block">
-                          {stripHtml(content.html_content).length > 50
-                            ? `${stripHtml(content.html_content).substring(0, 50)}...`
-                            : stripHtml(content.html_content)}
+                        <span className="truncate max-w-[200px] block">
+                          {transportation.distance.length > 35
+                            ? `${transportation.distance.substring(0, 35)}...`
+                            : transportation.distance}
                         </span>
                       </Tooltip>
                     </td>
+                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                      ₹{transportation.fee1}
+                    </td>
+                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                      ₹{transportation.fee2}
+                    </td>
+                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                      ₹{transportation.fee3}
+                    </td>                   
                     <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
-                      {new Date(content.created_at).toLocaleDateString()}
+                      {new Date(transportation.creation_date).toLocaleDateString()}
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-center relative">
                       <div
-                        ref={(el) => setDropdownRef(content.id, el)}
+                        ref={(el) => setDropdownRef(transportation.id, el)}
                         className="relative flex justify-center"
                       >
                         <button
-                          onClick={(e) => toggleDropdown(content.id, e)}
+                          onClick={(e) => toggleDropdown(transportation.id, e)}
                           className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                         >
                           <BsThreeDotsVertical className="w-4 h-4" />
                         </button>
-                        {activeDropdown === content.id &&
+                        {activeDropdown === transportation.id &&
                           createPortal(
                             <div
                               className="z-[9999] w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1"
@@ -457,21 +443,15 @@ const ContentTable: React.FC = () => {
                               onMouseDown={(e) => e.stopPropagation()}
                             >
                               <button
-                                onClick={() => handleView(content)}
-                                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                              >
-                                <MdVisibility className="w-4 h-4 mr-3" />
-                                View
-                              </button>
-                              <button
-                                onClick={() => handleEdit(content)}
+                                onClick={() => handleEdit(transportation)}
                                 className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                               >
                                 <MdEdit className="w-4 h-4 mr-3" />
                                 Edit
                               </button>
+
                               <button
-                                onClick={() => handleDeleteClick(content.id)}
+                                onClick={() => handleDeleteClick(transportation.id)}
                                 className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                               >
                                 <MdDelete className="w-4 h-4 mr-3" />
@@ -486,7 +466,7 @@ const ContentTable: React.FC = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="py-12 px-6 text-center">
+                  <td colSpan={8} className="py-12 px-6 text-center">
                     <div className="flex flex-col items-center justify-center text-gray-500">
                       <svg
                         className="w-16 h-16 text-gray-300 mb-4"
@@ -501,20 +481,20 @@ const ContentTable: React.FC = () => {
                           d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
-                      <p className="text-lg font-medium text-gray-600 mb-2">No contents found</p>
+                      <p className="text-lg font-medium text-gray-600 mb-2">No transportations found</p>
                       <p className="text-sm text-gray-500">
                         {filters.search || filters.academic_id
                           ? 'Try adjusting your search criteria'
-                          : 'No content records available'}
+                          : 'No transportation records available'}
                       </p>
                       {!filters.search && !filters.academic_id && (
                         <Button
-                          onClick={handleAddContent}
+                          onClick={handleAddTransportation}
                           gradientDuoTone="cyanToBlue"
                           className="mt-4"
                         >
                           <BsPlusLg className="mr-2 w-4 h-4" />
-                          Add Your First Content
+                          Add Your First Transportation
                         </Button>
                       )}
                     </div>
@@ -527,7 +507,7 @@ const ContentTable: React.FC = () => {
       </div>
 
       {/* Pagination */}
-      {contents.length > 0 && (
+      {transportations.length > 0 && (
         <div className="mt-6">
           <Pagination
             currentPage={filters.page + 1}
@@ -545,22 +525,22 @@ const ContentTable: React.FC = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={confirmDelete}
-        title="Delete Content"
-        message="Are you sure you want to delete this content? This action cannot be undone."
+        title="Delete Transportation"
+        message="Are you sure you want to delete this transportation record? This action cannot be undone."
       />
 
-      {/* Content Form Modal */}
-      <ContentForm
+      {/* Transportation Form Modal */}
+      <TransportationForm
         isOpen={showFormModal}
         onClose={() => {
           setShowFormModal(false);
-          setEditingContent(null);
+          setEditingTransportation(null);
         }}
         onSuccess={handleFormSuccess}
-        editingContent={editingContent}
+        editingTransportation={editingTransportation}
       />
     </div>
   );
 };
 
-export default ContentTable;
+export default TransportationTable;

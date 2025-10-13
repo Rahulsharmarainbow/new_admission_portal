@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { MdEdit, MdDelete, MdVisibility, MdLink } from 'react-icons/md';
 import { BsArrowRightCircleFill, BsPlusLg, BsSearch, BsThreeDotsVertical } from 'react-icons/bs';
-import { Button, Tooltip, Badge } from 'flowbite-react';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
+import { Button, Tooltip, Badge } from 'flowbite-react';
 import axios from 'axios';
 import Loader from 'src/Frontend/Common/Loader';
+import { useAuth } from 'src/hook/useAuth';
 import DeleteConfirmationModal from 'src/Frontend/Common/DeleteConfirmationModal';
 import { useDebounce } from 'src/hook/useDebounce';
-import { useAuth } from 'src/hook/useAuth';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
@@ -93,7 +93,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Accounts/get-accounts?` +
+        `${apiUrl}/${user?.role}/Accounts/get-accounts?` +
           `page=${filters.page}&rowsPerPage=${filters.rowsPerPage}&` +
           `order=${filters.order}&orderBy=${filters.orderBy}&` +
           `search=${filters.search}&type=${type}`,
@@ -168,7 +168,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
   const toggleActiveStatus = async (accountId: number, currentStatus: number) => {
     try {
       await axios.post(
-        `${apiUrl}/SuperAdmin/Accounts/Change-Academic-status`,
+        `${apiUrl}/${user?.role}/Accounts/Change-Academic-status`,
         {
           s_id: user?.id,
           academic_id: accountId,
@@ -208,7 +208,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
         });
 
         const response = await axios.post(
-          `${apiUrl}/SuperAdmin/Accounts/Delete-accounts`,
+          `${apiUrl}/${user?.role}/Accounts/Delete-accounts`,
           {
             id: [accountToDelete],
             s_id: user?.id,
@@ -222,11 +222,11 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
         );
 
         if (response.data.status === true) {
-          toast.success('Account deleted successfully!');
+          toast.success(response.data.message || 'Account deleted successfully!');
           fetchAccounts();
         } else {
           console.error('Delete failed:', response.data.message);
-          toast.error(response.data.message);
+          toast.error(response.data.message || 'Failed to delete account');
         }
       } catch (error: any) {
         console.error('Error deleting account:', error);
@@ -356,7 +356,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
         </div>
 
         {/* Add Button - Only show for demo accounts */}
-        {type === 'demo' && (
+        {(type === 'demo' && user?.role === 'SalesAdmin') && (
           <Button
             onClick={handleAddAccount}
             gradientDuoTone="cyanToBlue"

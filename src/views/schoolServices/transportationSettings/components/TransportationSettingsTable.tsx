@@ -12,17 +12,16 @@ import { Pagination } from 'src/Frontend/Common/Pagination';
 import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
 import SchoolDropdown from 'src/Frontend/Common/SchoolDropdown';
-import ContentForm from './ContentForm';
+import TransportationSettingsForm from './TransportationSettingsForm';
 
-
-interface Content {
+interface TransportationSetting {
   id: number;
-  academic_id: string;
-  page_name: string;
-  page_route: string;
-  html_content: string;
-  created_at: string;
+  academic_id: number;
+  param_name: string;
+  param_key: string;
+  param_value: string;
   academic_name: string;
+  creation_date: string;
 }
 
 interface Filters {
@@ -38,9 +37,9 @@ interface FormData {
   academic_id: string;
 }
 
-const ContentTable: React.FC = () => {
+const TransportationSettingsTable: React.FC = () => {
   const { user } = useAuth();
-  const [contents, setContents] = useState<Content[]>([]);
+  const [settings, setSettings] = useState<TransportationSetting[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     page: 0,
@@ -55,11 +54,11 @@ const ContentTable: React.FC = () => {
   });
   const [total, setTotal] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [contentToDelete, setContentToDelete] = useState<number | null>(null);
+  const [settingToDelete, setSettingToDelete] = useState<number | null>(null);
   const [sort, setSort] = useState({ key: 'id', direction: 'desc' as 'asc' | 'desc' });
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const [showFormModal, setShowFormModal] = useState(false);
-  const [editingContent, setEditingContent] = useState<Content | null>(null);
+  const [editingSetting, setEditingSetting] = useState<TransportationSetting | null>(null);
   const dropdownRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number }>({
     top: 0,
@@ -92,8 +91,8 @@ const ContentTable: React.FC = () => {
     };
   }, []);
 
-  // Fetch contents data
-  const fetchContents = async () => {
+  // Fetch settings data
+  const fetchSettings = async () => {
     setLoading(true);
     try {
       const payload = {
@@ -106,7 +105,7 @@ const ContentTable: React.FC = () => {
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/SchoolManagement/Content/list-Content`,
+        `${apiUrl}/SuperAdmin/SchoolManagement/Setting/list`,
         payload,
         {
           headers: {
@@ -119,19 +118,19 @@ const ContentTable: React.FC = () => {
       );
 
       if (response.data) {
-        setContents(response.data.data || []);
+        setSettings(response.data.data || []);
         setTotal(response.data.total || 0);
       }
     } catch (error) {
-      console.error('Error fetching contents:', error);
-      toast.error('Failed to load contents');
+      console.error('Error fetching transportation settings:', error);
+      toast.error('Failed to load transportation settings');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchContents();
+    fetchSettings();
   }, [filters.page, filters.rowsPerPage, filters.order, filters.orderBy, debouncedSearch, filters.academic_id]);
 
   // Handle search
@@ -188,40 +187,33 @@ const ContentTable: React.FC = () => {
     setFilters((prev) => ({ ...prev, rowsPerPage, page: 0 }));
   };
 
-  // Handle add new content
-  const handleAddContent = () => {
-    setEditingContent(null);
+  // Handle add new setting
+  const handleAddSetting = () => {
+    setEditingSetting(null);
     setShowFormModal(true);
   };
 
-  // Handle edit content
-  const handleEdit = (content: Content) => {
-    setEditingContent(content);
+  // Handle edit setting
+  const handleEdit = (setting: TransportationSetting) => {
+    setEditingSetting(setting);
     setShowFormModal(true);
-    setActiveDropdown(null);
-  };
-
-  // Handle view content
-  const handleView = (content: Content) => {
-    // You can implement a view modal here if needed
-    console.log('View content:', content);
     setActiveDropdown(null);
   };
 
   // Handle delete
   const handleDeleteClick = (id: number) => {
-    setContentToDelete(id);
+    setSettingToDelete(id);
     setShowDeleteModal(true);
     setActiveDropdown(null);
   };
 
   const confirmDelete = async () => {
-    if (contentToDelete !== null) {
+    if (settingToDelete !== null) {
       try {
         const response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/Content/delete-Content`,
+          `${apiUrl}/SuperAdmin/SchoolManagement/Setting/delete`,
           {
-            ids: [contentToDelete],
+            ids: [settingToDelete],
             s_id: user?.id,
           },
           {
@@ -233,17 +225,17 @@ const ContentTable: React.FC = () => {
         );
 
         if (response.data.status === true) {
-          toast.success(response.data.message || 'Content deleted successfully!');
-          fetchContents();
+          toast.success(response.data.message || 'Transportation setting deleted successfully!');
+          fetchSettings();
         } else {
-          toast.error(response.data.message || 'Failed to delete content');
+          toast.error(response.data.message || 'Failed to delete transportation setting');
         }
       } catch (error: any) {
-        console.error('Error deleting content:', error);
-        toast.error('Failed to delete content');
+        console.error('Error deleting transportation setting:', error);
+        toast.error('Failed to delete transportation setting');
       } finally {
         setShowDeleteModal(false);
-        setContentToDelete(null);
+        setSettingToDelete(null);
       }
     }
   };
@@ -251,15 +243,15 @@ const ContentTable: React.FC = () => {
   // Handle form success
   const handleFormSuccess = () => {
     setShowFormModal(false);
-    setEditingContent(null);
-    fetchContents();
+    setEditingSetting(null);
+    fetchSettings();
   };
 
   // Toggle dropdown
-  const toggleDropdown = (contentId: number, event: React.MouseEvent) => {
+  const toggleDropdown = (settingId: number, event: React.MouseEvent) => {
     event.stopPropagation();
 
-    if (activeDropdown === contentId) {
+    if (activeDropdown === settingId) {
       setActiveDropdown(null);
     } else {
       const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
@@ -272,20 +264,13 @@ const ContentTable: React.FC = () => {
       }
 
       setDropdownPosition({ top: rect.bottom + window.scrollY, left });
-      setActiveDropdown(contentId);
+      setActiveDropdown(settingId);
     }
   };
 
   // Set dropdown ref for each row
-  const setDropdownRef = (contentId: number, el: HTMLDivElement | null) => {
-    dropdownRefs.current[contentId] = el;
-  };
-
-  // Strip HTML tags for preview
-  const stripHtml = (html: string) => {
-    const tmp = document.createElement('DIV');
-    tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || '';
+  const setDropdownRef = (settingId: number, el: HTMLDivElement | null) => {
+    dropdownRefs.current[settingId] = el;
   };
 
   if (loading) {
@@ -304,12 +289,12 @@ const ContentTable: React.FC = () => {
             </div>
             <input
               type="text"
-              placeholder="Search by page name..."
+              placeholder="Search by parameter name or key..."
               value={filters.search}
               onChange={(e) => handleSearch(e.target.value)}
               className="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg 
-                         bg-white focus:ring-blue-500 focus:border-blue-500 
-                         placeholder-gray-400 transition-all duration-200"
+                       bg-white focus:ring-blue-500 focus:border-blue-500 
+                       placeholder-gray-400 transition-all duration-200"
             />
           </div>
 
@@ -326,12 +311,12 @@ const ContentTable: React.FC = () => {
 
         {/* Add Button */}
         <Button
-          onClick={handleAddContent}
+          onClick={handleAddSetting}
           gradientDuoTone="cyanToBlue"
           className="whitespace-nowrap w-full lg:w-auto"
         >
           <BsPlusLg className="mr-2 w-4 h-4" />
-          Add Content
+          Add Setting
         </Button>
       </div>
 
@@ -355,32 +340,32 @@ const ContentTable: React.FC = () => {
                 </th>
                 <th
                   className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
-                  onClick={() => handleSort('page_name')}
+                  onClick={() => handleSort('param_name')}
                 >
                   <div className="flex items-center space-x-1">
-                    <span>Page Name</span>
-                    {getSortIcon('page_name')}
+                    <span>Parameter Name</span>
+                    {getSortIcon('param_name')}
                   </div>
                 </th>
                 <th
                   className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
-                  onClick={() => handleSort('page_route')}
+                  onClick={() => handleSort('param_key')}
                 >
                   <div className="flex items-center space-x-1">
-                    <span>Page Route</span>
-                    {getSortIcon('page_route')}
+                    <span>Parameter Key</span>
+                    {getSortIcon('param_key')}
                   </div>
                 </th>
                 <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Content Preview
+                  Parameter Value
                 </th>
                 <th
                   className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
-                  onClick={() => handleSort('created_at')}
+                  onClick={() => handleSort('creation_date')}
                 >
                   <div className="flex items-center space-x-1">
                     <span>Created Date</span>
-                    {getSortIcon('created_at')}
+                    {getSortIcon('creation_date')}
                   </div>
                 </th>
                 <th className="w-20 py-3 px-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -389,63 +374,81 @@ const ContentTable: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {contents.length > 0 ? (
-                contents.map((content, index) => (
-                  <tr key={content.id} className="hover:bg-gray-50 transition-colors duration-150">
+              {settings.length > 0 ? (
+                settings.map((setting, index) => (
+                  <tr key={setting.id} className="hover:bg-gray-50 transition-colors duration-150">
                     <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {filters.page * filters.rowsPerPage + index + 1}
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
                       <Tooltip
-                        content={content.academic_name}
+                        content={setting.academic_name}
                         placement="top"
                         style="light"
                         animation="duration-300"
                       >
                         <span className="truncate max-w-[180px] block">
-                          {content.academic_name.length > 25
-                            ? `${content.academic_name.substring(0, 25)}...`
-                            : content.academic_name}
+                          {setting.academic_name.length > 25
+                            ? `${setting.academic_name.substring(0, 25)}...`
+                            : setting.academic_name}
                         </span>
                       </Tooltip>
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-700">
-                      {content.page_name}
-                    </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
-                      <Badge color="gray" className="font-mono text-xs">
-                        {content.page_route}
-                      </Badge>
-                    </td>
-                    <td className="py-4 px-4 text-sm text-gray-600 max-w-[300px]">
                       <Tooltip
-                        content={stripHtml(content.html_content)}
+                        content={setting.param_name}
                         placement="top"
                         style="light"
                         animation="duration-300"
                       >
-                        <span className="truncate block">
-                          {stripHtml(content.html_content).length > 50
-                            ? `${stripHtml(content.html_content).substring(0, 50)}...`
-                            : stripHtml(content.html_content)}
+                        <span className="truncate max-w-[150px] block">
+                          {setting.param_name.length > 20
+                            ? `${setting.param_name.substring(0, 20)}...`
+                            : setting.param_name}
+                        </span>
+                      </Tooltip>
+                    </td>
+                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-mono">
+                      <Tooltip
+                        content={setting.param_key}
+                        placement="top"
+                        style="light"
+                        animation="duration-300"
+                      >
+                        <span className="truncate max-w-[120px] block bg-gray-100 px-2 py-1 rounded text-xs">
+                          {setting.param_key}
                         </span>
                       </Tooltip>
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
-                      {new Date(content.created_at).toLocaleDateString()}
+                      <Tooltip
+                        content={setting.param_value}
+                        placement="top"
+                        style="light"
+                        animation="duration-300"
+                      >
+                        <span className="truncate max-w-[100px] block">
+                          {setting.param_value.length > 15
+                            ? `${setting.param_value.substring(0, 15)}...`
+                            : setting.param_value}
+                        </span>
+                      </Tooltip>
+                    </td>
+                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
+                      {new Date(setting.creation_date).toLocaleDateString()}
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-center relative">
                       <div
-                        ref={(el) => setDropdownRef(content.id, el)}
+                        ref={(el) => setDropdownRef(setting.id, el)}
                         className="relative flex justify-center"
                       >
                         <button
-                          onClick={(e) => toggleDropdown(content.id, e)}
+                          onClick={(e) => toggleDropdown(setting.id, e)}
                           className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                         >
                           <BsThreeDotsVertical className="w-4 h-4" />
                         </button>
-                        {activeDropdown === content.id &&
+                        {activeDropdown === setting.id &&
                           createPortal(
                             <div
                               className="z-[9999] w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1"
@@ -457,21 +460,15 @@ const ContentTable: React.FC = () => {
                               onMouseDown={(e) => e.stopPropagation()}
                             >
                               <button
-                                onClick={() => handleView(content)}
-                                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                              >
-                                <MdVisibility className="w-4 h-4 mr-3" />
-                                View
-                              </button>
-                              <button
-                                onClick={() => handleEdit(content)}
+                                onClick={() => handleEdit(setting)}
                                 className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                               >
                                 <MdEdit className="w-4 h-4 mr-3" />
                                 Edit
                               </button>
+
                               <button
-                                onClick={() => handleDeleteClick(content.id)}
+                                onClick={() => handleDeleteClick(setting.id)}
                                 className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                               >
                                 <MdDelete className="w-4 h-4 mr-3" />
@@ -501,20 +498,20 @@ const ContentTable: React.FC = () => {
                           d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
-                      <p className="text-lg font-medium text-gray-600 mb-2">No contents found</p>
+                      <p className="text-lg font-medium text-gray-600 mb-2">No settings found</p>
                       <p className="text-sm text-gray-500">
                         {filters.search || filters.academic_id
                           ? 'Try adjusting your search criteria'
-                          : 'No content records available'}
+                          : 'No transportation settings available'}
                       </p>
                       {!filters.search && !filters.academic_id && (
                         <Button
-                          onClick={handleAddContent}
+                          onClick={handleAddSetting}
                           gradientDuoTone="cyanToBlue"
                           className="mt-4"
                         >
                           <BsPlusLg className="mr-2 w-4 h-4" />
-                          Add Your First Content
+                          Add Your First Setting
                         </Button>
                       )}
                     </div>
@@ -527,7 +524,7 @@ const ContentTable: React.FC = () => {
       </div>
 
       {/* Pagination */}
-      {contents.length > 0 && (
+      {settings.length > 0 && (
         <div className="mt-6">
           <Pagination
             currentPage={filters.page + 1}
@@ -545,22 +542,22 @@ const ContentTable: React.FC = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={confirmDelete}
-        title="Delete Content"
-        message="Are you sure you want to delete this content? This action cannot be undone."
+        title="Delete Transportation Setting"
+        message="Are you sure you want to delete this transportation setting? This action cannot be undone."
       />
 
-      {/* Content Form Modal */}
-      <ContentForm
+      {/* Transportation Settings Form Modal */}
+      <TransportationSettingsForm
         isOpen={showFormModal}
         onClose={() => {
           setShowFormModal(false);
-          setEditingContent(null);
+          setEditingSetting(null);
         }}
         onSuccess={handleFormSuccess}
-        editingContent={editingContent}
+        editingSetting={editingSetting}
       />
     </div>
   );
 };
 
-export default ContentTable;
+export default TransportationSettingsTable;

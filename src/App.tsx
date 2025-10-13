@@ -5,6 +5,7 @@ import router from './routes/Router';
 import { AuthProvider } from './hook/useAuth';
 import { CookiesProvider } from 'react-cookie';
 import { Toaster } from 'react-hot-toast';
+import React from 'react';
 
 function App() {
   return (
@@ -27,12 +28,14 @@ function App() {
           }}
         />
       <CookiesProvider>
+        <React.StrictMode>
         <AuthProvider>
           <ThemeModeScript />
           <ThemeProvider theme={customTheme}>
             <RouterProvider router={router} />
           </ThemeProvider>
         </AuthProvider>
+        </React.StrictMode>
       </CookiesProvider>
     </>
   );

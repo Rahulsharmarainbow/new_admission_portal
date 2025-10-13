@@ -76,7 +76,7 @@ const AddEditAccount: React.FC = () => {
     setFetchLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Accounts/Get-Academic-details`,
+        `${apiUrl}/${user?.role}/Accounts/Get-Academic-details`,
         {
           s_id: user?.id,
           academic_id: id,
@@ -175,7 +175,7 @@ const AddEditAccount: React.FC = () => {
         }
 
         const response = await axios.post(
-          `${apiUrl}/SuperAdmin/Accounts/Demo-Account-Update`,
+          `${apiUrl}/${user?.role}/Accounts/Demo-Account-Update`,
           formDataToSend,
           {
             headers: {
@@ -209,7 +209,7 @@ const AddEditAccount: React.FC = () => {
         }
 
         const response = await axios.post(
-          `${apiUrl}/SuperAdmin/Accounts/add-demo-account`,
+          `${apiUrl}/${user?.role}/Accounts/add-demo-account`,
           formDataToSend,
           {
             headers: {

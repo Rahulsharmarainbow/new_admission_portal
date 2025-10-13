@@ -93,7 +93,7 @@ const CollegeDashboard = () => {
       setError(null);
 
       const response = await axios.post<ApiResponse>(
-        `${apiUrl}/SuperAdmin/Accounts/Get-AcademicInformation`,
+        `${apiUrl}/${user.role}/Accounts/Get-AcademicInformation`,
         {
           s_id: user.id.toString(), // Dynamic user ID
           year: new Date().getFullYear().toString(), // Current year
@@ -384,7 +384,7 @@ const CollegeDashboard = () => {
                     </div>
 
                     {/* Unique Code */}
-                    <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
+                    {/* <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
                       <div className="flex items-center gap-2 mb-2">
                         <MdPerson className="w-5 h-5 text-orange-600" />
                         <h3 className="text-lg font-semibold text-gray-800">Unique Code</h3>
@@ -392,7 +392,7 @@ const CollegeDashboard = () => {
                       <p className="text-lg font-bold text-gray-800 break-all">
                         {dashboardData.unique_code || 'N/A'}
                       </p>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>

@@ -36,7 +36,12 @@ import AddEditAccount from 'src/views/accounts/components/AddAccount';
 import OpenTickets from 'src/views/ticket/components/OpenTickets';
 import AcceptedTickets from 'src/views/ticket/components/AcceptedTickets';
 import ResolvedTickets from 'src/views/ticket/components/ResolvedTickets';
+import SalesDashboard from 'src/views/dashboards/SalesDashboard';
 import ClassTable from 'src/views/schoolServices/components/classes/components/ClassTable';
+import TransportationList from 'src/views/schoolServices/transportation/TransportationList';
+import TransportationSettingsList from 'src/views/schoolServices/transportationSettings/TransportationSettingsList';
+import ContentList from 'src/views/schoolServices/components/contentManagement/ContentList';
+import ClassList from 'src/views/schoolServices/class/ClassList';
 
 
 /* ***Layouts**** */
@@ -86,9 +91,6 @@ const Router = [
       { path: '/SuperAdmin/live-accounts/add', element: <AddAccount /> },
       { path: "/SuperAdmin/Academic/:id", element: <DetailsAccount />},
       { path: "/SuperAdmin/:type", element: <AdminManagement /> },
-      // { path: "/SuperAdmin/sales-admin", element: <AdminManagement /> },
-      // { path: "/SuperAdmin/support-admin", element: <AdminManagement /> },
-      // { path: "/SuperAdmin/super-admin", element: <AdminManagement /> },
       { path: "/SuperAdmin/profile", element: <AccountProfile /> },
       { path: "/SuperAdmin/Demo", element: <Demo/> },
       { path: "/SuperAdmin/fees", element: <FormVertical/> },
@@ -100,6 +102,11 @@ const Router = [
       { path: '/SuperAdmin/Ticket/open', element: <OpenTickets/> },
        { path: '/SuperAdmin/Ticket/Accepted', element: <AcceptedTickets /> },
       { path: '/SuperAdmin/Ticket/Resolved', element: <ResolvedTickets /> },
+      { path: '/SuperAdmin/classes', element: <ClassList/> },
+      { path: '/SuperAdmin/content-Management', element: <ContentList/> },
+      { path: '/SuperAdmin/transportation', element: <TransportationList/> },
+      { path: '/SuperAdmin/setting', element: <TransportationSettingsList/> },
+      { path: 'ui/table', element: <Table /> },
       { path: 'ui/form', element: <Form /> },
       { path: 'ui/alert', element: <Alert /> },
       { path: 'ui/buttons', element: <Buttons /> },
@@ -122,6 +129,7 @@ const Router = [
       { path: '/SupportAdmin/live-accounts', element: <LiveAccounts /> },
       { path: '/SupportAdmin/live-accounts/add', element: <AddAccount /> },
       { path: '/SupportAdmin/live-accounts/edit/:id', element: <AddAccount /> },
+      { path: "Academic/:id", element: <DetailsAccount />},
       { path: "/SupportAdmin/Academic/:id", element: <DetailsAccount />},
       { path: "/SupportAdmin/profile", element: <AccountProfile /> },
       { path: 'ui/typography', element: <Typography /> },
@@ -151,7 +159,16 @@ const Router = [
       </ProtectedRoute>
     ),
     children: [
-      { path: 'dashboard', element: <Dashboard /> },
+      { path: 'dashboard', element: <SalesDashboard /> },
+      { path: 'demo-accounts', element: <DemoAccounts /> },
+      { path: 'demo-accounts/add', element: <AddEditAccount /> },
+      { path: 'demo-accounts/edit/:id', element: <AddEditAccount /> },
+      { path: 'live-accounts', element: <LiveAccounts /> },
+      { path: 'live-accounts/edit/:id', element: <AddAccount /> },
+      { path: 'live-accounts/edit/:id', element: <AddAccount /> },
+      { path: 'Accounts/Edit/:id', element: <MakeItLive /> },
+      { path: 'live-accounts/add', element: <AddAccount /> },
+      { path: "Academic/:id", element: <DetailsAccount />},
       { path: "/SalesAdmin/profile", element: <AccountProfile /> },
       { path: 'ui/typography', element: <Typography /> },
       { path: '*', element: <Navigate to="/auth/404" /> },

@@ -46,6 +46,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
     html_content: "",
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [quillMounted, setQuillMounted] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -77,6 +78,15 @@ const ContentForm: React.FC<ContentFormProps> = ({
     'blockquote', 'code-block',
     'link', 'image', 'video'
   ];
+
+  // Mount Quill only when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      setQuillMounted(true);
+    } else {
+      setQuillMounted(false);
+    }
+  }, [isOpen]);
 
   // Reset form when modal opens/closes or editing content changes
   useEffect(() => {
@@ -232,6 +242,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
               Select School <span className="text-red-500">*</span>
             </label>
             <SchoolDropdown
+              value={formData.academic_id}
               formData={formData}
               setFormData={setFormData}
               onChange={handleAcademicChange}
@@ -289,14 +300,16 @@ const ContentForm: React.FC<ContentFormProps> = ({
               Content <span className="text-red-500">*</span>
             </label>
             <div className={`border rounded-lg ${errors.html_content ? 'border-red-500' : 'border-gray-300'}`}>
-              <ReactQuill
-                value={formData.html_content}
-                onChange={(value) => handleInputChange("html_content", value)}
-                modules={modules}
-                formats={formats}
-                theme="snow"
-                style={{ height: '300px' }}
-              />
+              {quillMounted && (
+                <ReactQuill
+                  value={formData.html_content}
+                  onChange={(value) => handleInputChange("html_content", value)}
+                  modules={modules}
+                  formats={formats}
+                  theme="snow"
+                  style={{ height: "300px" }}
+                />
+              )}
             </div>
             {errors.html_content && (
               <p className="text-red-500 text-sm mt-1">{errors.html_content}</p>
