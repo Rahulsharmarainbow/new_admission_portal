@@ -1,16 +1,79 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import Loader from 'src/Frontend/Common/Loader';
 import { useAuth } from "src/hook/useAuth";
 import axios from 'axios';
+import { TextInput } from 'flowbite-react';
+import { HiEye, HiEyeOff } from "react-icons/hi";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <div className={`bg-white p-6 border border-gray-200 rounded-2xl shadow-sm ${className}`}>
-    {children}
-  </div>
+// Eye icon component
+const EyeIcon = ({ isVisible, onClick }: { isVisible: boolean; onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+  >
+    {isVisible ? (
+      <HiEyeOff className="h-5 w-5" />
+    ) : (
+      <HiEye className="h-5 w-5" />
+    )}
+  </button>
 );
+
+// Password input component with eye icon
+const PasswordInput = ({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  className = ""
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  className?: string;
+}) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  return (
+    <div className={className}>
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          type={isVisible ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pr-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
+          placeholder={placeholder}
+        />
+        <EyeIcon isVisible={isVisible} onClick={() => setIsVisible(!isVisible)} />
+      </div>
+    </div>
+  );
+};
 
 const SettingsTab = () => {
   const { user } = useAuth();
@@ -112,7 +175,7 @@ const SettingsTab = () => {
         college_platform_fee: collegePlatformFee,
         school_platform_fee: schoolPlatformFee,
         wasabi_api_key: wasabiApiKey,
-        wasabi_secret_key: wasWasabiSecretKey,
+        wasabi_secret_key: wasabiSecretKey,
         wasabi_region: wasabiRegion,
         wasabi_endpoint: wasabiEndpoint,
         wasabi_bucket: wasabiBucket,
@@ -170,7 +233,7 @@ const SettingsTab = () => {
     </div>
   );
 
-  const inputStyle = "block w-full rounded-xl border border-gray-300 bg-gray-50 p-3.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200";
+  const inputStyle = "block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200";
   const labelStyle = "block text-sm font-medium text-gray-700 mb-2";
 
   if (isLoading) {
@@ -179,7 +242,7 @@ const SettingsTab = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <div className="bg-white p-6 rounded-2xl">
         <h5 className="text-xl font-bold tracking-tight text-gray-900 mb-2">
           Application Settings
         </h5>
@@ -195,28 +258,20 @@ const SettingsTab = () => {
               description="Configure WhatsApp API settings for notifications"
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="whatsapp-api-key" className={labelStyle}>WhatsApp API Key</label>
-                <input
-                  id="whatsapp-api-key"
-                  type="password"
-                  value={whatsappApiKey}
-                  onChange={(e) => setWhatsappApiKey(e.target.value)}
-                  className={inputStyle}
-                  placeholder="Enter WhatsApp API key"
-                />
-              </div>
-              <div>
-                <label htmlFor="whatsapp-password" className={labelStyle}>WhatsApp Password</label>
-                <input
-                  id="whatsapp-password"
-                  type="password"
-                  value={whatsappPassword}
-                  onChange={(e) => setWhatsappPassword(e.target.value)}
-                  className={inputStyle}
-                  placeholder="Enter WhatsApp password"
-                />
-              </div>
+              <PasswordInput
+                id="whatsapp-api-key"
+                label="WhatsApp API Key"
+                value={whatsappApiKey}
+                onChange={setWhatsappApiKey}
+                placeholder="Enter WhatsApp API key"
+              />
+              <PasswordInput
+                id="whatsapp-password"
+                label="WhatsApp Password"
+                value={whatsappPassword}
+                onChange={setWhatsappPassword}
+                placeholder="Enter WhatsApp password"
+              />
             </div>
           </div>
 
@@ -227,17 +282,13 @@ const SettingsTab = () => {
               description="Configure Zoho email service for sending emails"
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="zoho-api-key" className={labelStyle}>Zoho API Key</label>
-                <input
-                  id="zoho-api-key"
-                  type="password"
-                  value={zohoApiKey}
-                  onChange={(e) => setZohoApiKey(e.target.value)}
-                  className={inputStyle}
-                  placeholder="Enter Zoho API key"
-                />
-              </div>
+              <PasswordInput
+                id="zoho-api-key"
+                label="Zoho API Key"
+                value={zohoApiKey}
+                onChange={setZohoApiKey}
+                placeholder="Enter Zoho API key"
+              />
               <div>
                 <label htmlFor="bounce-address" className={labelStyle}>Bounce Address</label>
                 <input
@@ -270,28 +321,20 @@ const SettingsTab = () => {
               description="Configure SMS gateway for text notifications"
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="sms-api-key" className={labelStyle}>SMS API Key</label>
-                <input
-                  id="sms-api-key"
-                  type="password"
-                  value={smsApiKey}
-                  onChange={(e) => setSmsApiKey(e.target.value)}
-                  className={inputStyle}
-                  placeholder="Enter SMS API key"
-                />
-              </div>
-              <div>
-                <label htmlFor="sms-secret-key" className={labelStyle}>SMS Secret Key</label>
-                <input
-                  id="sms-secret-key"
-                  type="password"
-                  value={smsSecretKey}
-                  onChange={(e) => setSmsSecretKey(e.target.value)}
-                  className={inputStyle}
-                  placeholder="Enter SMS secret key"
-                />
-              </div>
+              <PasswordInput
+                id="sms-api-key"
+                label="SMS API Key"
+                value={smsApiKey}
+                onChange={setSmsApiKey}
+                placeholder="Enter SMS API key"
+              />
+              <PasswordInput
+                id="sms-secret-key"
+                label="SMS Secret Key"
+                value={smsSecretKey}
+                onChange={setSmsSecretKey}
+                placeholder="Enter SMS secret key"
+              />
             </div>
           </div>
 
@@ -302,28 +345,20 @@ const SettingsTab = () => {
               description="Configure Razorpay payment gateway"
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="razorpay-api-key" className={labelStyle}>Razorpay API Key</label>
-                <input
-                  id="razorpay-api-key"
-                  type="password"
-                  value={razorpayApiKey}
-                  onChange={(e) => setRazorpayApiKey(e.target.value)}
-                  className={inputStyle}
-                  placeholder="Enter Razorpay API key"
-                />
-              </div>
-              <div>
-                <label htmlFor="razorpay-secret-key" className={labelStyle}>Razorpay Secret Key</label>
-                <input
-                  id="razorpay-secret-key"
-                  type="password"
-                  value={razorpaySecretKey}
-                  onChange={(e) => setRazorpaySecretKey(e.target.value)}
-                  className={inputStyle}
-                  placeholder="Enter Razorpay secret key"
-                />
-              </div>
+              <PasswordInput
+                id="razorpay-api-key"
+                label="Razorpay API Key"
+                value={razorpayApiKey}
+                onChange={setRazorpayApiKey}
+                placeholder="Enter Razorpay API key"
+              />
+              <PasswordInput
+                id="razorpay-secret-key"
+                label="Razorpay Secret Key"
+                value={razorpaySecretKey}
+                onChange={setRazorpaySecretKey}
+                placeholder="Enter Razorpay secret key"
+              />
             </div>
           </div>
 
@@ -366,28 +401,20 @@ const SettingsTab = () => {
               description="Configure Wasabi cloud storage settings"
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="wasabi-api-key" className={labelStyle}>Wasabi API Key</label>
-                <input
-                  id="wasabi-api-key"
-                  type="password"
-                  value={wasabiApiKey}
-                  onChange={(e) => setWasabiApiKey(e.target.value)}
-                  className={inputStyle}
-                  placeholder="Enter Wasabi API key"
-                />
-              </div>
-              <div>
-                <label htmlFor="wasabi-secret-key" className={labelStyle}>Wasabi Secret Key</label>
-                <input
-                  id="wasabi-secret-key"
-                  type="password"
-                  value={wasabiSecretKey}
-                  onChange={(e) => setWasabiSecretKey(e.target.value)}
-                  className={inputStyle}
-                  placeholder="Enter Wasabi secret key"
-                />
-              </div>
+              <PasswordInput
+                id="wasabi-api-key"
+                label="Wasabi API Key"
+                value={wasabiApiKey}
+                onChange={setWasabiApiKey}
+                placeholder="Enter Wasabi API key"
+              />
+              <PasswordInput
+                id="wasabi-secret-key"
+                label="Wasabi Secret Key"
+                value={wasabiSecretKey}
+                onChange={setWasabiSecretKey}
+                placeholder="Enter Wasabi secret key"
+              />
               <div>
                 <label htmlFor="wasabi-region" className={labelStyle}>Wasabi Region</label>
                 <input
@@ -424,7 +451,7 @@ const SettingsTab = () => {
             </div>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Save Button */}
       <div className="flex justify-end">
