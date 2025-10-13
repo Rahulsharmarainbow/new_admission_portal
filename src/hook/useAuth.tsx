@@ -2,6 +2,7 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { useCookies } from "react-cookie";
 
 interface User {
+  academic_type: number;
   id: number;
   name: string;
   email: string;

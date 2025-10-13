@@ -88,7 +88,8 @@ const Dashboard = () => {
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
           {/* Year Dropdown */}
-          <div className="relative w-full sm:w-auto">
+           {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && 
+           (<div className="relative w-full sm:w-auto">
             <select
               value={filters.year}
               onChange={(e) => setFilters((prev) => ({ ...prev, year: e.target.value, page: 0 }))}
@@ -100,12 +101,14 @@ const Dashboard = () => {
               <option value="2022">2022</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-      <HiChevronDown className="w-4 h-4" />
-    </div>
+              <HiChevronDown className="w-4 h-4" />
+            </div>
           </div>
+        )}
 
           {/* Academic Dropdown */}
-          <div className="relative w-full sm:w-auto">
+           {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  (
+             <div className="relative w-full sm:w-auto">
             <AcademicDropdown
               name="academic"
               formData={filters}
@@ -115,17 +118,8 @@ const Dashboard = () => {
               className="min-w-[80px] text-sm"
             />
           </div>
+            )}
         </div>
-
-        {/* <div className="w-full sm:w-auto flex items-center">
-          <button
-            onClick={fetchDashboardData}
-            disabled={loading}
-            className="p-2 rounded-full bg-[#0084DA] hover:bg-blue-700 disabled:bg-blue-400 text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            <BsSearch size={18} />
-          </button>
-        </div> */}
       </div>
 
       {/* Statistics Cards */}
@@ -302,35 +296,84 @@ const Dashboard = () => {
 
       {/* Charts Section */}
       <div className="grid grid-cols-12 gap-6 mb-6">
-        <div className="lg:col-span-6 col-span-12">
-          <BarChart
-            labels={[
-              'BSC-CS',
-              'FFFF',
-              'BE',
-              'BA',
-              'BFA (All)',
-              'BFA (Photography)',
-              'B. Design (I.D)',
-              'Testing Degree',
-              'Testing',
-              'ME',
-            ]}
-            values={[4, 1, 2, 1, 15, 18, 14, 1, 2, 4]}
-            title="Degree Wise Paid Application"
-            subtitle="Distribution of paid applications by degree"
-          />
-        </div>
+        {/* ✅ SuperAdmin and SupportAdmin — dono charts show */}
+        {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && (
+          <>
+            <div className="lg:col-span-6 col-span-12">
+              <BarChart
+                labels={
+                  dashboardData?.degreeWisePaidApplications?.map((item: any) => item.name) || []
+                }
+                values={
+                  dashboardData?.degreeWisePaidApplications?.map(
+                    (item: any) => item.paid_applications_count,
+                  ) || []
+                }
+                title="Degree Wise Paid Application"
+                subtitle="Distribution of paid applications by degree"
+              />
+            </div>
 
-        <div className="lg:col-span-6 col-span-12">
-          <BarChart
-            labels={['Class IV', 'I', 'I', 'II', 'II']}
-            values={[1, 4, 2, 1, 1]}
-            title="Class Wise Paid Application"
-            subtitle="Distribution of paid applications by class"
-          />
-        </div>
+            <div className="lg:col-span-6 col-span-12">
+              <BarChart
+                labels={
+                  dashboardData?.classWisePaidApplications?.map((item: any) => item.class_name) ||
+                  []
+                }
+                values={
+                  dashboardData?.classWisePaidApplications?.map(
+                    (item: any) => item.paid_applications_count,
+                  ) || []
+                }
+                title="Class Wise Paid Application"
+                subtitle="Distribution of paid applications by class"
+              />
+            </div>
+          </>
+        )}
       </div>
+
+      {user?.role === 'CustomerAdmin' && (<div className="mb-6">
+        {/* ✅ CustomerAdmin — academic_type ke basis par */}
+        
+          <>
+            {user?.academic_type === 1 && (
+              <div className="lg:col-span-6 col-span-12">
+                <BarChart
+                  labels={
+                    dashboardData?.classWisePaidApplications?.map((item: any) => item.class_name) ||
+                    []
+                  }
+                  values={
+                    dashboardData?.classWisePaidApplications?.map(
+                      (item: any) => item.paid_applications_count,
+                    ) || []
+                  }
+                  title="Class Wise Paid Application"
+                  subtitle="Distribution of paid applications by class"
+                />
+              </div>
+            )}
+
+            {user?.academic_type === 2 && (
+              <div className="lg:col-span-6 col-span-12">
+                <BarChart
+                  labels={
+                    dashboardData?.degreeWisePaidApplications?.map((item: any) => item.name) || []
+                  }
+                  values={
+                    dashboardData?.degreeWisePaidApplications?.map(
+                      (item: any) => item.paid_applications_count,
+                    ) || []
+                  }
+                  title="Degree Wise Paid Application"
+                  subtitle="Distribution of paid applications by degree"
+                />
+              </div>
+            )}
+          </>
+      </div>
+        )}
 
       {/* Applications Table */}
       <div className="col-span-12">
@@ -340,18 +383,18 @@ const Dashboard = () => {
               <h5 className="text-lg font-semibold text-gray-900">Recently Added Application</h5>
               <h6 className="text-sm text-gray-600">Application List across all Academic</h6>
             </div>
-           <div className="relative w-full lg:w-auto">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <BsFillSearchHeartFill className="w-5 h-5 text-blue-400" />
-      </div>
-      <input
-        type="text"
-        placeholder="Search Applications..."
-        value={filters.search}
-        onChange={(e) => handleSearchChange(e.target.value)}
-        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full lg:w-64"
-      />
-    </div>
+            <div className="relative w-full lg:w-auto">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <BsFillSearchHeartFill className="w-5 h-5 text-blue-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search Applications..."
+                value={filters.search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full lg:w-64"
+              />
+            </div>
           </div>
 
           {loading ? (

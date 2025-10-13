@@ -38,6 +38,7 @@ export const LoginPage: React.FC = () => {
           whatsapp_status: response.whatsapp_status,
           email_status: response.email_status,
           sms_status: response.sms_status,
+          academic_type: response.academic_type || null,
         };
 
         // Check if two-step verification is needed

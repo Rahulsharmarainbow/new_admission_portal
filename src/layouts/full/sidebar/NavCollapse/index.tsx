@@ -1,54 +1,52 @@
-
-import  {useState } from "react";
+import React, { useState } from "react";
 import { ChildItem } from "../Sidebaritems";
 import { useLocation } from "react-router";
-import React from "react";
 import { CustomCollapse } from "../CustomCollapse";
 import Dropitems from "../DropItems";
 
 interface NavCollapseProps {
   item: ChildItem;
+  activeCollapse?: string | null;
+  setActiveCollapse?: (id: string | null) => void;
 }
 
-
-
-const NavCollapse: React.FC<NavCollapseProps> = ({ item }: any) => {
+const NavCollapse: React.FC<NavCollapseProps> = ({ item, activeCollapse, setActiveCollapse }) => {
   const location = useLocation();
   const pathname = location.pathname;
 
-  // Determine if any child matches the current path
   const activeDD = item.children.find((t: { url: string }) => t.url === pathname);
-  
+  const isOpen = activeCollapse === item.id; // Controlled open state
 
-  // Manage open/close state for the collapse
-  const [isOpen, setIsOpen] = useState<boolean>(!!activeDD);
-
-
-  // Toggle the collapse
   const handleToggle = () => {
-    setIsOpen((prev) => !prev);
+    setActiveCollapse?.(isOpen ? null : item.id); // Close others, open current
   };
+
+  const isActive = Boolean(activeDD) || isOpen;
 
   return (
     <CustomCollapse
-      label={ `${item.name}`}
+      label={item.name}
       open={isOpen}
       onClick={handleToggle}
-      icon={item.icon} 
+      icon={item.icon}
       isPro={item.isPro}
-      className={ 
-        Boolean(activeDD)
-          ? `sidebar-link bg-primary/10  hover:bg-primary/10  text-primary mb-1`
-          : `sidebar-link group/link before:content-[''] before:absolute before:start-0 before:top-0 before:h-full before:w-0 hover:before:w-full before:bg-primary/10 before:transition-all before:duration-400 before:rounded-e-full hover:bg-transparent  hover:text-primary  mb-1`
-      }
+      className={`sidebar-link relative mb-1 py-0 ps-6 pe-4 transition-all duration-300 
+        ${
+          isActive
+            ? "bg-[#0084DA]/20 text-[#0084DA] hover:bg-[#0084DA]/20"
+            : "group/link before:content-[''] before:absolute before:start-0 before:top-0 before:h-full before:w-0 hover:before:w-full before:bg-[#0084DA]/10 before:transition-all before:duration-400 before:rounded-e-full hover:bg-transparent hover:text-[#0084DA] text-dark/90"
+        }`}
     >
-      {/* Render child items */}
       {item.children && (
-        <div className="sidebar-dropdown">
+        <div className={`sidebar-dropdown transition-all ${isOpen ? "max-h-[500px]" : "max-h-0 overflow-hidden"}`}>
           {item.children.map((child: any) => (
             <React.Fragment key={child.id}>
               {child.children ? (
-                <NavCollapse item={child} /> // Recursive call for nested collapse
+                <NavCollapse
+                  item={child}
+                  activeCollapse={activeCollapse}
+                  setActiveCollapse={setActiveCollapse}
+                />
               ) : (
                 <Dropitems item={child} />
               )}

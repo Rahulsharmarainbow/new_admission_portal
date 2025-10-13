@@ -9,17 +9,7 @@ import { useAuth } from 'src/hook/useAuth';
 import axios from 'axios';
 import ReactSelect from 'react-select';
 import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
-
-const BCrumb = [
-  {
-    title: 'Home',
-    icon: FaHome,
-  },
-  {
-    title: 'Fees Structure',
-    icon: FaMoneyBillWave,
-  },
-];
+import Loader from 'src/Frontend/Common/Loader';
 
 interface FeesData {
   id?: number;
@@ -135,8 +125,8 @@ const FormVertical = () => {
     setCaste(selectedValues);
   };
 
-  const handleAcademicSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = event.target.value;
+  const handleAcademicSelect = (selectedId: string) => {
+    // const selectedId = event.target.value;
     setSelectedAcademic(selectedId);
     setFormVisible(true);
     setFormError(false);
@@ -316,33 +306,22 @@ const FormVertical = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Spinner size="xl" />
-      </div>
+      <Loader />
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center space-x-2 text-sm text-gray-600">
-        {BCrumb.map((item, index) => (
-          <div key={index} className="flex items-center space-x-2">
-            {index > 0 && <span>/</span>}
-            <item.icon className="w-4 h-4" />
-            <span>{item.title}</span>
-          </div>
-        ))}
-      </div>
-
+    <div>
       {/* Select Academic Section */}
       <Card className="mb-6">
-        <AcademicDropdown
+        <div className="w-[40%]">
+          <AcademicDropdown
           value={selectedAcademic}
           onChange={handleAcademicSelect}
-          label="Select Academic *"
+          label="First Select Academic"
           isRequired
         />
+        </div>
       </Card>
 
       {/* Conditional Forms */}

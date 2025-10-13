@@ -27,7 +27,6 @@ import UserForm from 'src/views/Admin/components/UserForm';
 import AdminManagement from 'src/views/Admin/AdminManagement';
 import AccountProfile from 'src/views/profile/AccountProfile';
 import Demo from 'src/views/profile/Demo';
-import FormVertical from 'src/views/feesStructure/components/FormVertical';
 import YourComponent from 'src/views/dataManager/typeOfConnection/components/YourComponent';
 import DataManagerPage from 'src/views/dataManager/typeOfConnection/components/DataManagerPage';
 import StateTable from 'src/views/dataManager/state/components/State';
@@ -42,6 +41,7 @@ import TransportationList from 'src/views/schoolServices/transportation/Transpor
 import TransportationSettingsList from 'src/views/schoolServices/transportationSettings/TransportationSettingsList';
 import ContentList from 'src/views/schoolServices/components/contentManagement/ContentList';
 import ClassList from 'src/views/schoolServices/class/ClassList';
+import Fees from 'src/views/feesStructure/Fees';
 
 
 /* ***Layouts**** */
@@ -93,7 +93,7 @@ const Router = [
       { path: "/SuperAdmin/:type", element: <AdminManagement /> },
       { path: "/SuperAdmin/profile", element: <AccountProfile /> },
       { path: "/SuperAdmin/Demo", element: <Demo/> },
-      { path: "/SuperAdmin/fees", element: <FormVertical/> },
+      { path: "/SuperAdmin/fees", element: <Fees/> },
       { path: "/SuperAdmin/admin/add/:type", element: <UserForm /> },
       { path: "/SuperAdmin/admin/edit/:id", element: <UserForm /> },
       { path: '/SuperAdmin/data-manager/State', element: <StateTable/> },
@@ -124,16 +124,39 @@ const Router = [
       </ProtectedRoute>
     ),
     children: [
-      { path: 'dashboard', element: <Dashboard /> },
-       { path: '/SupportAdmin/demo-accounts', element: <DemoAccounts /> },
-      { path: '/SupportAdmin/live-accounts', element: <LiveAccounts /> },
-      { path: '/SupportAdmin/live-accounts/add', element: <AddAccount /> },
-      { path: '/SupportAdmin/live-accounts/edit/:id', element: <AddAccount /> },
+     { path: 'dashboard', element: <Dashboard /> },
+      { path: 'demo-accounts', element: <DemoAccounts /> },
+      { path: 'demo-accounts/add', element: <AddEditAccount /> },
+      { path: 'demo-accounts/edit/:id', element: <AddEditAccount /> },
+      { path: 'live-accounts', element: <LiveAccounts /> },
+      { path: 'live-accounts/edit/:id', element: <AddAccount /> },
+      { path: 'live-accounts/edit/:id', element: <AddAccount /> },
+      { path: 'Accounts/Edit/:id', element: <MakeItLive /> },
+      { path: 'live-accounts/add', element: <AddAccount /> },
       { path: "Academic/:id", element: <DetailsAccount />},
-      { path: "/SupportAdmin/Academic/:id", element: <DetailsAccount />},
-      { path: "/SupportAdmin/profile", element: <AccountProfile /> },
-      { path: 'ui/typography', element: <Typography /> },
+      { path: ":type", element: <AdminManagement /> },
+      { path: "profile", element: <AccountProfile /> },
+      { path: "Demo", element: <Demo/> },
+      { path: "fees", element: <Fees /> },
+      { path: "admin/add/:type", element: <UserForm /> },
+      { path: "admin/edit/:id", element: <UserForm /> },
+      { path: 'data-manager/State', element: <StateTable/> },
+      { path: 'data-manager/District', element: <CasteTable/> },      // data manager ki District ka component
+      { path: 'data-manager/type-of-connection', element: <DataManagerPage/> },
+      { path: 'Ticket/open', element: <OpenTickets/> },
+       { path: 'Ticket/Accepted', element: <AcceptedTickets /> },
+      { path: 'Ticket/Resolved', element: <ResolvedTickets /> },
+      { path: 'classes', element: <ClassList/> },
+      { path: 'content-Management', element: <ContentList/> },
+      { path: 'transportation', element: <TransportationList/> },
+      { path: 'setting', element: <TransportationSettingsList/> },
       { path: 'ui/table', element: <Table /> },
+      { path: 'ui/form', element: <Form /> },
+      { path: 'ui/alert', element: <Alert /> },
+      { path: 'ui/buttons', element: <Buttons /> },
+      { path: 'icons/solar', element: <Solar /> },
+      { path: 'sample-page', element: <SamplePage /> },
+      { path: 'demo-accounts/add', element: <Add /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
@@ -146,9 +169,31 @@ const Router = [
     ),
     children: [
       { path: 'dashboard', element: <Dashboard /> },
-      { path: "/CustomerAdmin/profile", element: <AccountProfile /> },
-      { path: 'ui/typography', element: <Typography /> },
-      { path: '*', element: <Navigate to="/auth/404" /> },
+      { path: 'demo-accounts', element: <DemoAccounts /> },
+      { path: 'demo-accounts/add', element: <AddEditAccount /> },
+      { path: 'demo-accounts/edit/:id', element: <AddEditAccount /> },
+      { path: 'live-accounts', element: <LiveAccounts /> },
+      { path: 'live-accounts/edit/:id', element: <AddAccount /> },
+      { path: 'live-accounts/edit/:id', element: <AddAccount /> },
+      { path: 'Accounts/Edit/:id', element: <MakeItLive /> },
+      { path: 'live-accounts/add', element: <AddAccount /> },
+      { path: "Academic/:id", element: <DetailsAccount />},
+      { path: ":type", element: <AdminManagement /> },
+      { path: "profile", element: <AccountProfile /> },
+      { path: "Demo", element: <Demo/> },
+      { path: "fees", element: <Fees /> },
+      { path: "admin/add/:type", element: <UserForm /> },
+      { path: "admin/edit/:id", element: <UserForm /> },
+      { path: 'data-manager/State', element: <StateTable/> },
+      { path: 'data-manager/District', element: <CasteTable/> },      // data manager ki District ka component
+      { path: 'data-manager/type-of-connection', element: <DataManagerPage/> },
+      { path: 'Ticket/open', element: <OpenTickets/> },
+       { path: 'Ticket/Accepted', element: <AcceptedTickets /> },
+      { path: 'Ticket/Resolved', element: <ResolvedTickets /> },
+      { path: 'classes', element: <ClassList/> },
+      { path: 'content-Management', element: <ContentList/> },
+      { path: 'transportation', element: <TransportationList/> },
+      { path: 'setting', element: <TransportationSettingsList/> },
     ],
   },
   {
@@ -159,7 +204,7 @@ const Router = [
       </ProtectedRoute>
     ),
     children: [
-      { path: 'dashboard', element: <SalesDashboard /> },
+     { path: 'dashboard', element: <Dashboard /> },
       { path: 'demo-accounts', element: <DemoAccounts /> },
       { path: 'demo-accounts/add', element: <AddEditAccount /> },
       { path: 'demo-accounts/edit/:id', element: <AddEditAccount /> },
@@ -169,7 +214,22 @@ const Router = [
       { path: 'Accounts/Edit/:id', element: <MakeItLive /> },
       { path: 'live-accounts/add', element: <AddAccount /> },
       { path: "Academic/:id", element: <DetailsAccount />},
-      { path: "/SalesAdmin/profile", element: <AccountProfile /> },
+      { path: ":type", element: <AdminManagement /> },
+      { path: "profile", element: <AccountProfile /> },
+      { path: "Demo", element: <Demo/> },
+      { path: "fees", element: <Fees /> },
+      { path: "admin/add/:type", element: <UserForm /> },
+      { path: "admin/edit/:id", element: <UserForm /> },
+      { path: 'data-manager/State', element: <StateTable/> },
+      { path: 'data-manager/District', element: <CasteTable/> },      // data manager ki District ka component
+      { path: 'data-manager/type-of-connection', element: <DataManagerPage/> },
+      { path: 'Ticket/open', element: <OpenTickets/> },
+       { path: 'Ticket/Accepted', element: <AcceptedTickets /> },
+      { path: 'Ticket/Resolved', element: <ResolvedTickets /> },
+      { path: 'classes', element: <ClassList/> },
+      { path: 'content-Management', element: <ContentList/> },
+      { path: 'transportation', element: <TransportationList/> },
+      { path: 'setting', element: <TransportationSettingsList/> },
       { path: 'ui/typography', element: <Typography /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
