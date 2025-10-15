@@ -1056,7 +1056,7 @@ const DataManagerTable: React.FC<DataManagerTableProps> = ({
 
   // Handle page change
   const handlePageChange = (page: number) => {
-    setFilters(prev => ({ ...prev, page }));
+    setFilters(prev => ({ ...prev, page: page - 1 }));
   };
 
   // Handle rows per page change

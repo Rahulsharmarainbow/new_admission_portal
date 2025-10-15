@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Button, TextInput } from 'flowbite-react';
+import { Button, TextInput, Tooltip, Badge } from 'flowbite-react';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
-import { TbEdit } from "react-icons/tb";
+import { TbEdit } from 'react-icons/tb';
 import axios from 'axios';
 import Loader from 'src/Frontend/Common/Loader';
 import { useDebounce } from 'src/hook/useDebounce';
@@ -12,16 +12,20 @@ import DeleteConfirmationModal from 'src/Frontend/Common/DeleteConfirmationModal
 import BreadcrumbHeader from 'src/Frontend/Common/BreadcrumbHeader';
 import { HiPlus, HiSearch } from 'react-icons/hi';
 import toast from 'react-hot-toast';
-import StateModal from './AddStateModal';
+import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
+import TypeModal from './components/TypeModal';
 
-interface StateItem {
+interface TypeItem {
   id: number;
-  state_title: string;
+  academic_id: number;
+  type: string;
+  created_at: string;
+  updated_at: string;
 }
 
-interface StateResponse {
+interface TypeResponse {
   status: boolean;
-  rows: StateItem[];
+  rows: TypeItem[];
   total: number;
 }
 
@@ -33,10 +37,10 @@ interface Filters {
   search: string;
 }
 
-const StateTable: React.FC = () => {
+const TypeTable: React.FC = () => {
   const { user } = useAuth();
 
-  const [data, setData] = useState<StateItem[]>([]);
+  const [data, setData] = useState<TypeItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     page: 0,
@@ -49,8 +53,9 @@ const StateTable: React.FC = () => {
   const [sort, setSort] = useState({ key: 'id', direction: 'desc' as 'asc' | 'desc' });
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<StateItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<TypeItem | null>(null);
   const [modalType, setModalType] = useState<'add' | 'edit'>('add');
+  const [selectedAcademic, setSelectedAcademic] = useState<number>();
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -79,9 +84,7 @@ const StateTable: React.FC = () => {
       };
 
       const requestBody = {
-        type: 1,
-        s_id: user?.id,
-        academic_id: 65,
+        academic_id: selectedAcademic,
         page: filters.page,
         rowsPerPage: filters.rowsPerPage,
         order: filters.order,
@@ -89,13 +92,9 @@ const StateTable: React.FC = () => {
         search: filters.search,
       };
 
-      const response = await axios.post(
-        `${apiUrl}/SuperAdmin/StateDistrict/get-list`,
-        requestBody,
-        { headers },
-      );
+      const response = await axios.post(`${apiUrl}/SuperAdmin/Type/list`, requestBody, { headers });
 
-      if (response.data?.status) {
+      if (response.data) {
         setData(response.data.rows || []);
         setTotal(response.data.total || 0);
       } else {
@@ -103,8 +102,8 @@ const StateTable: React.FC = () => {
         setTotal(0);
       }
     } catch (error) {
-      console.error('Error fetching states:', error);
-      toast.error('Failed to fetch states');
+      console.error('Error fetching types:', error);
+      toast.error('Failed to fetch types');
       setData([]);
       setTotal(0);
     } finally {
@@ -114,7 +113,20 @@ const StateTable: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [filters.page, filters.rowsPerPage, filters.order, filters.orderBy, debouncedSearch]);
+  }, [
+    filters.page,
+    filters.rowsPerPage,
+    filters.order,
+    filters.orderBy,
+    debouncedSearch,
+    selectedAcademic,
+  ]);
+
+  // Handle academic change
+  const handleAcademicChange = (academicId: number) => {
+    setSelectedAcademic(academicId);
+    setFilters((prev) => ({ ...prev, page: 0 }));
+  };
 
   // Handle search
   const handleSearch = (searchValue: string) => {
@@ -149,7 +161,7 @@ const StateTable: React.FC = () => {
 
   // Handle page change
   const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page: page - 1 }));
+    setFilters((prev) => ({ ...prev, page: page - 1 }));
   };
 
   // Handle rows per page change
@@ -165,7 +177,7 @@ const StateTable: React.FC = () => {
   };
 
   // Handle edit click
-  const handleEditClick = (item: StateItem) => {
+  const handleEditClick = (item: TypeItem) => {
     setModalType('edit');
     setSelectedItem(item);
     setShowModal(true);
@@ -179,11 +191,12 @@ const StateTable: React.FC = () => {
   };
 
   // Handle delete click
-  const handleDeleteClick = (item: StateItem) => {
+  const handleDeleteClick = (item: TypeItem) => {
     setSelectedItem(item);
     setShowDeleteModal(true);
   };
 
+  // Handle delete confirm
   const handleDeleteConfirm = async () => {
     if (!selectedItem) return;
 
@@ -207,26 +220,23 @@ const StateTable: React.FC = () => {
       };
 
       const requestBody = {
-        type: 1,
         ids: [selectedItem.id],
         s_id: user?.id,
       };
 
-      const response = await axios.post(
-        `${apiUrl}/SuperAdmin/StateDistrict/Delete-StateDistrict`,
-        requestBody,
-        { headers },
-      );
+      const response = await axios.post(`${apiUrl}/SuperAdmin/Type/delete`, requestBody, {
+        headers,
+      });
 
       if (response.data?.status) {
-        toast.success('State deleted successfully!');
+        toast.success(response.data?.message || 'Type deleted successfully!');
         fetchData();
       } else {
-        toast.error(response.data?.message || 'Failed to delete state');
+        toast.error(response.data?.message || 'Failed to delete type');
       }
     } catch (error: any) {
-      console.error('Error deleting state:', error);
-      toast.error(error.response?.data?.message || 'Failed to delete state. Please try again.');
+      console.error('Error deleting type:', error);
+      toast.error(error.response?.data?.message || 'Failed to delete type. Please try again.');
     } finally {
       setShowDeleteModal(false);
       setSelectedItem(null);
@@ -235,37 +245,35 @@ const StateTable: React.FC = () => {
 
   return (
     <>
-      <BreadcrumbHeader
-        title="States"
-        paths={[{ name: 'States', link: '/' + user?.role + '/data-manager/State' }]}
-      />
+      <BreadcrumbHeader title="Data Manager" paths={[{ name: 'Type Configuration', link: '#' }]} />
       <div className="bg-white rounded-lg shadow-md relative overflow-x-auto">
         {/* Table Header with Search and Add Button */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 pb-4">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">States</h2>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 p-6 pb-4">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          {/* Search Input */}
+          <div className="relative w-full sm:w-64">
+            <TextInput
+              type="text"
+              placeholder="Search types..."
+              value={filters.search}
+              onChange={(e) => handleSearch(e.target.value)}
+              icon={HiSearch}
+              className="w-full"
+            />
+          </div>
+          <div className="w-full sm:w-60 md:w-72">
+            <AcademicDropdown value={selectedAcademic} onChange={handleAcademicChange} />
+          </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            {/* Search Input */}
-            <div className="relative w-full sm:w-64">
-              <TextInput
-                type="text"
-                placeholder="Search states..."
-                value={filters.search}
-                onChange={(e) => handleSearch(e.target.value)}
-                icon={HiSearch}
-                className="w-full"
-              />
-            </div>
-
             {/* Add Button */}
             <Button
               onClick={handleAddClick}
-              className="bg-blue-600 hover:bg-blue-700 focus:ring-blue-300"
+              color='primary'
             >
               <HiPlus className="mr-2 h-5 w-5" />
-              Add State
+              Add Type
             </Button>
           </div>
         </div>
@@ -277,67 +285,83 @@ const StateTable: React.FC = () => {
               <Loader />
             </div>
           )}
-          
+
+          {/* Table */}
           <div className="shadow-md rounded-lg min-w-full">
-            <table className="min-w-full divide-y divide-gray-200 p-2">
+            <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th
                     scope="col"
-                    className="w-60 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="w-20 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     S.NO
                   </th>
                   <th
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
-                    onClick={() => handleSort('state_title')}
+                    onClick={() => handleSort('type')}
                   >
-                    <div className="flex items-center">State Name {getSortIcon('state_title')}</div>
+                    <div className="flex items-center">Type Name {getSortIcon('type')}</div>
                   </th>
                   <th
                     scope="col"
-                    className="w-24 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
+                    onClick={() => handleSort('created_at')}
+                  >
+                    <div className="flex items-center">Created At {getSortIcon('created_at')}</div>
+                  </th>
+                  <th
+                    scope="col"
+                    className="w-32 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     Actions
                   </th>
                 </tr>
               </thead>
-
               <tbody className="bg-white divide-y divide-gray-200">
                 {data.length > 0 ? (
                   data.map((item, index) => (
                     <tr key={item.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 ml-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {filters.page * filters.rowsPerPage + index + 1}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {item.state_title}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <Badge color="blue" className="text-xs">
+                          {item.type}
+                        </Badge>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center space-x-2">
-                          <button
-                            className="text-blue-500 hover:text-blue-700 p-1 transition-colors"
-                            onClick={() => handleEditClick(item)}
-                            title="Edit"
-                          >
-                            <TbEdit  size={18} />
-                          </button>
+                          <Tooltip content="Edit Type">
+                            <button
+                              className="text-blue-500 hover:text-blue-700 p-1 transition-colors"
+                              onClick={() => handleEditClick(item)}
+                              title="Edit"
+                            >
+                              <TbEdit size={18} />
+                            </button>
+                          </Tooltip>
 
-                          <button
-                            className="text-red-500 hover:text-red-700 p-1 transition-colors"
-                            onClick={() => handleDeleteClick(item)}
-                            title="Delete"
-                          >
-                            <MdDeleteForever size={18} />
-                          </button>
+                          <Tooltip content="Delete Type">
+                            <button
+                              className="text-red-500 hover:text-red-700 p-1 transition-colors"
+                              onClick={() => handleDeleteClick(item)}
+                              title="Delete"
+                            >
+                              <MdDeleteForever size={18} />
+                            </button>
+                          </Tooltip>
                         </div>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                       <div className="flex flex-col items-center justify-center">
                         <svg
                           className="w-16 h-16 text-gray-300 mb-4"
@@ -352,27 +376,15 @@ const StateTable: React.FC = () => {
                             d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
-                        <p className="text-lg font-medium text-gray-600">No states found</p>
+                        <p className="text-lg font-medium text-gray-600">No types found</p>
                         <p className="text-sm text-gray-500 mt-1">
                           {filters.search
                             ? 'Try adjusting your search criteria'
-                            : 'No states available'}
+                            : 'No types available for selected academic'}
                         </p>
                         <Button onClick={handleAddClick} color="blue" className="mt-4">
-                          <svg
-                            className="w-4 h-4 mr-2"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 4v16m8-8H4"
-                            />
-                          </svg>
-                          Add State
+                          <HiPlus className="mr-2 h-4 w-4" />
+                          Add Type
                         </Button>
                       </div>
                     </td>
@@ -397,8 +409,8 @@ const StateTable: React.FC = () => {
           </div>
         )}
 
-        {/* Combined State Modal */}
-        <StateModal
+        {/* Type Modal */}
+        <TypeModal
           isOpen={showModal}
           onClose={() => {
             setShowModal(false);
@@ -407,6 +419,7 @@ const StateTable: React.FC = () => {
           onSuccess={handleModalSuccess}
           selectedItem={selectedItem}
           type={modalType}
+          academicId={selectedAcademic}
         />
 
         {/* Delete Confirmation Modal */}
@@ -417,12 +430,12 @@ const StateTable: React.FC = () => {
             setSelectedItem(null);
           }}
           onConfirm={handleDeleteConfirm}
-          title="Delete State"
-          message={`Are you sure you want to delete "${selectedItem?.state_title}"? This action cannot be undone.`}
+          title="Delete Type"
+          message={`Are you sure you want to delete "${selectedItem?.type}"? This action cannot be undone.`}
         />
       </div>
     </>
   );
 };
 
-export default StateTable;
+export default TypeTable;

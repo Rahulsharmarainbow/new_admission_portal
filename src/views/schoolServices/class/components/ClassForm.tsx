@@ -57,7 +57,7 @@ const ClassForm: React.FC<ClassFormProps> = ({
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  // Reset form when modal opens/closes or editing class changes
+console.log('editingClass',editingClass);
   useEffect(() => {
     if (isOpen) {
       if (editingClass) {
@@ -256,7 +256,7 @@ const ClassForm: React.FC<ClassFormProps> = ({
                 htmlFor="tution_fee_1"
                 className="block mb-1 text-sm font-medium text-gray-700"
               >
-                Tuition Fee 1 (₹) <span className="text-red-500">*</span>
+                Tuition Fee 1 <span className="text-red-500">*</span>
               </label>
               <TextInput
                 id="tution_fee_1"
@@ -274,7 +274,7 @@ const ClassForm: React.FC<ClassFormProps> = ({
                 htmlFor="tution_fee_2"
                 className="block mb-1 text-sm font-medium text-gray-700"
               >
-                Tuition Fee 2 (₹) <span className="text-red-500">*</span>
+                Tuition Fee 2 <span className="text-red-500">*</span>
               </label>
               <TextInput
                 id="tution_fee_2"
@@ -292,7 +292,7 @@ const ClassForm: React.FC<ClassFormProps> = ({
                 htmlFor="tution_fee_3"
                 className="block mb-1 text-sm font-medium text-gray-700"
               >
-                Tuition Fee 3 (₹) <span className="text-red-500">*</span>
+                Tuition Fee 3 <span className="text-red-500">*</span>
               </label>
               <TextInput
                 id="tution_fee_3"
@@ -310,7 +310,7 @@ const ClassForm: React.FC<ClassFormProps> = ({
                 htmlFor="registration_fees"
                 className="block mb-1 text-sm font-medium text-gray-700"
               >
-                Registration Fee (₹) <span className="text-red-500">*</span>
+                Registration Fee <span className="text-red-500">*</span>
               </label>
               <TextInput
                 id="registration_fees"

@@ -25,7 +25,7 @@ const SchoolDropdown: React.FC<SchoolDropdownProps> = ({
   name = "school_id",
   label = "",
   isRequired = false,
-  placeholder = "Search or select school...",
+  placeholder = "Search school...",
   className = "",
   formData,
   setFormData,

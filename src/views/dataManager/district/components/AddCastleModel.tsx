@@ -1,319 +1,96 @@
-// import React, { useState, useEffect } from 'react';
-// import { Button } from 'flowbite-react';
-// import axios from 'axios';
-// import { useAuth } from 'src/hook/useAuth';
-
-// interface StateItem {
-//   id: number;
-//   state_title: string;
-// }
-
-// interface AddCasteModalProps {
-//   isOpen: boolean;
-//   onClose: () => void;
-//   onSuccess: () => void;
-// }
-
-// const AddCasteModal: React.FC<AddCasteModalProps> = ({
-//   isOpen,
-//   onClose,
-//   onSuccess
-// }) => {
-//   const { user } = useAuth();
-//   const [casteTitle, setCasteTitle] = useState('');
-//   const [selectedState, setSelectedState] = useState('');
-//   const [states, setStates] = useState<StateItem[]>([]);
-//   const [loading, setLoading] = useState(false);
-//   const [loadingStates, setLoadingStates] = useState(false);
-
-//   const apiUrl = import.meta.env.VITE_API_URL;
-
-//   // Fetch states for dropdown when modal opens
-//   useEffect(() => {
-//     if (isOpen) {
-//       fetchStates();
-//     }
-//   }, [isOpen]);
-
-//   const fetchStates = async () => {
-//     setLoadingStates(true);
-//     try {
-//       const headers = {
-//         'accept': '*/*',
-//         'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
-//         'origin': 'http://localhost:3010',
-//         'priority': 'u=1, i',
-//         'referer': 'http://localhost:3010/',
-//         'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
-//         'sec-ch-ua-mobile': '?0',
-//         'sec-ch-ua-platform': '"Windows"',
-//         'sec-fetch-dest': 'empty',
-//         'sec-fetch-mode': 'cors',
-//         'sec-fetch-site': 'cross-site',
-//         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
-//         'Authorization': `Bearer ${user?.token}`,
-//         'Content-Type': 'application/json'
-//       };
-
-//       const requestBody = {
-//         type: 1, // State type
-//         s_id: user?.id,
-//         academic_id: 65,
-//         page: 0,
-//         rowsPerPage: 1000, // Get all states
-//         order: 'asc',
-//         orderBy: 'state_title',
-//         search: ''
-//       };
-
-//       const response = await axios.post(
-//         `${apiUrl}/SuperAdmin/StateDistrict/get-list`,
-//         requestBody,
-//         { headers }
-//       );
-
-//       if (response.data?.status) {
-//         setStates(response.data.rows || []);
-//       } else {
-//         console.error('Failed to fetch states');
-//       }
-//     } catch (error) {
-//       console.error('Error fetching states:', error);
-//     } finally {
-//       setLoadingStates(false);
-//     }
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-    
-//     if (!casteTitle.trim()) {
-//       alert('Please enter caste title');
-//       return;
-//     }
-
-//     if (!selectedState) {
-//       alert('Please select a state');
-//       return;
-//     }
-
-//     setLoading(true);
-//     try {
-//       const headers = {
-//         'accept': '*/*',
-//         'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
-//         'origin': 'http://localhost:3010',
-//         'priority': 'u=1, i',
-//         'referer': 'http://localhost:3010/',
-//         'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
-//         'sec-ch-ua-mobile': '?0',
-//         'sec-ch-ua-platform': '"Windows"',
-//         'sec-fetch-dest': 'empty',
-//         'sec-fetch-mode': 'cors',
-//         'sec-fetch-site': 'cross-site',
-//         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
-//         'Authorization': `Bearer ${user?.token}`,
-//         'Content-Type': 'application/json'
-//       };
-
-//       const requestBody = {
-//         type: 2, // Caste type
-//         district_title: casteTitle.trim(),
-//         state_id: selectedState,
-//         s_id: user?.id,
-//         academic_id: 65
-//       };
-
-//       const response = await axios.post(
-//         `${apiUrl}/SuperAdmin/StateDistrict/add-data`,
-//         requestBody,
-//         { headers }
-//       );
-
-//       if (response.data?.status) {
-//         alert('Caste added successfully!');
-//         setCasteTitle('');
-//         setSelectedState('');
-//         onSuccess();
-//       } else {
-//         alert(response.data?.message || 'Failed to add caste');
-//       }
-//     } catch (error: any) {
-//       console.error('Error adding caste:', error);
-//       alert(error.response?.data?.message || 'Failed to add caste. Please try again.');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleClose = () => {
-//     setCasteTitle('');
-//     setSelectedState('');
-//     onClose();
-//   };
-
-//   if (!isOpen) return null;
-
-//   return (
-//     <div className="fixed inset-0 bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
-//       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-//         {/* Header */}
-//         <div className="bg-gray-50 px-6 py-4 rounded-t-lg border-b">
-//           <h3 className="text-lg font-semibold text-gray-800">Add Caste</h3>
-//         </div>
-        
-//         {/* Body */}
-//         <form onSubmit={handleSubmit}>
-//           <div className="px-6 py-4">
-//             <div className="mb-4">
-//               <label className="block text-sm font-medium text-gray-700 mb-2">
-//                 Select State *
-//               </label>
-//               <select
-//                 value={selectedState}
-//                 onChange={(e) => setSelectedState(e.target.value)}
-//                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-//                 required
-//               >
-//                 <option value="">Select a state</option>
-//                 {loadingStates ? (
-//                   <option value="" disabled>Loading states...</option>
-//                 ) : (
-//                   states.map((state) => (
-//                     <option key={state.id} value={state.id}>
-//                       {state.state_title}
-//                     </option>
-//                   ))
-//                 )}
-//               </select>
-//             </div>
-
-//             <div className="mb-4">
-//               <label className="block text-sm font-medium text-gray-700 mb-2">
-//                 Caste Title *
-//               </label>
-//               <input
-//                 type="text"
-//                 value={casteTitle}
-//                 onChange={(e) => setCasteTitle(e.target.value)}
-//                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-//                 placeholder="Enter caste title"
-//                 required
-//               />
-//             </div>
-//           </div>
-          
-//           {/* Footer */}
-//           <div className="bg-gray-50 px-6 py-4 rounded-b-lg border-t flex justify-end space-x-3">
-//             <Button 
-//               color="light" 
-//               onClick={handleClose}
-//               disabled={loading}
-//               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-//             >
-//               Cancel
-//             </Button>
-//             <Button 
-//               type="submit"
-//               color="blue"
-//               disabled={loading}
-//               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-//             >
-//               {loading ? 'Adding...' : 'Add Caste'}
-//             </Button>
-//           </div>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default AddCasteModal;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState, useEffect } from 'react';
-import { Button } from 'flowbite-react';
+import { Button, Modal, TextInput, Label, ModalHeader, ModalBody, ModalFooter } from 'flowbite-react';
+import Select from 'react-select';
 import axios from 'axios';
 import { useAuth } from 'src/hook/useAuth';
+import toast from 'react-hot-toast';
 
 interface StateItem {
   id: number;
   state_title: string;
 }
 
-interface AddCasteModalProps {
+interface CasteItem {
+  state_id: any;
+  id: number;
+  district_title: string;
+}
+
+interface CasteModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  selectedItem: CasteItem | null;
+  type: 'add' | 'edit';
 }
 
-const AddCasteModal: React.FC<AddCasteModalProps> = ({
+interface SelectOption {
+  value: number;
+  label: string;
+}
+
+const CasteModal: React.FC<CasteModalProps> = ({
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
+  selectedItem,
+  type
 }) => {
   const { user } = useAuth();
   const [name, setName] = useState('');
-  const [selectedState, setSelectedState] = useState('');
+  const [selectedState, setSelectedState] = useState<SelectOption | null>(null);
   const [states, setStates] = useState<StateItem[]>([]);
+  const [stateOptions, setStateOptions] = useState<SelectOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingStates, setLoadingStates] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  // Fetch states for dropdown when modal opens
+  // Convert states to react-select options
+  useEffect(() => {
+    const options = states.map(state => ({
+      value: state.id,
+      label: state.state_title
+    }));
+    setStateOptions(options);
+  }, [states]);
+
+  // Reset form and fetch states when modal opens
   useEffect(() => {
     if (isOpen) {
       fetchStates();
+      if (type === 'edit' && selectedItem) {
+        setName(selectedItem.district_title || '');
+        // Set selected state after options are loaded
+        const timer = setTimeout(() => {
+          const stateOption = stateOptions.find(option => 
+            option.value === selectedItem.state_id
+          );
+          setSelectedState(stateOption || null);
+        }, 100);
+        return () => clearTimeout(timer);
+      } else {
+        setName('');
+        setSelectedState(null);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, selectedItem, type, stateOptions]);
 
   const fetchStates = async () => {
     setLoadingStates(true);
     try {
       const headers = {
         'accept': '*/*',
-        'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
-        'origin': 'http://localhost:3010',
-        'priority': 'u=1, i',
-        'referer': 'http://localhost:3010/',
-        'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'cross-site',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
         'Authorization': `Bearer ${user?.token}`,
         'Content-Type': 'application/json'
       };
 
       const requestBody = {
-        type: 1, // State type
+        type: 1,
         s_id: user?.id,
         academic_id: 65,
         page: 0,
-        rowsPerPage: 1000, // Get all states
+        rowsPerPage: 1000,
         order: 'asc',
         orderBy: 'state_title',
         search: ''
@@ -332,6 +109,7 @@ const AddCasteModal: React.FC<AddCasteModalProps> = ({
       }
     } catch (error) {
       console.error('Error fetching states:', error);
+      toast.error('Failed to load states');
     } finally {
       setLoadingStates(false);
     }
@@ -341,12 +119,12 @@ const AddCasteModal: React.FC<AddCasteModalProps> = ({
     e.preventDefault();
     
     if (!name.trim()) {
-      alert('Please enter district name');
+      toast.error('Please enter district name');
       return;
     }
 
     if (!selectedState) {
-      alert('Please select a state');
+      toast.error('Please select a state');
       return;
     }
 
@@ -354,45 +132,47 @@ const AddCasteModal: React.FC<AddCasteModalProps> = ({
     try {
       const headers = {
         'accept': '*/*',
-        'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
-        'origin': 'http://localhost:3010',
-        'priority': 'u=1, i',
-        'referer': 'http://localhost:3010/',
-        'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'cross-site',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
         'Authorization': `Bearer ${user?.token}`,
         'Content-Type': 'application/json'
       };
 
-      const requestBody = {
-        type: 2, // District type
-        name: name.trim(),
-        state_id: parseInt(selectedState),
-        s_id: user?.id
-      };
+      let requestBody;
+      let url;
 
-      const response = await axios.post(
-        `${apiUrl}/SuperAdmin/StateDistrict/Add-StateDistrict`,
-        requestBody,
-        { headers }
-      );
+      if (type === 'add') {
+        url = `${apiUrl}/SuperAdmin/StateDistrict/Add-StateDistrict`;
+        requestBody = {
+          type: 2,
+          name: name.trim(),
+          state_id: selectedState.value,
+          s_id: user?.id
+        };
+      } else {
+        if (!selectedItem) {
+          toast.error('No district selected for editing');
+          return;
+        }
+        url = `${apiUrl}/SuperAdmin/StateDistrict/Update-StateDistrict`;
+        requestBody = {
+          type: 2,
+          id: selectedItem.id,
+          name: name.trim(),
+          state_id: selectedState.value,
+          s_id: user?.id
+        };
+      }
+
+      const response = await axios.post(url, requestBody, { headers });
 
       if (response.data?.status) {
-        alert('District added successfully!');
-        setName('');
-        setSelectedState('');
+        toast.success(response.data?.message || `District ${type === 'add' ? 'added' : 'updated'} successfully!`);
         onSuccess();
       } else {
-        alert(response.data?.message || 'Failed to add district');
+        toast.error(response.data?.message || `Failed to ${type} district`);
       }
     } catch (error: any) {
-      console.error('Error adding district:', error);
-      alert(error.response?.data?.message || 'Failed to add district. Please try again.');
+      console.error(`Error ${type}ing district:`, error);
+      toast.error(error.response?.data?.message || `Failed to ${type} district. Please try again.`);
     } finally {
       setLoading(false);
     }
@@ -400,84 +180,164 @@ const AddCasteModal: React.FC<AddCasteModalProps> = ({
 
   const handleClose = () => {
     setName('');
-    setSelectedState('');
+    setSelectedState(null);
     onClose();
   };
 
-  if (!isOpen) return null;
+  // Enhanced custom styles to match Flowbite design
+  const customStyles = {
+    control: (base: any, state: any) => ({
+      ...base,
+      minHeight: '42px',
+      border: '1px solid #d1d5db',
+      borderRadius: '8px',
+      backgroundColor: state.isDisabled ? '#f9fafb' : '#fff',
+      '&:hover': {
+        borderColor: '#9ca3af'
+      },
+      borderColor: state.isFocused ? '#3b82f6' : '#d1d5db',
+      boxShadow: state.isFocused ? '0 0 0 2px rgba(59, 130, 246, 0.2)' : 'none',
+      transition: 'all 0.2s ease'
+    }),
+    menu: (base: any) => ({
+      ...base,
+      borderRadius: '8px',
+      border: '1px solid #e5e7eb',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      zIndex: 9999
+    }),
+    menuList: (base: any) => ({
+      ...base,
+      padding: '4px',
+      maxHeight: '200px'
+    }),
+    option: (base: any, state: any) => ({
+      ...base,
+      backgroundColor: state.isSelected ? '#3b82f6' : state.isFocused ? '#eff6ff' : 'white',
+      color: state.isSelected ? 'white' : '#374151',
+      borderRadius: '6px',
+      margin: '2px 0',
+      padding: '8px 12px',
+      fontSize: '14px',
+      '&:active': {
+        backgroundColor: '#3b82f6',
+        color: 'white'
+      }
+    }),
+    placeholder: (base: any) => ({
+      ...base,
+      color: '#9ca3af',
+      fontSize: '14px'
+    }),
+    singleValue: (base: any) => ({
+      ...base,
+      color: '#374151',
+      fontSize: '14px'
+    }),
+    input: (base: any) => ({
+      ...base,
+      color: '#374151',
+      fontSize: '14px'
+    }),
+    dropdownIndicator: (base: any, state: any) => ({
+      ...base,
+      color: '#6b7280',
+      padding: '8px',
+      transition: 'transform 0.2s ease',
+      transform: state.selectProps.menuIsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+      '&:hover': {
+        color: '#374151'
+      }
+    }),
+    clearIndicator: (base: any) => ({
+      ...base,
+      color: '#6b7280',
+      padding: '8px',
+      '&:hover': {
+        color: '#374151'
+      }
+    }),
+    loadingIndicator: (base: any) => ({
+      ...base,
+      color: '#3b82f6'
+    })
+  };
 
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-        {/* Header */}
-        <div className="bg-gray-50 px-6 py-4 rounded-t-lg border-b">
-          <h3 className="text-lg font-semibold text-gray-800">Add District</h3>
-        </div>
-        
-        {/* Body */}
-        <form onSubmit={handleSubmit}>
-          <div className="px-6 py-4">
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select State *
-              </label>
-              <select
+    <Modal show={isOpen} onClose={handleClose} size="md">
+      <ModalHeader>
+        {type === 'add' ? 'Add District' : 'Edit District'}
+      </ModalHeader>
+      
+      <form onSubmit={handleSubmit}>
+        <ModalBody>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="state" className="mb-2 block text-sm font-medium text-gray-700">
+                Select State <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                id="state"
                 value={selectedState}
-                onChange={(e) => setSelectedState(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={setSelectedState}
+                options={stateOptions}
+                placeholder="Search or select a state..."
+                isSearchable
+                isClearable
+                isLoading={loadingStates}
                 required
-              >
-                <option value="">Select a state</option>
-                {loadingStates ? (
-                  <option value="" disabled>Loading states...</option>
-                ) : (
-                  states.map((state) => (
-                    <option key={state.id} value={state.id}>
-                      {state.state_title}
-                    </option>
-                  ))
-                )}
-              </select>
+                isDisabled={loading || loadingStates}
+                styles={customStyles}
+                noOptionsMessage={({ inputValue }) =>
+                  inputValue ? "No states found" : "No states available"
+                }
+                loadingMessage={() => "Loading states..."}
+                className="react-select-container"
+                classNamePrefix="react-select"
+              />
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                District Name *
-              </label>
-              <input
+            <div>
+              <Label htmlFor="districtName" className="mb-2 block text-sm font-medium text-gray-700">
+                District Name <span className="text-red-500">*</span>
+              </Label>
+              <TextInput
+                id="districtName"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter district name"
                 required
+                disabled={loading}
               />
             </div>
           </div>
-          
-          {/* Footer */}
-          <div className="bg-gray-50 px-6 py-4 rounded-b-lg border-t flex justify-end space-x-3">
-            <Button 
-              color="light" 
-              onClick={handleClose}
-              disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit"
-              color="blue"
-              disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              {loading ? 'Adding...' : 'Add District'}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </ModalBody>
+        
+        <ModalFooter className="flex justify-end space-x-3">
+          <Button 
+            color="gray" 
+            onClick={handleClose}
+            disabled={loading}
+            className="px-4 py-2"
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit"
+            color="blue"
+            disabled={loading || !selectedState || !name.trim()}
+            className="px-4 py-2"
+          >
+            {loading 
+              ? (type === 'add' ? 'Adding...' : 'Updating...') 
+              : (type === 'add' ? 'Add District' : 'Update District')
+            }
+          </Button>
+        </ModalFooter>
+      </form>
+    </Modal>
   );
 };
 
-export default AddCasteModal;
+export default CasteModal;

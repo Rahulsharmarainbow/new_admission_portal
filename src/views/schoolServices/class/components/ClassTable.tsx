@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MdEdit, MdDelete, MdVisibility } from 'react-icons/md';
 import { BsPlusLg, BsSearch, BsThreeDotsVertical } from 'react-icons/bs';
-import { Button, Tooltip, Badge } from 'flowbite-react';
+import { Button, Tooltip, Badge, TextInput } from 'flowbite-react';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import axios from 'axios';
 import Loader from 'src/Frontend/Common/Loader';
@@ -183,7 +183,7 @@ const ClassTable: React.FC = () => {
 
   // Handle page change
   const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
+    setFilters((prev) => ({ ...prev, page: page - 1 }));
   };
 
   // Handle rows per page change
@@ -277,10 +277,6 @@ const ClassTable: React.FC = () => {
     dropdownRefs.current[classId] = el;
   };
 
-  if (loading) {
-    return <Loader />;
-  }
-
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       {/* Search Bar with Filters and Add Button */}
@@ -288,17 +284,11 @@ const ClassTable: React.FC = () => {
         <div className="flex flex-col sm:flex-row gap-4 w-full items-start sm:items-center">
           {/* Search Input */}
           <div className="relative w-full sm:w-80 order-1 sm:order-none">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <BsSearch className="w-4 h-4 text-gray-500" />
-            </div>
-            <input
+            <TextInput
               type="text"
               placeholder="Search by class name..."
               value={filters.search}
               onChange={(e) => handleSearch(e.target.value)}
-              className="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg 
-                       bg-white focus:ring-blue-500 focus:border-blue-500 
-                       placeholder-gray-400 transition-all duration-200"
             />
           </div>
 
@@ -326,6 +316,13 @@ const ClassTable: React.FC = () => {
 
       {/* Custom Table with Flowbite Styling */}
       <div className="rounded-lg border border-gray-200 shadow-sm relative">
+        {/* Table Loader */}
+        {loading && (
+          <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-10 rounded-lg">
+            <Loader />
+          </div>
+        )}
+        
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">

@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Button, Modal, TextInput, Label } from "flowbite-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Button, Modal, TextInput, Label, ModalFooter, ModalHeader, ModalBody } from "flowbite-react";
 import axios from "axios";
 import { useAuth } from "src/hook/useAuth";
 import toast from "react-hot-toast";
 import SchoolDropdown from "src/Frontend/Common/SchoolDropdown";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import JoditEditor from "jodit-react";
 
 interface Content {
   id: number;
@@ -46,47 +45,66 @@ const ContentForm: React.FC<ContentFormProps> = ({
     html_content: "",
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
-  const [quillMounted, setQuillMounted] = useState(false);
+  const [autoGenerateRoute, setAutoGenerateRoute] = useState(true);
+  
+  const editorRef = useRef<any>(null);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  // ReactQuill modules configuration
-  const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      [{ 'font': [] }],
-      [{ 'size': ['small', false, 'large', 'huge'] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'script': 'sub'}, { 'script': 'super' }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
-      [{ 'align': [] }],
-      ['blockquote', 'code-block'],
-      ['link', 'image', 'video'],
-      ['clean']
+  // Jodit Editor configuration
+  const editorConfig = {
+    readonly: false,
+    height: 400,
+    toolbarAdaptive: false,
+    toolbarSticky: true,
+    buttons: [
+      'source',
+      '|',
+      'bold',
+      'italic',
+      'underline',
+      'strikethrough',
+      '|',
+      'ul',
+      'ol',
+      '|',
+      'font',
+      'fontsize',
+      'brush',
+      'paragraph',
+      '|',
+      'image',
+      'video',
+      'table',
+      'link',
+      '|',
+      'left',
+      'center',
+      'right',
+      'justify',
+      '|',
+      'undo',
+      'redo',
+      '|',
+      'hr',
+      'eraser',
+      'copyformat',
+      'fullsize'
     ],
-  };
-
-  const formats = [
-    'header', 'font', 'size',
-    'bold', 'italic', 'underline', 'strike',
-    'color', 'background',
-    'script',
-    'list', 'bullet', 'indent',
-    'align',
-    'blockquote', 'code-block',
-    'link', 'image', 'video'
-  ];
-
-  // Mount Quill only when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      setQuillMounted(true);
-    } else {
-      setQuillMounted(false);
+    removeButtons: [],
+    showXPathInStatusbar: false,
+    showCharsCounter: false,
+    showWordsCounter: false,
+    toolbarButtonSize: 'medium',
+    theme: 'default',
+    uploader: {
+      insertImageAsBase64URI: true
+    },
+    placeholder: 'Start typing your content here...',
+    style: {
+      font: '14px Arial, sans-serif',
     }
-  }, [isOpen]);
+  };
 
   // Reset form when modal opens/closes or editing content changes
   useEffect(() => {
@@ -98,6 +116,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
           page_route: editingContent.page_route,
           html_content: editingContent.html_content,
         });
+        setAutoGenerateRoute(false); // Disable auto-generation in edit mode
       } else {
         setFormData({
           academic_id: "",
@@ -105,6 +124,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
           page_route: "",
           html_content: "",
         });
+        setAutoGenerateRoute(true); // Enable auto-generation in add mode
       }
       setErrors({});
     }
@@ -219,28 +239,36 @@ const ContentForm: React.FC<ContentFormProps> = ({
   const handlePageNameChange = (value: string) => {
     handleInputChange("page_name", value);
     
-    // Auto-generate page route if it's empty or matches the generated version of the previous page name
-    if (!formData.page_route || formData.page_route === generatePageRoute(formData.page_name)) {
+    // Auto-generate page route only if autoGenerateRoute is true and page_route is empty or matches the generated version
+    if (autoGenerateRoute && (!formData.page_route || formData.page_route === generatePageRoute(formData.page_name))) {
       handleInputChange("page_route", generatePageRoute(value));
     }
   };
 
-  return (
-    <Modal show={isOpen} onClose={onClose} size="4xl">
-      <div className="p-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">
-          {editingContent ? "Edit Content" : "Add New Content"}
-        </h3>
+  const handlePageRouteChange = (value: string) => {
+    handleInputChange("page_route", value.toLowerCase());
+    // When user manually edits page route, disable auto-generation
+    setAutoGenerateRoute(false);
+  };
 
+  // Handle editor content change
+  const handleEditorChange = (newContent: string) => {
+    handleInputChange("html_content", newContent);
+  };
+
+  return (
+    <Modal show={isOpen} onClose={onClose} size="5xl">
+      <ModalHeader>
+        {editingContent ? "Edit Content" : "Add New Content"}
+      </ModalHeader>
+      
+      <ModalBody>
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* School Dropdown */}
-          <div>
-            <label
-              htmlFor="academic_id"
-              className="block mb-1 text-sm font-medium text-gray-700"
-            >
+          <div className="w-auto">
+            <Label className="block mb-2">
               Select School <span className="text-red-500">*</span>
-            </label>
+            </Label>
             <SchoolDropdown
               value={formData.academic_id}
               formData={formData}
@@ -255,12 +283,9 @@ const ContentForm: React.FC<ContentFormProps> = ({
 
           {/* Page Name Input */}
           <div>
-            <label
-              htmlFor="page_name"
-              className="block mb-1 text-sm font-medium text-gray-700"
-            >
+            <Label className="block mb-2">
               Page Name <span className="text-red-500">*</span>
-            </label>
+            </Label>
             <TextInput
               id="page_name"
               type="text"
@@ -268,61 +293,61 @@ const ContentForm: React.FC<ContentFormProps> = ({
               onChange={(e) => handlePageNameChange(e.target.value)}
               placeholder="e.g., Declaration Forms, Terms and Conditions"
               color={errors.page_name ? "failure" : "gray"}
-              helperText={errors.page_name}
             />
+            {errors.page_name && (
+              <p className="text-red-500 text-sm mt-1">{errors.page_name}</p>
+            )}
           </div>
 
           {/* Page Route Input */}
           <div>
-            <label
-              htmlFor="page_route"
-              className="block mb-1 text-sm font-medium text-gray-700"
-            >
+            <Label className="block mb-2">
               Page Route <span className="text-red-500">*</span>
-            </label>
+            </Label>
             <TextInput
               id="page_route"
               type="text"
               value={formData.page_route}
-              onChange={(e) => handleInputChange("page_route", e.target.value.toLowerCase())}
+              onChange={(e) => handlePageRouteChange(e.target.value)}
               placeholder="e.g., declaration_forms"
               color={errors.page_route ? "failure" : "gray"}
-              helperText={errors.page_route || "This will be used in the URL path. Use lowercase letters, numbers, underscores, and hyphens only."}
             />
+            {errors.page_route ? (
+              <p className="text-red-500 text-sm mt-1">{errors.page_route}</p>
+            ) : (
+              <p className="text-gray-500 text-sm mt-1">
+                This will be used in the URL path. Use lowercase letters, numbers, underscores, and hyphens only.
+                {autoGenerateRoute && " (Auto-generated from page name)"}
+              </p>
+            )}
           </div>
 
           {/* HTML Content Editor */}
           <div>
-            <label
-              htmlFor="html_content"
-              className="block mb-1 text-sm font-medium text-gray-700"
-            >
-              Content <span className="text-red-500">*</span>
-            </label>
-            <div className={`border rounded-lg ${errors.html_content ? 'border-red-500' : 'border-gray-300'}`}>
-              {quillMounted && (
-                <ReactQuill
-                  value={formData.html_content}
-                  onChange={(value) => handleInputChange("html_content", value)}
-                  modules={modules}
-                  formats={formats}
-                  theme="snow"
-                  style={{ height: "300px" }}
-                />
-              )}
+            <Label className="block mb-2">
+              HTML Content <span className="text-red-500">*</span>
+            </Label>
+            <div className="border border-gray-300 rounded-lg overflow-hidden">
+              <JoditEditor
+                ref={editorRef}
+                value={formData.html_content}
+                config={editorConfig}
+                onBlur={(newContent: string) => handleEditorChange(newContent)}
+                onChange={(newContent: string) => handleEditorChange(newContent)}
+              />
             </div>
             {errors.html_content && (
               <p className="text-red-500 text-sm mt-1">{errors.html_content}</p>
             )}
           </div>
 
-          {/* Content Preview (Optional) */}
+          {/* Content Preview */}
           {formData.html_content && (
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">
-                Content Preview
-              </label>
-              <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 max-h-40 overflow-y-auto">
+              <Label className="block mb-2">
+                Content Preview : 
+              </Label>
+              <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 max-h-60 overflow-y-auto">
                 <div 
                   className="prose prose-sm max-w-none"
                   dangerouslySetInnerHTML={{ __html: formData.html_content }}
@@ -330,27 +355,36 @@ const ContentForm: React.FC<ContentFormProps> = ({
               </div>
             </div>
           )}
-
-          {/* Action Buttons */}
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-            <Button color="gray" onClick={onClose} disabled={loading}>
-              Cancel
-            </Button>
-            <Button type="submit" gradientDuoTone="cyanToBlue" disabled={loading}>
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  {editingContent ? "Updating..." : "Adding..."}
-                </div>
-              ) : editingContent ? (
-                "Update Content"
-              ) : (
-                "Add Content"
-              )}
-            </Button>
-          </div>
         </form>
-      </div>
+      </ModalBody>
+
+      <ModalFooter>
+        <div className="flex justify-end space-x-3 w-full">
+          <Button 
+            color="alternative" 
+            onClick={onClose} 
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmit}
+            gradientDuoTone="cyanToBlue" 
+            disabled={loading}
+          >
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                {editingContent ? "Updating..." : "Adding..."}
+              </div>
+            ) : editingContent ? (
+              "Update Content"
+            ) : (
+              "Add Content"
+            )}
+          </Button>
+        </div>
+      </ModalFooter>
     </Modal>
   );
 };

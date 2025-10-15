@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MdEdit, MdDelete, MdVisibility } from 'react-icons/md';
 import { BsPlusLg, BsSearch, BsThreeDotsVertical } from 'react-icons/bs';
-import { Button, Tooltip, Badge } from 'flowbite-react';
+import { Button, Tooltip, Badge, TextInput } from 'flowbite-react';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import axios from 'axios';
 import Loader from 'src/Frontend/Common/Loader';
@@ -179,7 +179,7 @@ const TransportationSettingsTable: React.FC = () => {
 
   // Handle page change
   const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
+    setFilters((prev) => ({ ...prev, page: page - 1 }));
   };
 
   // Handle rows per page change
@@ -273,291 +273,289 @@ const TransportationSettingsTable: React.FC = () => {
     dropdownRefs.current[settingId] = el;
   };
 
-  if (loading) {
-    return <Loader />;
-  }
 
-  return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      {/* Search Bar with Filters and Add Button */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-        <div className="flex flex-col sm:flex-row gap-4 w-full items-start sm:items-center">
-          {/* Search Input */}
-          <div className="relative w-full sm:w-80 order-1 sm:order-none">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <BsSearch className="w-4 h-4 text-gray-500" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search by parameter name or key..."
-              value={filters.search}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg 
-                       bg-white focus:ring-blue-500 focus:border-blue-500 
-                       placeholder-gray-400 transition-all duration-200"
-            />
-          </div>
-
-          {/* School Dropdown */}
-          <div className="w-full sm:w-64">
-            <SchoolDropdown
-              formData={formData}
-              setFormData={setFormData}
-              onChange={handleAcademicChange}
-              includeAllOption
-            />
-          </div>
+return (
+  <div className="p-4 bg-white rounded-lg shadow-md">
+    {/* Search Bar with Filters and Add Button */}
+    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 w-full items-start sm:items-center">
+        {/* Search Input */}
+        <div className="relative w-full sm:w-80 order-1 sm:order-none">
+          <TextInput
+            type="text"
+            placeholder="Search by parameter name or key..."
+            value={filters.search}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
         </div>
 
-        {/* Add Button */}
-        <Button
-          onClick={handleAddSetting}
-          gradientDuoTone="cyanToBlue"
-          className="whitespace-nowrap w-full lg:w-auto"
-        >
-          <BsPlusLg className="mr-2 w-4 h-4" />
-          Add Setting
-        </Button>
+        {/* School Dropdown */}
+        <div className="w-full sm:w-64">
+          <SchoolDropdown
+            formData={formData}
+            setFormData={setFormData}
+            onChange={handleAcademicChange}
+            includeAllOption
+          />
+        </div>
       </div>
 
-      {/* Custom Table with Flowbite Styling */}
-      <div className="rounded-lg border border-gray-200 shadow-sm relative">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="w-12 py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  S.NO
-                </th>
-                <th
-                  className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
-                  onClick={() => handleSort('academic_name')}
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>School Name</span>
-                    {getSortIcon('academic_name')}
-                  </div>
-                </th>
-                <th
-                  className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
-                  onClick={() => handleSort('param_name')}
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>Parameter Name</span>
-                    {getSortIcon('param_name')}
-                  </div>
-                </th>
-                <th
-                  className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
-                  onClick={() => handleSort('param_key')}
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>Parameter Key</span>
-                    {getSortIcon('param_key')}
-                  </div>
-                </th>
-                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Parameter Value
-                </th>
-                <th
-                  className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
-                  onClick={() => handleSort('creation_date')}
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>Created Date</span>
-                    {getSortIcon('creation_date')}
-                  </div>
-                </th>
-                <th className="w-20 py-3 px-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {settings.length > 0 ? (
-                settings.map((setting, index) => (
-                  <tr key={setting.id} className="hover:bg-gray-50 transition-colors duration-150">
-                    <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {filters.page * filters.rowsPerPage + index + 1}
-                    </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
-                      <Tooltip
-                        content={setting.academic_name}
-                        placement="top"
-                        style="light"
-                        animation="duration-300"
-                      >
-                        <span className="truncate max-w-[180px] block">
-                          {setting.academic_name.length > 25
-                            ? `${setting.academic_name.substring(0, 25)}...`
-                            : setting.academic_name}
-                        </span>
-                      </Tooltip>
-                    </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-700">
-                      <Tooltip
-                        content={setting.param_name}
-                        placement="top"
-                        style="light"
-                        animation="duration-300"
-                      >
-                        <span className="truncate max-w-[150px] block">
-                          {setting.param_name.length > 20
-                            ? `${setting.param_name.substring(0, 20)}...`
-                            : setting.param_name}
-                        </span>
-                      </Tooltip>
-                    </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-mono">
-                      <Tooltip
-                        content={setting.param_key}
-                        placement="top"
-                        style="light"
-                        animation="duration-300"
-                      >
-                        <span className="truncate max-w-[120px] block bg-gray-100 px-2 py-1 rounded text-xs">
-                          {setting.param_key}
-                        </span>
-                      </Tooltip>
-                    </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
-                      <Tooltip
-                        content={setting.param_value}
-                        placement="top"
-                        style="light"
-                        animation="duration-300"
-                      >
-                        <span className="truncate max-w-[100px] block">
-                          {setting.param_value.length > 15
-                            ? `${setting.param_value.substring(0, 15)}...`
-                            : setting.param_value}
-                        </span>
-                      </Tooltip>
-                    </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
-                      {new Date(setting.creation_date).toLocaleDateString()}
-                    </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-center relative">
-                      <div
-                        ref={(el) => setDropdownRef(setting.id, el)}
-                        className="relative flex justify-center"
-                      >
-                        <button
-                          onClick={(e) => toggleDropdown(setting.id, e)}
-                          className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                        >
-                          <BsThreeDotsVertical className="w-4 h-4" />
-                        </button>
-                        {activeDropdown === setting.id &&
-                          createPortal(
-                            <div
-                              className="z-[9999] w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1"
-                              style={{
-                                top: dropdownPosition.top,
-                                left: dropdownPosition.left,
-                                position: 'absolute',
-                              }}
-                              onMouseDown={(e) => e.stopPropagation()}
-                            >
-                              <button
-                                onClick={() => handleEdit(setting)}
-                                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                              >
-                                <MdEdit className="w-4 h-4 mr-3" />
-                                Edit
-                              </button>
+      {/* Add Button */}
+      <Button
+        onClick={handleAddSetting}
+        color='primary'
+        className="whitespace-nowrap w-full lg:w-auto"
+      >
+        <BsPlusLg className="mr-2 w-4 h-4" />
+        Add Setting
+      </Button>
+    </div>
 
-                              <button
-                                onClick={() => handleDeleteClick(setting.id)}
-                                className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                              >
-                                <MdDelete className="w-4 h-4 mr-3" />
-                                Delete
-                              </button>
-                            </div>,
-                            document.body,
-                          )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="py-12 px-6 text-center">
-                    <div className="flex flex-col items-center justify-center text-gray-500">
-                      <svg
-                        className="w-16 h-16 text-gray-300 mb-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+    {/* Custom Table with Flowbite Styling */}
+    <div className="rounded-lg border border-gray-200 shadow-sm relative">
+      {/* Table Loader Overlay */}
+      {loading && (
+        <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-10 rounded-lg">
+          <Loader />
+        </div>
+      )}
+      
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="w-12 py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                S.NO
+              </th>
+              <th
+                className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
+                onClick={() => handleSort('academic_name')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>School Name</span>
+                  {getSortIcon('academic_name')}
+                </div>
+              </th>
+              <th
+                className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
+                onClick={() => handleSort('param_name')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Parameter Name</span>
+                  {getSortIcon('param_name')}
+                </div>
+              </th>
+              <th
+                className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
+                onClick={() => handleSort('param_key')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Parameter Key</span>
+                  {getSortIcon('param_key')}
+                </div>
+              </th>
+              <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Parameter Value
+              </th>
+              <th
+                className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
+                onClick={() => handleSort('creation_date')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Created Date</span>
+                  {getSortIcon('creation_date')}
+                </div>
+              </th>
+              <th className="w-20 py-3 px-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {settings.length > 0 ? (
+              settings.map((setting, index) => (
+                <tr key={setting.id} className="hover:bg-gray-50 transition-colors duration-150">
+                  <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {filters.page * filters.rowsPerPage + index + 1}
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                    <Tooltip
+                      content={setting.academic_name}
+                      placement="top"
+                      style="light"
+                      animation="duration-300"
+                    >
+                      <span className="truncate max-w-[180px] block">
+                        {setting.academic_name.length > 25
+                          ? `${setting.academic_name.substring(0, 25)}...`
+                          : setting.academic_name}
+                      </span>
+                    </Tooltip>
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                    <Tooltip
+                      content={setting.param_name}
+                      placement="top"
+                      style="light"
+                      animation="duration-300"
+                    >
+                      <span className="truncate max-w-[150px] block">
+                        {setting.param_name.length > 20
+                          ? `${setting.param_name.substring(0, 20)}...`
+                          : setting.param_name}
+                      </span>
+                    </Tooltip>
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-mono">
+                    <Tooltip
+                      content={setting.param_key}
+                      placement="top"
+                      style="light"
+                      animation="duration-300"
+                    >
+                      <span className="truncate max-w-[120px] block bg-gray-100 px-2 py-1 rounded text-xs">
+                        {setting.param_key}
+                      </span>
+                    </Tooltip>
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
+                    <Tooltip
+                      content={setting.param_value}
+                      placement="top"
+                      style="light"
+                      animation="duration-300"
+                    >
+                      <span className="truncate max-w-[100px] block">
+                        {setting.param_value.length > 15
+                          ? `${setting.param_value.substring(0, 15)}...`
+                          : setting.param_value}
+                      </span>
+                    </Tooltip>
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
+                    {new Date(setting.creation_date).toLocaleDateString()}
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap text-center relative">
+                    <div
+                      ref={(el) => setDropdownRef(setting.id, el)}
+                      className="relative flex justify-center"
+                    >
+                      <button
+                        onClick={(e) => toggleDropdown(setting.id, e)}
+                        className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1}
-                          d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      <p className="text-lg font-medium text-gray-600 mb-2">No settings found</p>
-                      <p className="text-sm text-gray-500">
-                        {filters.search || filters.academic_id
-                          ? 'Try adjusting your search criteria'
-                          : 'No transportation settings available'}
-                      </p>
-                      {!filters.search && !filters.academic_id && (
-                        <Button
-                          onClick={handleAddSetting}
-                          gradientDuoTone="cyanToBlue"
-                          className="mt-4"
-                        >
-                          <BsPlusLg className="mr-2 w-4 h-4" />
-                          Add Your First Setting
-                        </Button>
-                      )}
+                        <BsThreeDotsVertical className="w-4 h-4" />
+                      </button>
+                      {activeDropdown === setting.id &&
+                        createPortal(
+                          <div
+                            className="z-[9999] w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1"
+                            style={{
+                              top: dropdownPosition.top,
+                              left: dropdownPosition.left,
+                              position: 'absolute',
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              onClick={() => handleEdit(setting)}
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                            >
+                              <MdEdit className="w-4 h-4 mr-3" />
+                              Edit
+                            </button>
+
+                            <button
+                              onClick={() => handleDeleteClick(setting.id)}
+                              className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                            >
+                              <MdDelete className="w-4 h-4 mr-3" />
+                              Delete
+                            </button>
+                          </div>,
+                          document.body,
+                        )}
                     </div>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={7} className="py-12 px-6 text-center">
+                  <div className="flex flex-col items-center justify-center text-gray-500">
+                    <svg
+                      className="w-16 h-16 text-gray-300 mb-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1}
+                        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <p className="text-lg font-medium text-gray-600 mb-2">No settings found</p>
+                    <p className="text-sm text-gray-500">
+                      {filters.search || filters.academic_id
+                        ? 'Try adjusting your search criteria'
+                        : 'No transportation settings available'}
+                    </p>
+                    {!filters.search && !filters.academic_id && (
+                      <Button
+                        onClick={handleAddSetting}
+                        color="primary"
+                        className="mt-4"
+                      >
+                        <BsPlusLg className="mr-2 w-4 h-4" />
+                        Add Your First Setting
+                      </Button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
-
-      {/* Pagination */}
-      {settings.length > 0 && (
-        <div className="mt-6">
-          <Pagination
-            currentPage={filters.page + 1}
-            totalPages={Math.ceil(total / filters.rowsPerPage)}
-            totalItems={total}
-            rowsPerPage={filters.rowsPerPage}
-            onPageChange={handlePageChange}
-            onRowsPerPageChange={handleRowsPerPageChange}
-          />
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={confirmDelete}
-        title="Delete Transportation Setting"
-        message="Are you sure you want to delete this transportation setting? This action cannot be undone."
-      />
-
-      {/* Transportation Settings Form Modal */}
-      <TransportationSettingsForm
-        isOpen={showFormModal}
-        onClose={() => {
-          setShowFormModal(false);
-          setEditingSetting(null);
-        }}
-        onSuccess={handleFormSuccess}
-        editingSetting={editingSetting}
-      />
     </div>
-  );
+
+    {/* Pagination */}
+    {settings.length > 0 && (
+      <div className="mt-6">
+        <Pagination
+          currentPage={filters.page + 1}
+          totalPages={Math.ceil(total / filters.rowsPerPage)}
+          totalItems={total}
+          rowsPerPage={filters.rowsPerPage}
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleRowsPerPageChange}
+        />
+      </div>
+    )}
+
+    {/* Delete Confirmation Modal */}
+    <DeleteConfirmationModal
+      isOpen={showDeleteModal}
+      onClose={() => setShowDeleteModal(false)}
+      onConfirm={confirmDelete}
+      title="Delete Transportation Setting"
+      message="Are you sure you want to delete this transportation setting? This action cannot be undone."
+    />
+
+    {/* Transportation Settings Form Modal */}
+    <TransportationSettingsForm
+      isOpen={showFormModal}
+      onClose={() => {
+        setShowFormModal(false);
+        setEditingSetting(null);
+      }}
+      onSuccess={handleFormSuccess}
+      editingSetting={editingSetting}
+    />
+  </div>
+);
 };
 
 export default TransportationSettingsTable;

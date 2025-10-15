@@ -27,7 +27,7 @@
 
 //   const handleSubmit = async (e: React.FormEvent) => {
 //     e.preventDefault();
-    
+
 //     if (!name.trim()) {
 //       setError('Name is required');
 //       return;
@@ -109,7 +109,7 @@
 //         <div className="px-6 py-4 border-b border-gray-200">
 //           <h3 className="text-xl font-semibold text-gray-900">Add New Data</h3>
 //         </div>
-        
+
 //         <form onSubmit={handleSubmit}>
 //           {/* Body */}
 //           <div className="px-6 py-4 max-h-96 overflow-y-auto">
@@ -165,7 +165,7 @@
 //               )}
 //             </div>
 //           </div>
-          
+
 //           {/* Footer */}
 //           <div className="px-6 py-4 border-t border-gray-200">
 //             <div className="flex justify-end space-x-3">
@@ -202,24 +202,6 @@
 
 // export default AddDataModal;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState } from 'react';
 import { Button, TextInput } from 'flowbite-react';
 import axios from 'axios';
@@ -242,7 +224,7 @@ const AddDataModal: React.FC<AddDataModalProps> = ({
   onClose,
   onSuccess,
   selectedAcademic,
-  selectedType
+  selectedType,
 }) => {
   const { user } = useAuth();
   const { academics, loading: academicLoading } = useAcademics();
@@ -256,7 +238,7 @@ const AddDataModal: React.FC<AddDataModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
       setError('Name is required');
       return;
@@ -272,34 +254,33 @@ const AddDataModal: React.FC<AddDataModalProps> = ({
 
     try {
       const headers = {
-        'accept': '*/*',
+        accept: '*/*',
         'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
-        'origin': 'http://localhost:3010',
-        'priority': 'u=1, i',
-        'referer': 'http://localhost:3010/',
+        origin: 'http://localhost:3010',
+        priority: 'u=1, i',
+        referer: 'http://localhost:3010/',
         'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
         'sec-ch-ua-mobile': '?0',
         'sec-ch-ua-platform': '"Windows"',
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'cross-site',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
-        'Authorization': `Bearer ${user?.token}`,
-        'Content-Type': 'application/json'
+        'user-agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+        Authorization: `Bearer ${user?.token}`,
+        'Content-Type': 'application/json',
       };
 
       const requestBody = {
         type: modalType,
         s_id: user?.id,
         academic_id: parseInt(modalAcademic),
-        name: name.trim()
+        name: name.trim(),
       };
 
-      const response = await axios.post(
-        `${apiUrl}/SuperAdmin/DataManager/Add-Data`,
-        requestBody,
-        { headers }
-      );
+      const response = await axios.post(`${apiUrl}/SuperAdmin/DataManager/Add-Data`, requestBody, {
+        headers,
+      });
 
       if (response.data?.status) {
         alert('Data added successfully!');
@@ -333,7 +314,7 @@ const AddDataModal: React.FC<AddDataModalProps> = ({
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-xl font-semibold text-gray-900">Add New Data</h3>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
           {/* Body */}
           <div className="px-6 py-4 max-h-96 overflow-y-auto">
@@ -345,22 +326,16 @@ const AddDataModal: React.FC<AddDataModalProps> = ({
               <div className="space-y-4">
                 {/* Academic Dropdown */}
                 <div>
-                  <label htmlFor="academic" className="block mb-2 text-sm font-medium text-gray-900">
+                  {/* <label htmlFor="academic" className="block mb-2 text-sm font-medium text-gray-900">
                     Select Academic *
-                  </label>
+                  </label> */}
                   <div className="relative">
                     <AcademicDropdown
-  value={modalAcademic}
-  onChange={setModalAcademic}
-  label="Select Academic *"
-  isRequired
-/>
-
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </div>
+                      value={modalAcademic}
+                      onChange={setModalAcademic}
+                      label="Select Academic"
+                      isRequired
+                    />
                   </div>
                 </div>
 
@@ -369,10 +344,7 @@ const AddDataModal: React.FC<AddDataModalProps> = ({
                   <label className="block mb-2 text-sm font-medium text-gray-900">
                     Select Type *
                   </label>
-                  <TypeOfConnection 
-                    selectedAcademic={modalAcademic}
-                    onTypeChange={setModalType}
-                  />
+                  <TypeOfConnection selectedAcademic={modalAcademic} onTypeChange={setModalType} />
                 </div>
 
                 {/* Name Input */}
@@ -394,22 +366,16 @@ const AddDataModal: React.FC<AddDataModalProps> = ({
                 </div>
 
                 {error && (
-                  <div className="p-3 text-sm text-red-800 bg-red-50 rounded-lg">
-                    {error}
-                  </div>
+                  <div className="p-3 text-sm text-red-800 bg-red-50 rounded-lg">{error}</div>
                 )}
               </div>
             )}
           </div>
-          
+
           {/* Footer */}
           <div className="px-6 py-4 border-t border-gray-200">
             <div className="flex justify-end space-x-3">
-              <Button
-                color="gray"
-                onClick={handleClose}
-                disabled={loading}
-              >
+              <Button color="gray" onClick={handleClose} disabled={loading}>
                 Cancel
               </Button>
               <Button

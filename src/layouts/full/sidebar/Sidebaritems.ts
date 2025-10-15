@@ -107,7 +107,13 @@ const SidebarContent: Record<number, MenuItem[]> = {
               isPro: false,
             },
             {
-              name: 'Type of Connection',
+              name: 'Type Configuration',
+              id: uniqueId(),
+              url: '/SuperAdmin/data-manager/type-configuration',
+              isPro: false,
+            },
+            {
+              name: 'Type Management',
               id: uniqueId(),
               url: '/SuperAdmin/data-manager/type-of-connection',
               isPro: false,

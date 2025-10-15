@@ -1,6 +1,6 @@
 // src/Frontend/Pages/Tickets/TicketManagement.tsx
 import React, { useState } from 'react';
-import TicketTable from './TicketTable';
+import TicketTable from './components/TicketTable';
 
 const TicketManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'open' | 'accepted' | 'resolved'>('open');

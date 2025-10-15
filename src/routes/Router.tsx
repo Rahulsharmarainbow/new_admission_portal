@@ -42,6 +42,7 @@ import TransportationSettingsList from 'src/views/schoolServices/transportationS
 import ContentList from 'src/views/schoolServices/components/contentManagement/ContentList';
 import ClassList from 'src/views/schoolServices/class/ClassList';
 import Fees from 'src/views/feesStructure/Fees';
+import TypeTable from 'src/views/dataManager/typeConfiguration/TypeTable';
 
 
 /* ***Layouts**** */
@@ -99,6 +100,7 @@ const Router = [
       { path: '/SuperAdmin/data-manager/State', element: <StateTable/> },
       { path: '/SuperAdmin/data-manager/District', element: <CasteTable/> },      // data manager ki District ka component
       { path: '/SuperAdmin/data-manager/type-of-connection', element: <DataManagerPage/> },
+      { path: 'data-manager/type-configuration', element: <TypeTable/> },
       { path: '/SuperAdmin/Ticket/open', element: <OpenTickets/> },
        { path: '/SuperAdmin/Ticket/Accepted', element: <AcceptedTickets /> },
       { path: '/SuperAdmin/Ticket/Resolved', element: <ResolvedTickets /> },

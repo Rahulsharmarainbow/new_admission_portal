@@ -57,7 +57,7 @@ const SalesDashboard = () => {
 
   // Update page
   const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
+    setFilters((prev) => ({ ...prev, page: page - 1 }));
   };
 
   // Update rows per page

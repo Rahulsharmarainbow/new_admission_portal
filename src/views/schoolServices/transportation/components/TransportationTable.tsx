@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MdEdit, MdDelete, MdVisibility } from 'react-icons/md';
 import { BsPlusLg, BsSearch, BsThreeDotsVertical } from 'react-icons/bs';
-import { Button, Tooltip, Badge } from 'flowbite-react';
+import { Button, Tooltip, Badge, TextInput } from 'flowbite-react';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import axios from 'axios';
 import Loader from 'src/Frontend/Common/Loader';
@@ -13,7 +13,6 @@ import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
 import SchoolDropdown from 'src/Frontend/Common/SchoolDropdown';
 import TransportationForm from './TransportationForm';
-
 
 interface Transportation {
   id: number;
@@ -116,7 +115,7 @@ const TransportationTable: React.FC = () => {
             'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       if (response.data) {
@@ -133,7 +132,14 @@ const TransportationTable: React.FC = () => {
 
   useEffect(() => {
     fetchTransportations();
-  }, [filters.page, filters.rowsPerPage, filters.order, filters.orderBy, debouncedSearch, filters.academic_id]);
+  }, [
+    filters.page,
+    filters.rowsPerPage,
+    filters.order,
+    filters.orderBy,
+    debouncedSearch,
+    filters.academic_id,
+  ]);
 
   // Handle search
   const handleSearch = (searchValue: string) => {
@@ -181,7 +187,7 @@ const TransportationTable: React.FC = () => {
 
   // Handle page change
   const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
+    setFilters((prev) => ({ ...prev, page: page - 1 }));
   };
 
   // Handle rows per page change
@@ -223,7 +229,7 @@ const TransportationTable: React.FC = () => {
               Authorization: `Bearer ${user?.token}`,
               'Content-Type': 'application/json',
             },
-          }
+          },
         );
 
         if (response.data.status === true) {
@@ -275,272 +281,277 @@ const TransportationTable: React.FC = () => {
     dropdownRefs.current[transportationId] = el;
   };
 
-  if (loading) {
-    return <Loader />;
-  }
 
-  return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      {/* Search Bar with Filters and Add Button */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-       <div className="flex flex-col sm:flex-row gap-4 w-full items-start sm:items-center">
-  {/* Search Input */}
-  <div className="relative w-full sm:w-80 order-1 sm:order-none">
-    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-      <BsSearch className="w-4 h-4 text-gray-500" />
-    </div>
-    <input
-      type="text"
-      placeholder="Search by distance..."
-      value={filters.search}
-      onChange={(e) => handleSearch(e.target.value)}
-      className="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg 
-                 bg-white focus:ring-blue-500 focus:border-blue-500 
-                 placeholder-gray-400 transition-all duration-200"
-    />
-  </div>
+ return (
+  <div className="p-4 bg-white rounded-lg shadow-md">
+    {/* Search Bar with Filters and Add Button */}
+    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 w-full items-start sm:items-center">
+        {/* Search Input */}
+        <div className="relative w-full sm:w-80 order-1 sm:order-none">
+          {/* <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <BsSearch className="w-4 h-4 text-gray-500" />
+          </div> */}
+          <TextInput
+            type="text"
+            placeholder="Search by distance..."
+            value={filters.search}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+        </div>
 
-  {/* School Dropdown */}
-  <div className="w-full sm:w-64">
-    <SchoolDropdown
-      formData={formData}
-      setFormData={setFormData}
-      onChange={handleAcademicChange}
-      includeAllOption
-    />
-  </div>
-</div>
-
-
-        {/* Add Button */}
-        <Button
-          onClick={handleAddTransportation}
-          gradientDuoTone="cyanToBlue"
-          className="whitespace-nowrap w-full lg:w-auto"
-        >
-          <BsPlusLg className="mr-2 w-4 h-4" />
-          Add Transportation
-        </Button>
+        {/* School Dropdown */}
+        <div className="w-full sm:w-64">
+          <SchoolDropdown
+            formData={formData}
+            setFormData={setFormData}
+            onChange={handleAcademicChange}
+            includeAllOption
+          />
+        </div>
       </div>
 
-      {/* Custom Table with Flowbite Styling */}
-      <div className="rounded-lg border border-gray-200 shadow-sm relative">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="w-12 py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  S.NO
-                </th>
-                <th
-                  className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
-                  onClick={() => handleSort('academic_name')}
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>School Name</span>
-                    {getSortIcon('academic_name')}
-                  </div>
-                </th>
-                <th
-                  className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
-                  onClick={() => handleSort('distance')}
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>Distance</span>
-                    {getSortIcon('distance')}
-                  </div>
-                </th>
-                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Fee 1
-                </th>
-                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Fee 2
-                </th>
-                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Fee 3
-                </th>                
-                <th
-                  className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
-                  onClick={() => handleSort('creation_date')}
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>Created Date</span>
-                    {getSortIcon('creation_date')}
-                  </div>
-                </th>
-                <th className="w-20 py-3 px-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {transportations.length > 0 ? (
-                transportations.map((transportation, index) => (
-                  <tr key={transportation.id} className="hover:bg-gray-50 transition-colors duration-150">
-                    <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {filters.page * filters.rowsPerPage + index + 1}
-                    </td>
-                     <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
-                      <Tooltip
-                        content={transportation.academic_name}
-                        placement="top"
-                        style="light"
-                        animation="duration-300"
-                      >
-                        <span className="truncate max-w-[180px] block">
-                          {transportation.academic_name.length > 25
-                            ? `${transportation.academic_name.substring(0, 25)}...`
-                            : transportation.academic_name}
-                        </span>
-                      </Tooltip>
-                    </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-700">
-                      <Tooltip
-                        content={transportation.distance}
-                        placement="top"
-                        style="light"
-                        animation="duration-300"
-                      >
-                        <span className="truncate max-w-[200px] block">
-                          {transportation.distance.length > 35
-                            ? `${transportation.distance.substring(0, 35)}...`
-                            : transportation.distance}
-                        </span>
-                      </Tooltip>
-                    </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                      ₹{transportation.fee1}
-                    </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                      ₹{transportation.fee2}
-                    </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                      ₹{transportation.fee3}
-                    </td>                   
-                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
-                      {new Date(transportation.creation_date).toLocaleDateString()}
-                    </td>
-                    <td className="py-4 px-4 whitespace-nowrap text-center relative">
-                      <div
-                        ref={(el) => setDropdownRef(transportation.id, el)}
-                        className="relative flex justify-center"
-                      >
-                        <button
-                          onClick={(e) => toggleDropdown(transportation.id, e)}
-                          className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                        >
-                          <BsThreeDotsVertical className="w-4 h-4" />
-                        </button>
-                        {activeDropdown === transportation.id &&
-                          createPortal(
-                            <div
-                              className="z-[9999] w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1"
-                              style={{
-                                top: dropdownPosition.top,
-                                left: dropdownPosition.left,
-                                position: 'absolute',
-                              }}
-                              onMouseDown={(e) => e.stopPropagation()}
-                            >
-                              <button
-                                onClick={() => handleEdit(transportation)}
-                                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                              >
-                                <MdEdit className="w-4 h-4 mr-3" />
-                                Edit
-                              </button>
+      {/* Add Button */}
+      <Button
+        onClick={handleAddTransportation}
+        color="primary"
+        className="whitespace-nowrap w-full lg:w-auto"
+      >
+        <BsPlusLg className="mr-2 w-4 h-4" />
+        Add Transportation
+      </Button>
+    </div>
 
-                              <button
-                                onClick={() => handleDeleteClick(transportation.id)}
-                                className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                              >
-                                <MdDelete className="w-4 h-4 mr-3" />
-                                Delete
-                              </button>
-                            </div>,
-                            document.body,
-                          )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={8} className="py-12 px-6 text-center">
-                    <div className="flex flex-col items-center justify-center text-gray-500">
-                      <svg
-                        className="w-16 h-16 text-gray-300 mb-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+    {/* Custom Table with Flowbite Styling */}
+    <div className="rounded-lg border border-gray-200 shadow-sm relative">
+      {/* Table Loader Overlay */}
+      {loading && (
+        <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-10 rounded-lg">
+          <Loader />
+        </div>
+      )}
+      
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="w-12 py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                S.NO
+              </th>
+              <th
+                className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
+                onClick={() => handleSort('academic_name')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>School Name</span>
+                  {getSortIcon('academic_name')}
+                </div>
+              </th>
+              <th
+                className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
+                onClick={() => handleSort('distance')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Distance</span>
+                  {getSortIcon('distance')}
+                </div>
+              </th>
+              <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Fee 1
+              </th>
+              <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Fee 2
+              </th>
+              <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Fee 3
+              </th>
+              <th
+                className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none"
+                onClick={() => handleSort('creation_date')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Created Date</span>
+                  {getSortIcon('creation_date')}
+                </div>
+              </th>
+              <th className="w-20 py-3 px-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {transportations.length > 0 ? (
+              transportations.map((transportation, index) => (
+                <tr
+                  key={transportation.id}
+                  className="hover:bg-gray-50 transition-colors duration-150"
+                >
+                  <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {filters.page * filters.rowsPerPage + index + 1}
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                    <Tooltip
+                      content={transportation.academic_name}
+                      placement="top"
+                      style="light"
+                      animation="duration-300"
+                    >
+                      <span className="truncate max-w-[180px] block">
+                        {transportation.academic_name.length > 25
+                          ? `${transportation.academic_name.substring(0, 25)}...`
+                          : transportation.academic_name}
+                      </span>
+                    </Tooltip>
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                    <Tooltip
+                      content={transportation.distance}
+                      placement="top"
+                      style="light"
+                      animation="duration-300"
+                    >
+                      <span className="truncate max-w-[200px] block">
+                        {transportation.distance.length > 35
+                          ? `${transportation.distance.substring(0, 35)}...`
+                          : transportation.distance}
+                      </span>
+                    </Tooltip>
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                    ₹{transportation.fee1}
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                    ₹{transportation.fee2}
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                    ₹{transportation.fee3}
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
+                    {new Date(transportation.creation_date).toLocaleDateString()}
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap text-center relative">
+                    <div
+                      ref={(el) => setDropdownRef(transportation.id, el)}
+                      className="relative flex justify-center"
+                    >
+                      <button
+                        onClick={(e) => toggleDropdown(transportation.id, e)}
+                        className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1}
-                          d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      <p className="text-lg font-medium text-gray-600 mb-2">No transportations found</p>
-                      <p className="text-sm text-gray-500">
-                        {filters.search || filters.academic_id
-                          ? 'Try adjusting your search criteria'
-                          : 'No transportation records available'}
-                      </p>
-                      {!filters.search && !filters.academic_id && (
-                        <Button
-                          onClick={handleAddTransportation}
-                          gradientDuoTone="cyanToBlue"
-                          className="mt-4"
-                        >
-                          <BsPlusLg className="mr-2 w-4 h-4" />
-                          Add Your First Transportation
-                        </Button>
-                      )}
+                        <BsThreeDotsVertical className="w-4 h-4" />
+                      </button>
+                      {activeDropdown === transportation.id &&
+                        createPortal(
+                          <div
+                            className="z-[9999] w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1"
+                            style={{
+                              top: dropdownPosition.top,
+                              left: dropdownPosition.left,
+                              position: 'absolute',
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              onClick={() => handleEdit(transportation)}
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                            >
+                              <MdEdit className="w-4 h-4 mr-3" />
+                              Edit
+                            </button>
+
+                            <button
+                              onClick={() => handleDeleteClick(transportation.id)}
+                              className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                            >
+                              <MdDelete className="w-4 h-4 mr-3" />
+                              Delete
+                            </button>
+                          </div>,
+                          document.body,
+                        )}
                     </div>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={8} className="py-12 px-6 text-center">
+                  <div className="flex flex-col items-center justify-center text-gray-500">
+                    <svg
+                      className="w-16 h-16 text-gray-300 mb-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1}
+                        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <p className="text-lg font-medium text-gray-600 mb-2">
+                      No transportations found
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {filters.search || filters.academic_id
+                        ? 'Try adjusting your search criteria'
+                        : 'No transportation records available'}
+                    </p>
+                    {!filters.search && !filters.academic_id && (
+                      <Button
+                        onClick={handleAddTransportation}
+                        color="primary"
+                        className="mt-4"
+                      >
+                        <BsPlusLg className="mr-2 w-4 h-4" />
+                        Add Your First Transportation
+                      </Button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
-
-      {/* Pagination */}
-      {transportations.length > 0 && (
-        <div className="mt-6">
-          <Pagination
-            currentPage={filters.page + 1}
-            totalPages={Math.ceil(total / filters.rowsPerPage)}
-            totalItems={total}
-            rowsPerPage={filters.rowsPerPage}
-            onPageChange={handlePageChange}
-            onRowsPerPageChange={handleRowsPerPageChange}
-          />
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={confirmDelete}
-        title="Delete Transportation"
-        message="Are you sure you want to delete this transportation record? This action cannot be undone."
-      />
-
-      {/* Transportation Form Modal */}
-      <TransportationForm
-        isOpen={showFormModal}
-        onClose={() => {
-          setShowFormModal(false);
-          setEditingTransportation(null);
-        }}
-        onSuccess={handleFormSuccess}
-        editingTransportation={editingTransportation}
-      />
     </div>
-  );
+
+    {/* Pagination */}
+    {transportations.length > 0 && (
+      <div className="mt-6">
+        <Pagination
+          currentPage={filters.page + 1}
+          totalPages={Math.ceil(total / filters.rowsPerPage)}
+          totalItems={total}
+          rowsPerPage={filters.rowsPerPage}
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleRowsPerPageChange}
+        />
+      </div>
+    )}
+
+    {/* Delete Confirmation Modal */}
+    <DeleteConfirmationModal
+      isOpen={showDeleteModal}
+      onClose={() => setShowDeleteModal(false)}
+      onConfirm={confirmDelete}
+      title="Delete Transportation"
+      message="Are you sure you want to delete this transportation record? This action cannot be undone."
+    />
+
+    {/* Transportation Form Modal */}
+    <TransportationForm
+      isOpen={showFormModal}
+      onClose={() => {
+        setShowFormModal(false);
+        setEditingTransportation(null);
+      }}
+      onSuccess={handleFormSuccess}
+      editingTransportation={editingTransportation}
+    />
+  </div>
+);
 };
 
 export default TransportationTable;
