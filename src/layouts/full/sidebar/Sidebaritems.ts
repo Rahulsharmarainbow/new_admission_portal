@@ -177,6 +177,46 @@ const SidebarContent: Record<number, MenuItem[]> = {
             },
           ],
         },
+        {
+          name: 'College Services',
+          id: uniqueId(),
+          icon: 'solar:user-id-line-duotone',
+          children: [
+            {
+              name: 'Degrees',
+              id: uniqueId(),
+              url: '/SuperAdmin/degrees',
+              isPro: false,
+            },
+            {
+              name: 'Hallticket',
+              id: uniqueId(),
+              url: '/SuperAdmin/halltickets',
+              isPro: false,
+            },
+            {
+              name: 'Nominal Roll',
+              id: uniqueId(),
+              url: '/SuperAdmin/nominal-roll',
+              isPro: false,
+            },
+            {
+              name: 'Rankcard',
+              id: uniqueId(),
+              url: '/SuperAdmin/rankcard',
+              isPro: false,
+            },
+            {
+              name: 'Content Management',
+              id: uniqueId(),
+              url: '/SuperAdmin/content-Management',
+              isPro: false,
+            },
+          ],
+        },
+
+
+
         { name: 'Profile', url: '/SuperAdmin/profile', icon: 'solar:user-circle-line-duotone' },
       ],
     },

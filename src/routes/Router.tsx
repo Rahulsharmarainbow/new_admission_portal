@@ -43,6 +43,9 @@ import ContentList from 'src/views/schoolServices/components/contentManagement/C
 import ClassList from 'src/views/schoolServices/class/ClassList';
 import Fees from 'src/views/feesStructure/Fees';
 import TypeTable from 'src/views/dataManager/typeConfiguration/TypeTable';
+import DegreeManagementTable from 'src/views/collegeServices/degrees/components/DegreeManagementTable';
+import HallticketTable from 'src/views/collegeServices/hallticket/components/HallticketTable';
+import HallticketForm from 'src/views/collegeServices/hallticket/components/HallticketForm';
 
 
 /* ***Layouts**** */
@@ -108,6 +111,11 @@ const Router = [
       { path: '/SuperAdmin/content-Management', element: <ContentList/> },
       { path: '/SuperAdmin/transportation', element: <TransportationList/> },
       { path: '/SuperAdmin/setting', element: <TransportationSettingsList/> },
+      { path: '/SuperAdmin/degrees', element: <DegreeManagementTable/> },
+      { path: '/SuperAdmin/halltickets', element: <HallticketTable/> },
+      { path: '/SuperAdmin//halltickets/add', element: <HallticketForm/> },
+      { path: '/SuperAdmin//halltickets/edit/:id', element: <HallticketForm/> },
+
       { path: 'ui/table', element: <Table /> },
       { path: 'ui/form', element: <Form /> },
       { path: 'ui/alert', element: <Alert /> },
