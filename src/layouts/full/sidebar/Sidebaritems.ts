@@ -1,5 +1,4 @@
 import { uniqueId } from 'lodash';
-import { useAuth } from 'src/hook/useAuth';
 
 interface ChildItem {
   name: string;

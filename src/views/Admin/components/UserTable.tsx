@@ -12,6 +12,7 @@ import { useDebounce } from 'src/hook/useDebounce';
 import { useAuth } from 'src/hook/useAuth';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
+import toast from 'react-hot-toast';
 
 interface User {
   id: number;
@@ -173,6 +174,34 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
 
       // Refresh data after status change
       fetchUsers();
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
+  };
+  const toggleActiveTwoStep = async (userId: number, currentStatus: number) => {
+    try {
+     const response = await axios.post(
+        `${apiUrl}/${user?.role}/Usermanagment/two-Step-factor`,
+        {
+          s_id: user?.id,
+          user_id: userId,
+          two_step_auth: currentStatus === 1 ? 0 : 1,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+     
+      if (response.data.status) {
+        toast.success(response.data.message || 'Status updated successfully!');
+        fetchUsers();
+      }else{
+        toast.error(response.data.message || 'Failed to update status');
+      }
+      
     } catch (error) {
       console.error('Error updating status:', error);
     }
@@ -351,7 +380,7 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
               </th>
             )}
             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">
-              Status
+              Two Step Auth
             </th>
             <th className="w-56 px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">
               Actions
@@ -400,12 +429,48 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
                   </td>
                 )}
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                 <span
+  onClick={() => toggleActiveTwoStep(user.id, user.two_step_auth)}
+  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer transition-all duration-200
+    ${user.two_step_auth === 0
+      ? 'bg-red-100 text-red-800 border border-red-200 hover:bg-red-200'
+      : 'bg-blue-100 text-blue-800 border border-blue-200 hover:bg-blue-200'
+    }`}
+>
+  {user.two_step_auth === 0 ? 'Remove' : 'Apply'}
+</span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex space-x-2">
+                    {/* <Button
+                      color={user.two_step_auth === 1 ? "default" : "green"}
+                      size="xs"
+                      className="text-xs px-3 py-1.5 font-medium rounded-lg transition-all duration-200 hover:shadow-sm"
+                      onClick={() => toggleActiveTwoStep(user.id, user.two_step_auth)}
+                    >
+                      {user.two_step_auth === 1 ? (
+                        <>
+                          <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Apply
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Remove
+                        </>
+                      )}
+                    </Button> */}
+                      <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium cursor-pointer ${
                       user.status === 1 
                         ? 'bg-green-100 text-green-800 border border-green-200' 
                         : 'bg-red-100 text-red-800 border border-red-200'
                     }`}
+                    onClick={() => toggleActiveStatus(user.id, user.status)}
                   >
                     {user.status === 1 ? (
                       <>
@@ -419,31 +484,6 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
                       </>
                     )}
                   </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex space-x-2">
-                    {/* <Button
-                      gradientDuoTone={user.status === 1 ? "pinkToOrange" : "greenToBlue"}
-                      size="xs"
-                      className="text-xs px-3 py-1.5 font-medium rounded-lg transition-all duration-200 hover:shadow-sm"
-                      onClick={() => toggleActiveStatus(user.id, user.status)}
-                    >
-                      {user.status === 1 ? (
-                        <>
-                          <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Deactivate
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Activate
-                        </>
-                      )}
-                    </Button> */}
 
                     <button
                       className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200 group/edit"

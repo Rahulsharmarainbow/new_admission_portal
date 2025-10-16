@@ -411,32 +411,37 @@ const DegreeFormModal: React.FC<DegreeFormModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <Modal show={isOpen} onClose={handleClose} size="4xl" className='overflow-visible'>
-      <ModalHeader>
-        <div className="flex justify-between items-center w-full">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-            {degree ? 'Edit Degree' : 'Add New Degree'}
-          </h2>
-        </div>
-      </ModalHeader>
+   <Modal 
+  show={isOpen} 
+  onClose={handleClose} 
+  size="4xl" 
+  // className="!overflow-visible"
+>
+  <ModalHeader>
+    {/* <div className="flex justify-between items-center w-full">
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-white"> */}
+        {degree ? 'Edit Degree' : 'Add New Degree'}
+      {/* </h2>
+    </div> */}
+  </ModalHeader>
 
-      <form onSubmit={handleSubmit}>
-        <ModalBody className="relative overflow-visible z-[100]">
-          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-            {/* 2x2 grid layout */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Select Academic */}
-              <div>
-               <Label className="block mb-2" >Select Academic <span className="text-red-500">*</span></Label>
-                <AcademicDropdown
-                  value={formData.academic_id}
-                  onChange={handleAcademicChange}
-                  isRequired={true}
-                  placeholder="Select academic..."
-                  includeAllOption={false}
-                  className="z-[9999]"
-                />
-              </div>
+  <form onSubmit={handleSubmit}>
+    <ModalBody className="overflow-visible">
+      <div className="space-y-4 max-h-[80vh] pr-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-[1000]">
+          <div className="relative z-[9999]">
+            <Label className="block mb-2">
+              Select Academic <span className="text-red-500">*</span>
+            </Label>
+            <AcademicDropdown
+              value={formData.academic_id}
+              onChange={handleAcademicChange}
+              isRequired={true}
+              placeholder="Select academic..."
+              includeAllOption={false}
+              className="!z-[9999]"
+            />
+          </div>
 
               {/* Degree Name */}
               <div>
@@ -501,7 +506,7 @@ const DegreeFormModal: React.FC<DegreeFormModalProps> = ({
         </ModalBody>
 
         <ModalFooter className="flex justify-end gap-3">
-          <Button color="gray" onClick={handleClose} disabled={loading}>
+          <Button color="alternative" onClick={handleClose} disabled={loading}>
             Cancel
           </Button>
           <Button type="submit" color="blue" disabled={loading}>

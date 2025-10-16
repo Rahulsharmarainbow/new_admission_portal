@@ -6,10 +6,11 @@ import FullLogo from "../shared/logo/FullLogo";
 import NavCollapse from "./NavCollapse";
 import SidebarContent from "./Sidebaritems";
 import { useAuth } from "src/hook/useAuth";
+import { BaseSidebarContent } from "./BaseSidebarContent";
 
 const SidebarLayout = () => {
   const { user } = useAuth();
-  const SidebarContents = SidebarContent[user?.login_type] || [];
+  const SidebarContents = BaseSidebarContent();
   const [activeCollapse, setActiveCollapse] = useState<string | null>(null); // Track which dropdown open
 
   return (

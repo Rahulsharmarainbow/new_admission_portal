@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Button, Label, Modal } from 'flowbite-react';
+import { Button, Label, Modal, ModalHeader } from 'flowbite-react';
 import axios from 'axios';
 import Select from 'react-select';
 import { useAuth } from 'src/hook/useAuth';
@@ -153,30 +153,17 @@ const NominalRollForm: React.FC<NominalRollFormProps> = ({ isOpen, onClose, onSu
   };
 
   return (
-    <Modal show={isOpen} onClose={onClose} size="md">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b rounded-t dark:border-gray-600">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Add Nominal Roll
-        </h3>
-        <button
-          type="button"
-          className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-          onClick={onClose}
-        >
-          <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-          </svg>
-          <span className="sr-only">Close modal</span>
-        </button>
-      </div>
+    <Modal show={isOpen} onClose={onClose} size="lg">
+      <ModalHeader>Add Nominal Roll</ModalHeader>
 
       {/* Body */}
       <div className="p-4 space-y-4">
         <div className="space-y-4">
           {/* Academic Dropdown */}
           <div>
-            <Label htmlFor="academic_id" value="Select Academic *" className="block mb-2" />
+            <Label htmlFor="academic_id" className="block mb-2" >
+              Select Academic <span className="text-red-500">*</span>
+            </Label>
             <AcademicDropdown
               value={formData.academic_id}
               onChange={handleAcademicChange}
@@ -187,7 +174,9 @@ const NominalRollForm: React.FC<NominalRollFormProps> = ({ isOpen, onClose, onSu
 
           {/* Degree Dropdown */}
           <div>
-            <Label htmlFor="degree_id" value="Select Degree *" className="block mb-2" />
+            <Label htmlFor="degree_id" className="block mb-2" >
+              Select Degree <span className="text-red-500">*</span> 
+            </Label>
             <Select
               id="degree_id"
               isLoading={degreeLoading}
@@ -214,9 +203,9 @@ const NominalRollForm: React.FC<NominalRollFormProps> = ({ isOpen, onClose, onSu
       </div>
 
       {/* Footer */}
-      <div className="flex items-center p-4 border-t border-gray-200 rounded-b dark:border-gray-600">
+      <div className="flex items-end p-4 border-t border-gray-200 rounded-b dark:border-gray-600">
         <Button
-          color="gray"
+          color="alternative"
           onClick={onClose}
           disabled={submitting}
           className="mr-2"
