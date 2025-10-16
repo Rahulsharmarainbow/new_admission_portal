@@ -239,7 +239,7 @@ const SidebarContent: Record<number, MenuItem[]> = {
             },
           ],
         },
-
+        { name: 'Transaction', url: '/SuperAdmin/transaction', icon: 'solar:card-transfer-line-duotone' },
         { name: 'Profile', url: '/SuperAdmin/profile', icon: 'solar:user-circle-line-duotone' },
       ],
     },

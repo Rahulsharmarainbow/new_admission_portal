@@ -49,6 +49,10 @@ import HallticketForm from 'src/views/collegeServices/hallticket/components/Hall
 import NominalRollTable from 'src/views/collegeServices/nominalRoll/components/NominalRollTable';
 import CollegeContentList from 'src/views/collegeServices/contentManagement/ContentList';
 import TemplatesManagementTable from 'src/views/campaign/templates/TemplatesManagementTable';
+import RankCardTable from 'src/views/collegeServices/rankcard/components/RankCardTable';
+import CampaignForm from 'src/views/campaign/sendCampaign/CampaignForm';
+import CampaignHistoryTable from 'src/views/campaign/campaignRecord/CampaignHistoryTable';
+import TransactionManagementTable from 'src/views/transaction/components/TransactionManagementTable';
 
 
 /* ***Layouts**** */
@@ -121,10 +125,10 @@ const Router = [
       { path: '/SuperAdmin//halltickets/edit/:id', element: <HallticketForm/> },
       { path: '/SuperAdmin/nominal-roll', element: <NominalRollTable/> },
       { path: '/SuperAdmin/campaign/template', element: <TemplatesManagementTable/> },
-      { path: '/SuperAdmin/campaign/send', element: <TemplatesManagementTable/> },
-      { path: '/SuperAdmin/campaign/history', element: <TemplatesManagementTable/> },
-      { path: 'ui/form', element: <Form /> },
-      { path: 'ui/alert', element: <Alert /> },
+      { path: '/SuperAdmin/campaign/send', element: <CampaignForm/> },
+      { path: '/SuperAdmin/campaign/history', element: <CampaignHistoryTable/> },
+      { path: '/SuperAdmin/rankcard', element: <RankCardTable/> },
+      { path: '/SuperAdmin/transaction', element: <TransactionManagementTable/> },
       { path: 'ui/buttons', element: <Buttons /> },
       { path: 'icons/solar', element: <Solar /> },
       { path: 'sample-page', element: <SamplePage /> },
