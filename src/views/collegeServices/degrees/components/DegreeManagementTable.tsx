@@ -222,9 +222,7 @@ const DegreeManagementTable: React.FC = () => {
     }
   };
 
-  if (loading && degrees.length === 0) {
-    return <Loader />;
-  }
+
 
   return (
     <>
@@ -279,12 +277,13 @@ const DegreeManagementTable: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-gray-200 shadow-sm relative">
-        {loading && degrees.length > 0 && (
-          <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-10">
-            <Loader />
-          </div>
-        )}
+     
+
+      {loading ? (
+                <Loader />
+              ) : (
+                 <div className="rounded-lg border border-gray-200 shadow-sm relative">
+       
         
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -408,6 +407,7 @@ const DegreeManagementTable: React.FC = () => {
           </table>
         </div>
       </div>
+              )}
 
       {/* Pagination */}
       {degrees.length > 0 && (

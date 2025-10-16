@@ -106,7 +106,7 @@ const ContentTable: React.FC = () => {
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/SchoolManagement/Content/list-Content`,
+        `${apiUrl}/${user?.role}/SchoolManagement/Content/list-Content`,
         payload,
         {
           headers: {
@@ -219,7 +219,7 @@ const ContentTable: React.FC = () => {
     if (contentToDelete !== null) {
       try {
         const response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/Content/delete-Content`,
+          `${apiUrl}/${user?.role}/SchoolManagement/Content/delete-Content`,
           {
             ids: [contentToDelete],
             s_id: user?.id,

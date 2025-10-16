@@ -46,6 +46,7 @@ import TypeTable from 'src/views/dataManager/typeConfiguration/TypeTable';
 import DegreeManagementTable from 'src/views/collegeServices/degrees/components/DegreeManagementTable';
 import HallticketTable from 'src/views/collegeServices/hallticket/components/HallticketTable';
 import HallticketForm from 'src/views/collegeServices/hallticket/components/HallticketForm';
+import NominalRollTable from 'src/views/collegeServices/nominalRoll/components/NominalRollTable';
 
 
 /* ***Layouts**** */
@@ -116,7 +117,7 @@ const Router = [
       { path: '/SuperAdmin//halltickets/add', element: <HallticketForm/> },
       { path: '/SuperAdmin//halltickets/edit/:id', element: <HallticketForm/> },
 
-      { path: 'ui/table', element: <Table /> },
+      { path: '/SuperAdmin/nominal-roll', element: <NominalRollTable/> },
       { path: 'ui/form', element: <Form /> },
       { path: 'ui/alert', element: <Alert /> },
       { path: 'ui/buttons', element: <Buttons /> },

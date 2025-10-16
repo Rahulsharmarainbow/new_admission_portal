@@ -107,7 +107,7 @@ const TransportationForm: React.FC<TransportationFormProps> = ({
       let response;
       if (editingTransportation) {
         response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/Transportation/update`,
+          `${apiUrl}/${user?.role}/SchoolManagement/Transportation/update`,
           { ...payload, id: editingTransportation.id },
           {
             headers: {
@@ -118,7 +118,7 @@ const TransportationForm: React.FC<TransportationFormProps> = ({
         );
       } else {
         response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/Transportation/add`,
+          `${apiUrl}/${user?.role}/SchoolManagement/Transportation/add`,
           payload,
           {
             headers: {

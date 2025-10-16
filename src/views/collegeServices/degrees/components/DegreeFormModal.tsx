@@ -421,7 +421,7 @@ const DegreeFormModal: React.FC<DegreeFormModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Select Academic */}
               <div>
-               {/* <Label>Select Academic *</Label> */}
+               <Label>Select Academic <span className="text-red-500">*</span></Label>
                 <AcademicDropdown
                   value={formData.academic_id}
                   onChange={handleAcademicChange}

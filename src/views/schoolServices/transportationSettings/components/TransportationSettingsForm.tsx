@@ -102,7 +102,7 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
       let response;
       if (editingSetting) {
         response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/Setting/update`,
+          `${apiUrl}/${user?.role}/SchoolManagement/Setting/update`,
           { ...payload, id: editingSetting.id },
           {
             headers: {
@@ -113,7 +113,7 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
         );
       } else {
         response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/Setting/add`,
+          `${apiUrl}/${user?.role}/SchoolManagement/Setting/add`,
           payload,
           {
             headers: {

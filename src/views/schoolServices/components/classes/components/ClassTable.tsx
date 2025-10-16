@@ -606,7 +606,7 @@ const ClassTable: React.FC = () => {
     setAcademicsLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Dropdown/get-school`,
+        `${apiUrl}/${user?.role}/Dropdown/get-school`,
         {
           academic_id: filters.academic_id || undefined
         },
@@ -646,7 +646,7 @@ const ClassTable: React.FC = () => {
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/SchoolManagement/class-list`,
+        `${apiUrl}/${user?.role}/SchoolManagement/class-list`,
         payload,
         {
           headers: {
@@ -752,7 +752,7 @@ const ClassTable: React.FC = () => {
     if (classToDelete !== null) {
       try {
         const response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/class-Delete`,
+          `${apiUrl}/${user?.role}/SchoolManagement/class-Delete`,
           {
             ids: [classToDelete],
             s_id: user?.id

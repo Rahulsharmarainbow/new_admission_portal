@@ -25,6 +25,142 @@ const Card = ({ children, className = '' }: { children: React.ReactNode; classNa
   </div>
 );
 
+// TextInput Component with eye icon for password fields
+// interface TextInputProps {
+//   id: string;
+//   label: string;
+//   type: string;
+//   value: string;
+//   onChange: (value: string) => void;
+//   placeholder?: string;
+//   required?: boolean;
+//   className?: string;
+// }
+
+// const TextInput = ({ 
+//   id, 
+//   label, 
+//   type, 
+//   value, 
+//   onChange, 
+//   placeholder = '', 
+//   required = false,
+//   className = '' 
+// }: TextInputProps) => {
+//   const [showPassword, setShowPassword] = useState(false);
+
+//   const isPasswordField = type === 'password';
+//   const inputType = isPasswordField && showPassword ? 'text' : type;
+
+//   return (
+//     <div className={className}>
+//       <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">
+//         {label}
+//         {required && <span className="text-red-500 ml-1">*</span>}
+//       </label>
+//       <div className="relative">
+//         <input
+//           id={id}
+//           type={inputType}
+//           value={value}
+//           onChange={(e) => onChange(e.target.value)}
+//           className="block w-full rounded-xl border border-gray-300 bg-gray-50 p-3.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 transition-all duration-200 outline-none"
+//           placeholder={placeholder}
+//           required={required}
+//         />
+//         {isPasswordField && (
+//           <button
+//             type="button"
+//             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700"
+//             onClick={() => setShowPassword(!showPassword)}
+//           >
+//             {showPassword ? (
+//               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L9 9m13 11l-4-4m0 0l-4 4m4-4V5" />
+//               </svg>
+//             ) : (
+//               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+//                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+//               </svg>
+//             )}
+//           </button>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// TextInput Component with proper eye icons for password fields
+interface TextInputProps {
+  id: string;
+  label: string;
+  type: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  required?: boolean;
+  className?: string;
+}
+
+const TextInput = ({ 
+  id, 
+  label, 
+  type, 
+  value, 
+  onChange, 
+  placeholder = '', 
+  required = false,
+  className = '' 
+}: TextInputProps) => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const isPasswordField = type === 'password';
+  const inputType = isPasswordField && showPassword ? 'text' : type;
+
+  return (
+    <div className={className}>
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          type={inputType}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="block w-full rounded-xl border border-gray-300 bg-gray-50 p-3.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 transition-all duration-200 outline-none pr-10"
+          placeholder={placeholder}
+          required={required}
+        />
+        {isPasswordField && (
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 transition-colors duration-200"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? (
+              // Eye slash icon (when password is visible)
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l18 18a.75.75 0 101.06-1.06l-18-18zM22.676 12.553a11.249 11.249 0 01-2.631 4.31l-3.099-3.099a5.25 5.25 0 00-6.71-6.71L7.759 4.577a11.217 11.217 0 014.242-.826c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113z"/>
+                <path d="M15.75 12c0 .18-.013.357-.037.53l-4.244-4.243A3.75 3.75 0 0115.75 12zM12.53 15.713l-4.243-4.244a3.75 3.75 0 004.243 4.243z"/>
+                <path d="M6.75 12c0-.619.107-1.213.304-1.764l-3.1-3.1a11.25 11.25 0 00-2.63 4.31c-.12.362-.12.752 0 1.114 1.489 4.467 5.704 7.69 10.675 7.69 1.5 0 2.933-.294 4.242-.826l-2.477-2.477A5.25 5.25 0 016.75 12z"/>
+              </svg>
+            ) : (
+              // Eye icon (when password is hidden)
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+                <path fillRule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 4.75 12.001 4.75c4.97 0 9.185 2.223 10.675 6.68.12.362.12.752 0 1.113-1.487 4.471-5.705 6.697-10.677 6.697-4.97 0-9.186-2.223-10.675-6.68a1.762 1.762 0 010-1.113zM17.25 12a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0z" clipRule="evenodd"/>
+              </svg>
+            )}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const AccountTab = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -285,78 +421,62 @@ const AccountTab = () => {
             </p>
             <form>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="your-name" className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                  <input
-                    id="your-name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="block w-full rounded-xl border border-gray-300 bg-gray-50 p-3.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full rounded-xl border border-gray-300 bg-gray-50 p-3.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="block w-full rounded-xl border border-gray-300 bg-gray-50 p-3.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
-                  <input
-                    id="current-password"
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="block w-full rounded-xl border border-gray-300 bg-gray-50 p-3.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
-                    placeholder="••••••••"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-                  <input
-                    id="new-password"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="block w-full rounded-xl border border-gray-300 bg-gray-50 p-3.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
-                    placeholder="Enter new password"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-                  <input
-                    id="confirm-password"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="block w-full rounded-xl border border-gray-300 bg-gray-50 p-3.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
-                    placeholder="Confirm new password"
-                  />
-                </div>
+                <TextInput
+                  id="your-name"
+                  label="Full Name"
+                  type="text"
+                  value={name}
+                  onChange={setName}
+                  required={true}
+                />
+                <TextInput
+                  id="email"
+                  label="Email Address"
+                  type="email"
+                  value={email}
+                  onChange={setEmail}
+                  required={true}
+                />
+                <TextInput
+                  id="phone"
+                  label="Phone Number"
+                  type="tel"
+                  value={phone}
+                  onChange={setPhone}
+                  required={true}
+                />
+                <TextInput
+                  id="current-password"
+                  label="Current Password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={setCurrentPassword}
+                  placeholder="••••••••"
+                />
+                <TextInput
+                  id="new-password"
+                  label="New Password"
+                  type="password"
+                  value={newPassword}
+                  onChange={setNewPassword}
+                  placeholder="Enter new password"
+                />
+                <TextInput
+                  id="confirm-password"
+                  label="Confirm Password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={setConfirmPassword}
+                  placeholder="Confirm new password"
+                />
                 <div className="md:col-span-2">
-                  <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">Address</label>
-                  <input
+                  <TextInput
                     id="address"
+                    label="Address"
+                    type="text"
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="block w-full rounded-xl border border-gray-300 bg-gray-50 p-3.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
+                    onChange={setAddress}
+                    className="w-full"
                   />
                 </div>
               </div>

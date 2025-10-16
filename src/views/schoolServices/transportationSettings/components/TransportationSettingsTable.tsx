@@ -105,7 +105,7 @@ const TransportationSettingsTable: React.FC = () => {
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/SchoolManagement/Setting/list`,
+        `${apiUrl}/${user?.role}/SchoolManagement/Setting/list`,
         payload,
         {
           headers: {
@@ -211,7 +211,7 @@ const TransportationSettingsTable: React.FC = () => {
     if (settingToDelete !== null) {
       try {
         const response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/Setting/delete`,
+          `${apiUrl}/${user?.role}/SchoolManagement/Setting/delete`,
           {
             ids: [settingToDelete],
             s_id: user?.id,

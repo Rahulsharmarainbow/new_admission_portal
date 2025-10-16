@@ -524,7 +524,7 @@ const ClassForm: React.FC<ClassFormProps> = ({ isOpen, onClose, onSuccess, class
         // Update existing class
         console.log('Updating class with payload:', { ...payload, id: classData.id }); // Debug log
         response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/class-Update`,
+          `${apiUrl}/${user?.role}/SchoolManagement/class-Update`,
           {
             ...payload,
             id: classData.id
@@ -540,7 +540,7 @@ const ClassForm: React.FC<ClassFormProps> = ({ isOpen, onClose, onSuccess, class
         // Create new class
         console.log('Adding new class with payload:', payload); // Debug log
         response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/class-Add`,
+          `${apiUrl}/${user?.role}/SchoolManagement/class-Add`,
           payload,
           {
             headers: {

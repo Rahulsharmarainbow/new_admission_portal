@@ -106,7 +106,7 @@ const TransportationTable: React.FC = () => {
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/SchoolManagement/Transportation/list`,
+        `${apiUrl}/${user?.role}/SchoolManagement/Transportation/list`,
         payload,
         {
           headers: {
@@ -219,7 +219,7 @@ const TransportationTable: React.FC = () => {
     if (transportationToDelete !== null) {
       try {
         const response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/Transportation/delete`,
+          `${apiUrl}/${user?.role}/SchoolManagement/Transportation/delete`,
           {
             ids: [transportationToDelete],
             s_id: user?.id,

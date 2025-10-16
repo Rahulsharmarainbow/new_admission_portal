@@ -105,7 +105,7 @@ const HallticketForm: React.FC = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/${user?.role}/Hallticket/details`,
+        `${apiUrl}/${user?.role}/CollegeManagement/Hallticket/details`,
         {
           id: parseInt(id!),
         },
@@ -204,8 +204,8 @@ const HallticketForm: React.FC = () => {
       console.log('Submitting payload:', payload);
 
       const url = isEdit 
-        ? `${apiUrl}/${user?.role}/Hallticket/update`
-        : `${apiUrl}/${user?.role}/Hallticket/add`;
+        ? `${apiUrl}/${user?.role}/CollegeManagement/Hallticket/update`
+        : `${apiUrl}/${user?.role}/CollegeManagement/Hallticket/add`;
 
       const response = await axios.post(url, payload, {
         headers: {
