@@ -5,6 +5,7 @@ import { useAuth } from "src/hook/useAuth";
 import toast from "react-hot-toast";
 import SchoolDropdown from "src/Frontend/Common/SchoolDropdown";
 import JoditEditor from "jodit-react";
+import AcademicDropdown from "src/Frontend/Common/AcademicDropdown";
 
 interface Content {
   id: number;
@@ -267,18 +268,17 @@ const ContentForm: React.FC<ContentFormProps> = ({
           {/* School Dropdown */}
           <div className="w-auto">
             <Label className="block mb-2">
-              Select School <span className="text-red-500">*</span>
+              Select Academic <span className="text-red-500">*</span>
             </Label>
-            <SchoolDropdown
-              value={formData.academic_id}
-              formData={formData}
-              setFormData={setFormData}
-              onChange={handleAcademicChange}
-              includeAllOption={false}
-            />
-            {/* {errors.academic_id && (
-              <p className="text-red-500 text-sm mt-1">{errors.academic_id}</p>
-            )} */}
+             <AcademicDropdown
+             value={formData.academic_id}
+                          formData={formData}
+                          setFormData={setFormData}
+                          onChange={handleAcademicChange}
+                          placeholder="Select academics..."
+                          includeAllOption={true}
+                          label=""
+                        />
           </div>
 
           {/* Page Name Input */}

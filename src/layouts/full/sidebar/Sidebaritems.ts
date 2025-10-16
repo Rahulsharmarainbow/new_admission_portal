@@ -148,6 +148,31 @@ const SidebarContent: Record<number, MenuItem[]> = {
           ],
         },
         {
+          name: 'Campaign',
+          id: uniqueId(),
+          icon: 'solar:ticket-line-duotone',
+          children: [
+            {
+              name: 'Template Campaign',
+              id: uniqueId(),
+              url: '/SuperAdmin/campaign/template',
+              isPro: false,
+            },
+            {
+              name: 'Send Campaign',
+              id: uniqueId(),
+              url: '/SuperAdmin/campaign/send',
+              isPro: false,
+            },
+            {
+              name: 'Campaign History',
+              id: uniqueId(),
+              url: '/SuperAdmin/campaign/history',
+              isPro: false,
+            },
+          ],
+        },
+        {
           name: 'School Services',
           id: uniqueId(),
           icon: 'solar:user-id-line-duotone',
@@ -173,7 +198,7 @@ const SidebarContent: Record<number, MenuItem[]> = {
             {
               name: 'Content Management',
               id: uniqueId(),
-              url: '/SuperAdmin/content-Management',
+              url: '/SuperAdmin/school-content-Management',
               isPro: false,
             },
           ],
@@ -210,7 +235,7 @@ const SidebarContent: Record<number, MenuItem[]> = {
             {
               name: 'Content Management',
               id: uniqueId(),
-              url: '/SuperAdmin/content-Management',
+              url: '/SuperAdmin/college-content-Management',
               isPro: false,
             },
           ],

@@ -47,6 +47,8 @@ import DegreeManagementTable from 'src/views/collegeServices/degrees/components/
 import HallticketTable from 'src/views/collegeServices/hallticket/components/HallticketTable';
 import HallticketForm from 'src/views/collegeServices/hallticket/components/HallticketForm';
 import NominalRollTable from 'src/views/collegeServices/nominalRoll/components/NominalRollTable';
+import CollegeContentList from 'src/views/collegeServices/contentManagement/ContentList';
+import TemplatesManagementTable from 'src/views/campaign/templates/TemplatesManagementTable';
 
 
 /* ***Layouts**** */
@@ -109,15 +111,18 @@ const Router = [
        { path: '/SuperAdmin/Ticket/Accepted', element: <AcceptedTickets /> },
       { path: '/SuperAdmin/Ticket/Resolved', element: <ResolvedTickets /> },
       { path: '/SuperAdmin/classes', element: <ClassList/> },
-      { path: '/SuperAdmin/content-Management', element: <ContentList/> },
+      { path: '/SuperAdmin/school-content-Management', element: <ContentList/> },
+      { path: '/SuperAdmin/college-content-Management', element: <CollegeContentList/> },
       { path: '/SuperAdmin/transportation', element: <TransportationList/> },
       { path: '/SuperAdmin/setting', element: <TransportationSettingsList/> },
       { path: '/SuperAdmin/degrees', element: <DegreeManagementTable/> },
       { path: '/SuperAdmin/halltickets', element: <HallticketTable/> },
       { path: '/SuperAdmin//halltickets/add', element: <HallticketForm/> },
       { path: '/SuperAdmin//halltickets/edit/:id', element: <HallticketForm/> },
-
       { path: '/SuperAdmin/nominal-roll', element: <NominalRollTable/> },
+      { path: '/SuperAdmin/campaign/template', element: <TemplatesManagementTable/> },
+      { path: '/SuperAdmin/campaign/send', element: <TemplatesManagementTable/> },
+      { path: '/SuperAdmin/campaign/history', element: <TemplatesManagementTable/> },
       { path: 'ui/form', element: <Form /> },
       { path: 'ui/alert', element: <Alert /> },
       { path: 'ui/buttons', element: <Buttons /> },

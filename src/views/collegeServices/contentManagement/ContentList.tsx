@@ -3,7 +3,7 @@ import BreadcrumbHeader from 'src/Frontend/Common/BreadcrumbHeader';
 import ContentTable from './components/ContentTable';
 import { useAuth } from 'src/hook/useAuth';
 
-const ContentList: React.FC = () => {
+const CollegeContentList: React.FC = () => {
   const { user } = useAuth();
   
   return (
@@ -17,4 +17,4 @@ const ContentList: React.FC = () => {
   );
 };
 
-export default ContentList;
+export default CollegeContentList;

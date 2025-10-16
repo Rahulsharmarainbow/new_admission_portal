@@ -330,8 +330,14 @@ const DegreeFormModal: React.FC<DegreeFormModalProps> = ({
     }
   }, [isOpen, degree]);
 
+  console.log(formData);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if(formData.academic_id === ''){
+      toast.error('Please select an academic');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -405,7 +411,7 @@ const DegreeFormModal: React.FC<DegreeFormModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <Modal show={isOpen} onClose={handleClose} size="4xl">
+    <Modal show={isOpen} onClose={handleClose} size="4xl" className='overflow-visible'>
       <ModalHeader>
         <div className="flex justify-between items-center w-full">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
@@ -415,19 +421,20 @@ const DegreeFormModal: React.FC<DegreeFormModalProps> = ({
       </ModalHeader>
 
       <form onSubmit={handleSubmit}>
-        <ModalBody>
-          <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+        <ModalBody className="relative overflow-visible z-[100]">
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
             {/* 2x2 grid layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Select Academic */}
               <div>
-               <Label>Select Academic <span className="text-red-500">*</span></Label>
+               <Label className="block mb-2" >Select Academic <span className="text-red-500">*</span></Label>
                 <AcademicDropdown
                   value={formData.academic_id}
                   onChange={handleAcademicChange}
                   isRequired={true}
                   placeholder="Select academic..."
                   includeAllOption={false}
+                  className="z-[9999]"
                 />
               </div>
 

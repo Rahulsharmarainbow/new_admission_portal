@@ -13,7 +13,7 @@ import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
 import SchoolDropdown from 'src/Frontend/Common/SchoolDropdown';
 import ContentForm from './ContentForm';
-
+import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
 
 interface Content {
   id: number;
@@ -103,7 +103,7 @@ const ContentTable: React.FC = () => {
         order: filters.order,
         orderBy: filters.orderBy,
         search: filters.search,
-        type: 1,
+        type: 2,
       };
 
       const response = await axios.post(
@@ -116,7 +116,7 @@ const ContentTable: React.FC = () => {
             'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       if (response.data) {
@@ -133,7 +133,14 @@ const ContentTable: React.FC = () => {
 
   useEffect(() => {
     fetchContents();
-  }, [filters.page, filters.rowsPerPage, filters.order, filters.orderBy, debouncedSearch, filters.academic_id]);
+  }, [
+    filters.page,
+    filters.rowsPerPage,
+    filters.order,
+    filters.orderBy,
+    debouncedSearch,
+    filters.academic_id,
+  ]);
 
   // Handle search
   const handleSearch = (searchValue: string) => {
@@ -181,7 +188,7 @@ const ContentTable: React.FC = () => {
 
   // Handle page change
   const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page: page - 1 }));
+    setFilters((prev) => ({ ...prev, page: page - 1 }));
   };
 
   // Handle rows per page change
@@ -230,7 +237,7 @@ const ContentTable: React.FC = () => {
               Authorization: `Bearer ${user?.token}`,
               'Content-Type': 'application/json',
             },
-          }
+          },
         );
 
         if (response.data.status === true) {
@@ -314,13 +321,15 @@ const ContentTable: React.FC = () => {
             />
           </div>
 
-          {/* School Dropdown */}
+          {/* college Dropdown */}
           <div className="w-full sm:w-64">
-            <SchoolDropdown
+            <AcademicDropdown
               formData={formData}
               setFormData={setFormData}
               onChange={handleAcademicChange}
-              includeAllOption
+              placeholder="Select academics..."
+              includeAllOption={true}
+              label=""
             />
           </div>
         </div>
@@ -328,7 +337,7 @@ const ContentTable: React.FC = () => {
         {/* Add Button */}
         <Button
           onClick={handleAddContent}
-          color="primary"
+          gradientDuoTone="cyanToBlue"
           className="whitespace-nowrap w-full lg:w-auto"
         >
           <BsPlusLg className="mr-2 w-4 h-4" />
