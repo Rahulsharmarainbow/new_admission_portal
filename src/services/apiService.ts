@@ -45,9 +45,9 @@ export const fetchDistricts = async (stateId: string) => {
 };
 
 // Academic data API calls
-export const fetchAcademicData = async (id: string, userId: string, authToken: string) => {
+export const fetchAcademicData = async (id: string, userId: string, authToken: string, role: string) => {
   try {
-    const response = await fetch(`${apiUrl}/SuperAdmin/Accounts/Get-Academic-details`, {
+    const response = await fetch(`${apiUrl}/${role}/Accounts/Get-Academic-details`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -71,7 +71,7 @@ export const fetchAcademicData = async (id: string, userId: string, authToken: s
   }
 };
 
-export const updateAcademicData = async (formData: FormData, id: string, userId: string, authToken: string) => {
+export const updateAcademicData = async (formData: FormData, id: string, userId: string, authToken: string, role: string) => {
   try {
     const formDataToSend = new FormData();
     
@@ -135,7 +135,7 @@ export const updateAcademicData = async (formData: FormData, id: string, userId:
       formDataToSend.append('academic_logo', formData.academicLogo);
     }
 
-    const response = await fetch(`${apiUrl}/SuperAdmin/Accounts/live-Account-Update`, {
+    const response = await fetch(`${apiUrl}/${role}/Accounts/live-Account-Update`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${authToken}`,

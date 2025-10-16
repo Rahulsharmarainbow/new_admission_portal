@@ -68,7 +68,7 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Usermanagment/list-User`,
+        `${apiUrl}/${user?.role}/Usermanagment/list-User`,
         {
           type: type,
           s_id: user?.id,
@@ -157,7 +157,7 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
   const toggleActiveStatus = async (userId: number, currentStatus: number) => {
     try {
       await axios.post(
-        `${apiUrl}/SuperAdmin/Usermanagment/Change-User-status`,
+        `${apiUrl}/${user?.role}/Usermanagment/Change-User-status`,
         {
           s_id: user?.id,
           user_id: userId,
@@ -188,7 +188,7 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
     if (userToDelete !== null) {
       try {
         const response = await axios.post(
-          `${apiUrl}/SuperAdmin/Usermanagment/Delete-User`,
+          `${apiUrl}/${user?.role}/Usermanagment/Delete-User`,
           {
             id: [userToDelete],
             s_id: user?.id,
@@ -420,9 +420,9 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
                     )}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center space-x-2">
-                    <Button
+                <td className="px-6 py-4">
+                  <div className="flex space-x-2">
+                    {/* <Button
                       gradientDuoTone={user.status === 1 ? "pinkToOrange" : "greenToBlue"}
                       size="xs"
                       className="text-xs px-3 py-1.5 font-medium rounded-lg transition-all duration-200 hover:shadow-sm"
@@ -443,7 +443,7 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
                           Activate
                         </>
                       )}
-                    </Button>
+                    </Button> */}
 
                     <button
                       className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200 group/edit"

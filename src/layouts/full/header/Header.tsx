@@ -29,7 +29,7 @@ const Header = () => {
             </div>
 
             <div className="flex gap-4 items-center">
-              <Button
+              {/* <Button
                 as={Link}
                 to="https://www.wrappixel.com/templates/spike-react-tailwind-admin-template/?ref=376#demos"
                 target="_blank"
@@ -38,7 +38,7 @@ const Header = () => {
                 className="rounded-full py-1 px-5 font-medium"
               >
                 Check Pro Template
-              </Button>
+              </Button> */}
               <Profile />
             </div>
           </div>

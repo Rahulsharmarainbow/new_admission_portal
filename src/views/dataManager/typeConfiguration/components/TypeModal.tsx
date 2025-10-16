@@ -78,7 +78,7 @@ const TypeModal: React.FC<TypeModalProps> = ({
       let url;
 
       if (type === 'add') {
-        url = `${apiUrl}/SuperAdmin/Type/add`;
+        url = `${apiUrl}/${user?.role}/Type/add`;
         requestBody = {
           academic_id: selectedAcademic,
           type: typeName.trim(),
@@ -89,7 +89,7 @@ const TypeModal: React.FC<TypeModalProps> = ({
           toast.error('No type selected for editing');
           return;
         }
-        url = `${apiUrl}/SuperAdmin/Type/update`;
+        url = `${apiUrl}/${user?.role}/Type/update`;
         requestBody = {
           id: selectedItem.id,
           academic_id: selectedAcademic,
@@ -127,7 +127,7 @@ const TypeModal: React.FC<TypeModalProps> = ({
       </ModalHeader>
       
       <form onSubmit={handleSubmit}>
-        <ModalBody>
+        <ModalBody className="overflow-visible">
           <div className="space-y-4">
             {/* Academic Dropdown */}
             <div>

@@ -415,7 +415,7 @@ const EditCasteModal: React.FC<EditCasteModalProps> = ({
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/StateDistrict/get-list`,
+        `${apiUrl}/${user?.role}/StateDistrict/get-list`,
         requestBody,
         { headers }
       );
@@ -478,7 +478,7 @@ const EditCasteModal: React.FC<EditCasteModalProps> = ({
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/StateDistrict/Update-StateDistrict`,
+        `${apiUrl}/${user?.role}/StateDistrict/Update-StateDistrict`,
         requestBody,
         { headers }
       );

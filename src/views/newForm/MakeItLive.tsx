@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Alert, Breadcrumb, Button, Card } from "flowbite-react";
 import { HiCheckCircle, HiArrowLeft, HiArrowRight, HiHome, HiInformationCircle } from "react-icons/hi";
 import { useAuth } from "src/hook/useAuth";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { FormData } from "src/types/formTypes";
 import { fetchStates, fetchAcademicData, updateAcademicData, fetchDistricts } from "src/services/apiService";
 import AcademicInformation from "./components/AcademicInformation";
@@ -100,6 +100,7 @@ const MakeItLive: React.FC = () => {
   const { user } = useAuth();
   const authToken = user?.token;
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState<FormData>({
     // Academic Information
@@ -315,7 +316,7 @@ const MakeItLive: React.FC = () => {
 
         if (id && authToken && user?.id) {
           console.log('Fetching academic data...');
-          const academicData = await fetchAcademicData(id, user.id, authToken);
+          const academicData = await fetchAcademicData(id, user.id, authToken, user.role);
           console.log('Fetched Academic Data:', academicData);
           
           if (academicData.academic) {
@@ -380,12 +381,12 @@ const MakeItLive: React.FC = () => {
     setSubmitMessage("");
 
     try {
-      const result = await updateAcademicData(formData, id, user.id, authToken);
+      const result = await updateAcademicData(formData, id, user.id, authToken, user.role);
       
       if (result.status) {
         setSubmitMessage("Account updated successfully!");
-        // Refresh academic data
-        const academicData = await fetchAcademicData(id, user.id, authToken);
+        const academicData = await fetchAcademicData(id, user.id, authToken, user.role);
+        navigate(`/${user?.role}/live-accounts`);
         if (academicData.academic) {
           await populateFormData(academicData);
         }

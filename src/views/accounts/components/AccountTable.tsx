@@ -569,16 +569,6 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
                           ? 'Try adjusting your search criteria'
                           : `No ${type} accounts available`}
                       </p>
-                      {!filters.search && type === 'demo' && (
-                        <Button
-                          onClick={handleAddAccount}
-                          gradientDuoTone="cyanToBlue"
-                          className="mt-4"
-                        >
-                          <BsPlusLg className="mr-2 w-4 h-4" />
-                          Add Your First Account
-                        </Button>
-                      )}
                     </div>
                   </td>
                 </tr>

@@ -7,19 +7,24 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 interface TypeOfConnectionProps {
   selectedAcademic: string;
-  onTypeChange: (type: string) => void;
+  onTypeChange: (typeId: number | null) => void;
+}
+
+interface TypeItem {
+  id: number;
+  type: string;
 }
 
 interface TypeResponse {
   status: boolean;
-  data: string[];
+  data: TypeItem[];
 }
 
 const TypeOfConnection = ({ selectedAcademic, onTypeChange }: TypeOfConnectionProps) => {
-  const [types, setTypes] = useState<{ value: string; label: string }[]>([]);
-  const [selectedType, setSelectedType] = useState<{ value: string; label: string } | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [types, setTypes] = useState<{ value: number; label: string }[]>([]);
+  const [selectedType, setSelectedType] = useState<{ value: number; label: string } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const { user } = useAuth();
 
   useEffect(() => {
@@ -27,7 +32,7 @@ const TypeOfConnection = ({ selectedAcademic, onTypeChange }: TypeOfConnectionPr
       if (!selectedAcademic) {
         setTypes([]);
         setSelectedType(null);
-        onTypeChange('');
+        onTypeChange(null);
         return;
       }
 
@@ -35,36 +40,30 @@ const TypeOfConnection = ({ selectedAcademic, onTypeChange }: TypeOfConnectionPr
       setError('');
 
       try {
-        console.log('Fetching types for academic ID:', selectedAcademic);
-
         const response = await axios.post<TypeResponse>(
           `${apiUrl}/SuperAdmin/Dropdown/get-type`,
           { academic_id: parseInt(selectedAcademic) },
           {
             headers: {
-              'Authorization': `Bearer ${user?.token}`,
+              Authorization: `Bearer ${user?.token}`,
               'Content-Type': 'application/json',
-              'Accept': '*/*',
             },
           }
         );
 
-        console.log('API Response:', response.data);
-
         if (response.data.status && Array.isArray(response.data.data)) {
-          const formatted = response.data.data.map((t) => ({
-            value: t,
-            label: formatTypeName(t),
+          const formatted = response.data.data.map((item) => ({
+            value: item.id, // Using ID as value
+            label: formatTypeName(item.type),
           }));
           setTypes(formatted);
-          console.log('Types loaded successfully:', formatted);
         } else {
-          throw new Error('Invalid response format from API');
+          throw new Error('Invalid response format');
         }
       } catch (err: any) {
         console.error('Error fetching types:', err);
-        setError(`Failed to load types: ${err.message}`);
         setTypes([]);
+        setError('Failed to load types');
       } finally {
         setLoading(false);
       }
@@ -77,20 +76,21 @@ const TypeOfConnection = ({ selectedAcademic, onTypeChange }: TypeOfConnectionPr
   const formatTypeName = (type: string): string => {
     return type
       .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
 
-  const handleTypeChange = (selected: any) => {
+  const handleTypeChange = (selected: { value: number; label: string } | null) => {
+    console.log('Selected Type ID:', selected?.value);
     setSelectedType(selected);
-    onTypeChange(selected?.value || '');
+    onTypeChange(selected ? selected.value : null);
   };
 
   return (
     <div className="relative w-full sm:w-auto min-w-[200px]">
       <Select
         isLoading={loading}
-        isDisabled={!selectedAcademic || loading || types.length === 0}
+        isDisabled={!selectedAcademic || loading}
         options={types}
         value={selectedType}
         onChange={handleTypeChange}

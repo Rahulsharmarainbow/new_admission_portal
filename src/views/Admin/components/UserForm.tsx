@@ -236,7 +236,7 @@ const UserForm: React.FC = () => {
     setFetchLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Usermanagment/details-User`,
+        `${apiUrl}/${user?.role}/Usermanagment/details-User`,
         { id: parseInt(id!) },
         {
           headers: {
@@ -375,8 +375,8 @@ const UserForm: React.FC = () => {
       }
 
       const endpoint = isEdit
-        ? `${apiUrl}/SuperAdmin/Usermanagment/Update-User`
-        : `${apiUrl}/SuperAdmin/Usermanagment/Add-User`;
+        ? `${apiUrl}/${user?.role}/Usermanagment/Update-User`
+        : `${apiUrl}/${user?.role}/Usermanagment/Add-User`;
 
       const response = await axios.post(endpoint, formDataToSend, {
         headers: {

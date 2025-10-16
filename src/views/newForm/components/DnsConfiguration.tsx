@@ -13,7 +13,7 @@ const DnsConfiguration: React.FC<DnsConfigurationProps> = ({ formData, updateFor
   const domainNameRegex = /^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
 
   const handleConfigure = () => {
-    if (!formData.domainNameError && formData.domainName) {
+    if (!formData.domainNameError && formData.website_url) {
       updateFormData({ 
         configure: "1",
         updateConfigure: 1
@@ -52,7 +52,7 @@ const DnsConfiguration: React.FC<DnsConfigurationProps> = ({ formData, updateFor
             <div className="relative">
               <TextInput
                 id="domainName"
-                value={formData.domainName}
+                value={formData.website_url}
                 onChange={(e) => handleDomainChange(e.target.value)}
                 color={formData.domainNameError ? "failure" : "gray"}
                 placeholder="example.com"

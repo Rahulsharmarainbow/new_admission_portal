@@ -1,4 +1,5 @@
 import { uniqueId } from 'lodash';
+import { useAuth } from 'src/hook/useAuth';
 
 interface ChildItem {
   name: string;
@@ -215,8 +216,6 @@ const SidebarContent: Record<number, MenuItem[]> = {
           ],
         },
 
-
-
         { name: 'Profile', url: '/SuperAdmin/profile', icon: 'solar:user-circle-line-duotone' },
       ],
     },
@@ -245,61 +244,163 @@ const SidebarContent: Record<number, MenuItem[]> = {
               url: '/SupportAdmin/live-accounts',
               isPro: false,
             },
+          ],
+        },
+        {
+          name: 'School Services',
+          id: uniqueId(),
+          icon: 'solar:user-id-line-duotone',
+          children: [
             {
-              name: 'School Services',
+              name: 'Classes',
               id: uniqueId(),
-              icon: 'solar:user-id-line-duotone',
-              children: [
-                {
-                  name: 'Classes',
-                  id: uniqueId(),
-                  url: '/SupportAdmin/classes',
-                  isPro: false,
-                },
-                {
-                  name: 'Transportation',
-                  id: uniqueId(),
-                  url: '/SupportAdmin/transportation',
-                  isPro: false,
-                },
-                {
-                  name: 'Setting',
-                  id: uniqueId(),
-                  url: '/SupportAdmin/setting',
-                  isPro: false,
-                },
-                {
-                  name: 'Content Management',
-                  id: uniqueId(),
-                  url: '/SupportAdmin/content-Management',
-                  isPro: false,
-                },
-              ],
+              url: '/SupportAdmin/classes',
+              isPro: false,
             },
             {
-              name: 'Ticket',
+              name: 'Transportation',
               id: uniqueId(),
-              icon: 'solar:ticket-line-duotone',
-              children: [
-                {
-                  name: 'Open Ticket',
-                  id: uniqueId(),
-                  url: '/SupportAdmin/Ticket/open',
-                  isPro: false,
-                },
-                {
-                  name: 'Accepted Ticket',
-                  id: uniqueId(),
-                  url: '/SupportAdmin/Ticket/Accepted',
-                  isPro: false,
-                },
-                {
-                  name: 'Resolved Ticket',
-                  id: uniqueId(),
-                  url: '/SupportAdmin/Ticket/Resolved',
-                  isPro: false,
-                },
-              ],
+              url: '/SupportAdmin/transportation',
+              isPro: false,
+            },
+            {
+              name: 'Setting',
+              id: uniqueId(),
+              url: '/SupportAdmin/setting',
+              isPro: false,
+            },
+            {
+              name: 'Content Management',
+              id: uniqueId(),
+              url: '/SupportAdmin/content-Management',
+              isPro: false,
+            },
+          ],
+        },
+        {
+          name: 'Ticket',
+          id: uniqueId(),
+          icon: 'solar:ticket-line-duotone',
+          children: [
+            {
+              name: 'Open Ticket',
+              id: uniqueId(),
+              url: '/SupportAdmin/Ticket/open',
+              isPro: false,
+            },
+            {
+              name: 'Accepted Ticket',
+              id: uniqueId(),
+              url: '/SupportAdmin/Ticket/Accepted',
+              isPro: false,
+            },
+            {
+              name: 'Resolved Ticket',
+              id: uniqueId(),
+              url: '/SupportAdmin/Ticket/Resolved',
+              isPro: false,
+            },
+          ],
+        },
+        {
+          name: 'College Services',
+          id: uniqueId(),
+          icon: 'solar:user-id-line-duotone',
+          children: [
+            {
+              name: 'Degrees',
+              id: uniqueId(),
+              url: '/SupportAdmin/degrees',
+              isPro: false,
+            },
+            {
+              name: 'Hallticket',
+              id: uniqueId(),
+              url: '/SupportAdmin/halltickets',
+              isPro: false,
+            },
+            {
+              name: 'Nominal Roll',
+              id: uniqueId(),
+              url: '/SupportAdmin/nominal-roll',
+              isPro: false,
+            },
+            {
+              name: 'Rankcard',
+              id: uniqueId(),
+              url: '/SupportAdmin/rankcard',
+              isPro: false,
+            },
+            {
+              name: 'Content Management',
+              id: uniqueId(),
+              url: '/SupportAdmin/content-Management',
+              isPro: false,
+            },
+          ],
+        },
+        {
+          name: 'User Management',
+          id: uniqueId(),
+          icon: 'solar:user-id-line-duotone',
+          children: [
+            {
+              name: 'Sales Admin',
+              id: uniqueId(),
+              url: '/SupportAdmin/sales-admin',
+              isPro: false,
+            },
+            {
+              name: 'Customer Admin',
+              id: uniqueId(),
+              url: '/SupportAdmin/customer-admin',
+              isPro: false,
+            },
+          ],
+        },
+
+        {
+          name: 'Fees Structure',
+          id: uniqueId(),
+          icon: 'solar:cardholder-line-duotone',
+          children: [
+            {
+              name: 'Fees',
+              id: uniqueId(),
+              url: '/SupportAdmin/fees',
+              isPro: false,
+            },
+          ],
+        },
+
+        {
+          name: 'Data Manager',
+          id: uniqueId(),
+          icon: 'solar:database-line-duotone',
+          children: [
+            {
+              name: 'State',
+              id: uniqueId(),
+              url: '/SupportAdmin/data-manager/State',
+              isPro: false,
+            },
+            {
+              name: 'District',
+              id: uniqueId(),
+              url: '/SupportAdmin/data-manager/District',
+              isPro: false,
+            },
+            {
+              name: 'Type Configuration',
+              id: uniqueId(),
+              url: '/SupportAdmin/data-manager/type-configuration',
+              isPro: false,
+            },
+            {
+              name: 'Type Management',
+              id: uniqueId(),
+              url: '/SupportAdmin/data-manager/type-of-connection',
+              isPro: false,
             },
           ],
         },
@@ -337,37 +438,82 @@ const SidebarContent: Record<number, MenuItem[]> = {
           ],
         },
 
-        {
-          name: 'School Services',
-          id: uniqueId(),
-          icon: 'solar:user-id-line-duotone',
-          children: [
-            {
-              name: 'Classes',
-              id: uniqueId(),
-              url: '/CustomerAdmin/classes',
-              isPro: false,
-            },
-            {
-              name: 'Transportation',
-              id: uniqueId(),
-              url: '/CustomerAdmin/transportation',
-              isPro: false,
-            },
-            {
-              name: 'Setting',
-              id: uniqueId(),
-              url: '/CustomerAdmin/setting',
-              isPro: false,
-            },
-            {
-              name: 'Content Management',
-              id: uniqueId(),
-              url: '/CustomerAdmin/content-Management',
-              isPro: false,
-            },
-          ],
-        },
+        // ...(useAuth().user?.academic_type === 1
+        //   ? [
+        //       {
+        //         name: 'School Services',
+        //         id: uniqueId(),
+        //         icon: 'solar:user-id-line-duotone',
+        //         children: [
+        //           {
+        //             name: 'Classes',
+        //             id: uniqueId(),
+        //             url: '/CustomerAdmin/classes',
+        //             isPro: false,
+        //           },
+        //           {
+        //             name: 'Transportation',
+        //             id: uniqueId(),
+        //             url: '/CustomerAdmin/transportation',
+        //             isPro: false,
+        //           },
+        //           {
+        //             name: 'Setting',
+        //             id: uniqueId(),
+        //             url: '/CustomerAdmin/setting',
+        //             isPro: false,
+        //           },
+        //           {
+        //             name: 'Content Management',
+        //             id: uniqueId(),
+        //             url: '/CustomerAdmin/content-Management',
+        //             isPro: false,
+        //           },
+        //         ],
+        //       },
+        //     ]
+        //   : []),
+        // ...(useAuth().user?.academic_type === 2
+        //   ? [
+        //       {
+        //         name: 'College Services',
+        //         id: uniqueId(),
+        //         icon: 'solar:user-id-line-duotone',
+        //         children: [
+        //           {
+        //             name: 'Degrees',
+        //             id: uniqueId(),
+        //             url: '/CustomerAdmin/degrees',
+        //             isPro: false,
+        //           },
+        //           {
+        //             name: 'Hallticket',
+        //             id: uniqueId(),
+        //             url: '/CustomerAdmin/halltickets',
+        //             isPro: false,
+        //           },
+        //           {
+        //             name: 'Nominal Roll',
+        //             id: uniqueId(),
+        //             url: '/CustomerAdmin/nominal-roll',
+        //             isPro: false,
+        //           },
+        //           {
+        //             name: 'Rankcard',
+        //             id: uniqueId(),
+        //             url: '/CustomerAdmin/rankcard',
+        //             isPro: false,
+        //           },
+        //           {
+        //             name: 'Content Management',
+        //             id: uniqueId(),
+        //             url: '/CustomerAdmin/content-Management',
+        //             isPro: false,
+        //           },
+        //         ],
+        //       },
+        //     ]
+        //   : []),
         {
           name: 'Ticket',
           id: uniqueId(),

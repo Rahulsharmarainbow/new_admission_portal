@@ -112,9 +112,6 @@ const EditDataModal: React.FC<EditDataModalProps> = ({
 
   const formatTypeName = (type: string): string => {
     return type
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
   };
 
   if (!isOpen) return null;
@@ -131,45 +128,6 @@ const EditDataModal: React.FC<EditDataModalProps> = ({
           {/* Body */}
           <div className="px-6 py-4 max-h-96 overflow-y-auto">
             <div className="space-y-4">
-              {/* ID Display */}
-              <div>
-                <label htmlFor="id" className="block mb-2 text-sm font-medium text-gray-900">
-                  ID
-                </label>
-                <TextInput
-                  id="id"
-                  value={selectedItem?.id || ''}
-                  disabled
-                  className="w-full"
-                />
-              </div>
-
-              {/* Type Display */}
-              <div>
-                <label htmlFor="type" className="block mb-2 text-sm font-medium text-gray-900">
-                  Type
-                </label>
-                <TextInput
-                  id="type"
-                  value={formatTypeName(selectedType)}
-                  disabled
-                  className="w-full"
-                />
-              </div>
-
-              {/* Academic Display */}
-              <div>
-                <label htmlFor="academic" className="block mb-2 text-sm font-medium text-gray-900">
-                  Academic
-                </label>
-                <TextInput
-                  id="academic"
-                  value={selectedAcademic}
-                  disabled
-                  className="w-full"
-                />
-              </div>
-
               {/* Name Input */}
               <div>
                 <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900">
@@ -187,12 +145,6 @@ const EditDataModal: React.FC<EditDataModalProps> = ({
                   className="w-full"
                 />
               </div>
-
-              {error && (
-                <div className="p-3 text-sm text-red-800 bg-red-50 rounded-lg">
-                  {error}
-                </div>
-              )}
             </div>
           </div>
           

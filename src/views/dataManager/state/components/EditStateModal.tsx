@@ -75,7 +75,7 @@ const EditStateModal: React.FC<EditStateModalProps> = ({
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/StateDistrict/Update-StateDistrict`,
+        `${apiUrl}/${user?.role}/StateDistrict/Update-StateDistrict`,
         requestBody,
         { headers }
       );

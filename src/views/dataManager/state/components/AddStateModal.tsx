@@ -62,7 +62,7 @@ const StateModal: React.FC<StateModalProps> = ({
       let url;
 
       if (type === 'add') {
-        url = `${apiUrl}/SuperAdmin/StateDistrict/Add-StateDistrict`;
+        url = `${apiUrl}/${user?.role}/StateDistrict/Add-StateDistrict`;
         requestBody = {
           type: 1,
           name: name.trim(),
@@ -73,7 +73,7 @@ const StateModal: React.FC<StateModalProps> = ({
           toast.error('No state selected for editing');
           return;
         }
-        url = `${apiUrl}/SuperAdmin/StateDistrict/Update-StateDistrict`;
+        url = `${apiUrl}/${user?.role}/StateDistrict/Update-StateDistrict`;
         requestBody = {
           type: 1,
           id: selectedItem.id,

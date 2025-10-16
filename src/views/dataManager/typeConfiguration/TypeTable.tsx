@@ -92,7 +92,7 @@ const TypeTable: React.FC = () => {
         search: filters.search,
       };
 
-      const response = await axios.post(`${apiUrl}/SuperAdmin/Type/list`, requestBody, { headers });
+      const response = await axios.post(`${apiUrl}/${user?.role}/Type/list`, requestBody, { headers });
 
       if (response.data) {
         setData(response.data.rows || []);
@@ -224,7 +224,7 @@ const TypeTable: React.FC = () => {
         s_id: user?.id,
       };
 
-      const response = await axios.post(`${apiUrl}/SuperAdmin/Type/delete`, requestBody, {
+      const response = await axios.post(`${apiUrl}/${user?.role}/Type/delete`, requestBody, {
         headers,
       });
 

@@ -97,7 +97,7 @@ const CasteModal: React.FC<CasteModalProps> = ({
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/StateDistrict/get-list`,
+        `${apiUrl}/${user?.role}/StateDistrict/get-list`,
         requestBody,
         { headers }
       );
@@ -140,7 +140,7 @@ const CasteModal: React.FC<CasteModalProps> = ({
       let url;
 
       if (type === 'add') {
-        url = `${apiUrl}/SuperAdmin/StateDistrict/Add-StateDistrict`;
+        url = `${apiUrl}/${user?.role}/StateDistrict/Add-StateDistrict`;
         requestBody = {
           type: 2,
           name: name.trim(),
@@ -152,7 +152,7 @@ const CasteModal: React.FC<CasteModalProps> = ({
           toast.error('No district selected for editing');
           return;
         }
-        url = `${apiUrl}/SuperAdmin/StateDistrict/Update-StateDistrict`;
+        url = `${apiUrl}/${user?.role}/StateDistrict/Update-StateDistrict`;
         requestBody = {
           type: 2,
           id: selectedItem.id,

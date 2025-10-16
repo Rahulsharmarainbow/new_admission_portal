@@ -90,7 +90,7 @@ const StateTable: React.FC = () => {
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/StateDistrict/get-list`,
+        `${apiUrl}/${user?.role}/StateDistrict/get-list`,
         requestBody,
         { headers },
       );
@@ -213,7 +213,7 @@ const StateTable: React.FC = () => {
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/StateDistrict/Delete-StateDistrict`,
+        `${apiUrl}/${user?.role}/StateDistrict/Delete-StateDistrict`,
         requestBody,
         { headers },
       );
