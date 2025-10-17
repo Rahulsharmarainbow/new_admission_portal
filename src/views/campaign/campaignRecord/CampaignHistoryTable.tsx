@@ -3,7 +3,7 @@ import { MdDeleteForever, MdFileDownload } from 'react-icons/md';
 import { TbEdit } from "react-icons/tb";
 import { BsPlusLg, BsSearch } from 'react-icons/bs';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
-import { Button, Tooltip } from 'flowbite-react';
+import { Button, TextInput, Tooltip } from 'flowbite-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import Loader from 'src/Frontend/Common/Loader';
@@ -243,17 +243,17 @@ const CampaignHistoryTable: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             {/* Search Input */}
             <div className="relative w-full sm:w-80">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              {/* <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <BsSearch className="w-4 h-4 text-gray-500" />
-              </div>
-              <input
+              </div> */}
+              <TextInput
                 type="text"
                 placeholder="Search by campaign name or target..."
                 value={filters.search}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg 
-                       bg-white focus:ring-blue-500 focus:border-blue-500 
-                       placeholder-gray-400 transition-all duration-200"
+                // className="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg 
+                //        bg-white focus:ring-blue-500 focus:border-blue-500 
+                //        placeholder-gray-400 transition-all duration-200"
               />
             </div>
 
@@ -374,10 +374,10 @@ const CampaignHistoryTable: React.FC = () => {
                           {formatDate(campaign.time)}
                         </td>
                         <td className="py-4 px-4 whitespace-nowrap text-center">
-                          <Tooltip content="Export" placement="top">
+                          <Tooltip content="Export" placement="top" style='light'>
                             <button
                               onClick={() => handleExport(campaign.id)}
-                              className="text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors"
+                              className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
                             >
                               <MdFileDownload className="w-5 h-5" />
                             </button>

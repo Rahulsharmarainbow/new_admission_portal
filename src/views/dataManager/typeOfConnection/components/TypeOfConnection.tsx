@@ -41,7 +41,7 @@ const TypeOfConnection = ({ selectedAcademic, onTypeChange }: TypeOfConnectionPr
 
       try {
         const response = await axios.post<TypeResponse>(
-          `${apiUrl}/SuperAdmin/Dropdown/get-type`,
+          `${apiUrl}/${user?.role}/Dropdown/get-type`,
           { academic_id: parseInt(selectedAcademic) },
           {
             headers: {

@@ -110,7 +110,7 @@ const DataManagerTable: React.FC<DataManagerTableProps> = ({
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/DataManager/get-list`,
+        `${apiUrl}/${user?.role}/DataManager/get-list`,
         requestBody,
         { headers }
       );
@@ -224,7 +224,7 @@ const DataManagerTable: React.FC<DataManagerTableProps> = ({
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/DataManager/Delete-Data`,
+        `${apiUrl}/${user?.role}/DataManager/Delete-Data`,
         requestBody,
         { headers }
       );

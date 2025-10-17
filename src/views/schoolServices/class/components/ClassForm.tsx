@@ -124,7 +124,7 @@ console.log('editingClass',editingClass);
       let response;
       if (editingClass) {
         response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/class-Update`,
+          `${apiUrl}/${user?.role}/SchoolManagement/class-Update`,
           { ...payload, id: editingClass.id },
           {
             headers: {
@@ -135,7 +135,7 @@ console.log('editingClass',editingClass);
         );
       } else {
         response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/class-Add`,
+          `${apiUrl}/${user?.role}/SchoolManagement/class-Add`,
           payload,
           {
             headers: {

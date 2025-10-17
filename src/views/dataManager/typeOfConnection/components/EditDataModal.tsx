@@ -84,7 +84,7 @@ const EditDataModal: React.FC<EditDataModalProps> = ({
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/DataManager/Update-Data`,
+        `${apiUrl}/${user?.role}/DataManager/Update-Data`,
         requestBody,
         { headers }
       );

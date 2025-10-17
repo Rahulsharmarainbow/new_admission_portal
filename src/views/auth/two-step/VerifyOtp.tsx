@@ -195,7 +195,7 @@ export const VerifyOtp: React.FC = () => {
                 onKeyDown={(e) => handleOtpKeyDown(index, e)}
                 onPaste={handleOtpPaste}
                 ref={(el) => (otpInputRefs.current[index] = el)}
-                className="w-14 h-14 text-center text-xl font-semibold border rounded-full focus:ring-2 focus:ring-primary"
+                className="w-14 h-14 text-center text-xl font-semibold border rounded-full"
               />
             ))}
           </div>

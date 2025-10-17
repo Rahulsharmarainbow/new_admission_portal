@@ -9,6 +9,8 @@ import TemplateDropdown from 'src/Frontend/Common/TemplateDropdown';
 import { useAuth } from 'src/hook/useAuth';
 import toast from 'react-hot-toast';
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 const CampaignForm: React.FC = () => {
   const { user } = useAuth();
   const [templateId, setTemplateId] = useState<string>("");
@@ -51,7 +53,7 @@ const CampaignForm: React.FC = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        'https://rainbowsolutionandtechnology.com/NewAdmissionPortal/public/api/SuperAdmin/Campaign/send-Campaign',
+        `${apiUrl}/${user?.role}/Campaign/send-Campaign`,
         {
           s_id: user?.id,
           template_id: parseInt(templateId),
@@ -175,7 +177,7 @@ const CampaignForm: React.FC = () => {
             key={channel}
             className={`flex items-center space-x-2 p-3 rounded-lg border-2 transition-all cursor-pointer ${
               channels.includes(channel) 
-                ? 'bg-blue-100 border-blue-500 shadow-md' 
+                ? 'bg-gray-100 border-blue-500 shadow-md' 
                 : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
             }`}
           >
@@ -218,9 +220,9 @@ const CampaignForm: React.FC = () => {
                     {channelData[channel as keyof typeof channelData]}
                   </pre>
                 </div>
-                <div className="mt-2 text-xs text-gray-500">
+                {/* <div className="mt-2 text-xs text-gray-500">
                   Variables: {'{#name#}'}, {'{#roll_no#}'}
-                </div>
+                </div> */}
               </Card>
             ))}
           </div>
@@ -228,7 +230,7 @@ const CampaignForm: React.FC = () => {
       )}
 
       {/* Selected Data Summary */}
-      {(templateId || academicId || degreeId || studentPerformance) && (
+      {/* {(templateId || academicId || degreeId || studentPerformance) && (
         <Card className="mb-6 bg-gray-50 border-gray-200">
           <h3 className="text-sm font-medium text-gray-700 mb-2">Selected Criteria:</h3>
           <div className="text-sm text-gray-600 space-y-1">
@@ -239,7 +241,7 @@ const CampaignForm: React.FC = () => {
             <p><span className="font-medium">Selected Channels:</span> {channels.length > 0 ? channels.map(ch => channelConfig[ch as keyof typeof channelConfig].label).join(', ') : 'None'}</p>
           </div>
         </Card>
-      )}
+      )} */}
 
       {/* Send Campaign Button */}
       <div className="flex justify-end">

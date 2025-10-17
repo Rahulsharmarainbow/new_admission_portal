@@ -217,7 +217,7 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
     if (userToDelete !== null) {
       try {
         const response = await axios.post(
-          `${apiUrl}/${user?.role}/Usermanagment/Delete-User`,
+          `${apiUrl}/${user?.role}/Usermanagment/delete-User`,
           {
             id: [userToDelete],
             s_id: user?.id,

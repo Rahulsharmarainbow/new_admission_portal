@@ -109,7 +109,7 @@ const ClassTable: React.FC = () => {
       };
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/SchoolManagement/class-list`,
+        `${apiUrl}/${user?.role}/SchoolManagement/class-list`,
         payload,
         {
           headers: {
@@ -215,7 +215,7 @@ const ClassTable: React.FC = () => {
     if (classToDelete !== null) {
       try {
         const response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/class-Delete`,
+          `${apiUrl}/${user?.role}/SchoolManagement/class-Delete`,
           {
             ids: [classToDelete],
             s_id: user?.id,

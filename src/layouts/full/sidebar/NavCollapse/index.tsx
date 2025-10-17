@@ -13,7 +13,6 @@ interface NavCollapseProps {
 const NavCollapse: React.FC<NavCollapseProps> = ({ item, activeCollapse, setActiveCollapse }) => {
   const location = useLocation();
   const pathname = location.pathname;
-
   const activeDD = item.children.find((t: { url: string }) => t.url === pathname);
   const isOpen = activeCollapse === item.id; // Controlled open state
 
