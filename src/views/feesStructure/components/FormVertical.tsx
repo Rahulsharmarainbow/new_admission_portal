@@ -196,7 +196,7 @@ const FormVertical = () => {
 
   const updateFeesData = async (data: any) => {
     try {
-      const response = await axios.post(`${apiUrl}/SuperAdmin/Fees/Update-Fees`, data, {
+      const response = await axios.post(`${apiUrl}/${user?.role}/Fees/Update-Fees`, data, {
         headers: {
           Authorization: `Bearer ${user?.token}`,
           'Content-Type': 'application/json',
@@ -219,7 +219,7 @@ const FormVertical = () => {
   const getFeesData = async (academicId: string) => {
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Fees/get-Fees`,
+        `${apiUrl}/${user?.role}/Fees/get-Fees`,
         {
           academic_id: parseInt(academicId),
         },

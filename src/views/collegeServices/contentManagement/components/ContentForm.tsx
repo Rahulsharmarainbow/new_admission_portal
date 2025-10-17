@@ -167,7 +167,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
       let response;
       if (editingContent) {
         response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/Content/Update-Content`,
+          `${apiUrl}/${user?.role}/SchoolManagement/Content/Update-Content`,
           { ...payload, id: editingContent.id },
           {
             headers: {
@@ -178,7 +178,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
         );
       } else {
         response = await axios.post(
-          `${apiUrl}/SuperAdmin/SchoolManagement/Content/Add-Content`,
+          `${apiUrl}/${user?.role}/SchoolManagement/Content/Add-Content`,
           payload,
           {
             headers: {

@@ -1,22 +1,26 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from './useAuth';
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 export const useTemplates = () => {
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const {user} = useAuth();
 
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
         setLoading(true);
         const response = await fetch(
-          'https://rainbowsolutionandtechnology.com/NewAdmissionPortal/public/api/SuperAdmin/Dropdown/get-template',
+          `${apiUrl}/${user?.role}/Dropdown/get-template`,
           {
             method: 'POST',
             headers: {
               'accept': 'application/json',
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token') || 'YOUR_TOKEN'}`,
+              'Authorization': `Bearer ${user?.token}`,
             },
           }
         );

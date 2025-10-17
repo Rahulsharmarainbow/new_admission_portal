@@ -1,6 +1,5 @@
-// src/components/Tickets/TicketTable.tsx
-import React, { useState, useEffect } from 'react';
-import { MdRemoveRedEye, MdCheckCircle, MdOutlineCheckCircle, MdDelete, MdDeleteForever } from 'react-icons/md';
+import React, { useState, useEffect, ReactNode } from 'react';
+import { MdRemoveRedEye, MdCheckCircle, MdOutlineCheckCircle, MdDeleteForever } from 'react-icons/md';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import axios from 'axios';
 import Loader from 'src/Frontend/Common/Loader';
@@ -9,13 +8,62 @@ import { useAuth } from 'src/hook/useAuth';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import DeleteConfirmationModal from 'src/Frontend/Common/DeleteConfirmationModal';
 import toast from 'react-hot-toast';
-
-// Import the new components
 import TicketDetailsModal from './TicketDetailsModal';
 import AddTicketModal from './AddTicketModal';
 import ResolveTicketModal from './ResolveTicketModal';
 
-// ... (keep all the interfaces same as before)
+interface TicketTableProps {
+  status: string;
+}
+
+interface Filters {
+  page: number;
+  rowsPerPage: number;
+  order: 'asc' | 'desc';
+  orderBy: string;
+  search: string;
+}
+
+interface Ticket {
+  ticket_description: ReactNode;
+  ticket_title: ReactNode;
+  created_by: ReactNode;
+  priority: string;
+  ticket_id: number;
+  name: string;
+  email: string;
+  mobile: string;
+  subject: string;
+  message: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface TicketDetails {
+  ticket_id: number;
+  ticket_title: string;
+  ticket_description: string;
+  status: string;
+  priority: string;
+  // created_by: string;
+  // accepted_by: string;
+  // resolve_by: string;
+  // accepted_at: string | null;
+  // resolve_at: string | null;
+  // resolve_remark: string;
+  // created_at: string;
+}
+
+interface AddTicketForm {
+  ticket_description: any;
+  ticket_title: any;
+  priority: string;
+}
+
+interface ResolveTicketForm {
+  remark: string;
+}
 
 const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
   const { user } = useAuth();
@@ -62,7 +110,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Tickets/get-tickets`,
+        `${apiUrl}/${user?.role}/Tickets/get-tickets`,
         {
           page: filters.page,
           rowsPerPage: filters.rowsPerPage,
@@ -103,7 +151,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
     setLoadingDetails(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Tickets/get-tickets-Details`,
+        `${apiUrl}/${user?.role}/Tickets/get-tickets-Details`,
         {
           ticket_id: ticketId
         },
@@ -136,7 +184,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
     setDeleteLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Tickets/delete-tickets`,
+        `${apiUrl}/${user?.role}/Tickets/delete-tickets`,
         {
           ids: [ticketToDelete],
           s_id: user?.id
@@ -171,7 +219,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
   const handleAcceptTicket = async (ticketId: number) => {
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Tickets/accept-tickets`,
+        `${apiUrl}/${user?.role}/Tickets/accept-tickets`,
         {
           ticket_id: ticketId,
           s_id: user?.id
@@ -205,7 +253,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
     setResolveTicketLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Tickets/resolve-tickets`,
+        `${apiUrl}/${user?.role}/Tickets/resolve-tickets`,
         {
           remark: form.remark,
           ticket_id: selectedTicketId,
@@ -243,7 +291,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
     setAddTicketLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Tickets/add-tickets`,
+        `${apiUrl}/${user?.role}/Tickets/add-tickets`,
         {
           ticket_title: form.ticket_title,
           priority: form.priority,
