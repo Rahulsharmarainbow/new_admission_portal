@@ -499,6 +499,11 @@ const ClassForm: React.FC<ClassFormProps> = ({ isOpen, onClose, onSuccess, class
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if(formData.className === ''){
+          toast.error('Please select an academic');
+          return;
+        }
     
     if (!validateForm()) {
       return;

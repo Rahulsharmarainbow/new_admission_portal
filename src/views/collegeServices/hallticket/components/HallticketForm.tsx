@@ -178,7 +178,12 @@ const HallticketForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if(formData.academic_id === ''){
+          toast.error('Please select an academic');
+          return;
+        }
     setSubmitting(true);
+    
 
     try {
       // Prepare payload according to your API structure

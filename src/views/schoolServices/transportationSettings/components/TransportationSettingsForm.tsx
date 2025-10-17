@@ -86,6 +86,10 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if(formData.academic_id === ''){
+      toast.error('Please select an academic');
+      return;
+    }
 
     if (!validateForm()) return;
 

@@ -150,6 +150,10 @@ const ContentForm: React.FC<ContentFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if(formData.academic_id === ''){
+      toast.error('Please select an academic');
+      return;
+    }
 
     if (!validateForm()) return;
 

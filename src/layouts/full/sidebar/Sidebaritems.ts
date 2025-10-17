@@ -239,6 +239,25 @@ const SidebarContent: Record<number, MenuItem[]> = {
             },
           ],
         },
+        {
+          name: 'Application Forms',
+          id: uniqueId(),
+          icon: 'solar:user-id-line-duotone',
+          children: [
+            {
+              name: 'School Applications',
+              id: uniqueId(),
+              url: '/SuperAdmin/school-applications',
+              isPro: false,
+            },
+            {
+              name: 'College Applications',
+              id: uniqueId(),
+              url: '/SuperAdmin/college-applications',
+              isPro: false,
+            },
+          ],
+        },
         { name: 'Transaction', url: '/SuperAdmin/transaction', icon: 'solar:card-transfer-line-duotone' },
         { name: 'Profile', url: '/SuperAdmin/profile', icon: 'solar:user-circle-line-duotone' },
       ],

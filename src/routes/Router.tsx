@@ -53,6 +53,7 @@ import RankCardTable from 'src/views/collegeServices/rankcard/components/RankCar
 import CampaignForm from 'src/views/campaign/sendCampaign/CampaignForm';
 import CampaignHistoryTable from 'src/views/campaign/campaignRecord/CampaignHistoryTable';
 import TransactionManagementTable from 'src/views/transaction/components/TransactionManagementTable';
+import ApplicationManagementTable from 'src/views/applicationForms/schoolApplications/ApplicationManagementTable';
 
 
 /* ***Layouts**** */
@@ -129,7 +130,7 @@ const Router = [
       { path: '/SuperAdmin/campaign/history', element: <CampaignHistoryTable/> },
       { path: '/SuperAdmin/rankcard', element: <RankCardTable/> },
       { path: '/SuperAdmin/transaction', element: <TransactionManagementTable/> },
-      { path: 'ui/buttons', element: <Buttons /> },
+      { path: '/SuperAdmin/school-applications', element: <ApplicationManagementTable/> },
       { path: 'icons/solar', element: <Solar /> },
       { path: 'sample-page', element: <SamplePage /> },
       { path: '/SuperAdmin/demo-accounts/add', element: <Add /> },

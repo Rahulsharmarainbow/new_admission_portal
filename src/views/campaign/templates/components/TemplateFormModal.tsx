@@ -57,6 +57,12 @@ const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+
+    if(formData.name === ''){
+      toast.error('Please select an academic');
+      return;
+    }
     setLoading(true);
 
     try {
