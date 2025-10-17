@@ -1,21 +1,18 @@
 import React, { useState } from 'react';
 import DataManagerTable from '../components/DataManagerTable';
-import { useAcademics } from 'src/hook/useAcademics';
 import TypeOfConnection from '../components/TypeOfConnection';
-import Loader from 'src/Frontend/Common/Loader';
 import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
 import BreadcrumbHeader from 'src/Frontend/Common/BreadcrumbHeader';
 import { useAuth } from 'src/hook/useAuth';
 import DataModal from './AddDataModal';
 
 const DataManagerPage: React.FC = () => {
-  const { academics, loading: academicLoading } = useAcademics();
-  const [selectedAcademic, setSelectedAcademic] = useState<string>('');
+  const { user } = useAuth();
+  const [selectedAcademic, setSelectedAcademic] = useState<string>(user?.academic_id?.toString() || '');
   const [selectedType, setSelectedType] = useState<string>('');
   const [showModal, setShowModal] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [modalType, setModalType] = useState<'add' | 'edit'>('add');
-  const { user } = useAuth();
 
   // Handle academic change
   const handleAcademicChange = (academic: string) => {
@@ -40,10 +37,6 @@ const DataManagerPage: React.FC = () => {
     setShowModal(true);
   };
 
-  if (academicLoading) {
-    return <Loader />;
-  }
-
   return (
     <div className="p-2">
       {/* Header */}
@@ -58,7 +51,9 @@ const DataManagerPage: React.FC = () => {
       <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-end">
           {/* Academic Dropdown */}
-          <div className="flex-1 min-w-[200px]">
+          {
+            user?.role !== 'CustomerAdmin' && (
+              <div className="flex-1 min-w-[200px]">
             <div className="relative">
               <AcademicDropdown
                 value={selectedAcademic}
@@ -67,6 +62,8 @@ const DataManagerPage: React.FC = () => {
               />
             </div>
           </div>
+            )
+          }
 
           {/* Type Dropdown */}
           <div className="flex-1 min-w-[200px]">
