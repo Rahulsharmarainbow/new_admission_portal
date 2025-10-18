@@ -57,6 +57,7 @@ import ApplicationManagementTable from 'src/views/applicationForms/schoolApplica
 import SchoolDataExport from 'src/views/exportData/schoolData/components/SchoolDataExport';
 import CollegeDataExport from 'src/views/exportData/collegeData/components/CollegeDataExport';
 import ActivitiesTable from 'src/views/activity/components/ActivitiesTable';
+import CollegeApplicationManagementTable from 'src/views/applicationForms/collegeApplication/CollegeApplicationManagementTable';
 
 
 /* ***Layouts**** */
@@ -134,6 +135,7 @@ const Router = [
       { path: '/SuperAdmin/rankcard', element: <RankCardTable/> },
       { path: '/SuperAdmin/transaction', element: <TransactionManagementTable/> },
       { path: '/SuperAdmin/school-applications', element: <ApplicationManagementTable/> },
+      { path: '/SuperAdmin/college-applications', element: <CollegeApplicationManagementTable/> },
       { path: '/SuperAdmin/school-data', element: <SchoolDataExport/> },
       { path: '/SuperAdmin/college-data', element: <CollegeDataExport/> },
       { path: '/SuperAdmin/demo-accounts/add', element: <Add /> },
