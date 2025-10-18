@@ -258,6 +258,26 @@ const SidebarContent: Record<number, MenuItem[]> = {
             },
           ],
         },
+         {
+          name: 'Export Data',
+          id: uniqueId(),
+          icon: 'solar:user-id-line-duotone',
+          children: [
+            {
+              name: 'School Data',
+              id: uniqueId(),
+              url: '/SuperAdmin/school-data',
+              isPro: false,
+            },
+            {
+              name: 'College Data',
+              id: uniqueId(),
+              url: '/SuperAdmin/college-data',
+              isPro: false,
+            },
+          ],
+        },     
+        { name: 'Activity', url: '/SuperAdmin/activity', icon: 'solar:card-transfer-line-duotone' },
         { name: 'Transaction', url: '/SuperAdmin/transaction', icon: 'solar:card-transfer-line-duotone' },
         { name: 'Profile', url: '/SuperAdmin/profile', icon: 'solar:user-circle-line-duotone' },
       ],

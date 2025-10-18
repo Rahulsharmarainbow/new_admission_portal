@@ -22,12 +22,12 @@ import DetailsAccount from 'src/views/accounts/components/DetailsAccount';
 import MakeItLive from 'src/views/newForm/MakeItLive';
 import Add from 'src/views/accounts/components/AddAccount';
 import AddAccount from 'src/views/accounts/components/AddAccount';
-import UserTable from 'src/views/Admin/components/UserTable';
+//import UserTable from 'src/views/Admin/components/UserTable';
 import UserForm from 'src/views/Admin/components/UserForm';
 import AdminManagement from 'src/views/Admin/AdminManagement';
 import AccountProfile from 'src/views/profile/AccountProfile';
 import Demo from 'src/views/profile/Demo';
-import YourComponent from 'src/views/dataManager/typeOfConnection/components/YourComponent';
+//import YourComponent from 'src/views/dataManager/typeOfConnection/components/YourComponent';
 import DataManagerPage from 'src/views/dataManager/typeOfConnection/components/DataManagerPage';
 import StateTable from 'src/views/dataManager/state/components/State';
 import CasteTable from 'src/views/dataManager/district/components/District';
@@ -54,6 +54,9 @@ import CampaignForm from 'src/views/campaign/sendCampaign/CampaignForm';
 import CampaignHistoryTable from 'src/views/campaign/campaignRecord/CampaignHistoryTable';
 import TransactionManagementTable from 'src/views/transaction/components/TransactionManagementTable';
 import ApplicationManagementTable from 'src/views/applicationForms/schoolApplications/ApplicationManagementTable';
+import SchoolDataExport from 'src/views/exportData/schoolData/components/SchoolDataExport';
+import CollegeDataExport from 'src/views/exportData/collegeData/components/CollegeDataExport';
+import ActivitiesTable from 'src/views/activity/components/ActivitiesTable';
 
 
 /* ***Layouts**** */
@@ -131,9 +134,10 @@ const Router = [
       { path: '/SuperAdmin/rankcard', element: <RankCardTable/> },
       { path: '/SuperAdmin/transaction', element: <TransactionManagementTable/> },
       { path: '/SuperAdmin/school-applications', element: <ApplicationManagementTable/> },
-      { path: 'icons/solar', element: <Solar /> },
-      { path: 'sample-page', element: <SamplePage /> },
+      { path: '/SuperAdmin/school-data', element: <SchoolDataExport/> },
+      { path: '/SuperAdmin/college-data', element: <CollegeDataExport/> },
       { path: '/SuperAdmin/demo-accounts/add', element: <Add /> },
+      { path: '/SuperAdmin/activity', element: <ActivitiesTable/>},
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
