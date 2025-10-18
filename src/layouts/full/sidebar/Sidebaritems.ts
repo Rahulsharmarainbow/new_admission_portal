@@ -122,6 +122,32 @@ const SidebarContent: Record<number, MenuItem[]> = {
         },
 
         {
+          name: 'Fronted Management',
+          id: uniqueId(),
+          icon: 'solar:database-line-duotone',
+          children: [
+            {
+              name: 'Home Page',
+              id: uniqueId(),
+              url: '/SuperAdmin/frontend-editing/home',
+              isPro: false,
+            },
+            {
+              name: 'Footer',
+              id: uniqueId(),
+              url: '/SuperAdmin/frontend-editing/footer',
+              isPro: false,
+            },
+            {
+              name: 'Popups',
+              id: uniqueId(),
+              url: '/SuperAdmin/frontend-editing/popups',
+              isPro: false,
+            },
+          ],
+        },
+
+        {
           name: 'Ticket',
           id: uniqueId(),
           icon: 'solar:ticket-line-duotone',

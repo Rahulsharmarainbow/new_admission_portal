@@ -58,6 +58,8 @@ import SchoolDataExport from 'src/views/exportData/schoolData/components/SchoolD
 import CollegeDataExport from 'src/views/exportData/collegeData/components/CollegeDataExport';
 import ActivitiesTable from 'src/views/activity/components/ActivitiesTable';
 import CollegeApplicationManagementTable from 'src/views/applicationForms/collegeApplication/CollegeApplicationManagementTable';
+import FooterEditing from 'src/views/frontedEditing/footer/Footer';
+import PopupEditing from 'src/views/frontedEditing/popup/PopupEditing';
 
 
 /* ***Layouts**** */
@@ -140,6 +142,9 @@ const Router = [
       { path: '/SuperAdmin/college-data', element: <CollegeDataExport/> },
       { path: '/SuperAdmin/demo-accounts/add', element: <Add /> },
       { path: '/SuperAdmin/activity', element: <ActivitiesTable/>},
+      { path: '/SuperAdmin/frontend-editing/home', element: <ActivitiesTable/>},
+      { path: '/SuperAdmin/frontend-editing/footer', element: <FooterEditing/>},
+      { path: '/SuperAdmin/frontend-editing/popups', element: <PopupEditing />},
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
