@@ -67,11 +67,11 @@ export const TwoStepVerification: React.FC = () => {
   const getMethodIcon = (method: string) => {
     switch (method) {
       case 'sms':
-        return <HiDeviceMobile className="h-5 w-5" />;
+        return <HiDeviceMobile className="h-5 w-5 text-blue-500" />;
       case 'whatsapp':
         return <HiChat className="h-5 w-5" />;
       case 'email':
-        return <HiMail className="h-5 w-5" />;
+        return <HiMail className="h-5 w-5 text-blue-500" />;
       default:
         return null;
     }

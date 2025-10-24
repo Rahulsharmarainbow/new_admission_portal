@@ -6,6 +6,7 @@ import { BsPlusLg } from 'react-icons/bs';
 import toast from 'react-hot-toast';
 import BreadcrumbHeader from 'src/Frontend/Common/BreadcrumbHeader';
 import { useAuth } from 'src/hook/useAuth';
+import OrganizationSelect from './OrganizationSelect';
 
 interface FormData {
   organizationType: string;
@@ -281,8 +282,8 @@ const AddEditAccount: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Type of the Organization *
                 </label>
-                <div className="border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all">
-                  <select
+                <div >
+                  {/* <select
                     name="organizationType"
                     value={formData.organizationType}
                     onChange={handleInputChange}
@@ -294,7 +295,16 @@ const AddEditAccount: React.FC = () => {
                     <option value="3">University</option>
                     <option value="1">School</option>
                     <option value="4">Institute</option>
-                  </select>
+                  </select> */}
+
+
+                <OrganizationSelect
+        formData={formData}
+        setFormData={setFormData}
+        loading={loading}
+      />
+
+
                 </div>
               </div>
 

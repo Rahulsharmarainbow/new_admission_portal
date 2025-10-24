@@ -10,7 +10,7 @@ import React from 'react';
 function App() {
   return (
     <>
-    <Toaster
+    {/* <Toaster
           position="top-right"
           toastOptions={{
             duration: 4000,
@@ -26,7 +26,31 @@ function App() {
               },
             },
           }}
-        />
+        /> */}
+
+    <Toaster
+  position="top-right"
+  toastOptions={{
+    duration: 4000,
+    style: {
+      background: '#363636',
+      color: '#fff',
+    },
+    success: {
+      duration: 3000,
+      iconTheme: {
+        primary: '#4ADE80',  // Light green
+        secondary: '#fff',
+      },
+      style: {
+        background: '#059669',  // Light green background
+        color: '#fff',
+      },
+    },
+  }}
+/>
+
+
       <CookiesProvider>
         <React.StrictMode>
         <AuthProvider>

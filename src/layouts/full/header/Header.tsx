@@ -13,8 +13,8 @@ const Header = () => {
   const handleClose = () => setIsOpen(false);
   return (
     <>
-      <header>
-        <Navbar fluid className={`rounded-lg bg-white shadow-md  py-4 `}>
+      <header >
+        <Navbar fluid className={`rounded-lg bg-white shadow-md  py-4 mt-4 `}>  {/*only change is mt-4*/}
           {/* Mobile Toggle Icon */}
 
           <div className="flex gap-3 items-center justify-between w-full ">
@@ -56,3 +56,9 @@ const Header = () => {
 };
 
 export default Header;
+
+
+
+
+
+
