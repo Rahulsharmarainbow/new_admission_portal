@@ -332,9 +332,81 @@ const ApplicationManagementTable: React.FC = () => {
   };
 
   // Handle download Excel
-  const handleDownloadExcel = () => {
-    toast.success('Downloading Excel file...');
-  };
+const handleDownloadExcel = async () => {
+  try {
+    setLoading(true);
+    toast.loading('Preparing Excel file...', { id: 'download-excel' });
+
+    const response = await axios.post(
+      `${apiUrl}/${user?.role}/Applications/Export-school-Applications`,
+      {
+        academic_id: filters.academic_id || "",
+        s_id: user?.id || "",
+        fromDate: filters.fromDate || "",
+        toDate: filters.toDate || "",
+        gender: filters.gender || "",
+        paymentStatus: filters.paymentStatus || "",
+        classAppliedFor: filters.classAppliedFor || "",
+        email: filters.search.includes('@') ? filters.search : "" // If search contains @, treat as email
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          accept: '/',
+          'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    // Check if response is successful
+    if (response.data.success && response.data.data) {
+      const { filename, excel_base64 } = response.data.data;
+      
+      // Base64 decode karo
+      const binaryString = atob(excel_base64);
+      const bytes = new Uint8Array(binaryString.length);
+      
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      // Blob create karo
+      const blob = new Blob([bytes], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      
+      // Download link create karo
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename || 'college-applications.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success('Excel file downloaded successfully!', { id: 'download-excel' });
+    } else {
+      throw new Error(response.data.message || 'Failed to generate Excel file');
+    }
+    
+  } catch (error: any) {
+    console.error('Error downloading Excel:', error);
+    
+    if (error.response?.status === 404) {
+      toast.error('No data found to export', { id: 'download-excel' });
+    } else if (error.response?.status === 500) {
+      toast.error('Server error while generating Excel file', { id: 'download-excel' });
+    } else if (error.response?.data?.message) {
+      toast.error(error.response.data.message, { id: 'download-excel' });
+    } else {
+      toast.error('Failed to download Excel file', { id: 'download-excel' });
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Clear all filters
   const handleClearFilters = () => {

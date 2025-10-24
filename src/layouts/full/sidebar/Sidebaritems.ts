@@ -50,6 +50,25 @@ const SidebarContent: Record<number, MenuItem[]> = {
           ],
         },
         {
+          name: 'Application Forms',
+          id: uniqueId(),
+          icon: 'solar:user-id-line-duotone',
+          children: [
+            {
+              name: 'School Applications',
+              id: uniqueId(),
+              url: '/SuperAdmin/school-applications',
+              isPro: false,
+            },
+            {
+              name: 'College Applications',
+              id: uniqueId(),
+              url: '/SuperAdmin/college-applications',
+              isPro: false,
+            },
+          ],
+        },
+        {
           name: 'User Management',
           id: uniqueId(),
           icon: 'solar:user-id-line-duotone',
@@ -266,25 +285,6 @@ const SidebarContent: Record<number, MenuItem[]> = {
           ],
         },
         {
-          name: 'Application Forms',
-          id: uniqueId(),
-          icon: 'solar:user-id-line-duotone',
-          children: [
-            {
-              name: 'School Applications',
-              id: uniqueId(),
-              url: '/SuperAdmin/school-applications',
-              isPro: false,
-            },
-            {
-              name: 'College Applications',
-              id: uniqueId(),
-              url: '/SuperAdmin/college-applications',
-              isPro: false,
-            },
-          ],
-        },
-         {
           name: 'Export Data',
           id: uniqueId(),
           icon: 'solar:user-id-line-duotone',
@@ -302,9 +302,13 @@ const SidebarContent: Record<number, MenuItem[]> = {
               isPro: false,
             },
           ],
-        },     
+        },
         { name: 'Activity', url: '/SuperAdmin/activity', icon: 'solar:card-transfer-line-duotone' },
-        { name: 'Transaction', url: '/SuperAdmin/transaction', icon: 'solar:card-transfer-line-duotone' },
+        {
+          name: 'Transaction',
+          url: '/SuperAdmin/transaction',
+          icon: 'solar:card-transfer-line-duotone',
+        },
         { name: 'Profile', url: '/SuperAdmin/profile', icon: 'solar:user-circle-line-duotone' },
       ],
     },
@@ -508,25 +512,119 @@ const SidebarContent: Record<number, MenuItem[]> = {
           icon: 'solar:pie-chart-line-duotone',
         },
         {
-          name: 'Accounts',
+          name: 'School Applications',
+          url: '/CustomerAdmin/school-applications',
+          icon: 'solar:pie-chart-line-duotone',
+        },
+        {
+          name: 'College Applications',
+          url: '/CustomerAdmin/college-applications',
+          icon: 'solar:pie-chart-line-duotone',
+        },
+        {
+          name: 'School Services',
           id: uniqueId(),
           icon: 'solar:user-id-line-duotone',
           children: [
             {
-              name: 'Demo Accounts',
+              name: 'Classes',
               id: uniqueId(),
-              url: '/CustomerAdmin/demo-accounts',
+              url: '/CustomerAdmin/classes',
               isPro: false,
             },
             {
-              name: 'Live Accounts',
+              name: 'Transportation',
               id: uniqueId(),
-              url: '/CustomerAdmin/live-accounts',
+              url: '/CustomerAdmin/transportation',
+              isPro: false,
+            },
+            {
+              name: 'Setting',
+              id: uniqueId(),
+              url: '/CustomerAdmin/setting',
+              isPro: false,
+            },
+            {
+              name: 'Content Management',
+              id: uniqueId(),
+              url: '/CustomerAdmin/school-content-Management',
               isPro: false,
             },
           ],
         },
-
+        {
+          name: 'College Services',
+          id: uniqueId(),
+          icon: 'solar:user-id-line-duotone',
+          children: [
+            {
+              name: 'Degrees',
+              id: uniqueId(),
+              url: '/CustomerAdmin/degrees',
+              isPro: false,
+            },
+            {
+              name: 'Hallticket',
+              id: uniqueId(),
+              url: '/CustomerAdmin/halltickets',
+              isPro: false,
+            },
+            {
+              name: 'Nominal Roll',
+              id: uniqueId(),
+              url: '/CustomerAdmin/nominal-roll',
+              isPro: false,
+            },
+            {
+              name: 'Rankcard',
+              id: uniqueId(),
+              url: '/CustomerAdmin/rankcard',
+              isPro: false,
+            },
+            {
+              name: 'Content Management',
+              id: uniqueId(),
+              url: '/CustomerAdmin/college-content-Management',
+              isPro: false,
+            },
+          ],
+        },
+         {
+          name: 'Transaction',
+          url: '/CustomerAdmin/transaction',
+          icon: 'solar:card-transfer-line-duotone',
+        },
+        {
+          name: 'Data Manager',
+          id: uniqueId(),
+          icon: 'solar:database-line-duotone',
+          children: [
+            {
+              name: 'State',
+              id: uniqueId(),
+              url: '/CustomerAdmin/data-manager/State',
+              isPro: false,
+            },
+            {
+              name: 'District',
+              id: uniqueId(),
+              url: '/CustomerAdmin/data-manager/District',
+              isPro: false,
+            },
+            {
+              name: 'Type Configuration',
+              id: uniqueId(),
+              url: '/CustomerAdmin/data-manager/type-configuration',
+              isPro: false,
+            },
+            {
+              name: 'Type Management',
+              id: uniqueId(),
+              url: '/CustomerAdmin/data-manager/type-of-connection',
+              isPro: false,
+            },
+          ],
+        },
         // ...(useAuth().user?.academic_type === 1
         //   ? [
         //       {

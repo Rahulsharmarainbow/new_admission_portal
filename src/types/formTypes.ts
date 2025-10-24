@@ -56,6 +56,7 @@ export interface FormData {
   isSmsApiEnabled: boolean;
   switchState: boolean;
   nominalState: boolean;
+  rankCardState: boolean;
   
   // Domain Configuration
   domainName: string;

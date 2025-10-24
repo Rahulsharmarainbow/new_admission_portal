@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Card, Label, Select, TextInput, Textarea, Checkbox, Alert } from "flowbite-react";
 import { HiInformationCircle, HiEye, HiEyeOff } from "react-icons/hi";
 import { FormData } from "src/types/formTypes";
+import PasswordInput from "./PasswordInput";
 
 interface ThirdPartyApiSetupProps {
   formData: FormData;
@@ -24,34 +25,57 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({ formData, updat
     updateFormData({ [field]: value });
   };
 
-  const PasswordInput = ({ 
-    id, value, onChange, showPassword, setShowPassword, placeholder 
-  }: {
-    id: string;
-    value: string;
-    onChange: (value: string) => void;
-    showPassword: boolean;
-    setShowPassword: (value: boolean) => void;
-    placeholder?: string;
-  }) => (
-    <div className="relative">
-      <TextInput
-        id={id}
-        type={showPassword ? "text" : "password"}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full pr-10"
-      />
-      <button
-        type="button"
-        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-        onClick={() => setShowPassword(!showPassword)}
-      >
-        {showPassword ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
-      </button>
-    </div>
-  );
+//  const PasswordInput = ({ 
+//   id, 
+//   value, 
+//   onChange, 
+//   showPassword, 
+//   setShowPassword, 
+//   placeholder 
+// }: {
+//   id: string;
+//   value: string;
+//   onChange: (value: string) => void;
+//   showPassword: boolean;
+//   setShowPassword: (value: boolean) => void;
+//   placeholder?: string;
+// }) => {
+//   const inputRef = React.useRef<HTMLInputElement>(null);
+
+//   const handleToggle = () => {
+//     setShowPassword(!showPassword);
+//     // Focus maintain करने के लिए
+//     setTimeout(() => {
+//       if (inputRef.current) {
+//         inputRef.current.focus();
+//         // Cursor को end में move करें
+//         const length = inputRef.current.value.length;
+//         inputRef.current.setSelectionRange(length, length);
+//       }
+//     }, 0);
+//   };
+
+//   return (
+//     <div className="relative">
+//       <input
+//         ref={inputRef}
+//         id={id}
+//         type={showPassword ? "text" : "password"}
+//         value={value}
+//         onChange={(e) => onChange(e.target.value)}
+//         placeholder={placeholder}
+//         className="block w-full border border-gray-300 rounded-lg bg-white p-2.5 text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 pr-10"
+//       />
+//       <button
+//         type="button"
+//         className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+//         onClick={handleToggle}
+//       >
+//         {showPassword ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
+//       </button>
+//     </div>
+//   );
+// };
 
   return (
     <div className="space-y-6">

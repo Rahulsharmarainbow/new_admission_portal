@@ -56,41 +56,6 @@ const CustomStepper: React.FC<StepperProps> = ({ steps, activeStep }) => {
   );
 };
 
-// Custom Breadcrumb Component
-const CustomBreadcrumb = () => {
-  return (
-    <nav className="flex mb-6" aria-label="Breadcrumb">
-      <ol className="inline-flex items-center space-x-1 md:space-x-3 flex-wrap">
-        <li className="inline-flex items-center">
-          <a href="#" className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
-            <HiHome className="w-4 h-4 mr-2" />
-            Home
-          </a>
-        </li>
-        <li>
-          <div className="flex items-center">
-            <svg className="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
-            </svg>
-            <a href="#" className="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2 dark:text-gray-400 dark:hover:text-white">
-              Accounts
-            </a>
-          </div>
-        </li>
-        <li aria-current="page">
-          <div className="flex items-center">
-            <svg className="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
-            </svg>
-             <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">
-              Live Account Onboarding 
-            </span> 
-          </div>
-        </li>
-      </ol>
-    </nav>
-  );
-};
 
 const MakeItLive: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -160,6 +125,7 @@ const MakeItLive: React.FC = () => {
     isSmsApiEnabled: false,
     switchState: false,
     nominalState: false,
+    rankCardState: false,
     
     // Domain Configuration
     domainName: "",
@@ -242,18 +208,18 @@ const MakeItLive: React.FC = () => {
       // Logo preview
       previewImage: academic.academic_logo ? `${import.meta.env.VITE_ASSET_URL}/${academic.academic_logo}` : null,
       // Contact Information
-      technicalName: decodeBase64(technicalContact.name) || "",
-      technicalEmail: decodeBase64(technicalContact.email) || "",
-      technicalPhone: decodeBase64(technicalContact.phone) || "",
-      technicalLocation: decodeBase64(technicalContact.location) || "",
-      billingName: decodeBase64(billingContact.name) || "",
-      billingEmail: decodeBase64(billingContact.email) || "",
-      billingPhone: decodeBase64(billingContact.phone) || "",
-      billingLocation: decodeBase64(billingContact.location) || "",
-      additionalName: decodeBase64(additionalContact.name) || "",
-      additionalEmail: decodeBase64(additionalContact.email) || "",
-      additionalPhone: decodeBase64(additionalContact.phone) || "",
-      additionalLocation: decodeBase64(additionalContact.location) || "",
+      technicalName: technicalContact.name || "",
+      technicalEmail: technicalContact.email || "",
+      technicalPhone: technicalContact.phone || "",
+      technicalLocation: technicalContact.location || "",
+      billingName: billingContact.name || "",
+      billingEmail: billingContact.email || "",
+      billingPhone: billingContact.phone || "",
+      billingLocation: billingContact.location || "",
+      additionalName: additionalContact.name || "",
+      additionalEmail: additionalContact.email || "",
+      additionalPhone: additionalContact.phone || "",
+      additionalLocation: additionalContact.location || "",
       // Templates
       whatsappTemplate: template?.whatsapp_template || "",
       smsTemplate: template?.sms_template || "",
@@ -277,6 +243,7 @@ const MakeItLive: React.FC = () => {
       isSmsApiEnabled: Boolean(credentials?.sms_details_enable),
       switchState: Boolean(credentials?.hallticket_generate_permission),
       nominalState: Boolean(credentials?.nominal_permission),
+      rankCardState: Boolean(credentials?.nominal_permission),
     };
 
     console.log('Form Data Updates:', updates);
@@ -416,7 +383,7 @@ const MakeItLive: React.FC = () => {
       "Contact Information": <ContactInformation formData={formData} updateFormData={updateFormData} />,
       "Third party api setup": <ThirdPartyApiSetup formData={formData} updateFormData={updateFormData} />,
       "Roll based access": <RollBasedAccess formData={formData} updateFormData={updateFormData} />,
-      "Dns Configuration": <DnsConfiguration formData={formData} updateFormData={updateFormData} />,
+      "Dns Configuration": <DnsConfiguration formData={formData} updateFormData={updateFormData} isEditMode={true} />,
     };
 
     const currentStep = steps[step];
@@ -438,15 +405,8 @@ const MakeItLive: React.FC = () => {
                 ]}
               />
 
-        {/* <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white break-words">Live Account Onboarding</h1>
-          <p className="text-gray-600 dark:text-gray-400 break-words">Complete the onboarding process for live accounts</p>
-        </div> */}
-
         <Card className="overflow-hidden">
           <div className="p-6">
-            {/* <h5 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 break-words">Live Account Onboarding</h5> */}
-
             <CustomStepper steps={steps} activeStep={activeStep} />
 
             {submitMessage && (

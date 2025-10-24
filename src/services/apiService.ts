@@ -153,3 +153,101 @@ export const updateAcademicData = async (formData: FormData, id: string, userId:
     throw error;
   }
 };
+
+
+export const addLiveAccount = async (formData: FormData, userId: string, authToken: string, role: string) => {
+  try {
+    const formDataToSend = new FormData();
+
+    // Basic academic information
+    formDataToSend.append('s_id', userId);
+    formDataToSend.append('select_type', formData.selectType);
+    formDataToSend.append('select_subtype', formData.selectSubtype || '');
+    formDataToSend.append('email', formData.primary_email);
+    formDataToSend.append('academic_name', formData.academicName);
+    formDataToSend.append('academic_area', formData.area);
+    formDataToSend.append('academic_address', formData.academicAddress);
+    formDataToSend.append('academic_description', formData.academicDescription);
+    formDataToSend.append('academic_pincode', formData.Pincode);
+    formDataToSend.append('state_id', formData.selectState);
+    formDataToSend.append('district_id', formData.selectDistrict);
+    formDataToSend.append('website_url', formData.website_url);
+
+    // Contact information
+    const technicalContact = {
+      name: formData.technicalName,
+      email: formData.technicalEmail,
+      phone: formData.technicalPhone,
+      location: formData.technicalLocation
+    };
+    const billingContact = {
+      name: formData.billingName,
+      email: formData.billingEmail,
+      phone: formData.billingPhone,
+      location: formData.billingLocation
+    };
+    const additionalContact = {
+      name: formData.additionalName,
+      email: formData.additionalEmail,
+      phone: formData.additionalPhone,
+      location: formData.additionalLocation
+    };
+
+    formDataToSend.append('technicalName', JSON.stringify(technicalContact));
+    formDataToSend.append('billingName', JSON.stringify(billingContact));
+    formDataToSend.append('additionalName', JSON.stringify(additionalContact));
+
+    // Domain configuration
+    formDataToSend.append('configured', formData.configure);
+    formDataToSend.append('configured_domain', formData.domainName);
+
+    // Templates
+    formDataToSend.append('whatsapp_template', formData.whatsappTemplate);
+    formDataToSend.append('sms_template', formData.smsTemplate);
+    formDataToSend.append('email_template', formData.emailTemplate);
+
+    // API Keys and credentials
+    formDataToSend.append('wtsp_api_key', formData.wPassword);
+    formDataToSend.append('sms_api_key', formData.smsApikey);
+    formDataToSend.append('razorpay_api_key', formData.razorpayApikey);
+    formDataToSend.append('razorpay_secret_key', formData.razorpaySecretkey);
+    formDataToSend.append('zoho_api_key', formData.zohoApiKey);
+    formDataToSend.append('zoho_from_email', formData.zohoFromEmail);
+    formDataToSend.append('bounce_address', formData.bounceAddress);
+
+    // Permissions
+    formDataToSend.append('hallticket_generate_permission', formData.switchState ? "1" : "0");
+    formDataToSend.append('nominal_permission', formData.nominalState ? "1" : "0");
+    formDataToSend.append('rankcard_permission', formData.rankCardState ? "1" : "0");
+    formDataToSend.append('email_service_dropdown_enabled', formData.isDropdownEnabled ? "1" : "0");
+    formDataToSend.append('whatsapp_details_enable', formData.isTemplatesVisible ? "1" : "0");
+    formDataToSend.append('sms_details_enable', formData.isSmsApiEnabled ? "1" : "0");
+
+    // Logo file
+    if (formData.academicLogo) {
+      formDataToSend.append('academic_logo', formData.academicLogo);
+    }
+
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/${role}/Accounts/Add-live-accouunts`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'accept': 'application/json',
+        },
+        body: formDataToSend,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error adding live account:', error);
+    throw error;
+  }
+};
