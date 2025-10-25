@@ -196,6 +196,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
             'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
             'Content-Type': 'application/json'
           }
+          
         }
       );
 
@@ -626,10 +627,29 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
         onConfirm={handleDeleteTicket}
         title="Delete Ticket"
         message="Are you sure you want to delete this ticket? This action cannot be undone."
-        loading={deleteLoading}
+       loading={deleteLoading}
       />
     </>
   );
 };
 
 export default TicketTable;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -51,6 +51,7 @@ const StateTable: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<StateItem | null>(null);
   const [modalType, setModalType] = useState<'add' | 'edit'>('add');
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -186,7 +187,7 @@ const StateTable: React.FC = () => {
 
   const handleDeleteConfirm = async () => {
     if (!selectedItem) return;
-
+      setDeleteLoading(true);
     try {
       const headers = {
         accept: '*/*',
@@ -230,6 +231,7 @@ const StateTable: React.FC = () => {
     } finally {
       setShowDeleteModal(false);
       setSelectedItem(null);
+        setDeleteLoading(false);
     }
   };
 
@@ -419,6 +421,7 @@ const StateTable: React.FC = () => {
           onConfirm={handleDeleteConfirm}
           title="Delete State"
           message={`Are you sure you want to delete "${selectedItem?.state_title}"? This action cannot be undone.`}
+          loading={deleteLoading}
         />
       </div>
     </>

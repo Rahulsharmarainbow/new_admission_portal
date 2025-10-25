@@ -58,6 +58,7 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
   const [sort, setSort] = useState({ key: 'id', direction: 'desc' as 'asc' | 'desc' });
+   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const assetUrl = import.meta.env.VITE_ASSET_URL;
@@ -215,6 +216,7 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
 
   const confirmDelete = async () => {
     if (userToDelete !== null) {
+      setDeleteLoading(true)
       try {
         const response = await axios.post(
           `${apiUrl}/${user?.role}/Usermanagment/delete-User`,
@@ -248,6 +250,7 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
       } finally {
         setShowDeleteModal(false);
         setUserToDelete(null);
+          setDeleteLoading(false);
       }
     }
   };
@@ -559,6 +562,7 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
     onConfirm={confirmDelete}
     title="Delete User"
     message="Are you sure you want to delete this user? This action cannot be undone."
+    loading={deleteLoading}
   />
 </div>
   );

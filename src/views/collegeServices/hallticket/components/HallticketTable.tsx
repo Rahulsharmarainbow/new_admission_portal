@@ -68,6 +68,7 @@ const HallticketTable: React.FC = () => {
     top: 0,
     left: 0,
   });
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -212,6 +213,7 @@ const HallticketTable: React.FC = () => {
 
   const confirmDelete = async () => {
     if (hallticketToDelete !== null) {
+      setDeleteLoading(true);
       try {
         const response = await axios.post(
           `${apiUrl}/${user?.role}/CollegeManagement/Hallticket/delete`,
@@ -239,6 +241,7 @@ const HallticketTable: React.FC = () => {
       } finally {
         setShowDeleteModal(false);
         setHallticketToDelete(null);
+        setDeleteLoading(false);
       }
     }
   };
@@ -642,6 +645,7 @@ const toggleDropdown = (hallticketId: number, event: React.MouseEvent) => {
           onConfirm={confirmDelete}
           title="Delete Hallticket"
           message="Are you sure you want to delete this hallticket? This action cannot be undone."
+          loading={deleteLoading}
         />
       </div>
     </>

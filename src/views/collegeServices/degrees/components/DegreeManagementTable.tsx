@@ -1,18 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import { MdDeleteForever } from 'react-icons/md';
 import { TbEdit } from "react-icons/tb";
@@ -67,6 +52,7 @@ const DegreeManagementTable: React.FC = () => {
   const [showFormModal, setShowFormModal] = useState(false);
   const [editingDegree, setEditingDegree] = useState<Degree | null>(null);
   const [sort, setSort] = useState({ key: 'id', direction: 'desc' as 'asc' | 'desc' });
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -190,6 +176,7 @@ const DegreeManagementTable: React.FC = () => {
 
   const confirmDelete = async () => {
     if (degreeToDelete !== null) {
+        setDeleteLoading(true);
       try {
         const response = await axios.post(
           `${apiUrl}/${user?.role}/CollegeManagement/Degree/delete`,
@@ -218,6 +205,7 @@ const DegreeManagementTable: React.FC = () => {
       } finally {
         setShowDeleteModal(false);
         setDegreeToDelete(null);
+        setDeleteLoading(false);
       }
     }
   };
@@ -441,6 +429,7 @@ const DegreeManagementTable: React.FC = () => {
         onConfirm={confirmDelete}
         title="Delete Degree"
         message="Are you sure you want to delete this degree? This action cannot be undone."
+        loading={deleteLoading}
       />
     </div>
     </>

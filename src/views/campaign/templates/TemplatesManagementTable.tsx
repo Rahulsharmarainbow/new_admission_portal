@@ -50,6 +50,8 @@ const TemplatesManagementTable: React.FC = () => {
   const [showFormModal, setShowFormModal] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [sort, setSort] = useState({ key: 'id', direction: 'desc' as 'asc' | 'desc' });
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -198,6 +200,7 @@ const TemplatesManagementTable: React.FC = () => {
   // Single delete confirmation
   const confirmDelete = async () => {
     if (templateToDelete !== null) {
+      setDeleteLoading(true);
       try {
         const response = await axios.post(
           `${apiUrl}/${user?.role}/Campaign/delete`,
@@ -226,6 +229,7 @@ const TemplatesManagementTable: React.FC = () => {
       } finally {
         setShowDeleteModal(false);
         setTemplateToDelete(null);
+        setDeleteLoading(true);
       }
     }
   };
@@ -233,6 +237,7 @@ const TemplatesManagementTable: React.FC = () => {
   // Bulk delete confirmation
   const confirmBulkDelete = async () => {
     if (selectedTemplates.length > 0) {
+        setBulkDeleteLoading(true); 
       try {
         const response = await axios.post(
           `${apiUrl}/${user?.role}/Campaign/delete`,
@@ -261,6 +266,7 @@ const TemplatesManagementTable: React.FC = () => {
         toast.error('Failed to delete templates');
       } finally {
         setShowBulkDeleteModal(false);
+        setBulkDeleteLoading(false); 
       }
     }
   };
@@ -524,6 +530,7 @@ const TemplatesManagementTable: React.FC = () => {
           onConfirm={confirmDelete}
           title="Delete Template"
           message="Are you sure you want to delete this template? This action cannot be undone."
+           loading={deleteLoading}
         />
 
         {/* Bulk Delete Confirmation Modal */}
@@ -533,6 +540,7 @@ const TemplatesManagementTable: React.FC = () => {
           onConfirm={confirmBulkDelete}
           title="Delete Templates"
           message={`Are you sure you want to delete ${selectedTemplates.length} selected template(s)? This action cannot be undone.`}
+           loading={bulkDeleteLoading}
         />
       </div>
     </>

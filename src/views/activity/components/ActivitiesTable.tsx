@@ -59,6 +59,7 @@ const ActivitiesTable: React.FC = () => {
     top: 0,
     left: 0,
   });
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -182,6 +183,7 @@ const ActivitiesTable: React.FC = () => {
 
   const confirmDelete = async () => {
     if (activityToDelete !== null) {
+       setDeleteLoading(true);
       try {
         // Add your delete API call here
         // const response = await axios.post(
@@ -214,6 +216,7 @@ const ActivitiesTable: React.FC = () => {
       } finally {
         setShowDeleteModal(false);
         setActivityToDelete(null);
+         setDeleteLoading(false);
       }
     }
   };
@@ -511,6 +514,7 @@ const ActivitiesTable: React.FC = () => {
           onConfirm={confirmDelete}
           title="Delete Activity"
           message="Are you sure you want to delete this activity? This action cannot be undone."
+           loading={deleteLoading}
         />
       </div>
     </>

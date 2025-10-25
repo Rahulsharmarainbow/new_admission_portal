@@ -623,6 +623,7 @@ const NominalRollTable: React.FC = () => {
   const [nominalToDelete, setNominalToDelete] = useState<number | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [sort, setSort] = useState({ key: 'id', direction: 'desc' as 'asc' | 'desc' });
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -733,6 +734,7 @@ const NominalRollTable: React.FC = () => {
 
   const confirmDelete = async () => {
     if (nominalToDelete !== null) {
+      setDeleteLoading(true);
       try {
         const response = await axios.post(
           `${apiUrl}/${user?.role}/CollegeManagement/Nominal/delete`,
@@ -760,6 +762,7 @@ const NominalRollTable: React.FC = () => {
       } finally {
         setShowDeleteModal(false);
         setNominalToDelete(null);
+        setDeleteLoading(false);
       }
     }
   };
@@ -1068,6 +1071,7 @@ const NominalRollTable: React.FC = () => {
           onConfirm={confirmDelete}
           title="Delete Nominal Roll"
           message="Are you sure you want to delete this nominal roll? This action cannot be undone."
+          loading={deleteLoading}
         />
       </div>
     </>

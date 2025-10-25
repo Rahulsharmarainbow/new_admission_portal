@@ -68,6 +68,7 @@ const ClassTable: React.FC = () => {
     top: 0,
     left: 0,
   });
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -213,6 +214,7 @@ const ClassTable: React.FC = () => {
 
   const confirmDelete = async () => {
     if (classToDelete !== null) {
+      setDeleteLoading(true);
       try {
         const response = await axios.post(
           `${apiUrl}/${user?.role}/SchoolManagement/class-Delete`,
@@ -240,6 +242,7 @@ const ClassTable: React.FC = () => {
       } finally {
         setShowDeleteModal(false);
         setClassToDelete(null);
+        setDeleteLoading(false);
       }
     }
   };
@@ -505,6 +508,7 @@ const ClassTable: React.FC = () => {
         onConfirm={confirmDelete}
         title="Delete Class"
         message="Are you sure you want to delete this class? This action cannot be undone."
+        loading={deleteLoading}
       />
 
       {/* Class Form Modal */}

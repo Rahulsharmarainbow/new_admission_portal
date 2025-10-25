@@ -65,6 +65,7 @@ const DataManagerTable: React.FC<DataManagerTableProps> = ({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<DataItem | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -199,7 +200,7 @@ const DataManagerTable: React.FC<DataManagerTableProps> = ({
   // Handle delete confirm
   const handleDeleteConfirm = async () => {
     if (!selectedItem) return;
-
+     setDeleteLoading(true);
     try {
       const headers = {
         'accept': '*/*',
@@ -240,6 +241,7 @@ const DataManagerTable: React.FC<DataManagerTableProps> = ({
     } finally {
       setShowDeleteModal(false);
       setSelectedItem(null);
+      setDeleteLoading(false);
     }
   };
 
@@ -415,6 +417,7 @@ const DataManagerTable: React.FC<DataManagerTableProps> = ({
         onConfirm={handleDeleteConfirm}
         title="Delete Data"
         message={`Are you sure you want to delete "${selectedItem?.name}"? This action cannot be undone.`}
+        loading={deleteLoading}
       />
     </div>
   );

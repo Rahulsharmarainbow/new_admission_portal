@@ -65,6 +65,8 @@ const TransportationTable: React.FC = () => {
     top: 0,
     left: 0,
   });
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -217,6 +219,7 @@ const TransportationTable: React.FC = () => {
 
   const confirmDelete = async () => {
     if (transportationToDelete !== null) {
+      setDeleteLoading(true);
       try {
         const response = await axios.post(
           `${apiUrl}/${user?.role}/SchoolManagement/Transportation/delete`,
@@ -244,6 +247,7 @@ const TransportationTable: React.FC = () => {
       } finally {
         setShowDeleteModal(false);
         setTransportationToDelete(null);
+        setDeleteLoading(false);
       }
     }
   };
@@ -538,6 +542,7 @@ const TransportationTable: React.FC = () => {
       onConfirm={confirmDelete}
       title="Delete Transportation"
       message="Are you sure you want to delete this transportation record? This action cannot be undone."
+      loading={deleteLoading}
     />
 
     {/* Transportation Form Modal */}

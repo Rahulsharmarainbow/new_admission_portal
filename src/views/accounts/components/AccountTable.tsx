@@ -685,6 +685,8 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState<number | null>(null);
   const [selectedAccounts, setSelectedAccounts] = useState<number[]>([]);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
   const [sort, setSort] = useState({ key: 'id', direction: 'desc' as 'asc' | 'desc' });
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const dropdownRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
@@ -871,6 +873,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
 
   // Single delete confirmation
   const confirmDelete = async () => {
+    setDeleteLoading(true);
     if (accountToDelete !== null) {
       try {
         console.log('Deleting account:', {
@@ -905,6 +908,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
       } finally {
         setShowDeleteModal(false);
         setAccountToDelete(null);
+        setDeleteLoading(false);
       }
     }
   };
@@ -912,6 +916,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
   // Bulk delete confirmation
   const confirmBulkDelete = async () => {
     if (selectedAccounts.length > 0) {
+        setBulkDeleteLoading(true);
       try {
         console.log('Deleting accounts:', {
           id: selectedAccounts,
@@ -949,6 +954,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
         toast.error('Failed to delete accounts');
       } finally {
         setShowBulkDeleteModal(false);
+        setBulkDeleteLoading(false);
       }
     }
   };
@@ -1357,6 +1363,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
         onConfirm={confirmDelete}
         title="Delete Account"
         message="Are you sure you want to delete this account? This action cannot be undone."
+        loading={deleteLoading}
       />
 
       {/* Bulk Delete Confirmation Modal */}
@@ -1366,6 +1373,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
         onConfirm={confirmBulkDelete}
         title="Delete Accounts"
         message={`Are you sure you want to delete ${selectedAccounts.length} selected account(s)? This action cannot be undone.`}
+         loading={bulkDeleteLoading}
       />
     </div>
   );

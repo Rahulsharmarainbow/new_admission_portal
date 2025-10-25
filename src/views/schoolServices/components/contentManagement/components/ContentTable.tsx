@@ -65,6 +65,7 @@ const ContentTable: React.FC = () => {
     top: 0,
     left: 0,
   });
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -218,6 +219,7 @@ const ContentTable: React.FC = () => {
 
   const confirmDelete = async () => {
     if (contentToDelete !== null) {
+      setDeleteLoading(true);
       try {
         const response = await axios.post(
           `${apiUrl}/${user?.role}/SchoolManagement/Content/delete-Content`,
@@ -245,6 +247,7 @@ const ContentTable: React.FC = () => {
       } finally {
         setShowDeleteModal(false);
         setContentToDelete(null);
+        setDeleteLoading(false);
       }
     }
   };
@@ -548,6 +551,7 @@ const ContentTable: React.FC = () => {
         onConfirm={confirmDelete}
         title="Delete Content"
         message="Are you sure you want to delete this content? This action cannot be undone."
+        loading={deleteLoading}
       />
 
       {/* Content Form Modal */}

@@ -522,6 +522,7 @@ const TypeTable: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<TypeItem | null>(null);
   const [modalType, setModalType] = useState<'add' | 'edit'>('add');
   const [selectedAcademic, setSelectedAcademic] = useState<number>();
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -665,7 +666,7 @@ const TypeTable: React.FC = () => {
   // Handle delete confirm
   const handleDeleteConfirm = async () => {
     if (!selectedItem) return;
-
+    setDeleteLoading(true);
     try {
       const headers = {
         accept: '*/*',
@@ -706,6 +707,7 @@ const TypeTable: React.FC = () => {
     } finally {
       setShowDeleteModal(false);
       setSelectedItem(null);
+      setDeleteLoading(false);
     }
   };
 
@@ -901,6 +903,7 @@ const TypeTable: React.FC = () => {
           onConfirm={handleDeleteConfirm}
           title="Delete Type"
           message={`Are you sure you want to delete "${selectedItem?.type}"? This action cannot be undone.`}
+          loading={deleteLoading}
         />
       </div>
     </>

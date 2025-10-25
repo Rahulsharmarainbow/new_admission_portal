@@ -46,6 +46,7 @@ const RankCardTable: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [showAddModal, setShowAddModal] = useState(false);
   const [sort, setSort] = useState({ key: 'id', direction: 'desc' as 'asc' | 'desc' });
+  
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
