@@ -733,7 +733,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
         `${apiUrl}/${user?.role}/Accounts/get-accounts?` +
           `page=${filters.page}&rowsPerPage=${filters.rowsPerPage}&` +
           `order=${filters.order}&orderBy=${filters.orderBy}&` +
-          `search=${filters.search}&type=${type}`,
+          `search=${filters.search}&type=${type}&` + `s_id=${user?.id}`,
         {},
         {
           headers: {
@@ -987,6 +987,10 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
     navigate(`/${user?.role}/demo-accounts/add`);
   };
 
+  const handleAddLiveAccount = () => {
+    navigate(`/${user?.role}/live-accounts/add`);
+  };
+
   // Toggle dropdown
   const toggleDropdown = (accountId: number, event: React.MouseEvent) => {
     event.stopPropagation();
@@ -1089,7 +1093,17 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
           {(type === 'demo' && user?.role === 'SalesAdmin') && (
             <Button
               onClick={handleAddAccount}
-              gradientDuoTone="cyanToBlue"
+              className="whitespace-nowrap"
+              color={'primary'}
+            >
+              <BsPlusLg className="mr-2 w-4 h-4" />
+              Add Account
+            </Button>
+          )}
+
+          {(type === 'live' && user?.role === 'SalesAdmin') && (
+            <Button
+              onClick={handleAddLiveAccount}
               className="whitespace-nowrap"
               color={'primary'}
             >
