@@ -21,7 +21,7 @@ const Dropitems: React.FC<NavItemsProps> = ({ item }) => {
             ? `text-primary  ${
                 item.icon ? ` bg-primary/10   hover:bg-primary/10 ` : 'bg-transparent '
               }   active `
-            : ` text-dark/80 bg-transparent  group/link  `
+            : ` text-dark/95 bg-transparent  group/link  `
         } `}
       >
         <div className="flex items-center justify-between">
@@ -37,7 +37,7 @@ const Dropitems: React.FC<NavItemsProps> = ({ item }) => {
                 } `}
               ></span>
             )}
-            <span className={`max-w-32 text-ellipsis overflow-x-hidden`}>{item.name}</span>
+            <span className={`max-w-40 text-ellipsis overflow-x-hidden`}>{item.name}</span>
           </span>
           {item.isPro ? (
             <span className="py-1 px-2 text-[10px] bg-secondary/20 text-secondary rounded-full">

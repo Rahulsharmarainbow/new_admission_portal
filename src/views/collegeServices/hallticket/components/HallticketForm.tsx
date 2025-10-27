@@ -258,193 +258,206 @@ const HallticketForm: React.FC = () => {
           </p>
         </div> */}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Academic Dropdown */}
-            <div>
-              <Label htmlFor="academic_id" className="block mb-2">
-                Select Academic <span className="text-red-500">*</span>
-              </Label>
-              <AcademicDropdown
-                value={formData.academic_id}
-                onChange={handleAcademicChange}
-                name="academic_id"
-                isRequired={true}
-                placeholder="Search and select academic..."
-                label="" // Remove heading
-              />
-            </div>
+     <form onSubmit={handleSubmit} className="space-y-4">
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {/* Academic Dropdown */}
+    <div>
+      <Label htmlFor="academic_id" className="text-sm font-medium">
+        Academic <span className="text-red-500">*</span>
+      </Label>
+      <AcademicDropdown
+        value={formData.academic_id}
+        onChange={handleAcademicChange}
+        name="academic_id"
+        isRequired={true}
+        placeholder="Search academic..."
+        label=""
+        className="mt-1"
+      />
+    </div>
 
-            {/* Degree Dropdown */}
-            <div>
-              <Label htmlFor="degree_id" className="block mb-2">
-                Select Degree <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                id="degree_id"
-                isLoading={degreeLoading}
-                isDisabled={!formData.academic_id || degreeLoading}
-                options={degrees}
-                value={degrees.find(opt => opt.value.toString() === formData.degree_id)}
-                onChange={handleSelectChange('degree_id')}
-                placeholder={formData.academic_id ? "Select degree..." : "First select academic"}
-                classNamePrefix="react-select"
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    borderColor: "#d1d5db",
-                    borderRadius: "0.5rem",
-                    padding: "2px",
-                    minHeight: "42px",
-                    boxShadow: "none",
-                    "&:hover": { borderColor: "#93c5fd" },
-                  }),
-                }}
-              />
-            </div>
+    {/* Degree Dropdown */}
+    <div>
+      <Label htmlFor="degree_id" className="text-sm font-medium">
+        Degree <span className="text-red-500">*</span>
+      </Label>
+      <Select
+        id="degree_id"
+        isLoading={degreeLoading}
+        isDisabled={!formData.academic_id || degreeLoading}
+        options={degrees}
+        value={degrees.find(opt => opt.value.toString() === formData.degree_id)}
+        onChange={handleSelectChange('degree_id')}
+        placeholder={formData.academic_id ? "Select degree..." : "First select academic"}
+        classNamePrefix="react-select"
+        className="mt-1"
+        styles={{
+          control: (base) => ({
+            ...base,
+            borderColor: "#d1d5db",
+            borderRadius: "0.375rem",
+            padding: "1px",
+            minHeight: "38px",
+            fontSize: "0.875rem",
+            boxShadow: "none",
+            "&:hover": { borderColor: "#93c5fd" },
+          }),
+        }}
+      />
+    </div>
 
-            {/* Hallticket Series */}
-            <div>
-              <Label htmlFor="hall_ticket_series" className="block mb-2">
-                Hallticket Series <span className="text-red-500">*</span>
-              </Label>
-              <TextInput
-                id="hall_ticket_series"
-                name="hall_ticket_series"
-                value={formData.hall_ticket_series}
-                onChange={handleInputChange}
-                placeholder="Enter hallticket series"
-                required
-              />
-            </div>
+    {/* Hallticket Series */}
+    <div>
+      <Label htmlFor="hall_ticket_series" className="text-sm font-medium">
+        Hallticket Series <span className="text-red-500">*</span>
+      </Label>
+      <TextInput
+        id="hall_ticket_series"
+        name="hall_ticket_series"
+        value={formData.hall_ticket_series}
+        onChange={handleInputChange}
+        placeholder="Enter series"
+        required
+        className="mt-1"
+      />
+    </div>
 
-            {/* Start Series */}
-            <div>
-              <Label htmlFor="start_series" className="block mb-2">
-                Application Start Series <span className="text-red-500">*</span>
-              </Label>
-              <TextInput
-                id="start_series"
-                name="start_series"
-                value={formData.start_series}
-                onChange={handleInputChange}
-                placeholder="Enter application start series"
-                required
-              />
-            </div>
+    {/* Start Series */}
+    <div>
+      <Label htmlFor="start_series" className="text-sm font-medium">
+        Start Series <span className="text-red-500">*</span>
+      </Label>
+      <TextInput
+        id="start_series"
+        name="start_series"
+        value={formData.start_series}
+        onChange={handleInputChange}
+        placeholder="Enter start series"
+        required
+        className="mt-1"
+      />
+    </div>
 
-            {/* End Series */}
-            <div>
-              <Label htmlFor="end_series" className="block mb-2">
-                Application End Series <span className="text-red-500">*</span>
-              </Label>
-              <TextInput
-                id="end_series"
-                name="end_series"
-                value={formData.end_series}
-                onChange={handleInputChange}
-                placeholder="Enter application end series"
-                required
-              />
-            </div>
+    {/* End Series */}
+    <div>
+      <Label htmlFor="end_series" className="text-sm font-medium">
+        End Series <span className="text-red-500">*</span>
+      </Label>
+      <TextInput
+        id="end_series"
+        name="end_series"
+        value={formData.end_series}
+        onChange={handleInputChange}
+        placeholder="Enter end series"
+        required
+        className="mt-1"
+      />
+    </div>
 
-            {/* Exam Center Name */}
-            <div>
-              <Label htmlFor="exam_center_name" className="block mb-2">
-                Exam Center Name <span className="text-red-500">*</span>
-              </Label>
-              <TextInput
-                id="exam_center_name"
-                name="exam_center_name"
-                value={formData.exam_center_name}
-                onChange={handleInputChange}
-                placeholder="Enter exam center name"
-                required
-              />
-            </div>
+    {/* Exam Center Name */}
+    <div>
+      <Label htmlFor="exam_center_name" className="text-sm font-medium">
+        Exam Center <span className="text-red-500">*</span>
+      </Label>
+      <TextInput
+        id="exam_center_name"
+        name="exam_center_name"
+        value={formData.exam_center_name}
+        onChange={handleInputChange}
+        placeholder="Enter center name"
+        required
+        className="mt-1"
+      />
+    </div>
+  </div>
 
-            {/* Exam Date */}
-            <div>
-              <Label htmlFor="exam_date" className="block mb-2">
-                Exam Date <span className="text-red-500">*</span>
-              </Label>
-              <TextInput
-                id="exam_date"
-                name="exam_date"
-                type="date"
-                value={formData.exam_date}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
+  {/* Exam Date and Times in one line */}
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <Label htmlFor="exam_date" className="text-sm font-medium">
+        Exam Date <span className="text-red-500">*</span>
+      </Label>
+      <TextInput
+        id="exam_date"
+        name="exam_date"
+        type="date"
+        value={formData.exam_date}
+        onChange={handleInputChange}
+        required
+        className="mt-1"
+      />
+    </div>
 
-            {/* Exam Start Time */}
-            <div>
-              <Label htmlFor="exam_time" className="block mb-2">
-                Exam Start Time <span className="text-red-500">*</span>
-              </Label>
-              <TextInput
-                id="exam_time"
-                name="exam_time"
-                type="time"
-                value={formData.exam_time}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
+    <div>
+      <Label htmlFor="exam_time" className="text-sm font-medium">
+        Start Time <span className="text-red-500">*</span>
+      </Label>
+      <TextInput
+        id="exam_time"
+        name="exam_time"
+        type="time"
+        value={formData.exam_time}
+        onChange={handleInputChange}
+        required
+        className="mt-1"
+      />
+    </div>
 
-            {/* Exam End Time */}
-            <div>
-              <Label htmlFor="exam_end_time" className="block mb-2">
-                Exam End Time <span className="text-red-500">*</span>
-              </Label>
-              <TextInput
-                id="exam_end_time"
-                name="exam_end_time"
-                type="time"
-                value={formData.exam_end_time}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-          </div>
+    <div>
+      <Label htmlFor="exam_end_time" className="text-sm font-medium">
+        End Time <span className="text-red-500">*</span>
+      </Label>
+      <TextInput
+        id="exam_end_time"
+        name="exam_end_time"
+        type="time"
+        value={formData.exam_end_time}
+        onChange={handleInputChange}
+        required
+        className="mt-1"
+      />
+    </div>
+  </div>
 
-          {/* Center Address */}
-          <div>
-            <Label htmlFor="center_address" className="block mb-2">
-              Center Address <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              id="center_address"
-              name="center_address"
-              value={formData.center_address}
-              onChange={handleInputChange}
-              placeholder="Enter complete center address"
-              rows={4}
-              required
-            />
-          </div>
+  {/* Center Address */}
+  <div>
+    <Label htmlFor="center_address" className="text-sm font-medium">
+      Center Address <span className="text-red-500">*</span>
+    </Label>
+    <Textarea
+      id="center_address"
+      name="center_address"
+      value={formData.center_address}
+      onChange={handleInputChange}
+      placeholder="Enter complete address"
+      rows={3}
+      required
+      className="mt-1"
+    />
+  </div>
 
-          {/* Form Actions */}
-          <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-            <Button
-              type="button"
-              color="alternative"
-              onClick={() => navigate(`/${user?.role}/halltickets`)}
-              disabled={submitting}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              color='primary'
-              disabled={submitting}
-              isProcessing={submitting}
-            >
-              {isEdit ? 'Update Hallticket' : 'Create Hallticket'}
-            </Button>
-          </div>
-        </form>
+  {/* Form Actions */}
+  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+    <Button
+      type="button"
+      color="alternative"
+      onClick={() => navigate(`/${user?.role}/halltickets`)}
+      disabled={submitting}
+      size="sm"
+    >
+      Cancel
+    </Button>
+    <Button
+      type="submit"
+      color='primary'
+      disabled={submitting}
+      isProcessing={submitting}
+      size="sm"
+    >
+      {isEdit ? 'Update' : 'Create'}
+    </Button>
+  </div>
+</form>
       </div>
     </>
   );

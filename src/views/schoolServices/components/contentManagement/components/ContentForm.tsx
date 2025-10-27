@@ -1,3 +1,7 @@
+
+
+
+
 // import React, { useState, useEffect, useRef } from "react";
 // import { Button, Modal, TextInput, Label, ModalFooter, ModalHeader, ModalBody } from "flowbite-react";
 // import axios from "axios";
@@ -48,6 +52,7 @@
 //   const [autoGenerateRoute, setAutoGenerateRoute] = useState(true);
   
 //   const editorRef = useRef<any>(null);
+//   const editorInstanceRef = useRef<any>(null);
 
 //   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -103,7 +108,46 @@
 //     placeholder: 'Start typing your content here...',
 //     style: {
 //       font: '14px Arial, sans-serif',
-//     }
+//     },
+//     // IMPORTANT: Fix for text direction and focus issues
+//     direction: 'ltr', // Force LTR direction
+//     language: 'en',
+//     defaultMode: '1', // WYSIWYG mode
+//     iframe: false,
+    
+//     // Fix for focus issues
+//     events: {
+//       afterInit: (editor: any) => {
+//         editorInstanceRef.current = editor;
+        
+//         // Set LTR direction explicitly
+//         editor.editor.style.direction = 'ltr';
+//         editor.editor.setAttribute('dir', 'ltr');
+        
+//         // Focus the editor when it's ready
+//         setTimeout(() => {
+//           if (editor.container && editor.container.querySelector('.jodit-wysiwyg')) {
+//             const wysiwyg = editor.container.querySelector('.jodit-wysiwyg');
+//             wysiwyg.style.direction = 'ltr';
+//             wysiwyg.setAttribute('dir', 'ltr');
+//             wysiwyg.focus();
+            
+//             // Set cursor to start
+//             editor.selection.setCursorIn(wysiwyg, false);
+//           }
+//         }, 100);
+//       },
+//       focus: () => {
+//         console.log('Editor focused');
+//       },
+//       blur: () => {
+//         console.log('Editor blurred');
+//       }
+//     },
+//     // Additional settings to prevent focus loss
+//     allowTabNavigation: true,
+//     saveHeightInStorage: false,
+//     disablePlugins: ['mobile', 'speechRecognize', 'waiting']
 //   };
 
 //   // Reset form when modal opens/closes or editing content changes
@@ -127,8 +171,64 @@
 //         setAutoGenerateRoute(true); // Enable auto-generation in add mode
 //       }
 //       setErrors({});
+      
+//       // Focus editor when modal opens
+//       setTimeout(() => {
+//         if (editorInstanceRef.current) {
+//           editorInstanceRef.current.focus();
+//           // Reset cursor to start position
+//           try {
+//             const wysiwyg = editorInstanceRef.current.container.querySelector('.jodit-wysiwyg');
+//             if (wysiwyg) {
+//               editorInstanceRef.current.selection.setCursorIn(wysiwyg, false);
+//             }
+//           } catch (error) {
+//             console.log('Error setting cursor position');
+//           }
+//         }
+//       }, 300);
 //     }
 //   }, [isOpen, editingContent]);
+
+//   // Handle editor instance
+//   const handleEditorInstance = (editor: any) => {
+//     editorInstanceRef.current = editor;
+    
+//     // Add event listeners to maintain focus and LTR direction
+//     if (editor && editor.container) {
+//       const wysiwyg = editor.container.querySelector('.jodit-wysiwyg');
+//       if (wysiwyg) {
+//         // Force LTR direction
+//         wysiwyg.style.direction = 'ltr';
+//         wysiwyg.setAttribute('dir', 'ltr');
+//         wysiwyg.setAttribute('tabindex', '0');
+//         wysiwyg.style.outline = 'none';
+//         wysiwyg.style.textAlign = 'left';
+        
+//         // Set initial cursor position to start
+//         setTimeout(() => {
+//           editor.selection.setCursorIn(wysiwyg, false);
+//         }, 50);
+        
+//         // Prevent focus loss on click
+//         wysiwyg.addEventListener('mousedown', (e: MouseEvent) => {
+//           e.preventDefault();
+//           wysiwyg.focus();
+//           editor.selection.setCursorIn(wysiwyg, false);
+//         });
+
+//         // Handle key events to maintain LTR behavior
+//         wysiwyg.addEventListener('keydown', (e: KeyboardEvent) => {
+//           // Ensure cursor stays in LTR mode
+//           if (e.key === 'Enter' || e.key === 'Tab') {
+//             setTimeout(() => {
+//               editor.selection.setCursorIn(wysiwyg, false);
+//             }, 10);
+//           }
+//         });
+//       }
+//     }
+//   };
 
 //   const validateForm = (): boolean => {
 //     const newErrors: Partial<FormData> = {};
@@ -280,9 +380,6 @@
 //               onChange={handleAcademicChange}
 //               includeAllOption={false}
 //             />
-//             {/* {errors.academic_id && (
-//               <p className="text-red-500 text-sm mt-1">{errors.academic_id}</p>
-//             )} */}
 //           </div>
 
 //           {/* Page Name Input */}
@@ -331,13 +428,31 @@
 //             <Label className="block mb-2">
 //               HTML Content <span className="text-red-500">*</span>
 //             </Label>
-//             <div className="border border-gray-300 rounded-lg overflow-hidden">
+//             <div 
+//               className="border border-gray-300 rounded-lg overflow-hidden"
+//               onClick={() => {
+//                 // Focus editor when clicking on the container
+//                 if (editorInstanceRef.current) {
+//                   editorInstanceRef.current.focus();
+//                   // Reset cursor to start
+//                   try {
+//                     const wysiwyg = editorInstanceRef.current.container.querySelector('.jodit-wysiwyg');
+//                     if (wysiwyg) {
+//                       editorInstanceRef.current.selection.setCursorIn(wysiwyg, false);
+//                     }
+//                   } catch (error) {
+//                     console.log('Error setting cursor position');
+//                   }
+//                 }
+//               }}
+//             >
 //               <JoditEditor
 //                 ref={editorRef}
 //                 value={formData.html_content}
 //                 config={editorConfig}
 //                 onBlur={(newContent: string) => handleEditorChange(newContent)}
 //                 onChange={(newContent: string) => handleEditorChange(newContent)}
+//                 onInit={handleEditorInstance}
 //               />
 //             </div>
 //             {errors.html_content && (
@@ -412,8 +527,7 @@
 
 
 
-
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Button, Modal, TextInput, Label, ModalFooter, ModalHeader, ModalBody } from "flowbite-react";
 import axios from "axios";
 import { useAuth } from "src/hook/useAuth";
@@ -464,10 +578,11 @@ const ContentForm: React.FC<ContentFormProps> = ({
   
   const editorRef = useRef<any>(null);
   const editorInstanceRef = useRef<any>(null);
+  const formInitializedRef = useRef(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  // Jodit Editor configuration
+  // Jodit Editor configuration - SIMPLIFIED
   const editorConfig = {
     readonly: false,
     height: 400,
@@ -520,126 +635,45 @@ const ContentForm: React.FC<ContentFormProps> = ({
     style: {
       font: '14px Arial, sans-serif',
     },
-    // IMPORTANT: Fix for text direction and focus issues
-    direction: 'ltr', // Force LTR direction
+    direction: 'ltr',
     language: 'en',
-    defaultMode: '1', // WYSIWYG mode
+    defaultMode: '1',
     iframe: false,
-    
-    // Fix for focus issues
-    events: {
-      afterInit: (editor: any) => {
-        editorInstanceRef.current = editor;
-        
-        // Set LTR direction explicitly
-        editor.editor.style.direction = 'ltr';
-        editor.editor.setAttribute('dir', 'ltr');
-        
-        // Focus the editor when it's ready
-        setTimeout(() => {
-          if (editor.container && editor.container.querySelector('.jodit-wysiwyg')) {
-            const wysiwyg = editor.container.querySelector('.jodit-wysiwyg');
-            wysiwyg.style.direction = 'ltr';
-            wysiwyg.setAttribute('dir', 'ltr');
-            wysiwyg.focus();
-            
-            // Set cursor to start
-            editor.selection.setCursorIn(wysiwyg, false);
-          }
-        }, 100);
-      },
-      focus: () => {
-        console.log('Editor focused');
-      },
-      blur: () => {
-        console.log('Editor blurred');
-      }
-    },
-    // Additional settings to prevent focus loss
-    allowTabNavigation: true,
-    saveHeightInStorage: false,
-    disablePlugins: ['mobile', 'speechRecognize', 'waiting']
   };
 
-  // Reset form when modal opens/closes or editing content changes
+  // Reset form when modal opens/closes or editing content changes - FIXED
   useEffect(() => {
     if (isOpen) {
-      if (editingContent) {
+      if (editingContent && !formInitializedRef.current) {
         setFormData({
           academic_id: editingContent.academic_id.toString(),
           page_name: editingContent.page_name,
           page_route: editingContent.page_route,
           html_content: editingContent.html_content,
         });
-        setAutoGenerateRoute(false); // Disable auto-generation in edit mode
-      } else {
+        setAutoGenerateRoute(false);
+        formInitializedRef.current = true;
+      } else if (!editingContent && !formInitializedRef.current) {
         setFormData({
           academic_id: "",
           page_name: "",
           page_route: "",
           html_content: "",
         });
-        setAutoGenerateRoute(true); // Enable auto-generation in add mode
+        setAutoGenerateRoute(true);
+        formInitializedRef.current = true;
       }
       setErrors({});
-      
-      // Focus editor when modal opens
-      setTimeout(() => {
-        if (editorInstanceRef.current) {
-          editorInstanceRef.current.focus();
-          // Reset cursor to start position
-          try {
-            const wysiwyg = editorInstanceRef.current.container.querySelector('.jodit-wysiwyg');
-            if (wysiwyg) {
-              editorInstanceRef.current.selection.setCursorIn(wysiwyg, false);
-            }
-          } catch (error) {
-            console.log('Error setting cursor position');
-          }
-        }
-      }, 300);
+    } else {
+      // Reset when modal closes
+      formInitializedRef.current = false;
     }
   }, [isOpen, editingContent]);
 
-  // Handle editor instance
-  const handleEditorInstance = (editor: any) => {
+  // Handle editor instance - SIMPLIFIED
+  const handleEditorInstance = useCallback((editor: any) => {
     editorInstanceRef.current = editor;
-    
-    // Add event listeners to maintain focus and LTR direction
-    if (editor && editor.container) {
-      const wysiwyg = editor.container.querySelector('.jodit-wysiwyg');
-      if (wysiwyg) {
-        // Force LTR direction
-        wysiwyg.style.direction = 'ltr';
-        wysiwyg.setAttribute('dir', 'ltr');
-        wysiwyg.setAttribute('tabindex', '0');
-        wysiwyg.style.outline = 'none';
-        wysiwyg.style.textAlign = 'left';
-        
-        // Set initial cursor position to start
-        setTimeout(() => {
-          editor.selection.setCursorIn(wysiwyg, false);
-        }, 50);
-        
-        // Prevent focus loss on click
-        wysiwyg.addEventListener('mousedown', (e: MouseEvent) => {
-          e.preventDefault();
-          wysiwyg.focus();
-          editor.selection.setCursorIn(wysiwyg, false);
-        });
-
-        // Handle key events to maintain LTR behavior
-        wysiwyg.addEventListener('keydown', (e: KeyboardEvent) => {
-          // Ensure cursor stays in LTR mode
-          if (e.key === 'Enter' || e.key === 'Tab') {
-            setTimeout(() => {
-              editor.selection.setCursorIn(wysiwyg, false);
-            }, 10);
-          }
-        });
-      }
-    }
-  };
+  }, []);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
@@ -649,7 +683,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
     if (!formData.page_route.trim()) newErrors.page_route = "Page route is required";
     if (!formData.html_content.trim()) newErrors.html_content = "Content is required";
 
-    // Validate page_route format (only lowercase letters, numbers, underscores, and hyphens)
     const routeRegex = /^[a-z0-9_-]+$/;
     if (formData.page_route && !routeRegex.test(formData.page_route)) {
       newErrors.page_route = "Page route can only contain lowercase letters, numbers, underscores, and hyphens";
@@ -710,6 +743,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
             : "Content added successfully!"
         );
         onSuccess();
+        onClose();
       } else {
         toast.error(
           response.data.message ||
@@ -726,22 +760,37 @@ const ContentForm: React.FC<ContentFormProps> = ({
     }
   };
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
+  // FIXED: Input change handlers with useCallback
+  const handleInputChange = useCallback((field: keyof FormData, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
+    
+    // Clear error for this field
     if (errors[field]) {
       setErrors((prev) => ({
         ...prev,
         [field]: undefined,
       }));
     }
-  };
+  }, [errors]);
 
-  const handleAcademicChange = (academicId: string) => {
-    handleInputChange("academic_id", academicId);
-  };
+  // FIXED: SchoolDropdown handler - remove unnecessary props
+  const handleAcademicChange = useCallback((academicId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      academic_id: academicId,
+    }));
+    
+    // Clear error
+    if (errors.academic_id) {
+      setErrors((prev) => ({
+        ...prev,
+        academic_id: undefined,
+      }));
+    }
+  }, [errors.academic_id]);
 
   // Generate page route from page name
   const generatePageRoute = (pageName: string) => {
@@ -751,25 +800,65 @@ const ContentForm: React.FC<ContentFormProps> = ({
       .replace(/(^_|_$)/g, '');
   };
 
-  const handlePageNameChange = (value: string) => {
-    handleInputChange("page_name", value);
+  // FIXED: Page name change handler
+  const handlePageNameChange = useCallback((value: string) => {
+    setFormData((prev) => {
+      const newFormData = {
+        ...prev,
+        page_name: value,
+      };
+      
+      // Auto-generate page route only if autoGenerateRoute is true
+      if (autoGenerateRoute && (!prev.page_route || prev.page_route === generatePageRoute(prev.page_name))) {
+        newFormData.page_route = generatePageRoute(value);
+      }
+      
+      return newFormData;
+    });
     
-    // Auto-generate page route only if autoGenerateRoute is true and page_route is empty or matches the generated version
-    if (autoGenerateRoute && (!formData.page_route || formData.page_route === generatePageRoute(formData.page_name))) {
-      handleInputChange("page_route", generatePageRoute(value));
+    // Clear error
+    if (errors.page_name) {
+      setErrors((prev) => ({
+        ...prev,
+        page_name: undefined,
+      }));
     }
-  };
+  }, [autoGenerateRoute, errors.page_name]);
 
-  const handlePageRouteChange = (value: string) => {
-    handleInputChange("page_route", value.toLowerCase());
+  // FIXED: Page route change handler
+  const handlePageRouteChange = useCallback((value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      page_route: value.toLowerCase(),
+    }));
+    
     // When user manually edits page route, disable auto-generation
     setAutoGenerateRoute(false);
-  };
+    
+    // Clear error
+    if (errors.page_route) {
+      setErrors((prev) => ({
+        ...prev,
+        page_route: undefined,
+      }));
+    }
+  }, [errors.page_route]);
 
-  // Handle editor content change
-  const handleEditorChange = (newContent: string) => {
-    handleInputChange("html_content", newContent);
-  };
+  // FIXED: Editor content change handler
+  const handleEditorChange = useCallback((newContent: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      html_content: newContent,
+    }));
+    
+    // Clear error
+    if (errors.html_content) {
+      setErrors((prev) => ({
+        ...prev,
+        html_content: undefined,
+      }));
+    }
+  }, [errors.html_content]);
 
   return (
     <Modal show={isOpen} onClose={onClose} size="5xl">
@@ -779,18 +868,19 @@ const ContentForm: React.FC<ContentFormProps> = ({
       
       <ModalBody>
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* School Dropdown */}
+          {/* School Dropdown - FIXED: Remove formData and setFormData props */}
           <div className="w-auto">
             <Label className="block mb-2">
               Select School <span className="text-red-500">*</span>
             </Label>
             <SchoolDropdown
               value={formData.academic_id}
-              formData={formData}
-              setFormData={setFormData}
               onChange={handleAcademicChange}
               includeAllOption={false}
             />
+            {errors.academic_id && (
+              <p className="text-red-500 text-sm mt-1">{errors.academic_id}</p>
+            )}
           </div>
 
           {/* Page Name Input */}
@@ -834,35 +924,18 @@ const ContentForm: React.FC<ContentFormProps> = ({
             )}
           </div>
 
-          {/* HTML Content Editor */}
+          {/* HTML Content Editor - SIMPLIFIED */}
           <div>
             <Label className="block mb-2">
               HTML Content <span className="text-red-500">*</span>
             </Label>
-            <div 
-              className="border border-gray-300 rounded-lg overflow-hidden"
-              onClick={() => {
-                // Focus editor when clicking on the container
-                if (editorInstanceRef.current) {
-                  editorInstanceRef.current.focus();
-                  // Reset cursor to start
-                  try {
-                    const wysiwyg = editorInstanceRef.current.container.querySelector('.jodit-wysiwyg');
-                    if (wysiwyg) {
-                      editorInstanceRef.current.selection.setCursorIn(wysiwyg, false);
-                    }
-                  } catch (error) {
-                    console.log('Error setting cursor position');
-                  }
-                }
-              }}
-            >
+            <div className="border border-gray-300 rounded-lg overflow-hidden">
               <JoditEditor
                 ref={editorRef}
                 value={formData.html_content}
                 config={editorConfig}
-                onBlur={(newContent: string) => handleEditorChange(newContent)}
-                onChange={(newContent: string) => handleEditorChange(newContent)}
+                onBlur={handleEditorChange}
+                onChange={handleEditorChange}
                 onInit={handleEditorInstance}
               />
             </div>
@@ -894,6 +967,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
             color="alternative" 
             onClick={onClose} 
             disabled={loading}
+            type="button"
           >
             Cancel
           </Button>
@@ -901,6 +975,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
             onClick={handleSubmit}
             gradientDuoTone="cyanToBlue" 
             disabled={loading}
+            type="button"
           >
             {loading ? (
               <div className="flex items-center gap-2">

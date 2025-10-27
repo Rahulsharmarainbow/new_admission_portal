@@ -87,8 +87,8 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
 
   // State options
   const stateOptions = statelist.map(state => ({
-    value: state.id?.toString(),
-    label: state.name,
+    value: state.state_id?.toString(),
+    label: state.state_title,
   }));
 
   // Caste options
@@ -336,6 +336,9 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
               </div>
             )}
           </div>
+
+         
+          
 
           {/* Caste Dropdown */}
           <div>

@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useAuth } from './useAuth';
 
 export interface State {
+  id: any;
+  name: any;
   state_id: number;
   state_title: string;
 }

@@ -1,10 +1,10 @@
-.menu-sidebar {
+ .menu-sidebar {
     flex-shrink: 0;
     z-index: 10;
     transition: .2s ease-in;
     position: fixed;
     inset-inline-start: 0px;
-    width: 270px !important;
+    width: 280px !important;
     overflow-y: hidden;
     box-shadow: 0 2px 6px #2553b91a !important;
 }
@@ -19,7 +19,7 @@
 }
 
 .sidebar-nav {
-    margin-inline-end: 16px;
+    margin-inline-end: 20px;
 }
 
 .sidebar-nav .caption {
@@ -105,4 +105,17 @@
 
 .collpase-items .sidebar-dropdown li button {
     max-height: 35px !important;
-}
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
