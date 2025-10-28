@@ -158,7 +158,7 @@ const ApplicationDetailModal: React.FC<ApplicationDetailModalProps> = ({
 
       {/* Modal Footer */}
       <div className="flex items-center p-6 border-t border-gray-200 rounded-b dark:border-gray-600">
-        <Button onClick={onClose} color="gray" className="mr-3">
+        <Button onClick={onClose} color="alternative" className="mr-3">
           Close
         </Button>
         <Button color="blue">

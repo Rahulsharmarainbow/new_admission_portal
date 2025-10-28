@@ -93,7 +93,9 @@ const Dashboard = () => {
             <select
               value={filters.year}
               onChange={(e) => setFilters((prev) => ({ ...prev, year: e.target.value, page: 0 }))}
-              className="w-full sm:w-auto min-w-[120px] p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
+             className="w-full sm:w-auto min-w-[250px] px-3 py-2.5 border border-gray-300 rounded-md bg-white 
+focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
+
             >
               <option value="2025">2025</option>
               <option value="2024">2024</option>
@@ -108,14 +110,14 @@ const Dashboard = () => {
 
           {/* Academic Dropdown */}
            {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  (
-             <div className="relative w-full sm:w-auto">
+             <div className="relative w-full sm:w-auto ">
             <AcademicDropdown
               name="academic"
               formData={filters}
               setFormData={setFilters}
               includeAllOption
               label=""
-              className="min-w-[80px] text-sm"
+              className="min-w-[250px] text-sm"
             />
           </div>
             )}
