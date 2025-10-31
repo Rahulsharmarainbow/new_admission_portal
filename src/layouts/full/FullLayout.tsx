@@ -32,6 +32,10 @@
 
 // export default FullLayout;
 
+
+
+
+
 // import { FC } from 'react';
 // import { Outlet } from 'react-router';
 
@@ -48,6 +52,7 @@
 //             {/* Header/sidebar */}
 //             <Sidebar />
 //             <div className="container flex flex-col w-full pt-6">
+           
 //               {/* Top Header  */}
 //               <Header />
 
@@ -120,7 +125,8 @@ const FullLayout: FC = () => {
           {/* Right content area */}
           <div className="flex flex-col w-full min-w-0 min-h-screen">
             {/* Header - ab yahan fixed hoga */}
-            <div className="fixed top-0 right-4 left-73 z-40"> {/* 👈 left-64 sidebar ki width ke hisab se */}
+            {/* <div className="fixed top-0 right-4 left-73 z-40">  */}
+            <div className="fixed top-0 left-72 right-4 z-40 bg-white shadow-md rounded-md">
               <Header />
             </div>
 
@@ -138,3 +144,10 @@ const FullLayout: FC = () => {
 };
 
 export default FullLayout;
+
+
+
+
+
+
+

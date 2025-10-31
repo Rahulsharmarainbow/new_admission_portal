@@ -6,6 +6,7 @@ import { AuthProvider } from './hook/useAuth';
 import { CookiesProvider } from 'react-cookie';
 import { Toaster } from 'react-hot-toast';
 import React from 'react';
+import CustomToaster from './components/CustomToaster';
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
           }}
         /> */}
 
-    <Toaster
+    {/* <Toaster
   position="bottom-center"
   toastOptions={{
     duration: 4000,
@@ -48,7 +49,9 @@ function App() {
       },
     },
   }}
-/>
+/> */}
+
+ <CustomToaster />
 
 
       <CookiesProvider>
