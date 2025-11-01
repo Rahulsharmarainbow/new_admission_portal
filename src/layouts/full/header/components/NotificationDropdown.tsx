@@ -53,7 +53,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 
   return (
     <div 
-      className="absolute right-0 mt-2 w-150 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden"
+      className="absolute right-0 mt-2 w-100 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >

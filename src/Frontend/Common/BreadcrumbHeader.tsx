@@ -23,13 +23,13 @@ const BreadcrumbHeader: React.FC<BreadcrumbHeaderProps> = ({ title, paths }) => 
         >
           <FaArrowLeft size={18} />
         </button>
-        <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-gray-100">
+        <h2 className="text-xl md:text-xl font-semibold text-gray-900 dark:text-gray-100">
           {title}
         </h2>
       </div>
 
       {/* Right section - Breadcrumb */}
-      <Breadcrumb className="mt-2 sm:mt-0">
+      <Breadcrumb className="mt-2 sm:mt-0 md:text-m">
         <li className="flex items-center">
           <FaHome className="mr-2 text-gray-500" />
           <Link to={`/${user?.role}/dashboard`} className="text-gray-600 hover:text-blue-600">

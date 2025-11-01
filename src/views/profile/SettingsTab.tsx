@@ -232,12 +232,12 @@ const SettingsTab = () => {
   return (
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-2xl">
-        <h5 className="text-xl font-bold tracking-tight text-gray-900 mb-2">
+        {/* <h5 className="text-xl font-bold tracking-tight text-gray-900 mb-2">
           Application Settings
         </h5>
         <p className="font-normal text-gray-500 mb-6">
           Configure your application settings and integrations
-        </p>
+        </p> */}
 
         <div className="space-y-8">
           {/* WhatsApp Settings */}
