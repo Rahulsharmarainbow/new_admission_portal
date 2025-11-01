@@ -61,6 +61,7 @@ import CollegeApplicationManagementTable from 'src/views/applicationForms/colleg
 import FooterEditing from 'src/views/frontedEditing/footer/Footer';
 import PopupEditing from 'src/views/frontedEditing/popup/PopupEditing';
 import AddLiveAccount from 'src/views/accounts/live/components/AddLiveAccount';
+import NotificationsPage from 'src/layouts/full/header/components/NotificationsPage';
 
 
 /* ***Layouts**** */
@@ -145,6 +146,7 @@ const Router = [
       { path: '/SuperAdmin/frontend-editing/home', element: <ActivitiesTable/>},
       { path: '/SuperAdmin/frontend-editing/footer', element: <FooterEditing/>},
       { path: '/SuperAdmin/frontend-editing/popups', element: <PopupEditing />},
+      { path: 'notifications', element: <NotificationsPage/> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
