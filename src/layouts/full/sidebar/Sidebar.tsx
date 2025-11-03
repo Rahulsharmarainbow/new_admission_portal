@@ -71,13 +71,14 @@ import NavItems from "./NavItems";
 import SimpleBar from "simplebar-react";
 import FullLogo from "../shared/logo/FullLogo";
 import NavCollapse from "./NavCollapse";
-import SidebarContent from "./Sidebaritems";
+// import SidebarContent from "./Sidebaritems";
 import { useAuth } from "src/hook/useAuth";
 import { BaseSidebarContent } from "./BaseSidebarContent";
 
 const SidebarLayout = () => {
   const { user } = useAuth();
   const SidebarContents = BaseSidebarContent();
+  console.log("SidebarContents",SidebarContents);
   const [activeCollapse, setActiveCollapse] = useState<string | null>(null);
 
   return (
