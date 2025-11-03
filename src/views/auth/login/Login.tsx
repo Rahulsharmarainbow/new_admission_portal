@@ -39,6 +39,7 @@ export const LoginPage: React.FC = () => {
           email_status: response.email_status,
           sms_status: response.sms_status,
           academic_type: response.academic_type || null,
+          academic_id : response.academic_id || null
         };
 
         // Check if two-step verification is needed

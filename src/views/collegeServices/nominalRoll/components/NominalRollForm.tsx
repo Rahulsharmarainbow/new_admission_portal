@@ -32,27 +32,27 @@ const NominalRollForm: React.FC<NominalRollFormProps> = ({ isOpen, onClose, onSu
   const [degreeLoading, setDegreeLoading] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
-    academic_id: '',
+    academic_id: user?.role === 'CustomerAdmin' ? user?.academic_id?.toString() || '' : '',
     degree_id: '',
   });
 
   const apiUrl = import.meta.env.VITE_API_URL;
-
+console.log(formData);
   // Fetch degrees when academic_id changes
   useEffect(() => {
-    if (formData.academic_id) {
+    if (formData.academic_id && isOpen) {
       fetchDegrees(formData.academic_id);
     } else {
       setDegrees([]);
       setFormData(prev => ({ ...prev, degree_id: '' }));
     }
-  }, [formData.academic_id]);
+  }, [formData.academic_id, isOpen]);
 
   // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       setFormData({
-        academic_id: '',
+        academic_id: user?.role === 'CustomerAdmin' ? user?.academic_id?.toString() || '' : '',
         degree_id: '',
       });
       setDegrees([]);

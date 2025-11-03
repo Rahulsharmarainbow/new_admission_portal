@@ -115,7 +115,7 @@ const CollegeApplicationManagementTable: React.FC = () => {
   // Calculate active filters count
   useEffect(() => {
     let count = 0;
-    if (filters.academic_id) count++;
+    if (filters.academic_id && user?.role != "CustomerAdmin") count++;
     if (filters.year) count++;
     if (filters.degree) count++;
     if (filters.gender) count++;

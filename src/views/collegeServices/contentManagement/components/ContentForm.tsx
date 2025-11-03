@@ -412,7 +412,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
       {/* School, Page Name, and Page Route in ONE ROW */}
       <div className="flex flex-wrap sm:flex-nowrap gap-4">
         {/* Academic Dropdown */}
-        <div className="w-full sm:w-1/3">
+       {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  ( <div className="w-full sm:w-1/3">
           <Label className="block mb-2">
             School <span className="text-red-500">*</span>
           </Label>
@@ -428,7 +428,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
               {errors.academic_id}
             </p>
           )}
-        </div>
+        </div>)}
 
         {/* Page Name Input */}
         <div className="w-full sm:w-1/3">

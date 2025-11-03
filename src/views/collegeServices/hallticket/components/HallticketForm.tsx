@@ -39,7 +39,7 @@ const HallticketForm: React.FC = () => {
   const [degreeLoading, setDegreeLoading] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
-    academic_id: '',
+    academic_id: user?.role === 'CustomerAdmin' ? user?.academic_id?.toString() || '' : '',
     degree_id: '',
     hall_ticket_series: '',
     start_series: '',
