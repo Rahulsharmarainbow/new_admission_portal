@@ -189,7 +189,7 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Academic Dropdown */}
-          <div>
+           {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  (<div>
             <Label htmlFor="academic" className="block mb-2 text-sm font-medium text-gray-700">
               Academic
             </Label>
@@ -200,7 +200,7 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
               includeAllOption={true}
               label=""
             />
-          </div>
+          </div>)}
 
           {/* Year Dropdown */}
           <div>

@@ -78,6 +78,7 @@ export const updateAcademicData = async (formData: FormData, id: string, userId:
     // Add all form fields
     formDataToSend.append('s_id', String(userId));
     formDataToSend.append('account_id', String(id));
+    formDataToSend.append('credential_id', formData.credentialsData?.credential_id || "");
     formDataToSend.append('select_type', formData.selectType);
     formDataToSend.append('select_subtype', formData.selectSubtype || '');
     formDataToSend.append('email', formData.primary_email);
@@ -126,6 +127,7 @@ export const updateAcademicData = async (formData: FormData, id: string, userId:
     // Permissions
     formDataToSend.append('hallticket_generate_permission', formData.switchState ? "1" : "0");
     formDataToSend.append('nominal_permission', formData.nominalState ? "1" : "0");
+    formDataToSend.append('rankcard_permission', formData.rankCardState ? "1" : "0");
     formDataToSend.append('email_service_dropdown_enabled', formData.isDropdownEnabled ? "1" : "0");
     formDataToSend.append('whatsapp_details_enable', formData.isTemplatesVisible ? "1" : "0");
     formDataToSend.append('sms_details_enable', formData.isSmsApiEnabled ? "1" : "0");

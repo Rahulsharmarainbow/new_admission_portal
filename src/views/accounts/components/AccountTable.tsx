@@ -967,8 +967,8 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
   };
 
   // Navigate to website
-  const handleWebsiteClick = (accountId: number) => {
-    navigate(`/Frontend/Customer/${accountId}`);
+  const handleWebsiteClick = (code: number) => {
+    navigate(`/Frontend/${code}`);
     setActiveDropdown(null);
   };
 
@@ -1227,7 +1227,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-sm">
                       <button
-                        onClick={() => handleWebsiteClick(account.id)}
+                        onClick={() => handleWebsiteClick(account?.unique_code)}
                         className="text-blue-600 hover:text-blue-800 flex items-center space-x-1 font-medium transition-colors"
                       >
                         <span>Visit Site</span>

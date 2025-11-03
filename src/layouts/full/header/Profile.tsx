@@ -9,7 +9,6 @@ const assetUrl = import.meta.env.VITE_ASSET_URL;
 const Profile = () => {
   const { logout , user} = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  console.log(user);
 
   const handleLogout = () => {
     setIsOpen(false);

@@ -178,7 +178,7 @@ const HallticketForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(formData.academic_id === ''){
+    if(formData.academic_id === '' && user?.role != "CustomerAdmin"){
           toast.error('Please select an academic');
           return;
         }
@@ -261,7 +261,7 @@ const HallticketForm: React.FC = () => {
      <form onSubmit={handleSubmit} className="space-y-4">
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
     {/* Academic Dropdown */}
-    <div>
+     {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  ( <div>
       <Label htmlFor="academic_id" className="text-sm font-medium">
         Academic <span className="text-red-500">*</span>
       </Label>
@@ -274,7 +274,7 @@ const HallticketForm: React.FC = () => {
         label=""
         className="mt-1"
       />
-    </div>
+    </div> )}
 
     {/* Degree Dropdown */}
     <div>

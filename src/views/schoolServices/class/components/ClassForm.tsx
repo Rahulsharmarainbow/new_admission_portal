@@ -4,6 +4,7 @@ import axios from "axios";
 import { useAuth } from "src/hook/useAuth";
 import toast from "react-hot-toast";
 import SchoolDropdown from "src/Frontend/Common/SchoolDropdown";
+import { al } from "node_modules/react-router/dist/development/context-CIdFp11b.d.mts";
 
 interface Class {
   id: number;
@@ -88,7 +89,7 @@ console.log('editingClass',editingClass);
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
 
-    if (!formData.academic_id) newErrors.academic_id = "School is required";
+    if (!formData.academic_id && user?.role != 'CustomerAdmin') newErrors.academic_id = "School is required";
     if (!formData.className.trim()) newErrors.className = "Class name is required";
     if (!formData.availableSeat.trim()) newErrors.availableSeat = "Available seats is required";
     if (!formData.tution_fee_1.trim()) newErrors.tution_fee_1 = "Tuition fee 1 is required";
@@ -102,7 +103,7 @@ console.log('editingClass',editingClass);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(formData.academic_id === ''){
+    if(formData.academic_id === '' && user?.role != 'CustomerAdmin'){
       toast.error('Please select an academic');
       return;
     }
@@ -195,7 +196,7 @@ console.log('editingClass',editingClass);
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* School Dropdown */}
-          <div>
+         {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  ( <div>
             <label
               htmlFor="academic_id"
               className="block mb-1 text-sm font-medium text-gray-700"
@@ -212,7 +213,7 @@ console.log('editingClass',editingClass);
             {errors.academic_id && (
               <p className="text-red-500 text-sm mt-1">{errors.academic_id}</p>
             )}
-          </div>
+          </div>)}
 
           {/* Class Name Input */}
           <div>

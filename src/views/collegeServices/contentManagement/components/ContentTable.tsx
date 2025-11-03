@@ -325,7 +325,7 @@ const ContentTable: React.FC = () => {
           </div>
 
           {/* college Dropdown */}
-          <div className="w-full sm:w-64">
+           {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  (<div className="w-full sm:w-64">
             <AcademicDropdown
               formData={formData}
               setFormData={setFormData}
@@ -334,7 +334,7 @@ const ContentTable: React.FC = () => {
               includeAllOption={true}
               label=""
             />
-          </div>
+          </div>)}
         </div>
 
         {/* Add Button */}

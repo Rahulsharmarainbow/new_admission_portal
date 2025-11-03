@@ -165,6 +165,7 @@ const AccountTab = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isUpdating2, setIsUpdating2] = useState(false);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   
   // Form states
@@ -210,7 +211,7 @@ const AccountTab = () => {
         setEmail(profileData.email);
         setPhone(profileData.number);
         setCurrentPassword(profileData.d_password || '');
-        setAddress(profileData.address || '');
+        // setAddress(profileData.address || '');
         setIs2faEnabled(profileData.two_step_auth === 1);
         
         // Set profile image URL
@@ -249,7 +250,7 @@ const AccountTab = () => {
       return;
     }
     
-    setIsUpdating(true);
+    setIsUpdating2(true);
     try {
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Profile/Update-two-step`,
@@ -267,7 +268,7 @@ const AccountTab = () => {
       );
 
       if (response.data.status) {
-        setIs2faEnabled(!is2faEnabled);
+        fetchProfile();
         toast.success('Two-factor authentication updated successfully!');
       } else {
         toast.error(response.data.message || 'Failed to update two-factor authentication');
@@ -276,7 +277,7 @@ const AccountTab = () => {
       console.error('Error updating 2FA:', error);
       toast.error('Failed to update two-factor authentication');
     } finally {
-      setIsUpdating(false);
+      setIsUpdating2(false);
     }
   };
 
@@ -308,7 +309,7 @@ const AccountTab = () => {
       
       // Only update password if new password is provided
       if (newPassword) {
-        formData.append('d_password', newPassword);
+        formData.append('password', newPassword);
       }
       
       if (profileImage) {
@@ -469,7 +470,7 @@ const AccountTab = () => {
                   onChange={setConfirmPassword}
                   placeholder="Confirm new password"
                 />
-                <div className="md:col-span-2">
+                {/* <div className="md:col-span-2">
                   <TextInput
                     id="address"
                     label="Address"
@@ -478,7 +479,7 @@ const AccountTab = () => {
                     onChange={setAddress}
                     className="w-full"
                   />
-                </div>
+                </div> */}
               </div>
             </form>
           </Card>
@@ -509,9 +510,9 @@ const AccountTab = () => {
                     ? 'bg-red-100 hover:bg-red-200 text-red-700 border border-red-300'
                     : 'bg-green-100 hover:bg-green-200 text-green-700 border border-green-300'
                 }`}
-                disabled={isUpdating}
+                disabled={isUpdating2}
               >
-                {isUpdating ? 'Updating...' : is2faEnabled ? 'Disable' : 'Enable'}
+                {isUpdating2 ? 'Updating...' : is2faEnabled ? 'Disable' : 'Enable'}
               </button>
             </div>
           </Card>

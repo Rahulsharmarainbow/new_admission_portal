@@ -70,6 +70,7 @@ export interface FormData {
   districts: any[];
   academicData: any;
   templateData: any;
+  credentialsData: any;
 }
 
 export interface State {

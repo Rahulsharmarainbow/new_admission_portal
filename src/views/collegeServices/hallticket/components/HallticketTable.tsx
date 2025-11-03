@@ -363,7 +363,7 @@ const toggleDropdown = (hallticketId: number, event: React.MouseEvent) => {
             </div>
 
             {/* Academic Dropdown - without heading */}
-            <div className="w-full sm:w-64">
+            {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  ( <div className="w-full sm:w-64">
               <AcademicDropdown
                 value={filters.academic_id}
                 onChange={handleAcademicChange}
@@ -371,7 +371,7 @@ const toggleDropdown = (hallticketId: number, event: React.MouseEvent) => {
                 includeAllOption={true}
                 label="" // Empty label to remove heading
               />
-            </div>
+            </div>)}
           </div>
 
           {/* Add Button */}

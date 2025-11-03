@@ -4,10 +4,9 @@ import Select from "react-select";
 const OrganizationSelect = ({ formData, setFormData, loading }) => {
   // Options list
   const options = [
+    { value: "1", label: "School" },
     { value: "2", label: "College" },
     { value: "3", label: "University" },
-    { value: "1", label: "School" },
-    { value: "4", label: "Institute" },
   ];
 
   // Handle change

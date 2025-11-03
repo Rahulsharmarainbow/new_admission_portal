@@ -296,14 +296,14 @@ const ClassTable: React.FC = () => {
           </div>
 
           {/* School Dropdown */}
-          <div className="w-full sm:w-64">
+         {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && (<div className="w-full sm:w-64">
             <SchoolDropdown
               formData={formData}
               setFormData={setFormData}
               onChange={handleAcademicChange}
               includeAllOption
             />
-          </div>
+          </div>)}
         </div>
 
         {/* Add Button */}

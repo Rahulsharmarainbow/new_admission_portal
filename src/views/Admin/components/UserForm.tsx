@@ -1572,9 +1572,9 @@ const UserForm: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 text-center">
+                  {/* <p className="text-xs text-gray-500 text-center">
                     Recommended: Square image, 500x500 pixels, max 2MB
-                  </p>
+                  </p> */}
                 </div>
               </div>
             </div>

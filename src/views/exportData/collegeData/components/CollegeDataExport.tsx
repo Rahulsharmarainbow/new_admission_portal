@@ -266,7 +266,7 @@ const CollegeDataExport: React.FC = () => {
         <div >
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-end">
             {/* Academic Dropdown */}
-            <div className="lg:col-span-1">
+             {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  (<div className="lg:col-span-1">
               <Label htmlFor="academic" className="block mb-2 text-sm font-medium text-gray-700">
                 Select Academic
               </Label>
@@ -278,7 +278,7 @@ const CollegeDataExport: React.FC = () => {
                 label=""
               />
              
-            </div>
+            </div>)}
 
             {/* Start Date */}
             <div className="lg:col-span-1">

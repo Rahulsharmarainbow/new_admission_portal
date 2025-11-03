@@ -78,7 +78,7 @@ const TransportationForm: React.FC<TransportationFormProps> = ({
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
 
-    if (!formData.academic_id) newErrors.academic_id = "School is required";
+    if (!formData.academic_id && user?.role != 'CustomerAdmin') newErrors.academic_id = "School is required";
     if (!formData.distance.trim()) newErrors.distance = "Distance is required";
     if (!formData.fees1.trim()) newErrors.fees1 = "Fee 1 is required";
     if (!formData.fees2.trim()) newErrors.fees2 = "Fee 2 is required";
@@ -90,7 +90,7 @@ const TransportationForm: React.FC<TransportationFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(formData.academic_id === ''){
+    if(formData.academic_id === '' && user?.role != 'CustomerAdmin') {
       toast.error('Please select an academic');
       return;
     }
@@ -182,7 +182,7 @@ const TransportationForm: React.FC<TransportationFormProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-5">
   {/* School Dropdown */}
-  <div>
+   {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  ( <div>
     <label
       htmlFor="academic_id"
       className="block mb-1 text-sm font-medium text-gray-700"
@@ -199,7 +199,7 @@ const TransportationForm: React.FC<TransportationFormProps> = ({
     {errors.academic_id && (
       <p className="text-red-500 text-sm mt-1">{errors.academic_id}</p>
     )}
-  </div>
+  </div> )}
 
   {/* Distance Input */}
   <div>

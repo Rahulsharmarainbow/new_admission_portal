@@ -243,7 +243,7 @@ const DegreeManagementTable: React.FC = () => {
           </div>
 
           {/* Academic Dropdown */}
-          <div className="w-full sm:w-64">
+           {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  (<div className="w-full sm:w-64">
             <AcademicDropdown
               value={filters.academic_id}
               onChange={handleAcademicChange}
@@ -251,7 +251,7 @@ const DegreeManagementTable: React.FC = () => {
               includeAllOption={true}
               label=""
             />
-          </div>
+          </div>)}
         </div>
 
         {/* Add Button */}

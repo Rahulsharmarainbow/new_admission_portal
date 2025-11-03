@@ -445,7 +445,11 @@ const RankCardForm: React.FC<RankCardFormProps> = ({ isOpen, onClose, onSuccess 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.academic_id || !formData.degree_id || !formData.file) {
+    if (!formData.academic_id && user?.role != "CustomerAdmin") {
+      toast.error('Please selecte academic');
+      return;
+    }
+    if (!formData.degree_id || !formData.file) {
       toast.error('Please fill all required fields');
       return;
     }
@@ -513,7 +517,7 @@ const RankCardForm: React.FC<RankCardFormProps> = ({ isOpen, onClose, onSuccess 
         <div className="p-4 space-y-4">
           <div className="space-y-4">
             {/* Academic Dropdown */}
-            <div>
+            {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  ( <div>
               <Label htmlFor="academic_id" value="Select Academic *" className="block mb-2" />
               <AcademicDropdown
                 value={formData.academic_id}
@@ -521,7 +525,7 @@ const RankCardForm: React.FC<RankCardFormProps> = ({ isOpen, onClose, onSuccess 
                 placeholder="Search and select academic..."
                 label=""
               />
-            </div>
+            </div> )}
 
             {/* Degree Dropdown */}
             <div>

@@ -721,7 +721,7 @@ const handleDownloadExcel = async () => {
         {/* Content */}
         <div className="p-6 space-y-6 overflow-y-auto h-[calc(100%-140px)]">
           {/* Academic Dropdown */}
-          <div>
+          {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  ( <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Academic</label>
             <AcademicDropdown
               value={filters.academic_id}
@@ -730,7 +730,7 @@ const handleDownloadExcel = async () => {
               includeAllOption={true}
               label=""
             />
-          </div>
+          </div>)}
 
           {/* Class Dropdown */}
           <div>

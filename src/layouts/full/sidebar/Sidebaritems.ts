@@ -26,7 +26,6 @@ interface MenuItem {
 const SidebarContent: Record<number, MenuItem[]> = {
  
     1: [
-    // SuperAdmin Menu
     {
       heading: 'Home',
       children: [

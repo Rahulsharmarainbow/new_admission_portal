@@ -63,7 +63,7 @@ const DegreeFormModal: React.FC<DegreeFormModalProps> = ({
   console.log(formData);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(formData.academic_id === ''){
+    if(formData.academic_id === '' && user?.role != 'CustomerAdmin') {
       toast.error('Please select an academic');
       return;
     }
@@ -159,7 +159,7 @@ const DegreeFormModal: React.FC<DegreeFormModalProps> = ({
     <ModalBody className="overflow-visible">
       <div className="space-y-4 max-h-[80vh] pr-2">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-[1000]">
-          <div className="relative z-[9999]">
+          {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  ( <div className="relative z-[9999]">
             <Label className="block mb-2">
               Select Academic <span className="text-red-500">*</span>
             </Label>
@@ -171,7 +171,7 @@ const DegreeFormModal: React.FC<DegreeFormModalProps> = ({
               includeAllOption={false}
               className="!z-[9999]"
             />
-          </div>
+          </div> )}
 
               {/* Degree Name */}
               <div>

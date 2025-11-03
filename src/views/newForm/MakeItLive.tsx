@@ -1,17 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { Alert, Breadcrumb, Button, Card } from "flowbite-react";
-import { HiCheckCircle, HiArrowLeft, HiArrowRight, HiHome, HiInformationCircle } from "react-icons/hi";
-import { useAuth } from "src/hook/useAuth";
-import { useNavigate, useParams } from "react-router";
-import { FormData } from "src/types/formTypes";
-import { fetchStates, fetchAcademicData, updateAcademicData, fetchDistricts } from "src/services/apiService";
-import AcademicInformation from "./components/AcademicInformation";
-import ThirdPartyApiSetup from "./components/ThirdPartyApiSetup";
-import RollBasedAccess from "./components/RollBasedAccess";
-import DnsConfiguration from "./components/DnsConfiguration";
-import ContactInformation from "./components/ContactInformation";
-import Loader from "src/Frontend/Common/Loader";
-import BreadcrumbHeader from "src/Frontend/Common/BreadcrumbHeader";
+import React, { useState, useEffect } from 'react';
+import { Alert, Breadcrumb, Button, Card } from 'flowbite-react';
+import {
+  HiCheckCircle,
+  HiArrowLeft,
+  HiArrowRight,
+  HiHome,
+  HiInformationCircle,
+} from 'react-icons/hi';
+import { useAuth } from 'src/hook/useAuth';
+import { useNavigate, useParams } from 'react-router';
+import { FormData } from 'src/types/formTypes';
+import {
+  fetchStates,
+  fetchAcademicData,
+  updateAcademicData,
+  fetchDistricts,
+} from 'src/services/apiService';
+import AcademicInformation from './components/AcademicInformation';
+import ThirdPartyApiSetup from './components/ThirdPartyApiSetup';
+import RollBasedAccess from './components/RollBasedAccess';
+import DnsConfiguration from './components/DnsConfiguration';
+import ContactInformation from './components/ContactInformation';
+import Loader from 'src/Frontend/Common/Loader';
+import BreadcrumbHeader from 'src/Frontend/Common/BreadcrumbHeader';
 
 // Custom Stepper Component
 interface StepperProps {
@@ -27,26 +38,24 @@ const CustomStepper: React.FC<StepperProps> = ({ steps, activeStep }) => {
           <div className="flex flex-col items-center min-w-max">
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                index <= activeStep
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-500"
+                index <= activeStep ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
               }`}
             >
               {index + 1}
             </div>
             <span
               className={`text-xs mt-1 text-center max-w-20 break-words ${
-                index <= activeStep ? "text-blue-600 font-medium" : "text-gray-500"
+                index <= activeStep ? 'text-blue-600 font-medium' : 'text-gray-500'
               }`}
             >
               {step}
             </span>
           </div>
-          
+
           {index < steps.length - 1 && (
             <div
               className={`flex-1 h-1 mx-2 min-w-8 ${
-                index < activeStep ? "bg-blue-600" : "bg-gray-200"
+                index < activeStep ? 'bg-blue-600' : 'bg-gray-200'
               }`}
             />
           )}
@@ -56,12 +65,11 @@ const CustomStepper: React.FC<StepperProps> = ({ steps, activeStep }) => {
   );
 };
 
-
 const MakeItLive: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [submitMessage, setSubmitMessage] = useState("");
+  const [submitMessage, setSubmitMessage] = useState('');
   const { user } = useAuth();
   const authToken = user?.token;
   const { id } = useParams<{ id: string }>();
@@ -69,56 +77,56 @@ const MakeItLive: React.FC = () => {
 
   const [formData, setFormData] = useState<FormData>({
     // Academic Information
-    selectType: "",
-    selectSubtype: "",
-    academicName: "",
-    selectState: "",
-    selectDistrict: "",
-    Pincode: "",
-    area: "",
-    website_url: "",
-    primary_email: "",
-    academicAddress: "",
-    academicDescription: "",
+    selectType: '',
+    selectSubtype: '',
+    academicName: '',
+    selectState: '',
+    selectDistrict: '',
+    Pincode: '',
+    area: '',
+    website_url: '',
+    primary_email: '',
+    academicAddress: '',
+    academicDescription: '',
     academicLogo: null,
     previewImage: null,
 
     // Contact Information
-    technicalName: "",
-    technicalEmail: "",
-    technicalPhone: "",
-    technicalLocation: "",
-    billingName: "",
-    billingEmail: "",
-    billingPhone: "",
-    billingLocation: "",
-    additionalName: "",
-    additionalEmail: "",
-    additionalPhone: "",
-    additionalLocation: "",
+    technicalName: '',
+    technicalEmail: '',
+    technicalPhone: '',
+    technicalLocation: '',
+    billingName: '',
+    billingEmail: '',
+    billingPhone: '',
+    billingLocation: '',
+    additionalName: '',
+    additionalEmail: '',
+    additionalPhone: '',
+    additionalLocation: '',
 
     // API Configurations
-    selectedServicesOption: "Zoho Api",
-    fromEmail: "",
-    smtpHost: "",
-    smtpPort: "",
-    smtpUsername: "",
-    smtpPassword: "",
-    zohoApiKey: "",
-    zohoFromEmail: "",
-    bounceAddress: "",
-    UserId: "",
-    wPassword: "",
-    smsApikey: "",
-    smsSecretkey: "",
-    razorpayApikey: "",
-    razorpaySecretkey: "",
-    
+    selectedServicesOption: 'Zoho Api',
+    fromEmail: '',
+    smtpHost: '',
+    smtpPort: '',
+    smtpUsername: '',
+    smtpPassword: '',
+    zohoApiKey: '',
+    zohoFromEmail: '',
+    bounceAddress: '',
+    UserId: '',
+    wPassword: '',
+    smsApikey: '',
+    smsSecretkey: '',
+    razorpayApikey: '',
+    razorpaySecretkey: '',
+
     // Templates
-    whatsappTemplate: "",
-    smsTemplate: "",
-    emailTemplate: "",
-    
+    whatsappTemplate: '',
+    smsTemplate: '',
+    emailTemplate: '',
+
     // Toggles
     isDropdownEnabled: false,
     isTemplatesVisible: false,
@@ -126,12 +134,12 @@ const MakeItLive: React.FC = () => {
     switchState: false,
     nominalState: false,
     rankCardState: false,
-    
+
     // Domain Configuration
-    domainName: "",
+    domainName: '',
     domainNameError: false,
-    domainNameErrorMsg: "",
-    configure: "",
+    domainNameErrorMsg: '',
+    configure: '',
     updateConfigure: 0,
 
     // API Data
@@ -139,11 +147,12 @@ const MakeItLive: React.FC = () => {
     districts: [],
     academicData: null,
     templateData: null,
+    credentialsData: null,
   });
 
   // Helper function to decode base64
   const decodeBase64 = (str: string): string => {
-    if (!str) return "";
+    if (!str) return '';
     try {
       // Multiple base64 decoding (as per your data structure)
       let decoded = str;
@@ -170,9 +179,9 @@ const MakeItLive: React.FC = () => {
     console.log('Raw API Data:', { academic, credentials, template });
 
     // Parse contact information
-    let technicalContact = { name: "", email: "", phone: "", location: "" };
-    let billingContact = { name: "", email: "", phone: "", location: "" };
-    let additionalContact = { name: "", email: "", phone: "", location: "" };
+    let technicalContact = { name: '', email: '', phone: '', location: '' };
+    let billingContact = { name: '', email: '', phone: '', location: '' };
+    let additionalContact = { name: '', email: '', phone: '', location: '' };
 
     try {
       if (academic.technical_contact) {
@@ -193,73 +202,76 @@ const MakeItLive: React.FC = () => {
     const updates: Partial<FormData> = {
       academicData: academic,
       templateData: template,
+      credentialsData: credentials,
       // Academic Information
-      academicName: academic.academic_name || "",
-      primary_email: academic.academic_email || "",
-      area: academic.academic_area || "",
-      academicAddress: academic.academic_address || "",
-      academicDescription: academic.academic_description || "",
-      Pincode: academic.academic_pincode || "",
-      selectState: academic.state_id ? String(academic.state_id) : "",
-      selectDistrict: academic.district_id ? String(academic.district_id) : "",
-      website_url: academic.academic_website || "",
-      selectType: academic.academic_type ? String(academic.academic_type) : "",
-      selectSubtype: academic.academic_subtype || "",
+      academicName: academic.academic_name || '',
+      primary_email: academic.academic_email || '',
+      area: academic.academic_area || '',
+      academicAddress: academic.academic_address || '',
+      academicDescription: academic.academic_description || '',
+      Pincode: academic.academic_pincode || '',
+      selectState: academic.state_id ? String(academic.state_id) : '',
+      selectDistrict: academic.district_id ? String(academic.district_id) : '',
+      website_url: academic.academic_website || '',
+      selectType: academic.academic_type ? String(academic.academic_type) : '',
+      selectSubtype: academic.academic_subtype || '',
       // Logo preview
-      previewImage: academic.academic_logo ? `${import.meta.env.VITE_ASSET_URL}/${academic.academic_logo}` : null,
+      previewImage: academic.academic_logo
+        ? `${import.meta.env.VITE_ASSET_URL}/${academic.academic_logo}`
+        : null,
       // Contact Information
-      technicalName: technicalContact.name || "",
-      technicalEmail: technicalContact.email || "",
-      technicalPhone: technicalContact.phone || "",
-      technicalLocation: technicalContact.location || "",
-      billingName: billingContact.name || "",
-      billingEmail: billingContact.email || "",
-      billingPhone: billingContact.phone || "",
-      billingLocation: billingContact.location || "",
-      additionalName: additionalContact.name || "",
-      additionalEmail: additionalContact.email || "",
-      additionalPhone: additionalContact.phone || "",
-      additionalLocation: additionalContact.location || "",
+      technicalName: technicalContact.name || '',
+      technicalEmail: technicalContact.email || '',
+      technicalPhone: technicalContact.phone || '',
+      technicalLocation: technicalContact.location || '',
+      billingName: billingContact.name || '',
+      billingEmail: billingContact.email || '',
+      billingPhone: billingContact.phone || '',
+      billingLocation: billingContact.location || '',
+      additionalName: additionalContact.name || '',
+      additionalEmail: additionalContact.email || '',
+      additionalPhone: additionalContact.phone || '',
+      additionalLocation: additionalContact.location || '',
       // Templates
-      whatsappTemplate: template?.whatsapp_template || "",
-      smsTemplate: template?.sms_template || "",
-      emailTemplate: template?.email_template || "",
+      whatsappTemplate: template?.whatsapp_template || '',
+      smsTemplate: template?.sms_template || '',
+      emailTemplate: template?.email_template || '',
       // Domain configuration
-      domainName: academic.configured_domain || "",
-      configure: academic.configured ? "1" : "0",
+      domainName: academic.configured_domain || '',
+      configure: academic.configured ? '1' : '0',
       // API Configurations
-      zohoApiKey: credentials?.zoho_api_key || "",
-      zohoFromEmail: credentials?.zoho_from_email || "",
-      bounceAddress: credentials?.bounce_address || "",
-      wPassword: credentials?.wtsp_pass || "",
-      smsApikey: credentials?.sms_api_key || "",
-      smsSecretkey: credentials?.sms_secret_key || "",
-      razorpayApikey: credentials?.razorpay_api_key || "",
-      razorpaySecretkey: credentials?.razorpay_secret_key || "",
-      selectedServicesOption: credentials?.mail_type || "Zoho Api",
+      zohoApiKey: credentials?.zoho_api_key || '',
+      zohoFromEmail: credentials?.zoho_from_email || '',
+      bounceAddress: credentials?.bounce_address || '',
+      wPassword: credentials?.wtsp_pass || '',
+      smsApikey: credentials?.sms_api_key || '',
+      smsSecretkey: credentials?.sms_secret_key || '',
+      razorpayApikey: credentials?.razorpay_api_key || '',
+      razorpaySecretkey: credentials?.razorpay_secret_key || '',
+      selectedServicesOption: credentials?.mail_type || 'Zoho Api',
       // Permissions
-      isDropdownEnabled: Boolean(credentials?.email_service_dropdown_enabled),
-      isTemplatesVisible: Boolean(credentials?.whatsapp_details_enable),
-      isSmsApiEnabled: Boolean(credentials?.sms_details_enable),
+      isDropdownEnabled: Boolean(credentials?.email_status),
+      isTemplatesVisible: Boolean(credentials?.whatsapp_status),
+      isSmsApiEnabled: Boolean(credentials?.sms_status),
       switchState: Boolean(credentials?.hallticket_generate_permission),
       nominalState: Boolean(credentials?.nominal_permission),
-      rankCardState: Boolean(credentials?.nominal_permission),
+      rankCardState: Boolean(credentials?.rankcard_permission),
     };
 
     console.log('Form Data Updates:', updates);
 
-    setFormData(prev => ({ ...prev, ...updates }));
+    setFormData((prev) => ({ ...prev, ...updates }));
 
     // Fetch districts if state is selected
     if (academic.state_id) {
       try {
         const districtsData = await fetchDistricts(String(academic.state_id));
         console.log('Fetched Districts:', districtsData);
-        
-        setFormData(prev => ({
+
+        setFormData((prev) => ({
           ...prev,
           districts: districtsData,
-          selectDistrict: academic.district_id ? String(academic.district_id) : ""
+          selectDistrict: academic.district_id ? String(academic.district_id) : '',
         }));
       } catch (error) {
         console.error('Error fetching districts:', error);
@@ -272,20 +284,20 @@ const MakeItLive: React.FC = () => {
     const initializeData = async () => {
       try {
         console.log('Initializing data...', { id, userId: user?.id, hasToken: !!authToken });
-        
+
         const statesData = await fetchStates();
         console.log('Fetched States:', statesData);
-        
-        setFormData(prev => ({
+
+        setFormData((prev) => ({
           ...prev,
-          states: statesData
+          states: statesData,
         }));
 
         if (id && authToken && user?.id) {
           console.log('Fetching academic data...');
           const academicData = await fetchAcademicData(id, user.id, authToken, user.role);
           console.log('Fetched Academic Data:', academicData);
-          
+
           if (academicData.academic) {
             await populateFormData(academicData);
           } else {
@@ -296,7 +308,7 @@ const MakeItLive: React.FC = () => {
         }
       } catch (error) {
         console.error('Error initializing data:', error);
-      }finally {
+      } finally {
         setLoading(false);
       }
     };
@@ -306,23 +318,23 @@ const MakeItLive: React.FC = () => {
 
   // Update form data
   const updateFormData = (updates: Partial<FormData>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
+    setFormData((prev) => ({ ...prev, ...updates }));
   };
 
   // Steps configuration
   const getSteps = () => {
     const baseSteps = [
-      "Academic information",
-      "Contact Information",
-      "Third party api setup",
-      "Roll based access",
-      "Dns Configuration",
+      'Academic information',
+      'Contact Information',
+      'Third party api setup',
+      'Roll based access',
+      'Dns Configuration',
     ];
-    
-    if (formData.selectType === "1") {
-      return baseSteps.filter(step => step !== "Roll based access");
+
+    if (formData.selectType === '1') {
+      return baseSteps.filter((step) => step !== 'Roll based access');
     }
-    
+
     return baseSteps;
   };
 
@@ -340,29 +352,31 @@ const MakeItLive: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id || !user?.id || !authToken) {
-      setSubmitMessage("Error: Missing required data");
+      setSubmitMessage('Error: Missing required data');
       return;
     }
 
     setIsLoading(true);
-    setSubmitMessage("");
+    setSubmitMessage('');
 
     try {
       const result = await updateAcademicData(formData, id, user.id, authToken, user.role);
-      
+
       if (result.status) {
-        setSubmitMessage("Account updated successfully!");
+        setSubmitMessage('Account updated successfully!');
         const academicData = await fetchAcademicData(id, user.id, authToken, user.role);
         navigate(`/${user?.role}/live-accounts`);
         if (academicData.academic) {
           await populateFormData(academicData);
         }
       } else {
-        setSubmitMessage("Error updating account: " + (result.message || "Unknown error"));
+        setSubmitMessage('Error updating account: ' + (result.message || 'Unknown error'));
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      setSubmitMessage("Error updating account: " + (error instanceof Error ? error.message : "Unknown error"));
+      setSubmitMessage(
+        'Error updating account: ' + (error instanceof Error ? error.message : 'Unknown error'),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -379,11 +393,19 @@ const MakeItLive: React.FC = () => {
   // Get step content
   const renderStepContent = (step: number) => {
     const stepComponents = {
-      "Academic information": <AcademicInformation formData={formData} updateFormData={updateFormData} />,
-      "Contact Information": <ContactInformation formData={formData} updateFormData={updateFormData} />,
-      "Third party api setup": <ThirdPartyApiSetup formData={formData} updateFormData={updateFormData} />,
-      "Roll based access": <RollBasedAccess formData={formData} updateFormData={updateFormData} />,
-      "Dns Configuration": <DnsConfiguration formData={formData} updateFormData={updateFormData} isEditMode={true} />,
+      'Academic information': (
+        <AcademicInformation formData={formData} updateFormData={updateFormData} />
+      ),
+      'Contact Information': (
+        <ContactInformation formData={formData} updateFormData={updateFormData} />
+      ),
+      'Third party api setup': (
+        <ThirdPartyApiSetup formData={formData} updateFormData={updateFormData} />
+      ),
+      'Roll based access': <RollBasedAccess formData={formData} updateFormData={updateFormData} />,
+      'Dns Configuration': (
+        <DnsConfiguration formData={formData} updateFormData={updateFormData} isEditMode={true} />
+      ),
     };
 
     const currentStep = steps[step];
@@ -396,71 +418,69 @@ const MakeItLive: React.FC = () => {
         <Loader />
       ) : (
         <div className="max-w-7xl mx-auto">
-        {/* Breadcrumb Header */}
-              <BreadcrumbHeader
-                title={'Live Account Onboarding'}
-                paths={[
-                  { name: 'Demo Accounts', link: `/${user?.role}/demo-accounts` },
-                  { name: 'Live Account Onboarding', link: '#' },
-                ]}
-              />
+          {/* Breadcrumb Header */}
+          <BreadcrumbHeader
+            title={'Live Account Onboarding'}
+            paths={[
+              { name: 'Demo Accounts', link: `/${user?.role}/demo-accounts` },
+              { name: 'Live Account Onboarding', link: '#' },
+            ]}
+          />
 
-        <Card className="overflow-hidden">
-          <div className="p-6">
-            <CustomStepper steps={steps} activeStep={activeStep} />
+          <Card className="overflow-hidden">
+            <div className="p-6">
+              <CustomStepper steps={steps} activeStep={activeStep} />
 
-            {submitMessage && (
-              <Alert 
-                color={submitMessage.includes("successfully") ? "success" : "failure"} 
-                className="mb-4 break-words"
-              >
-                {submitMessage}
-              </Alert>
-            )}
+              {submitMessage && (
+                <Alert
+                  color={submitMessage.includes('successfully') ? 'success' : 'failure'}
+                  className="mb-4 break-words"
+                >
+                  {submitMessage}
+                </Alert>
+              )}
 
-            {activeStep === steps.length ? (
-              <Alert color="success" className="mb-4">
-                All steps completed - you're finished
-              </Alert>
-            ) : (
-              <>
-                <div className="mb-8">
-                  {renderStepContent(activeStep)}
-                </div>
+              {activeStep === steps.length ? (
+                <Alert color="success" className="mb-4">
+                  All steps completed - you're finished
+                </Alert>
+              ) : (
+                <>
+                  <div className="mb-8">{renderStepContent(activeStep)}</div>
 
-                <div className="flex justify-between items-center flex-wrap gap-4">
-                  <Button
-                    color="light"
-                    onClick={handleBack}
-                    disabled={activeStep === 0}
-                    className="flex items-center gap-2"
-                  >
-                    <HiArrowLeft className="w-4 h-4" />
-                    Back
-                  </Button>
-
-                  {activeStep === steps.length - 1 ? (
-                    <Button 
-                      onClick={handleSubmit} 
-                      color="blue" 
+                  <div className="flex justify-between items-center flex-wrap gap-4">
+                    <Button
+                      color="light"
+                      onClick={handleBack}
+                      disabled={activeStep === 0}
                       className="flex items-center gap-2"
-                      disabled={isLoading}
                     >
-                      {isLoading ? "Updating..." : "Update"}
-                      <HiCheckCircle className="w-4 h-4" />
+                      <HiArrowLeft className="w-4 h-4" />
+                      Back
                     </Button>
-                  ) : (
-                    <Button onClick={handleNext} color="blue" className="flex items-center gap-2">
-                      Next
-                      <HiArrowRight className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        </Card>
-      </div>
+
+                    {activeStep === steps.length - 1 ? (
+                      <Button
+                        onClick={handleSubmit}
+                        color="blue"
+                        className="flex items-center gap-2"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Updating...' : 'Update'}
+                        <HiCheckCircle className="w-4 h-4" />
+                      </Button>
+                    ) : (
+                      <Button onClick={handleNext} color="blue" className="flex items-center gap-2">
+                        Next
+                        <HiArrowRight className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </Card>
+        </div>
       )}
     </div>
   );

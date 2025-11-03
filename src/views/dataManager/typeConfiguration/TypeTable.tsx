@@ -729,13 +729,12 @@ const TypeTable: React.FC = () => {
               className="w-full"
             />
           </div>
-          <div className="w-full sm:w-60 md:w-72">
-            {/* AcademicDropdown को AllAcademicsDropdown से replace करें */}
-            <AllAcademicsDropdown // यह line change करें
+           {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  (<div className="w-full sm:w-60 md:w-72">
+            <AllAcademicsDropdown 
               value={selectedAcademic} 
               onChange={handleAcademicChange} 
             />
-          </div>
+          </div>)}
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">

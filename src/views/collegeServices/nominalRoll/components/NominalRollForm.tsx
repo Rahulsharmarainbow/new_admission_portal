@@ -108,8 +108,12 @@ const NominalRollForm: React.FC<NominalRollFormProps> = ({ isOpen, onClose, onSu
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.academic_id || !formData.degree_id) {
-      toast.error('Please select both academic and degree');
+    if (!formData.academic_id && user?.role != "CustomerAdmin") {
+      toast.error('Please select academic');
+      return;
+    }
+    if (!formData.degree_id) {
+      toast.error('Please select degree');
       return;
     }
 
@@ -160,7 +164,7 @@ const NominalRollForm: React.FC<NominalRollFormProps> = ({ isOpen, onClose, onSu
       <div className="p-4 space-y-4">
         <div className="space-y-4">
           {/* Academic Dropdown */}
-          <div>
+           {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  ( <div>
             <Label htmlFor="academic_id" className="block mb-2" >
               Select Academic <span className="text-red-500">*</span>
             </Label>
@@ -170,7 +174,7 @@ const NominalRollForm: React.FC<NominalRollFormProps> = ({ isOpen, onClose, onSu
               placeholder="Search and select academic..."
               label=""
             />
-          </div>
+          </div> )}
 
           {/* Degree Dropdown */}
           <div>
