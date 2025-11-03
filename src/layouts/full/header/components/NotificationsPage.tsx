@@ -139,8 +139,8 @@ const NotificationsPage: React.FC = () => {
                   <Icon icon="solar:bell-bing-line-duotone" height={32} className="text-blue-600" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
-                  <p className="text-gray-600 mt-1">
+                  <h1 className="text-xl font-bold text-gray-900">Notifications</h1>
+                  <p className="text-gray-600 mt-0">
                     Stay updated with your latest activities
                   </p>
                 </div>
@@ -219,12 +219,12 @@ const NotificationsPage: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <h3 className={`text-lg font-semibold ${
+                          <h3 className={`text-base font-semibold ${
                             !notification.read ? 'text-gray-900' : 'text-gray-700'
                           }`}>
                             {notification.title}
                           </h3>
-                          <p className="text-gray-600 mt-2 leading-relaxed">
+                          <p className="text-gray-600 text-sm mt-2 leading-relaxed">
                             {notification.message}
                           </p>
                         </div>

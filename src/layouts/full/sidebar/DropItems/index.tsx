@@ -90,7 +90,7 @@ const Dropitems: React.FC<NavItemsProps> = ({ item }) => {
   return (
     <Link to={item.url} target={item.isPro ? '_blank' : '_self'}>
       <SidebarItem
-        className={`relative py-3 px-4 my-1 transition-all duration-200 rounded-lg
+        className={`relative py-3 px-4 my-1 transition-all duration-200 rounded-lg 
           ${
             isActive
               ? "text-[#0084DA] bg-pink-50 font-medium"
@@ -102,49 +102,7 @@ const Dropitems: React.FC<NavItemsProps> = ({ item }) => {
       >
         <div className="flex items-center justify-between w-full">
           <span className="flex gap-3 items-center min-w-0">
-           {/* {item.icon ? (
-  <Icon 
-    icon={item.icon} 
-    className={`${isActive ? "text-[#0084DA]" : "text-gray-500 group-hover/link:text-[#0084DA]"}`} 
-    height={10} 
-    width={10}
-  />
-) : (
-  // Modern Circle Outline
-  <div className={`ms-1 me-2 transition-all duration-200 border-2 rounded-full ${
-    isActive
-      ? 'w-2 h-2 border-[#0084DA] bg-[#0084DA]'
-      : 'w-2 h-2 border-gray-300 bg-transparent group-hover/link:w-2.5 group-hover/link:h-2.5 group-hover/link:border-[#0084DA]'
-  }`} />
-)} */}
-
-{/* {item.icon ? (
-  <Icon 
-    icon={item.icon} 
-    className={`${isActive ? "text-[#0084DA]" : "text-gray-500 group-hover/link:text-[#0084DA]"}`} 
-    height={20} 
-    width={20}
-  />
-) : (
-  // Small Chevron Right
-  <svg 
-    className={`ms-1 me-2 transition-all duration-200 ${
-      isActive ? "text-[#0084DA] scale-110" : "text-gray-400 group-hover/link:text-[#0084DA]"
-    }`} 
-    width="12" 
-    height="12" 
-    viewBox="0 0 16 16" 
-    fill="none"
-  >
-    <path 
-      d="M6 12L10 8L6 4" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-  </svg>
-)} */}
+          
 
 
 {item.icon ? (

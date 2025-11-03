@@ -743,9 +743,7 @@ const CollegeDashboard = () => {
         {/* Contact Information Tab Content */}
         {activeTab === 'contact' && (
           <div>
-            <h2 className="text-xl font-bold text-gray-800 mb-8">
-              Contact Information
-            </h2>
+         
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Technical Contact */}
