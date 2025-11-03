@@ -272,7 +272,7 @@ const Router = [
       </ProtectedRoute>
     ),
     children: [
-      { path: 'dashboard', element: <Dashboard /> },
+      { path: 'dashboard', element: <SalesDashboard /> },
       { path: 'demo-accounts', element: <DemoAccounts /> },
       { path: 'demo-accounts/add', element: <AddEditAccount /> },
       { path: 'demo-accounts/edit/:id', element: <AddEditAccount /> },
@@ -335,7 +335,7 @@ const Router = [
       { path: '/auth/404', element: <Error /> },
       { path: '/Frontend/:institute_id', element: <Home /> },
       { path: '/page/:pageType', element: <TypePage /> },
-      { path: '/apply', element: <Apply /> },
+      { path: '/Frontend/apply', element: <Apply /> },
       { path: '/Form-view', element: <FormView /> },
       { path: '/Confirmation', element: <Confirmation /> },
       { 
