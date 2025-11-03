@@ -113,12 +113,6 @@
 
 
 
-
-
-
-
-
-
 import React from "react";
 import { ChildItem } from "../Sidebaritems";
 import { SidebarItem } from "flowbite-react";
@@ -137,25 +131,26 @@ const NavItems: React.FC<NavItemsProps> = ({ item }) => {
   return (
     <Link to={item.url} target={item.isPro ? "_blank" : "_self"}>
       <SidebarItem
-        className={`relative py-3 px-4 my-1 transition-all duration-200 rounded-lg
+        className={`relative py-3 px-4  transition-all duration-200 rounded-lg
           ${
             isActive
-              ? "text-[#0084DA] bg-pink-50 font-semibold"
-              : "text-gray-700 bg-transparent hover:text-[#0084DA] hover:bg-pink-50 font-normal group/link"
+              ? "bg-pink-50 text-[#0084DA] font-semibold"
+              : "text-gray-700 hover:text-[#0084DA] hover:bg-pink-50 font-normal"
           }`}
         style={{
           fontSize: "14px",
         }}
       >
         <div className="flex items-center justify-between w-full">
+          {/* Icon and Text */}
           <span className="flex gap-3 items-center min-w-0">
             {item.icon ? (
               <Icon
                 icon={item.icon}
-                className={`${
+                className={`transition-colors duration-200 ${
                   isActive
                     ? "text-[#0084DA]"
-                    : "text-gray-500 group-hover/link:text-[#0084DA]"
+                    : "text-gray-700 group-hover/link:text-[#0084DA]"
                 }`}
                 height={20}
                 width={20}
@@ -165,23 +160,24 @@ const NavItems: React.FC<NavItemsProps> = ({ item }) => {
                 className={`ms-1 me-2 transition-all duration-300 rounded-full ${
                   isActive
                     ? "w-2 h-2 bg-gradient-to-r from-[#0084DA] to-[#00C2FF] shadow-sm"
-                    : "w-2 h-2 bg-gradient-to-r from-gray-300 to-gray-400 group-hover/link:w-2 group-hover/link:h-2 group-hover/link:from-[#0084DA] group-hover/link:to-[#00C2FF]"
+                    : "w-2 h-2 bg-gradient-to-r from-gray-300 to-gray-400 group-hover/link:from-[#0084DA] group-hover/link:to-[#00C2FF]"
                 }`}
               />
             )}
             <span
               className={`min-w-0 flex-1 truncate ${
-                isActive ? "text-[#0084DA]" : "text-inherit"
+                isActive ? "text-[#0084DA]" : "text-gray-700"
               }`}
               style={{
                 fontSize: "14px",
-                fontWeight: isActive ? "500" : "400",
+                fontWeight: isActive ? "600" : "500",
               }}
             >
               {item.name}
             </span>
           </span>
 
+          {/* Pro Badge */}
           {item.isPro && (
             <span
               className="py-1 px-2 rounded-full border whitespace-nowrap flex-shrink-0 ml-2 text-xs font-medium"

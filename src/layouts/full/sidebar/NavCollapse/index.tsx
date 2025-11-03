@@ -198,7 +198,7 @@ const NavCollapse: React.FC<NavCollapseProps> = ({
   const isActive = Boolean(activeDD) || isOpen;
 
   return (
-    <div className="mb-2">
+    <div className="mb-1.5">
       {/* Main Menu Item */}
       <div
         className={`w-full py-3 px-4 transition-all duration-300 rounded-lg flex items-center justify-between cursor-pointer group

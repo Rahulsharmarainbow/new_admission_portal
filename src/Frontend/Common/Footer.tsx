@@ -1,7 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router';
+import { Link, useParams } from 'react-router';
 
 const Footer = ({ footerData }) => {
+  const { institute_id } = useParams();
   // Default data if no footerData provided
   const defaultFooterData = {
     title: "General Enquiries & Technical Support",
@@ -53,7 +54,7 @@ const Footer = ({ footerData }) => {
       links: [
         {
           text: "About",
-          href: "/page/about",
+          href: `/Frontend/${institute_id}/about  `,
           color: "blue"
         },
         {
