@@ -573,7 +573,7 @@ const ClassForm: React.FC<ClassFormProps> = ({
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {/* School Dropdown */}
-            <div>
+            {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  (<div>
               <label
                 htmlFor="academic_id"
                 className="block mb-1 text-sm font-medium text-gray-700"
@@ -590,7 +590,7 @@ const ClassForm: React.FC<ClassFormProps> = ({
               {errors.academic_id && (
                 <p className="text-red-500 text-sm mt-1">{errors.academic_id}</p>
               )}
-            </div>
+            </div> )}
 
             {/* Class Name Input */}
             <div>

@@ -273,7 +273,7 @@ const TypeModal: React.FC<TypeModalProps> = ({
       return;
     }
 
-    if (!selectedAcademic) {
+    if (!selectedAcademic && user?.role !== 'CustomerAdmin') {
       toast.error('Please select academic');
       return;
     }
@@ -342,7 +342,7 @@ const TypeModal: React.FC<TypeModalProps> = ({
         <ModalBody className="overflow-visible">
           <div className="space-y-4">
             {/* Academic Dropdown - AcademicDropdown को AllAcademicsDropdown से replace करें */}
-            <div>
+            {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  (<div>
               <Label htmlFor="academic" className="mb-2 block text-sm font-medium text-gray-700">
                 Select Academic <span className="text-red-500">*</span>
               </Label>
@@ -351,7 +351,7 @@ const TypeModal: React.FC<TypeModalProps> = ({
                 onChange={handleAcademicChange}
                 label=""
               />
-            </div>
+            </div> )}
 
             <div>
               <Label htmlFor="typeName" className="mb-2 block text-sm font-medium text-gray-700">
@@ -382,7 +382,7 @@ const TypeModal: React.FC<TypeModalProps> = ({
           <Button 
             type="submit"
             color="primary"
-            disabled={loading || !typeName.trim() || !selectedAcademic}
+            disabled={loading || !typeName.trim()}
             className="px-4 py-2"
           >
             {loading 

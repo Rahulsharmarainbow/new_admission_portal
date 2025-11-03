@@ -87,7 +87,11 @@ const TypeOfConnection = ({ selectedAcademic, onTypeChange }: TypeOfConnectionPr
   };
 
   return (
-    <div className="relative w-full sm:w-auto min-w-[200px]">
+    <div className={`relative w-full sm:w-auto min-w-[200px]  ${
+        user?.role === 'CustomerAdmin'
+          ? 'md:w-1/2' 
+          : '' 
+      }`}>
       <Select
         isLoading={loading}
         isDisabled={!selectedAcademic || loading}

@@ -1473,7 +1473,7 @@ const ContentTable: React.FC = () => {
   }
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md h-screen overflow-y-hidden">
+    <div className="p-4 bg-white rounded-lg shadow-md h-full overflow-y-hidden">
       {/* Search Bar with Filters and Add Button */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4 w-full items-start sm:items-center">

@@ -99,12 +99,13 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
 
   // Fetch filter options when academic_id changes
   useEffect(() => {
-    if (filters.academic_id) {
+   if(user?.role === 'CustomerAdmin') handleInputChange('academic_id', user?.academic_id?.toString() || '');
+    if (filters.academic_id && isOpen) {
       fetchFilterOptions();
     } else {
       setFilterOptions(null);
     }
-  }, [filters.academic_id]);
+  }, [filters.academic_id, isOpen]);
 
   const fetchFilterOptions = async () => {
     if (!filters.academic_id) return;
