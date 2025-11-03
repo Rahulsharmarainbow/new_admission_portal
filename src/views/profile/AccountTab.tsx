@@ -368,10 +368,10 @@ const AccountTab = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Picture Section */}
         <Card className="lg:col-span-1">
-          <h5 className="text-xl font-bold tracking-tight text-gray-900 mb-4">
+          <h5 className="text-lg font-bold tracking-tight text-gray-900 mb-4">
             Profile Picture
           </h5>
-          <p className="font-normal text-gray-500 mb-6">
+          <p className="font-base text-gray-500 mb-6">
             Update your profile photo from here
           </p>
           <div className="flex flex-col items-center">
@@ -414,10 +414,10 @@ const AccountTab = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* Personal Details */}
           <Card>
-            <h5 className="text-xl font-bold tracking-tight text-gray-900 mb-4">
+            <h5 className="text-lg font-bold tracking-tight text-gray-900 mb-4">
               Personal Details
             </h5>
-            <p className="font-normal text-gray-500 mb-6">
+            <p className="font-base text-gray-500 mb-6">
               Update your personal information
             </p>
             <form>
@@ -486,7 +486,7 @@ const AccountTab = () => {
 
           {/* Two-Factor Authentication */}
           <Card>
-            <h5 className="text-xl font-bold tracking-tight text-gray-900 mb-4">
+            <h5 className="text-lg font-bold tracking-tight text-gray-900 mb-4">
               Security Settings
             </h5>
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">

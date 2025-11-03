@@ -9,6 +9,18 @@
     box-shadow: 0 2px 6px #2553b91a !important;
 }
 
+/* .menu-sidebar {
+    flex-shrink: 0;
+    z-index: 10;
+    transition: .2s 
+ease-in;
+    position: fixed;
+    inset-inline-start: 0px;
+    width: 260px !important;
+    overflow-y: hidden;
+    box-shadow: 0 2px 6px #2553b91a !important;
+    margin: 0px 7px;
+} */
 
 .logo img {
     margin: 0 auto;
