@@ -59,17 +59,17 @@ const Footer = ({ footerData }) => {
         },
         {
           text: "Privacy Policy",
-          href: "/page/privacy-policy",
+          href: `/Frontend/${institute_id}/privacy-policy`,
           color: "green"
         },
         {
           text: "Disclaimer",
-          href: "/page/disclaimer",
+          href: `/Frontend/${institute_id}/disclaimer`,
           color: "yellow"
         },
         {
           text: "Cancellation Policy",
-          href: "/page/cancellation-policy",
+          href: `/Frontend/${institute_id}/cancellation-policy`,
           color: "red"
         }
       ]

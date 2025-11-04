@@ -118,7 +118,7 @@ const Home = () => {
           title: "Application",
           link: {
             text: data.buttons?.[0]?.text || "Apply Online",
-            url: data.buttons?.[0]?.href || "#"
+            url: data.buttons?.[0]?.href ||  (data.institute_id ? `/Frontend/${data.institute_id}/apply` : "#")
           },
           showNewBadge: data.buttons?.some(b => b.new === 1) || false
         },
@@ -133,7 +133,6 @@ const Home = () => {
 
   const transformedData = transformApiData(institute);
   const { examInfo, alert, cards } = transformedData;
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Custom Header with logo on left and name in center */}
@@ -145,7 +144,7 @@ const Home = () => {
     <img 
       src={`${assetUrl}/${institute.header.logo}`} 
       alt="Institute Logo" 
-      className="h-40 w-40 object-contain mr-3 cursor-pointer"
+      className="h-20 w-20 object-contain mr-3 cursor-pointer"
     />
   </Link>
 )}
@@ -190,7 +189,7 @@ const Home = () => {
                 {alert.showNewBadge && <NewBadge className="ml-2" />}
               </h2>
             </div>
-            <div className="text-gray-700 leading-relaxed text-lg max-w-7xl mx-auto bg-gray-50 p-6 rounded-xl border border-gray-200">
+            <div className="text-gray-700 leading-relaxed text-base max-w-7xl mx-auto bg-gray-50 p-6 rounded-xl border border-gray-200">
               {examInfo.description}
             </div>
           </div>
@@ -259,7 +258,7 @@ const Home = () => {
               </div>
               <div className="p-6 flex-grow flex items-center bg-gray-50 rounded-b-2xl">
                 <div className="flex items-center justify-center bg-white rounded-xl p-6 w-full shadow-inner border border-gray-200 hover:shadow-md transition-shadow duration-200">
-                  <a href={cards.application.link.url} target="_blank" rel="noopener noreferrer" className="font-bold text-white hover:text-white transition-colors duration-200 inline-flex items-center text-lg bg-gradient-to-r from-[#dc2626] to-[#ea580c] px-6 py-3 rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                  <a href={`/Frontend/${institute_id}/${cards.application.link.url}`} target="_blank" rel="noopener noreferrer" className="font-bold text-white hover:text-white transition-colors duration-200 inline-flex items-center text-lg bg-gradient-to-r from-[#dc2626] to-[#ea580c] px-6 py-3 rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
                     <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd" />
                     </svg>

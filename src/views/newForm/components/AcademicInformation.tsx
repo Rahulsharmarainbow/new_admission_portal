@@ -277,39 +277,60 @@
 
 
 
-
-
-
-
-import React, { useEffect } from "react";
-import { MdBusiness, MdLocationOn, MdLanguage, MdEmail, MdUpload, MdDescription } from "react-icons/md";
-import { FormData } from "../../../types/formTypes";
+import React, { useEffect, useMemo } from "react";
+import { 
+  Card, 
+  Label, 
+  Select, 
+  TextInput, 
+  Textarea, 
+  FileInput,
+  HelperText
+} from "flowbite-react";
+// Assuming these types/services are correctly defined in your project
+import { FormData } from "src/types/formTypes";
+import { fetchDistricts } from "src/services/apiService";
+import { HiOutlineUpload } from "react-icons/hi"; 
 
 interface AcademicInformationProps {
   formData: FormData;
   updateFormData: (updates: Partial<FormData>) => void;
+  // Note: The actual form submission/navigation logic will be handled 
+  // by the parent component that renders this form inside a <form> tag.
 }
 
 const AcademicInformation: React.FC<AcademicInformationProps> = ({ formData, updateFormData }) => {
+  // Use environment variable for asset URL
   const assetUrl = import.meta.env.VITE_ASSET_URL;
   
-  // Fetch districts when state changes
+  // --- Data Fetching Logic: Fetch districts when state changes ---
   useEffect(() => {
     const loadDistricts = async () => {
       if (formData.selectState) {
-        // Add your API call here
-        // const districtsData = await fetchDistricts(formData.selectState);
-        // updateFormData({ districts: districtsData });
+        try {
+          const districtsData = await fetchDistricts(formData.selectState);
+          updateFormData({ 
+            districts: districtsData
+          });
+        } catch (error) {
+          console.error("Failed to fetch districts:", error);
+        }
+      } else {
+        // Clear districts if state is deselected
+        updateFormData({ districts: [] });
       }
     };
 
     loadDistricts();
-  }, [formData.selectState]);
+  }, [formData.selectState]); 
+
+  // --- Handlers ---
 
   const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const stateId = e.target.value;
     updateFormData({ 
-      selectState: e.target.value,
-      selectDistrict: ""
+      selectState: stateId,
+      selectDistrict: "" // Reset district when state changes
     });
   };
 
@@ -317,7 +338,7 @@ const AcademicInformation: React.FC<AcademicInformationProps> = ({ formData, upd
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
-      updateFormData({ academicLogo: file });
+      updateFormData({ academicLogo: file }); 
       
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -327,247 +348,260 @@ const AcademicInformation: React.FC<AcademicInformationProps> = ({ formData, upd
     }
   };
 
-  const logoUrl = formData.previewImage || 
-    (formData.academicData?.academic_logo ? `${assetUrl}/${formData.academicData.academic_logo}` : null);
+  // --- Memoized Values ---
+  const logoUrl = useMemo(() => {
+    if (formData.previewImage) {
+      return formData.previewImage;
+    }
+    if (formData.academicData?.academic_logo) {
+      return `${assetUrl}/${formData.academicData.academic_logo}`;
+    }
+    return null;
+  }, [formData.previewImage, formData.academicData?.academic_logo, assetUrl]);
+
+  // --- UI Helper for Mandatory Labels ---
+  const RequiredLabel: React.FC<{ htmlFor: string, children: React.ReactNode }> = ({ htmlFor, children }) => (
+    <Label htmlFor={htmlFor} className="mb-2 block font-semibold text-gray-900 dark:text-white">
+      {children} <span className="text-red-600 dark:text-red-400">*</span>
+    </Label>
+  );
 
   return (
-    <div className="">
-      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
-        {/* Header */}
-       
-
-        {/* Main Form Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-blue-500/10 transition-shadow duration-500">
+    <div className="space-y-8">
+      <Card className="shadow-lg">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 border-b pb-2">
+          Organization Details
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
+          {/* Type of Organization - MANDATORY */}
+          <div>
+            <RequiredLabel htmlFor="selectType">Type of the Organization</RequiredLabel>
+            <Select
+              id="selectType"
+              value={formData.selectType}
+              onChange={(e) => updateFormData({ selectType: e.target.value, selectSubtype: "" })}
+              required 
+              className="w-full"
+            >
+              <option value="">Please Select</option>
+              <option value="1">School</option>
+              <option value="2">College</option>
+              <option value="3">University</option>
+            </Select>
+          </div>
+
+          {/* Subtype (Conditional, MANDATORY only if Type is University) */}
+          {formData.selectType === "3" ? (
+            <div>
+              <RequiredLabel htmlFor="selectSubtype">Subtype of Organization</RequiredLabel>
+              <Select
+                id="selectSubtype"
+                value={formData.selectSubtype}
+                onChange={(e) => updateFormData({ selectSubtype: e.target.value })}
+                required 
+                className="w-full"
+              >
+                <option value="">Please Select</option>
+                <option value="Arts College">Arts College</option>
+                <option value="Law University">Law University</option>
+              </Select>
+            </div>
+          ) : (
+             <div className="hidden lg:block"></div> 
+          )}
+
+          {/* Academic Name - MANDATORY */}
+          <div className={`${formData.selectType === "3" ? "" : "md:col-span-2 lg:col-span-2"}`}>
+            <RequiredLabel htmlFor="academicName">Name of the Organization</RequiredLabel>
+            <TextInput
+              id="academicName"
+              value={formData.academicName}
+              onChange={(e) => updateFormData({ academicName: e.target.value })}
+              required 
+              placeholder="e.g., Global Public School"
+              className="w-full"
+            />
+          </div>
+
+          {/* Primary Email - MANDATORY */}
+          <div>
+            <RequiredLabel htmlFor="primary_email">Primary Email for Main Account</RequiredLabel>
+            <TextInput
+              id="primary_email"
+              type="email"
+              value={formData.primary_email}
+              onChange={(e) => updateFormData({ primary_email: e.target.value })}
+              required 
+              placeholder="organization@example.com"
+              className="w-full"
+            />
+          </div>
           
-          <div className="p-6 md:p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Type of Organization */}
-              <div className="space-y-2 group">
-                <label htmlFor="selectType" className="text-sm font-semibold flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                  <MdBusiness className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  Type of Organization <span className="text-red-600">*</span>
-                </label>
-                <select
-                  id="selectType"
-                  value={formData.selectType}
-                  onChange={(e) => updateFormData({ selectType: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:border-blue-400"
-                >
-                  <option value="">Please Select</option>
-                  <option value="1">School</option>
-                  <option value="2">College</option>
-                  <option value="3">University</option>
-                </select>
-              </div>
+          {/* Website URL - MANDATORY */}
+          <div>
+            <RequiredLabel htmlFor="website_url">Website URL</RequiredLabel>
+            <TextInput
+              id="website_url"
+              type="url"
+              value={formData.website_url}
+              onChange={(e) => updateFormData({ website_url: e.target.value })}
+              required 
+              placeholder="https://www.your-org.com"
+              className="w-full"
+            />
+          </div>
+        </div>
 
-              {/* Subtype (conditional) */}
-              {formData.selectType === "3" && (
-                <div className="space-y-2 animate-fade-in">
-                  <label htmlFor="selectSubtype" className="text-sm font-semibold flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                    <MdDescription className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                    Subtype <span className="text-red-600">*</span>
-                  </label>
-                  <select
-                    id="selectSubtype"
-                    value={formData.selectSubtype}
-                    onChange={(e) => updateFormData({ selectSubtype: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all hover:border-cyan-400"
-                  >
-                    <option value="">Please Select</option>
-                    <option value="Arts College">Arts College</option>
-                    <option value="Law University">Law University</option>
-                  </select>
-                </div>
-              )}
+        ---
 
-              {/* Academic Name */}
-              <div className={`space-y-2 ${formData.selectType === "3" ? "" : "md:col-span-2"}`}>
-                <label htmlFor="academicName" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Organization Name <span className="text-red-600">*</span>
-                </label>
-                <input
-                  id="academicName"
-                  type="text"
-                  value={formData.academicName}
-                  onChange={(e) => updateFormData({ academicName: e.target.value })}
-                  placeholder="Enter organization name"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:border-blue-400"
-                />
-              </div>
+        {/* --- Address Section --- */}
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-8 mb-6 border-b pb-2">
+          Address Details
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* State - MANDATORY */}
+          <div>
+            <RequiredLabel htmlFor="selectState">Select State</RequiredLabel>
+            <Select
+              id="selectState"
+              value={formData.selectState}
+              onChange={handleStateChange}
+              required 
+              className="w-full"
+            >
+              <option value="">Please Select</option>
+              {formData.states?.map((state: any) => (
+                <option key={state.state_id} value={state.state_id}>
+                  {state.state_title}
+                </option>
+              ))}
+            </Select>
+          </div>
 
-              {/* State */}
-              <div className="space-y-2">
-                <label htmlFor="selectState" className="text-sm font-semibold flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                  <MdLocationOn className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  State <span className="text-red-600">*</span>
-                </label>
-                <select
-                  id="selectState"
-                  value={formData.selectState}
-                  onChange={handleStateChange}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:border-blue-400"
-                >
-                  <option value="">Please Select</option>
-                  {formData.states.map((state) => (
-                    <option key={state.state_id} value={state.state_id}>
-                      {state.state_title}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          {/* District - MANDATORY */}
+          <div>
+            <RequiredLabel htmlFor="selectDistrict">Select District</RequiredLabel>
+            <Select
+              id="selectDistrict"
+              value={formData.selectDistrict}
+              onChange={(e) => updateFormData({ selectDistrict: e.target.value })}
+              required 
+              disabled={!formData.selectState || !formData.districts || formData.districts.length === 0}
+              className="w-full"
+            >
+              <option value="">
+                {formData.selectState ? "Loading districts..." : "Select State First"}
+              </option>
+              {formData.districts?.map((district: any) => (
+                <option key={district.id} value={district.id}>
+                  {district.district_title}
+                </option>
+              ))}
+            </Select>
+          </div>
 
-              {/* District */}
-              <div className="space-y-2">
-                <label htmlFor="selectDistrict" className="text-sm font-semibold flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                  <MdLocationOn className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                  District <span className="text-red-600">*</span>
-                </label>
-                <select
-                  id="selectDistrict"
-                  value={formData.selectDistrict}
-                  onChange={(e) => updateFormData({ selectDistrict: e.target.value })}
-                  disabled={!formData.selectState}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all hover:border-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <option value="">Please Select</option>
-                  {formData.districts.map((district) => (
-                    <option key={district.id} value={district.id}>
-                      {district.district_title}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          {/* Pincode - MANDATORY */}
+          <div>
+            <RequiredLabel htmlFor="pincode">Enter Pincode</RequiredLabel>
+            <TextInput
+              id="pincode"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]{6}"
+              maxLength={6}
+              value={formData.Pincode}
+              onChange={(e) => updateFormData({ Pincode: e.target.value })}
+              required 
+              placeholder="e.g., 110001"
+              className="w-full"
+            />
+            <HelperText>Pincode must be 6 digits.</HelperText>
+          </div>
 
-              {/* Pincode */}
-              <div className="space-y-2">
-                <label htmlFor="pincode" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Pincode <span className="text-red-600">*</span>
-                </label>
-                <input
-                  id="pincode"
-                  type="number"
-                  value={formData.Pincode}
-                  onChange={(e) => updateFormData({ Pincode: e.target.value })}
-                  placeholder="Enter pincode"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:border-blue-400"
-                />
-              </div>
+          {/* Area - OPTIONAL (Retained as optional based on original code) */}
+          <div>
+            <Label htmlFor="area" className="mb-2 block font-semibold text-gray-900 dark:text-white">Enter Area/Locality</Label>
+            <TextInput
+              id="area"
+              value={formData.area}
+              onChange={(e) => updateFormData({ area: e.target.value })}
+              placeholder="e.g., Connaught Place"
+              className="w-full"
+            />
+          </div>
 
-              {/* Area */}
-              <div className="space-y-2">
-                <label htmlFor="area" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Area
-                </label>
-                <input
-                  id="area"
-                  type="text"
-                  value={formData.area}
-                  onChange={(e) => updateFormData({ area: e.target.value })}
-                  placeholder="Enter area"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all hover:border-cyan-400"
-                />
-              </div>
+          {/* Full Address - MANDATORY */}
+          <div className="md:col-span-2">
+            <RequiredLabel htmlFor="academicAddress">Enter Full Address</RequiredLabel>
+            <TextInput
+              id="academicAddress"
+              value={formData.academicAddress}
+              onChange={(e) => updateFormData({ academicAddress: e.target.value })}
+              required 
+              placeholder="Street Address, Landmark"
+              className="w-full"
+            />
+          </div>
+        </div>
 
-              {/* Website URL */}
-              <div className="space-y-2">
-                <label htmlFor="website_url" className="text-sm font-semibold flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                  <MdLanguage className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  Website URL <span className="text-red-600">*</span>
-                </label>
-                <input
-                  id="website_url"
-                  type="url"
-                  value={formData.website_url}
-                  onChange={(e) => updateFormData({ website_url: e.target.value })}
-                  placeholder="https://example.com"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:border-blue-400"
-                />
-              </div>
+        ---
 
-              {/* Primary Email */}
-              <div className="space-y-2">
-                <label htmlFor="primary_email" className="text-sm font-semibold flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                  <MdEmail className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                  Primary Email <span className="text-red-600">*</span>
-                </label>
-                <input
-                  id="primary_email"
-                  type="email"
-                  value={formData.primary_email}
-                  onChange={(e) => updateFormData({ primary_email: e.target.value })}
-                  placeholder="admin@example.com"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all hover:border-cyan-400"
-                />
-              </div>
+        {/* --- Description and Logo --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          
+          {/* Description - MANDATORY */}
+          <div className="lg:col-span-2">
+            <RequiredLabel htmlFor="academicDescription">Enter Description</RequiredLabel>
+            <Textarea
+              id="academicDescription"
+              value={formData.academicDescription}
+              onChange={(e) => updateFormData({ academicDescription: e.target.value })}
+              rows={6}
+              required 
+              placeholder="Provide a brief description of your organization (max 500 characters)."
+              maxLength={500}
+              className="w-full resize-y"
+            />
+            <HelperText>
+              {formData.academicDescription.length} / 500 characters
+            </HelperText>
+          </div>
 
-              {/* Full Address */}
-              <div className="space-y-2 md:col-span-2">
-                <label htmlFor="academicAddress" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Full Address
-                </label>
-                <input
-                  id="academicAddress"
-                  type="text"
-                  value={formData.academicAddress}
-                  onChange={(e) => updateFormData({ academicAddress: e.target.value })}
-                  placeholder="Enter complete address"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:border-blue-400"
-                />
-              </div>
-
-              {/* Description */}
-              <div className="space-y-2 md:col-span-3">
-                <label htmlFor="academicDescription" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Description
-                </label>
-                <textarea
-                  id="academicDescription"
-                  value={formData.academicDescription}
-                  onChange={(e) => updateFormData({ academicDescription: e.target.value })}
-                  placeholder="Enter organization description..."
-                  rows={4}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:border-blue-400 resize-y"
-                />
-              </div>
-
-              {/* Logo Upload */}
-              <div className="md:col-span-3">
-                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 transition-all bg-gradient-to-br from-gray-50/50 to-white dark:from-gray-800/50 dark:to-gray-700/50 rounded-xl p-6">
-                  <div className="flex flex-col sm:flex-row items-center gap-6">
-                    {logoUrl && (
-                      <div className="flex-shrink-0 group relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl blur-xl group-hover:blur-2xl transition-all" />
-                        <img
-                          src={logoUrl}
-                          alt="Organization Logo"
-                          className="relative w-32 h-32 object-contain rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg"
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1 w-full space-y-3">
-                      <label htmlFor="academicLogo" className="text-sm font-semibold flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                        <MdUpload className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                        Upload Logo <span className="text-red-600">*</span>
-                      </label>
-                      <input
-                        id="academicLogo"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer transition-all"
-                      />
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Recommended size: 180x180 pixels. Supports JPG, PNG, SVG formats.
-                      </p>
-                    </div>
+          {/* Logo Upload - MANDATORY */}
+          <div className="lg:col-span-1">
+            <RequiredLabel htmlFor="academicLogo">Upload Logo Here</RequiredLabel>
+            <div className="flex flex-col gap-3">
+              <div className="w-full h-auto flex justify-center items-center p-2 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
+                {logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt="Organization Logo"
+                    className="w-32 h-32 object-contain rounded-lg"
+                  />
+                ) : (
+                  <div className="text-center p-4 text-gray-500 dark:text-gray-400">
+                    <HiOutlineUpload className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500" />
+                    <p className="mt-1 text-sm">No Logo Selected</p>
                   </div>
-                </div>
+                )}
               </div>
+              
+              {/* Logo is required only if no existing logo (logoUrl) is present */}
+              <FileInput
+                id="academicLogo"
+                accept="image/jpeg,image/png,image/svg+xml"
+                onChange={handleFileUpload}
+                required={!logoUrl} 
+                helperText="Recommended size: 180x180 pixels. Supports JPG, PNG, SVG formats."
+                className="w-full"
+              />
             </div>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

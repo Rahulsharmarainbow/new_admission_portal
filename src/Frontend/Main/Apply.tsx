@@ -1598,10 +1598,21 @@
 
 
 
-// import React, { useState, useEffect } from 'react';
-// import { Link, useParams } from 'react-router';
+
+
+
+
+
+
+
+
+
+
+// import React, { useState, useEffect, useCallback } from 'react';
+// import { useParams } from 'react-router';
 // import Header from '../Common/Header';
 // import Footer from '../Common/Footer';
+// import Loader from 'src/Frontend/Common/Loader'; // 1. Custom Loader Import
 
 // const DynamicApply = () => {
 //     const { institute_id } = useParams();
@@ -1611,7 +1622,17 @@
 //     const [errors, setErrors] = useState({});
 //     const [loading, setLoading] = useState(true);
 
-//     // Fetch form configuration from API
+//     // Helper to decode Base64 options (assuming options might be encoded)
+//     const decodeBase64 = (str) => {
+//         try {
+//             return atob(str);
+//         } catch (e) {
+//             return str;
+//         }
+//     };
+    
+//     // --- Data Fetching and Initialization ---
+
 //     useEffect(() => {
 //         const fetchFormConfig = async () => {
 //             try {
@@ -1622,28 +1643,28 @@
 //                     },
 //                     body: JSON.stringify({ unique_code: "EeOEBgpF7O3oC4O" })
 //                 });
-                
+
 //                 const data = await response.json();
 //                 setFormConfig(data);
-                
+
 //                 // Initialize form data
 //                 const initialData = {};
 //                 data.data.forEach(section => {
 //                     section.children.forEach(field => {
 //                         if (field.name) {
-//                             initialData[field.name] = field.value || '';
+//                             initialData[field.name] = (field.type === 'adhar') ? Array(12).fill('') : (field.value || '');
 //                         }
 //                     });
 //                 });
 //                 setFormData(initialData);
-                
+
 //                 // Initialize errors from required_child
 //                 const initialErrors = {};
 //                 data.required_child.forEach(field => {
 //                     initialErrors[field.name] = field.validation_message;
 //                 });
 //                 setErrors(initialErrors);
-                
+
 //                 setLoading(false);
 //             } catch (error) {
 //                 console.error('Error fetching form config:', error);
@@ -1654,225 +1675,18 @@
 //         fetchFormConfig();
 //     }, []);
 
-//     // Field Renderer Function
-//     const renderField = (field) => {
-//         const commonProps = {
-//             key: field.id,
-//             className: "w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent transition-all duration-200 bg-white",
-//             value: formData[field.name] || '',
-//             onChange: (e) => handleInputChange(field.name, e.target.value),
-//             onBlur: () => handleBlur(field.name)
-//         };
-
-//         switch (field.type) {
-//             case 'text':
-//                 return (
-//                     <input
-//                         {...commonProps}
-//                         type="text"
-//                         placeholder={field.label}
-//                     />
-//                 );
-
-//             case 'select':
-//                 return (
-//                     <div className="relative">
-//                         <select {...commonProps}>
-//                             <option value="">Select {field.label}</option>
-//                             {field.options.map(option => (
-//                                 <option key={option.value} value={option.value}>
-//                                     {(option.text)} {/* Decode base64 text */}
-//                                 </option>
-//                             ))}
-//                         </select>
-//                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-//                             <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-//                                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-//                             </svg>
-//                         </div>
-//                     </div>
-//                 );
-
-//             case 'date':
-//                 return (
-//                     <div className="relative">
-//                         <input
-//                             {...commonProps}
-//                             type="date"
-//                         />
-//                         <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-//                             <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-//                                 <path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" />
-//                             </svg>
-//                         </div>
-//                     </div>
-//                 );
-
-//             case 'adhar':
-//                 return (
-//                     <div className="flex items-center space-x-2">
-//                         {Array(12).fill('').map((_, index) => (
-//                             <div key={index} className="flex-1">
-//                                 <input
-//                                     placeholder="X"
-//                                     maxLength="1"
-//                                     className="w-full px-2 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent text-center text-base font-semibold transition-all duration-200 bg-white"
-//                                     type="text"
-//                                     value={formData[field.name]?.[index] || ''}
-//                                     onChange={(e) => handleAadhaarChange(field.name, index, e.target.value.replace(/\D/g, ''))}
-//                                     onBlur={() => handleBlur(field.name)}
-//                                 />
-//                             </div>
-//                         ))}
-//                     </div>
-//                 );
-
-//             case 'file_button':
-//                 return (
-//                     <div className="text-center space-y-3">
-//                         <div className="bg-gray-50 p-3 rounded-xl border-2 border-dashed border-gray-300">
-//                             <div className="mx-auto w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
-//                                 {formData[field.name] ? (
-//                                     <img
-//                                         src={URL.createObjectURL(formData[field.name])}
-//                                         alt="Preview"
-//                                         className="w-full h-full object-cover rounded-lg"
-//                                     />
-//                                 ) : (
-//                                     <img
-//                                         src="https://dummyimage.com/180x180/d4cdd4/0d0c0d.png"
-//                                         alt="Placeholder"
-//                                         className="w-full h-full object-cover rounded-lg"
-//                                     />
-//                                 )}
-//                             </div>
-//                             <p className="text-xs text-gray-600 mb-2">
-//                                 {field.name === 'candidate_pic' ? 'Profile Photo' : 
-//                                  field.name === 'candidate_signature' ? 'Signature' : 'Upload'}
-//                             </p>
-//                             <input
-//                                 type="file"
-//                                 id={field.name}
-//                                 className="hidden"
-//                                 onChange={(e) => handleFileUpload(field.name, e.target.files[0])}
-//                                 accept="image/*"
-//                             />
-//                             <label
-//                                 htmlFor={field.name}
-//                                 className={`bg-gradient-to-r ${
-//                                     field.name === 'candidate_pic' ? 'from-[#1e40af] to-[#0369a1]' : 'from-[#dc2626] to-[#ea580c]'
-//                                 } text-white px-2 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200 w-full cursor-pointer block`}
-//                             >
-//                                 Upload {field.name === 'candidate_pic' ? 'Image' : 'Signature'}
-//                             </label>
-//                         </div>
-//                     </div>
-//                 );
-
-//             case 'checkbox':
-//                 return (
-//                     <label className="flex items-start space-x-3 cursor-pointer">
-//                         <div className="flex items-center h-5">
-//                             <input
-//                                 type="checkbox"
-//                                 className="w-4 h-4 text-[#1e40af] border-gray-300 rounded focus:ring-[#1e40af]"
-//                                 checked={formData[field.name] || false}
-//                                 onChange={(e) => handleInputChange(field.name, e.target.checked)}
-//                             />
-//                         </div>
-//                         <div className="text-sm text-gray-700">
-//                             <span className="font-medium">By checking this box, you agree that the information provided is accurate and truthful.</span>
-//                         </div>
-//                     </label>
-//                 );
-
-//             case 'heading':
-//                 return (
-//                     <h4 className="caption-heading_apply text-lg font-bold text-[#dc2626] inline-flex items-center">
-//                         {field.label || 'Section Title'}
-//                     </h4>
-//                 );
-
-//             case 'para':
-//                 return (
-//                     <p className="text-sm text-gray-600">{field.label}</p>
-//                 );
-
-//             case 'image':
-//                 return (
-//                     <div className="mx-auto w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
-//                         <img
-//                             src={formData[field.name] || "https://dummyimage.com/180x180/d4cdd4/0d0c0d.png"}
-//                             alt="Preview"
-//                             className="w-full h-full object-cover rounded-lg"
-//                         />
-//                     </div>
-//                 );
-
-//             default:
-//                 return <div>Unsupported field type: {field.type}</div>;
-//         }
-//     };
-
-//     // Section Renderer Function
-//     const renderSection = (section, index) => {
-//         const widthClass = section.width === '100%' ? 'w-full' : 
-//                           section.width === '80%' ? 'w-4/5' :
-//                           section.width === '20%' ? 'w-1/5' :
-//                           section.width === '50%' ? 'w-1/2' :
-//                           section.width === '55%' ? 'w-11/20' :
-//                           section.width === '45%' ? 'w-9/20' : 'w-full';
-
-//         const justifyClass = section.justify === 'start' ? 'justify-start' :
-//                            section.justify === 'center' ? 'justify-center' :
-//                            section.justify === 'end' ? 'justify-end' : 'justify-start';
-
-//         return (
-//             <div key={index} className={`${widthClass} mb-6`}>
-//                 <div className={`grid grid-cols-1 ${getGridColumns(section)} gap-4 ${justifyClass}`}>
-//                     {section.children.map(field => (
-//                         <div key={field.id} className={`${getFieldWidth(field)} space-y-2`}>
-//                             {field.label && field.type !== 'heading' && field.type !== 'para' && (
-//                                 <label className="block text-sm font-semibold text-gray-700">
-//                                     {field.label} 
-//                                     {isFieldRequired(field.name) && <span className="text-red-500">*</span>}
-//                                 </label>
-//                             )}
-//                             {renderField(field)}
-//                             {shouldShowError(field.name) && (
-//                                 <p className="text-red-500 text-xs">{errors[field.name]}</p>
-//                             )}
-//                         </div>
-//                     ))}
-//                 </div>
-//             </div>
-//         );
-//     };
-
-//     // Helper functions
-//     const getGridColumns = (section) => {
-//         if (section.width === '20%') return '';
-//         return section.children.length > 4 ? 'md:grid-cols-4' : 
-//                section.children.length > 2 ? 'md:grid-cols-2' : 'grid-cols-1';
-//     };
-
-//     const getFieldWidth = (field) => {
-//         if (field.type === 'adhar') return 'md:col-span-3';
-//         return '';
-//     };
+//     // --- Validation and State Handlers (Unchanged from previous revision for core logic) ---
 
 //     const isFieldRequired = (fieldName) => {
 //         return formConfig?.required_child.some(field => field.name === fieldName);
 //     };
 
-//     // Event Handlers
 //     const handleInputChange = (fieldName, value) => {
 //         setFormData(prev => ({
 //             ...prev,
 //             [fieldName]: value
 //         }));
 
-//         // Clear error when user starts typing
 //         if (value && value.toString().trim() !== '') {
 //             setErrors(prev => ({
 //                 ...prev,
@@ -1884,16 +1698,24 @@
 //     const handleAadhaarChange = (fieldName, index, value) => {
 //         const currentAadhaar = formData[fieldName] || Array(12).fill('');
 //         const newAadhaar = [...currentAadhaar];
-//         newAadhaar[index] = value;
+//         const sanitizedValue = value.replace(/\D/g, '');
+        
+//         if (sanitizedValue.length > 1) return;
+
+//         newAadhaar[index] = sanitizedValue;
 
 //         setFormData(prev => ({
 //             ...prev,
 //             [fieldName]: newAadhaar
 //         }));
 
-//         // Check if all digits are filled
-//         const allFilled = newAadhaar.every(digit => digit !== '');
-//         if (allFilled) {
+//         if (sanitizedValue && index < 11) {
+//             const nextInput = document.getElementById(`${fieldName}-${index + 1}`);
+//             nextInput?.focus();
+//         }
+
+//         const fullAadhaar = newAadhaar.filter(Boolean).join('');
+//         if (fullAadhaar.length === 12 || !isFieldRequired(fieldName)) {
 //             setErrors(prev => ({
 //                 ...prev,
 //                 [fieldName]: ''
@@ -1920,60 +1742,322 @@
 //             ...prev,
 //             [fieldName]: true
 //         }));
+        
+//         if (isFieldRequired(fieldName)) {
+//             const value = formData[fieldName];
+//             let isValid = true;
+            
+//             if (fieldName === 'adhar') {
+//                 const fullAadhaar = value.filter(Boolean).join('');
+//                 isValid = fullAadhaar.length === 12;
+//             } else if (fieldName.includes('candidate_pic') || fieldName.includes('signature')) {
+//                 isValid = !!value;
+//             } else {
+//                 isValid = !!value && value.toString().trim() !== '';
+//             }
+
+//             if (!isValid) {
+//                 const validationMessage = formConfig.required_child.find(f => f.name === fieldName)?.validation_message || 'This field is required.';
+//                 setErrors(prev => ({
+//                     ...prev,
+//                     [fieldName]: validationMessage
+//                 }));
+//             }
+//         }
 //     };
 
 //     const shouldShowError = (fieldName) => {
 //         return touched[fieldName] && errors[fieldName];
 //     };
+    
+//     // --- Layout Helper Functions (Optimized Grid and Full Width Logic) ---
+
+//     const getGridColumns = (section) => {
+//         // Full width container mein default 3 columns on large screens
+//         let baseCols = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'; 
+        
+//         // Agar section mein kam fields hain, toh 2 columns tak rakhenge
+//         if (section.children.length <= 4 && section.children.every(f => f.type !== 'file_button' && f.type !== 'para')) {
+//              baseCols = 'grid-cols-1 md:grid-cols-2';
+//         }
+        
+//         if (section.children.length === 1 && (section.children[0].type === 'heading' || section.children[0].type === 'para')) {
+//             return '';
+//         }
+        
+//         return baseCols;
+//     };
+
+//     const getFieldWidth = (field) => {
+//         if (field.type === 'heading' || field.type === 'para' || field.type === 'checkbox') {
+//             return 'col-span-full'; // Full width on all screen sizes
+//         }
+//         // Aadhaar will take 2 columns in a 3-column grid, giving it enough space
+//         if (field.type === 'adhar') return 'lg:col-span-2 md:col-span-full'; 
+        
+//         if (field.type === 'file_button') return 'lg:col-span-1 md:col-span-1'; 
+        
+//         return ''; // Default to 1 grid cell (or 1 column in md:grid-cols-2)
+//     };
+    
+//     // --- Renderer Functions ---
+
+//     const renderField = (field) => {
+//         const fieldName = field.name;
+        
+//         // Unified attractive input styling
+//         const commonProps = {
+//             key: field.id,
+//             className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0369a1] focus:border-[#0369a1] transition-all duration-200 bg-white text-gray-800 shadow-sm text-base",
+//             value: formData[fieldName] || '',
+//             onChange: (e) => handleInputChange(fieldName, e.target.value),
+//             onBlur: () => handleBlur(fieldName)
+//         };
+
+//         if (shouldShowError(fieldName)) {
+//             commonProps.className = commonProps.className.replace('border-gray-300', 'border-red-500');
+//             commonProps.className = commonProps.className.replace('focus:ring-[#0369a1]', 'focus:ring-red-500');
+//             commonProps.className = commonProps.className.replace('focus:border-[#0369a1]', 'focus:border-red-500');
+//         }
+
+//         switch (field.type) {
+//             case 'text':
+//             case 'number':
+//             case 'email':
+//                 return (
+//                     <input
+//                         {...commonProps}
+//                         type={field.type === 'text' ? 'text' : (field.type === 'number' ? 'number' : 'email')}
+//                         placeholder={field.label}
+//                     />
+//                 );
+
+//             case 'select':
+//                 return (
+//                     <div className="relative">
+//                         <select {...commonProps}>
+//                             <option value="">Select {field.label}</option>
+//                             {field.options?.map(option => (
+//                                 <option key={option.value} value={option.value}>
+//                                     {decodeBase64(option.text)}
+//                                 </option>
+//                             ))}
+//                         </select>
+//                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+//                             <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+//                         </div>
+//                     </div>
+//                 );
+
+//             case 'date':
+//                 return (
+//                     <input {...commonProps} type="date" />
+//                 );
+
+//             case 'adhar':
+//                 // 2. Aadhaar input styling made smaller (w-8 h-8, text-base)
+//                 return (
+//                     <div className="flex space-x-1 lg:space-x-1 bg-white rounded-lg p-2 border border-gray-300 shadow-sm">
+//                         {Array(12).fill('').map((_, index) => (
+//                             <input
+//                                 key={index}
+//                                 id={`${fieldName}-${index}`}
+//                                 placeholder="0"
+//                                 maxLength="1"
+//                                 className={`w-8 h-8 px-1 py-1 border rounded-md text-center text-base font-mono focus:ring-1 focus:ring-blue-500 transition-all ${
+//                                     shouldShowError(fieldName) ? 'border-red-500 bg-red-50' : 'border-gray-300'
+//                                 }`}
+//                                 type="text"
+//                                 inputMode="numeric"
+//                                 value={formData[fieldName]?.[index] || ''}
+//                                 onChange={(e) => handleAadhaarChange(fieldName, index, e.target.value)}
+//                                 onBlur={() => handleBlur(fieldName)}
+//                             />
+//                         ))}
+//                     </div>
+//                 );
+
+//             case 'file_button':
+//                 const file = formData[fieldName];
+//                 const isPic = fieldName === 'candidate_pic';
+                
+//                 return (
+//                     <div className="text-center space-y-3 p-4 bg-white rounded-xl border-2 border-dashed border-[#a3e635] hover:border-[#1e40af] transition-all duration-300">
+//                         <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-2 overflow-hidden shadow-md">
+//                             {file instanceof File ? (
+//                                 <img
+//                                     src={URL.createObjectURL(file)}
+//                                     alt="Preview"
+//                                     className="w-full h-full object-cover"
+//                                 />
+//                             ) : (
+//                                 <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+//                             )}
+//                         </div>
+//                         <p className="text-sm text-gray-700 font-semibold mb-2">
+//                             {isPic ? 'Profile Photo (max 50kb)' : 'Candidate Signature (max 20kb)'}
+//                         </p>
+//                         <input
+//                             type="file"
+//                             id={fieldName}
+//                             className="hidden"
+//                             onChange={(e) => handleFileUpload(fieldName, e.target.files[0])}
+//                             accept="image/*"
+//                             onBlur={() => handleBlur(fieldName)}
+//                         />
+//                         <label
+//                             htmlFor={fieldName}
+//                             className={`bg-gradient-to-r ${
+//                                 isPic ? 'from-[#3b82f6] to-[#2563eb]' : 'from-[#ef4444] to-[#dc2626]'
+//                             } text-white px-4 py-2 rounded-full text-sm font-bold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300 w-full cursor-pointer block`}
+//                         >
+//                             {file ? 'Change File' : `Select ${isPic ? 'Image' : 'Signature'}`}
+//                         </label>
+//                     </div>
+//                 );
+
+//             case 'checkbox':
+//                 return (
+//                     <label className="flex items-start space-x-3 cursor-pointer p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
+//                         <div className="flex items-center h-5">
+//                             <input
+//                                 type="checkbox"
+//                                 className="w-5 h-5 text-[#1e40af] border-gray-400 rounded focus:ring-[#1e40af]"
+//                                 checked={formData[fieldName] || false}
+//                                 onChange={(e) => handleInputChange(fieldName, e.target.checked)}
+//                                 onBlur={() => handleBlur(fieldName)}
+//                             />
+//                         </div>
+//                         <div className="text-sm text-gray-700">
+//                             <span className="font-medium">{field.label || 'I agree to the terms and conditions.'}</span>
+//                         </div>
+//                     </label>
+//                 );
+
+//             case 'heading':
+//                 return (
+//                     <h4 className="text-xl font-extrabold text-[#1e40af] border-b-2 border-[#1e40af]/30 pb-2 mb-4">
+//                         {field.label || 'Section Title'}
+//                     </h4>
+//                 );
+
+//             case 'para':
+//                 return (
+//                     <p className="text-base text-gray-600 italic border-l-4 border-gray-300 pl-3">
+//                         {field.label}
+//                     </p>
+//                 );
+
+//             default:
+//                 return <div className="text-red-500">Unsupported field type: **{field.type}**</div>;
+//         }
+//     };
+
+//     const renderSection = (section, index) => {
+//         const sectionClasses = index % 2 === 0
+//             ? 'bg-white p-6 rounded-xl shadow-inner border border-gray-100'
+//             : 'bg-gray-50 p-6 rounded-xl border border-gray-200';
+        
+//         const gridTemplate = getGridColumns(section);
+//         const hasGrid = gridTemplate !== '';
+
+//          const sectionWidth = section.width ? `w-[${section.width}]` : 'w-full';
+//     // OR if width is numeric, append '%' automatically:
+//     const customWidth = section.width 
+//         ? { width: typeof section.width === 'number' ? `${section.width}%` : section.width }
+//         : { width: '100%' };
+
+//         return (
+//             <div key={index} className={`mb-8 ${sectionClasses}`}  style={customWidth}>
+//                 {section.label && (
+//                     <h3 className="text-xl font-bold mb-4 text-[#dc2626] border-b pb-2">
+//                         {section.label}
+//                     </h3>
+//                 )}
+                
+//                 <div className={`${hasGrid ? 'grid gap-6' : 'space-y-6'} ${gridTemplate}`}>
+//                     {section.children.map(field => (
+//                         <div key={field.id} className={`${getFieldWidth(field)} space-y-1`}>
+//                             {field.label && field.type !== 'heading' && field.type !== 'para' && field.type !== 'checkbox' && (
+//                                 <label className="block text-sm font-medium text-gray-700 transition-colors duration-200">
+//                                     {field.label}
+//                                     {isFieldRequired(field.name) && <span className="text-red-500 ml-1">*</span>}
+//                                 </label>
+//                             )}
+                            
+//                             {renderField(field)}
+                            
+//                             {shouldShowError(field.name) && (
+//                                 <p className="text-red-600 text-xs mt-1 font-medium flex items-center">
+//                                     <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path></svg>
+//                                     {errors[field.name]}
+//                                 </p>
+//                             )}
+//                         </div>
+//                     ))}
+//                 </div>
+//             </div>
+//         );
+//     };
+
+
+//     // --- Loading/Error States ---
 
 //     if (loading) {
-//         return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+//         // 1. Using the provided custom Loader component
+//         return <Loader />; 
 //     }
 
-//     if (!formConfig) {
-//         return <div className="min-h-screen flex items-center justify-center">Error loading form configuration</div>;
+//     if (!formConfig || !formConfig.data) {
+//         return <div className="min-h-screen flex items-center justify-center text-red-600 bg-gray-100">❌ Error loading form configuration.</div>;
 //     }
+
+
+//     // --- Main Component Render ---
 
 //     return (
-//         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-//             <Header instituteName={formConfig.header?.name} />
+//         // 3. Removed max-width container, using mx-full
+//         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200">
+//             <Header instituteName={formConfig.header?.name || 'Application Portal'} />
 
-//             <div className=" mx-full py-8">
-//                 <div className="group relative mb-8">
-//                     <div className="absolute -inset-1 bg-gradient-to-r from-[#1e40af] to-[#dc2626] rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
-//                     <div className="relative bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-//                         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#1e40af] to-[#dc2626]"></div>
+//             <div className="mx-full py-8 px-4 sm:px-6 lg:px-8">
+//                 <div className="group relative">
+//                     <div className="absolute -inset-0.5 bg-gradient-to-r from-[#1e40af] to-[#dc2626] rounded-xl blur-sm opacity-20 group-hover:opacity-100 transition duration-500"></div>
+                    
+//                     <div className="relative bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
+//                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e40af] to-[#dc2626]"></div>
 
 //                         {/* Form Header */}
-//                         <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
-//                             <h4 className="text-center text-xl font-bold text-[#1e40af] inline-flex items-center justify-center">
-//                                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-//                                     <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-//                                 </svg>
-//                                 Application Form
-//                             </h4>
+//                         <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/10 to-[#dc2626]/10">
+//                             <h2 className="text-center text-2xl font-extrabold text-[#1e40af] flex items-center justify-center">
+//                                 <svg className="w-6 h-6 mr-3 text-[#dc2626]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+//                                 Dynamic Application Form
+//                             </h2>
+//                             <p className="text-center text-sm text-gray-600 mt-1">Please fill in all the required details carefully.</p>
 //                         </div>
 
-//                         <div className="p-6">
+//                         <form className="p-6 flex flex-wrap">
 //                             {/* Render all sections dynamically */}
 //                             {formConfig.data.map((section, index) => renderSection(section, index))}
-//                         </div>
+//                         </form>
 
 //                         {/* Submit Button */}
-//                         <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-//                             <div className="text-end">
+//                         <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+//                             <div className="flex justify-end">
 //                                 <button
-//                                     className="bg-gradient-to-r from-[#059669] to-[#d97706] text-white px-8 py-2 rounded-full font-bold text-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
+//                                     className="bg-gradient-to-r from-[#059669] to-[#d97706] text-white px-8 py-3 rounded-full font-bold text-lg hover:shadow-2xl hover:shadow-yellow-300/50 transform hover:scale-105 transition-all duration-300 flex items-center"
 //                                     onClick={() => {
-//                                         // Mark all fields as touched when submitting
 //                                         const allTouched = {};
 //                                         Object.keys(formData).forEach(key => {
 //                                             allTouched[key] = true;
 //                                         });
 //                                         setTouched(allTouched);
+//                                         // TODO: Implement full validation logic and submission here
+//                                         console.log('Form Data:', formData);
+//                                         console.log('Errors:', errors);
 //                                     }}
 //                                 >
-//                                     Next
+//                                     Submit Application &nbsp; &rarr;
 //                                 </button>
 //                             </div>
 //                         </div>
@@ -2003,11 +2087,1539 @@
 
 
 
-import React, { useState, useEffect, useCallback } from 'react';
+
+
+
+// import React, { useState, useEffect, useCallback, useRef } from 'react';
+// import { useParams } from 'react-router';
+// import Header from '../Common/Header';
+// import Footer from '../Common/Footer';
+// import Loader from 'src/Frontend/Common/Loader';
+
+// const baseUrl = 'https://rainbowsolutionandtechnology.com/NewAdmissionPortal/public/';
+
+// const DynamicApply = () => {
+//     const { institute_id } = useParams();
+//     const [formConfig, setFormConfig] = useState(null);
+//     const [formData, setFormData] = useState({});
+//     const [touched, setTouched] = useState({});
+//     const [errors, setErrors] = useState({});
+//     const [loading, setLoading] = useState(true);
+//     const [districts, setDistricts] = useState([]);
+
+//     // Keep track of created object URLs to revoke later
+//     const createdObjectUrls = useRef([]);
+
+//     // Helper to decode Base64 options (assuming options might be encoded)
+//     const decodeBase64 = (str) => {
+//   if (!str || typeof str !== "string") return str;
+//   try {
+//     return decodeURIComponent(escape(window.atob(str)));
+//   } catch {
+//     return str;
+//   }
+// };
+
+
+//     // Utility: safely set formConfig children options (immutable update)
+//     const updateFieldOptions = (fieldName, newOptions) => {
+//         setFormConfig(prev => {
+//             if (!prev) return prev;
+//             const newData = prev.data.map(section => {
+//                 const newChildren = section.children.map(child => {
+//                     if (child.name === fieldName) {
+//                         return { ...child, options: newOptions };
+//                     }
+//                     return child;
+//                 });
+//                 return { ...section, children: newChildren };
+//             });
+//             return { ...prev, data: newData };
+//         });
+//     };
+
+//     // --- Data Fetching and Initialization ---
+//     useEffect(() => {
+//         const fetchFormConfig = async () => {
+//             try {
+//                 const response = await fetch(baseUrl + 'api/Public/Get-apply-form', {
+//                     method: 'POST',
+//                     headers: { 'Content-Type': 'application/json' },
+//                     body: JSON.stringify({ unique_code: "EeOEBgpF7O3oC4O" })
+//                 });
+
+//                 const data = await response.json();
+//                 setFormConfig(data);
+
+//                 // Initialize form data
+//                 const initialData = {};
+//                 data.data.forEach(section => {
+//                     section.children.forEach(field => {
+//                         if (field.name) {
+//                             initialData[field.name] = (field.type === 'adhar') ? Array(12).fill('') : (field.value || '');
+//                         }
+//                     });
+//                 });
+//                 setFormData(initialData);
+
+//                 // Initialize errors from required_child
+//                 const initialErrors = {};
+//                 data.required_child.forEach(field => {
+//                     initialErrors[field.name] = field.validation_message;
+//                 });
+//                 setErrors(initialErrors);
+
+//                 setLoading(false);
+//             } catch (error) {
+//                 console.error('Error fetching form config:', error);
+//                 setLoading(false);
+//             }
+//         };
+
+//         fetchFormConfig();
+
+//         // cleanup on unmount: revoke any created object URLs
+//         return () => {
+//             createdObjectUrls.current.forEach(url => URL.revokeObjectURL(url));
+//             createdObjectUrls.current = [];
+//         };
+//     }, []);
+
+//     // --- District fetching ---
+//     const fetchDistricts = useCallback(async (stateId, districtFieldName) => {
+//         if (!stateId) return;
+//         try {
+//             const res = await fetch(baseUrl + 'api/frontend/get_district_by_state_id', {
+//                 method: 'POST',
+//                 headers: { 'Content-Type': 'application/json' },
+//                 body: JSON.stringify({ state_id: stateId })
+//             });
+
+//             const json = await res.json();
+//             // Accept multiple possible shapes:
+//             // 1) { status: true, data: [{ id, name }, ...] }
+//             // 2) [{ id, name }, ...]
+//             // 3) [{ value, text }, ...]
+//             let districts = [];
+
+//             if (Array.isArray(json)) {
+//                 districts = json;
+//             } else if (Array.isArray(json.data)) {
+//                 districts = json.data;
+//             } else if (Array.isArray(json.districts)) {
+//                 districts = json.districts;
+//             }
+
+//             // Normalize to { value, text }
+//             const options = districts.map(d => {
+//                 if (d.value !== undefined && d.text !== undefined) {
+//                     return { value: d.value, text: d.text };
+//                 }
+//                 // common API fields:
+//                 if (d.id !== undefined && (d.name !== undefined || d.district_name !== undefined)) {
+//                     return { value: d.id, text: d.name || d.district_name };
+//                 }
+//                 // fallback: whole object stringify
+//                 return { value: d.id ?? d.value ?? JSON.stringify(d), text: d.name ?? d.text ?? JSON.stringify(d) };
+//             });
+
+//             // Update the formConfig options for district field
+//             updateFieldOptions(districtFieldName, options);
+
+//             // reset district value in formData & clear any error
+//             setFormData(prev => ({ ...prev, [districtFieldName]: '' }));
+//             setErrors(prev => ({ ...prev, [districtFieldName]: '' }));
+//         } catch (err) {
+//             console.error('Error fetching districts', err);
+//         }
+//     }, []);
+
+//     // --- Validation and State Handlers ---
+
+//     const isFieldRequired = (fieldName) => {
+//         return formConfig?.required_child?.some(field => field.name === fieldName);
+//     };
+
+//     const handleInputChange = (fieldName, value) => {
+//         setFormData(prev => ({
+//             ...prev,
+//             [fieldName]: value
+//         }));
+
+//         if (value && value.toString().trim() !== '') {
+//             setErrors(prev => ({
+//                 ...prev,
+//                 [fieldName]: ''
+//             }));
+//         }
+//     };
+
+
+
+//   const handleStateChange = async (fieldName, value) => {
+//   handleInputChange(fieldName, value); // update selected state
+
+//   // Only run when selecting the class8_state
+//   if (fieldName === "class8_state") {
+//     setFormData((prev) => ({ ...prev, class8_district: "" })); // reset district
+//     setDistricts([]); // clear old districts
+
+//     if (!value) return; // if no state selected
+
+//     try {
+//       const res = await fetch(
+//         "https://rainbowsolutionandtechnology.com/NewAdmissionPortal/public/api/frontend/get_district_by_state_id",
+//         {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           body: JSON.stringify({ state_id: value }),
+//         }
+//       );
+//       const data = await res.json();
+
+//       console.log("District API response:", data); // helpful debug
+
+//       // Normalize and decode names safely
+//       const options = (data?.data || []).map((d) => ({
+//         value: d.id || d.value || d.district_id,
+//         text: decodeBase64(d.district_name || d.text || ""),
+//       }));
+
+//       setDistricts(options);
+//     } catch (error) {
+//       console.error("Error fetching districts:", error);
+//       setDistricts([]);
+//     }
+//   }
+// };
+
+
+
+//     // Special handler for selects to detect state change
+//     const handleSelectChange = (field, value) => {
+//         // set selected value first
+//         handleInputChange(field.name, value);
+
+//         // If this is a "state" field OR the specific 'selectBelong' field, trigger district fetch
+//         if (field.name === 'selectBelong') {
+//             // mapping in your sample: selectBelong -> selectDistrict
+//             const districtName = 'selectDistrict';
+//             // clear existing district options to show "Select State First"
+//             updateFieldOptions(districtName, [{ value: '', text: 'Select State First' }]);
+//             setFormData(prev => ({ ...prev, [districtName]: '' }));
+//             // fetch districts (only if value)
+//             if (value) fetchDistricts(value, districtName);
+//         } else if (field.name && field.name.includes('_state')) {
+//             const districtName = field.name.replace('_state', '_district');
+//             updateFieldOptions(districtName, [{ value: '', text: 'Select State First' }]);
+//             setFormData(prev => ({ ...prev, [districtName]: '' }));
+//             if (value) fetchDistricts(value, districtName);
+//         }
+//     };
+
+//     const handleAadhaarChange = (fieldName, index, value) => {
+//         const currentAadhaar = formData[fieldName] || Array(12).fill('');
+//         const newAadhaar = [...currentAadhaar];
+//         const sanitizedValue = value.replace(/\D/g, '');
+
+//         if (sanitizedValue.length > 1) return;
+
+//         newAadhaar[index] = sanitizedValue;
+
+//         setFormData(prev => ({
+//             ...prev,
+//             [fieldName]: newAadhaar
+//         }));
+
+//         if (sanitizedValue && index < 11) {
+//             const nextInput = document.getElementById(`${fieldName}-${index + 1}`);
+//             nextInput?.focus();
+//         }
+
+//         const fullAadhaar = newAadhaar.filter(Boolean).join('');
+//         if (fullAadhaar.length === 12 || !isFieldRequired(fieldName)) {
+//             setErrors(prev => ({
+//                 ...prev,
+//                 [fieldName]: ''
+//             }));
+//         }
+//     };
+
+//     const handleFileUpload = (fieldName, file) => {
+//         if (!file) return;
+
+//         // create preview URL
+//         const url = URL.createObjectURL(file);
+//         createdObjectUrls.current.push(url);
+
+//         setFormData(prev => {
+//             const next = { ...prev, [fieldName]: file };
+//             // if this upload is a candidate pic or signature, also set preview fields
+//             if (fieldName === 'candidate_pic') {
+//                 next['customer_pic_preview'] = url; // match your JSON preview field name
+//             } else if (fieldName === 'candidate_signature') {
+//                 next['signature_pic_preview'] = url; // match your JSON preview field name
+//             } else if (fieldName === 'caste_certificate') {
+//                 next['caste_certificate_preview'] = url;
+//             }
+//             return next;
+//         });
+
+//         setErrors(prev => ({
+//             ...prev,
+//             [fieldName]: ''
+//         }));
+//     };
+
+//     const handleBlur = (fieldName) => {
+//         setTouched(prev => ({
+//             ...prev,
+//             [fieldName]: true
+//         }));
+
+//         if (isFieldRequired(fieldName)) {
+//             const value = formData[fieldName];
+//             let isValid = true;
+
+//             if (fieldName === 'adhar' || fieldName === 'adharCard') {
+//                 const fullAadhaar = (value || []).filter(Boolean).join('');
+//                 isValid = fullAadhaar.length === 12;
+//             } else if (fieldName.includes('candidate_pic') || fieldName.includes('signature') || fieldName.includes('file')) {
+//                 isValid = !!value;
+//             } else {
+//                 isValid = !!value && value.toString().trim() !== '';
+//             }
+
+//             if (!isValid) {
+//                 const validationMessage = formConfig.required_child.find(f => f.name === fieldName)?.validation_message || 'This field is required.';
+//                 setErrors(prev => ({
+//                     ...prev,
+//                     [fieldName]: validationMessage
+//                 }));
+//             }
+//         }
+//     };
+
+//     const shouldShowError = (fieldName) => {
+//         return touched[fieldName] && errors[fieldName];
+//     };
+
+//     // --- Layout Helper Functions (Optimized Grid and Full Width Logic) ---
+//     const getGridColumns = (section) => {
+//         let baseCols = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+
+//         if (section.children.length <= 4 && section.children.every(f => f.type !== 'file_button' && f.type !== 'para')) {
+//             baseCols = 'grid-cols-1 md:grid-cols-2';
+//         }
+
+//         if (section.children.length === 1 && (section.children[0].type === 'heading' || section.children[0].type === 'para')) {
+//             return '';
+//         }
+
+//         return baseCols;
+//     };
+
+//     const getFieldWidth = (field) => {
+//         if (field.type === 'heading' || field.type === 'para' || field.type === 'checkbox') {
+//             return 'col-span-full';
+//         }
+//         if (field.type === 'adhar') return 'lg:col-span-2 md:col-span-full';
+//         if (field.type === 'file_button') return 'lg:col-span-1 md:col-span-1';
+//         return '';
+//     };
+
+//     // --- Renderer Functions ---
+//     const renderField = (field) => {
+//         const fieldName = field.name;
+//         const commonBase = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0369a1] focus:border-[#0369a1] transition-all duration-200 bg-white text-gray-800 shadow-sm text-base";
+//         let commonClass = commonBase;
+//         const fieldValue = formData[fieldName] ?? '';
+
+//         if (shouldShowError(fieldName)) {
+//             commonClass = commonClass.replace('border-gray-300', 'border-red-500')
+//                                      .replace('focus:ring-[#0369a1]', 'focus:ring-red-500')
+//                                      .replace('focus:border-[#0369a1]', 'focus:border-red-500');
+//         }
+
+//         switch (field.type) {
+//             case 'text':
+//             case 'number':
+//             case 'email':
+//                 return (
+//                     <input
+//                         key={field.id}
+//                         className={commonClass}
+//                         type={field.type === 'text' ? 'text' : (field.type === 'number' ? 'number' : 'email')}
+//                         placeholder={field.label}
+//                         value={fieldValue}
+//                         onChange={(e) => handleInputChange(fieldName, e.target.value)}
+//                         onBlur={() => handleBlur(fieldName)}
+//                     />
+//                 );
+
+//             case 'select': {
+//   const fieldName = field.name;
+//   const fieldValue = formData[fieldName] ?? '';
+//   const baseClass = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0369a1] focus:border-[#0369a1] transition-all duration-200 bg-white text-gray-800 shadow-sm text-base";
+//   // show red styles when error
+//   const className = shouldShowError(fieldName)
+//     ? baseClass.replace('border-gray-300', 'border-red-500').replace('focus:ring-[#0369a1]', 'focus:ring-red-500').replace('focus:border-[#0369a1]', 'focus:border-red-500')
+//     : baseClass;
+
+//   const isState = fieldName === "class8_state" || fieldName === "selectBelong" || fieldName.endsWith('_state');
+//   const isDistrict = fieldName.endsWith('_district') || fieldName === "selectDistrict";
+
+//   // choose options: if this is a district field, use districts state (fetched); otherwise use backend-provided
+//   const optionsList = isDistrict ? (districts || []) : (field.options || []);
+
+//   return (
+//     <div className="relative" key={field.id}>
+//       <select
+//         className={className}
+//         value={fieldValue}
+//         onChange={(e) => {
+//           const value = e.target.value;
+//           // if this is a state-like field, route to handleStateChange (which will fetch districts and reset the district)
+//           if (isState) {
+//             // If you implemented handleStateChange as suggested earlier, it will accept (fieldName, value)
+//             if (typeof handleStateChange === 'function') {
+//               handleStateChange(fieldName, value);
+//             } else {
+//               // fallback: update and try to trigger generic logic
+//               handleInputChange(fieldName, value);
+//               // compute district field name and reset it
+//               const districtName = fieldName === 'selectBelong' ? 'selectDistrict' : fieldName.replace('_state', '_district');
+//               setFormData(prev => ({ ...prev, [districtName]: '' }));
+//               // and trigger fetchDistricts if you have it
+//               if (typeof fetchDistricts === 'function') fetchDistricts(value, districtName);
+//             }
+//           } else {
+//             handleInputChange(fieldName, value);
+//           }
+//         }}
+//         onBlur={() => handleBlur(fieldName)}
+//       >
+//         <option value="">{isDistrict ? 'Select District' : `Select ${field.label || 'Option'}`}</option>
+
+//         {optionsList.map(opt => (
+//           <option key={opt.value} value={opt.value}>
+//             {typeof opt.text === 'string' ? decodeBase64(opt.text) : (opt.text ?? String(opt.value))}
+//           </option>
+//         ))}
+//       </select>
+
+//       <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+//         <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+//             case 'date':
+//                 return (
+//                     <input
+//                         key={field.id}
+//                         className={commonClass}
+//                         type="date"
+//                         value={fieldValue}
+//                         onChange={(e) => handleInputChange(fieldName, e.target.value)}
+//                         onBlur={() => handleBlur(fieldName)}
+//                     />
+//                 );
+
+//             case 'adhar':
+//                 return (
+//                     <div className="flex space-x-1 lg:space-x-1 bg-white rounded-lg p-2 border border-gray-300 shadow-sm">
+//                         {Array(12).fill('').map((_, index) => (
+//                             <input
+//                                 key={index}
+//                                 id={`${fieldName}-${index}`}
+//                                 placeholder="0"
+//                                 maxLength="1"
+//                                 className={`w-8 h-8 px-1 py-1 border rounded-md text-center text-base font-mono focus:ring-1 focus:ring-blue-500 transition-all ${shouldShowError(fieldName) ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+//                                 type="text"
+//                                 inputMode="numeric"
+//                                 value={formData[fieldName]?.[index] || ''}
+//                                 onChange={(e) => handleAadhaarChange(fieldName, index, e.target.value)}
+//                                 onBlur={() => handleBlur(fieldName)}
+//                             />
+//                         ))}
+//                     </div>
+//                 );
+
+//             case 'file_button': {
+//                 const file = formData[fieldName];
+//                 const isPic = fieldName === 'candidate_pic';
+
+//                 return (
+//                     <div key={field.id} className="text-center space-y-3 p-4 bg-white rounded-xl border-2 border-dashed border-[#a3e635] hover:border-[#1e40af] transition-all duration-300">
+//                         <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-2 overflow-hidden shadow-md">
+//                             {file instanceof File ? (
+//                                 <img src={URL.createObjectURL(file)} alt="Preview" className="w-full h-full object-cover" />
+//                             ) : formData[isPic ? 'customer_pic_preview' : (fieldName.includes('signature') ? 'signature_pic_preview' : '')] ? (
+//                                 <img src={formData[isPic ? 'customer_pic_preview' : (fieldName.includes('signature') ? 'signature_pic_preview' : '')]} alt="Preview" className="w-full h-full object-cover" />
+//                             ) : (
+//                                 <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+//                             )}
+//                         </div>
+//                         <p className="text-sm text-gray-700 font-semibold mb-2">
+//                             {isPic ? 'Profile Photo (max 50kb)' : 'Candidate Signature (max 20kb)'}
+//                         </p>
+//                         <input
+//                             type="file"
+//                             id={fieldName}
+//                             className="hidden"
+//                             onChange={(e) => handleFileUpload(fieldName, e.target.files[0])}
+//                             accept="image/*"
+//                             onBlur={() => handleBlur(fieldName)}
+//                         />
+//                         <label
+//                             htmlFor={fieldName}
+//                             className={`bg-gradient-to-r ${isPic ? 'from-[#3b82f6] to-[#2563eb]' : 'from-[#ef4444] to-[#dc2626]'} text-white px-4 py-2 rounded-full text-sm font-bold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300 w-full cursor-pointer block`}
+//                         >
+//                             {file ? 'Change File' : `Select ${isPic ? 'Image' : 'Signature'}`}
+//                         </label>
+//                     </div>
+//                 );
+//             }
+
+//             case 'image': {
+//                 // Display preview (180x180) if available; otherwise placeholder box
+//                 const previewSrc = formData[fieldName] || '';
+//                 return (
+//                     <div key={field.id} className="flex items-center justify-center">
+//                         {previewSrc ? (
+//                             <img src={previewSrc} alt="preview" width={180} height={180} className="rounded-md object-cover border shadow-sm" />
+//                         ) : (
+//                             <div className="w-[180px] h-[180px] rounded-md bg-gray-100 flex items-center justify-center border border-dashed text-gray-400">
+//                                 <span className="text-xs">180 x 180</span>
+//                             </div>
+//                         )}
+//                     </div>
+//                 );
+//             }
+
+//             case 'checkbox':
+//                 return (
+//                     <label key={field.id} className="flex items-start space-x-3 cursor-pointer p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
+//                         <div className="flex items-center h-5">
+//                             <input
+//                                 type="checkbox"
+//                                 className="w-5 h-5 text-[#1e40af] border-gray-400 rounded focus:ring-[#1e40af]"
+//                                 checked={!!formData[fieldName]}
+//                                 onChange={(e) => handleInputChange(fieldName, e.target.checked)}
+//                                 onBlur={() => handleBlur(fieldName)}
+//                             />
+//                         </div>
+//                         <div className="text-sm text-gray-700">
+//                             <span className="font-medium">{field.label || 'I agree to the terms and conditions.'}</span>
+//                         </div>
+//                     </label>
+//                 );
+
+//             case 'heading':
+//                 return (
+//                     <h4 key={field.id} className="text-xl font-extrabold text-[#1e40af] border-b-2 border-[#1e40af]/30 pb-2 mb-4">
+//                         {field.label || 'Section Title'}
+//                     </h4>
+//                 );
+
+//             case 'para':
+//                 return (
+//                     <p key={field.id} className="text-base text-gray-600 italic border-l-4 border-gray-300 pl-3">
+//                         {field.label}
+//                     </p>
+//                 );
+
+//             default:
+//                 return <div key={field.id} className="text-red-500">Unsupported field type: <strong>{field.type}</strong></div>;
+//         }
+//     };
+
+//     const renderSection = (section, index) => {
+//         const sectionClasses = index % 2 === 0
+//             ? 'bg-white p-6 rounded-xl shadow-inner border border-gray-100'
+//             : 'bg-gray-50 p-6 rounded-xl border border-gray-200';
+
+//         const gridTemplate = getGridColumns(section);
+//         const hasGrid = gridTemplate !== '';
+
+//         const customWidth = section.width
+//             ? { width: typeof section.width === 'number' ? `${section.width}%` : section.width }
+//             : { width: '100%' };
+
+//         return (
+//             <div key={index} className={`mb-8 ${sectionClasses}`} style={customWidth}>
+//                 {section.label && (
+//                     <h3 className="text-xl font-bold mb-4 text-[#dc2626] border-b pb-2">
+//                         {section.label}
+//                     </h3>
+//                 )}
+
+//                 <div className={`${hasGrid ? 'grid gap-6' : 'space-y-6'} ${gridTemplate}`}>
+//                     {section.children.map(field => (
+//                         <div key={field.id} className={`${getFieldWidth(field)} space-y-1`}>
+//                             {field.label && field.type !== 'heading' && field.type !== 'para' && field.type !== 'checkbox' && (
+//                                 <label className="block text-sm font-medium text-gray-700 transition-colors duration-200">
+//                                     {field.label}
+//                                     {isFieldRequired(field.name) && <span className="text-red-500 ml-1">*</span>}
+//                                 </label>
+//                             )}
+
+//                             {renderField(field)}
+
+//                             {shouldShowError(field.name) && (
+//                                 <p className="text-red-600 text-xs mt-1 font-medium flex items-center">
+//                                     <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path></svg>
+//                                     {errors[field.name]}
+//                                 </p>
+//                             )}
+//                         </div>
+//                     ))}
+//                 </div>
+//             </div>
+//         );
+//     };
+
+//     // --- Loading/Error States ---
+//     if (loading) {
+//         return <Loader />;
+//     }
+
+//     if (!formConfig || !formConfig.data) {
+//         return <div className="min-h-screen flex items-center justify-center text-red-600 bg-gray-100">❌ Error loading form configuration.</div>;
+//     }
+
+//     // --- Main Component Render ---
+//     return (
+//         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200">
+//             <Header instituteName={formConfig.header?.name || 'Application Portal'} />
+
+//             <div className="mx-full py-8 px-4 sm:px-6 lg:px-8">
+//                 <div className="group relative">
+//                     <div className="absolute -inset-0.5 bg-gradient-to-r from-[#1e40af] to-[#dc2626] rounded-xl blur-sm opacity-20 group-hover:opacity-100 transition duration-500"></div>
+
+//                     <div className="relative bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
+//                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e40af] to-[#dc2626]"></div>
+
+//                         <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/10 to-[#dc2626]/10">
+//                             <h2 className="text-center text-2xl font-extrabold text-[#1e40af] flex items-center justify-center">
+//                                 <svg className="w-6 h-6 mr-3 text-[#dc2626]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+//                                 Dynamic Application Form
+//                             </h2>
+//                             <p className="text-center text-sm text-gray-600 mt-1">Please fill in all the required details carefully.</p>
+//                         </div>
+
+//                         <form className="p-6 flex flex-wrap">
+//                             {formConfig.data.map((section, index) => renderSection(section, index))}
+//                         </form>
+
+//                         <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+//                             <div className="flex justify-end">
+//                                 <button
+//                                     className="bg-gradient-to-r from-[#059669] to-[#d97706] text-white px-8 py-3 rounded-full font-bold text-lg hover:shadow-2xl hover:shadow-yellow-300/50 transform hover:scale-105 transition-all duration-300 flex items-center"
+//                                     onClick={(e) => {
+//                                         e.preventDefault();
+//                                         const allTouched = {};
+//                                         Object.keys(formData).forEach(key => {
+//                                             allTouched[key] = true;
+//                                         });
+//                                         setTouched(allTouched);
+//                                         // TODO: implement full validation + submission
+//                                         console.log('Form Data:', formData);
+//                                         console.log('Errors:', errors);
+//                                     }}
+//                                 >
+//                                     Submit Application &nbsp; &rarr;
+//                                 </button>
+//                             </div>
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+
+//             <Footer />
+//         </div>
+//     );
+// };
+
+// export default DynamicApply;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useState, useEffect, useCallback, useRef } from 'react';
+// import { useParams } from 'react-router';
+// import Header from '../Common/Header';
+// import Footer from '../Common/Footer';
+// import Loader from 'src/Frontend/Common/Loader';
+// import toast from 'react-hot-toast';
+
+// const baseUrl = 'https://rainbowsolutionandtechnology.com/NewAdmissionPortal/public/';
+
+// // Image blur detection function
+// const isImageBlurred = (src, width, height) => {
+//   return new Promise((resolve) => {
+//     const img = new Image();
+//     img.crossOrigin = 'Anonymous';
+//     img.src = src;
+    
+//     img.onload = () => {
+//       const canvas = document.createElement('canvas');
+//       const ctx = canvas.getContext('2d');
+//       canvas.width = width || 100;
+//       canvas.height = height || 100;
+      
+//       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+//       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+//       const data = imageData.data;
+      
+//       let contrast = 0;
+//       for (let i = 0; i < data.length; i += 4) {
+//         const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
+//         contrast += Math.abs(brightness - 128);
+//       }
+      
+//       const avgContrast = contrast / (data.length / 4);
+//       resolve(avgContrast < 25); // Threshold for blur detection
+//     };
+    
+//     img.onerror = () => resolve(false);
+//   });
+// };
+
+// const DynamicApply = () => {
+//     const { institute_id } = useParams();
+//     const [formConfig, setFormConfig] = useState(null);
+//     const [formData, setFormData] = useState({});
+//     const [touched, setTouched] = useState({});
+//     const [errors, setErrors] = useState({});
+//     const [loading, setLoading] = useState(true);
+//     const [districtsData, setDistrictsData] = useState({});
+
+//     const createdObjectUrls = useRef([]);
+
+//     // --- Data Fetching and Initialization ---
+//     useEffect(() => {
+//         const fetchFormConfig = async () => {
+//             try {
+//                 const response = await fetch(baseUrl + 'api/Public/Get-apply-form', {
+//                     method: 'POST',
+//                     headers: { 'Content-Type': 'application/json' },
+//                     body: JSON.stringify({ unique_code: "EeOEBgpF7O3oC4O" })
+//                 });
+
+//                 const data = await response.json();
+//                 console.log('Form config loaded:', data);
+//                 setFormConfig(data);
+
+//                 // Initialize form data
+//                 const initialFormData = {};
+//                 data.data.forEach(section => {
+//                     section.children.forEach(field => {
+//                         if (field.name) {
+//                             if (field.type === 'adhar') {
+//                                 initialFormData[field.name] = Array(12).fill('');
+//                             } else if (field.type === 'checkbox') {
+//                                 initialFormData[field.name] = false;
+//                             } else {
+//                                 initialFormData[field.name] = field.value || '';
+//                             }
+//                         }
+//                     });
+//                 });
+//                 setFormData(initialFormData);
+
+//                 // Initialize errors from required_child
+//                 const initialErrors = {};
+//                 data.required_child.forEach(field => {
+//                     initialErrors[field.name] = field.validation_message;
+//                 });
+//                 setErrors(initialErrors);
+
+//                 setLoading(false);
+//             } catch (error) {
+//                 console.error('Error fetching form config:', error);
+//                 toast.error('Failed to load form configuration. Please refresh the page.');
+//                 setLoading(false);
+//             }
+//         };
+
+//         fetchFormConfig();
+
+//         // Cleanup on unmount
+//         return () => {
+//             createdObjectUrls.current.forEach(url => URL.revokeObjectURL(url));
+//             createdObjectUrls.current = [];
+//         };
+//     }, []);
+
+//     console.log('Districts Data State:', districtsData);
+
+//     // --- District fetching ---
+//     const fetchDistricts = useCallback(async (stateId, stateFieldName) => {
+//         if (!stateId) {
+//             console.log('No state ID provided for district fetch');
+//             return;
+//         }
+
+//         console.log('Fetching districts for state:', stateId, 'field:', stateFieldName);
+
+//         const loadingToast = toast.loading('Loading districts...');
+
+//         try {
+//             const res = await fetch(baseUrl + 'api/frontend/get_district_by_state_id', {
+//                 method: 'POST',
+//                 headers: { 'Content-Type': 'application/json' },
+//                 body: JSON.stringify({ state_id: stateId })
+//             });
+
+//             const data = await res.json();
+//             console.log('District API response:', data);
+
+//             let districtOptions = [];
+            
+//             // Handle different response formats
+//             if (data.status && Array.isArray(data.districts)) {
+//                 districtOptions = data.districts.map(district => ({
+//                     value: district.id,
+//                     text: district.district_title || district.district_name || district.name || 'District'
+//                 }));
+//             } else if (Array.isArray(data)) {
+//                 districtOptions = data.map(district => ({
+//                     value: district.id,
+//                     text: district.district_name || district.name || 'District'
+//                 }));
+//             } else {
+//                 console.warn('Unexpected district API response format:', data);
+//                 districtOptions = [{ value: "", text: "No districts available" }];
+//             }
+
+//             // Store districts in state with stateFieldName as key
+//             setDistrictsData(prev => ({
+//                 ...prev,
+//                 [stateFieldName]: districtOptions
+//             }));
+
+//             toast.success('Districts loaded successfully!', { id: loadingToast });
+//             console.log('Processed district options:', districtOptions);
+
+//         } catch (err) {
+//             console.error('Error fetching districts:', err);
+//             toast.error('Failed to load districts. Please try again.', { id: loadingToast });
+//             setDistrictsData(prev => ({
+//                 ...prev,
+//                 [stateFieldName]: [{ value: "", text: "Error loading districts" }]
+//             }));
+//         }
+//     }, []);
+
+//     // --- Validation and State Handlers ---
+
+//     const isFieldRequired = (fieldName) => {
+//         return formConfig?.required_child?.some(field => field.name === fieldName);
+//     };
+
+//     const handleInputChange = (fieldName, value) => {
+//         console.log('Field changed:', fieldName, 'Value:', value);
+        
+//         setFormData(prev => ({
+//             ...prev,
+//             [fieldName]: value
+//         }));
+
+//         // Clear error when field has value
+//         if (value && value.toString().trim() !== '') {
+//             setErrors(prev => ({
+//                 ...prev,
+//                 [fieldName]: ''
+//             }));
+//         }
+//     };
+
+//     // Handle state selection and trigger district fetch
+//     const handleStateChange = async (fieldName, value) => {
+//         console.log('State changed:', fieldName, 'Value:', value);
+        
+//         // Update state field
+//         handleInputChange(fieldName, value);
+
+//         // Determine corresponding district field name
+//         let districtFieldName = '';
+//         if (fieldName === 'selectBelong') {
+//             districtFieldName = 'selectDistrict';
+//         } else if (fieldName.includes('_state')) {
+//             districtFieldName = fieldName.replace('_state', '_district');
+//         } else if (fieldName === 'address_state') {
+//             districtFieldName = 'address_district';
+//         }
+
+//         if (districtFieldName) {
+//             // Reset district field
+//             setFormData(prev => ({
+//                 ...prev,
+//                 [districtFieldName]: ''
+//             }));
+
+//             // Clear district error
+//             setErrors(prev => ({
+//                 ...prev,
+//                 [districtFieldName]: ''
+//             }));
+
+//             // Fetch districts if state is selected
+//             if (value) {
+//                 await fetchDistricts(value, fieldName);
+//             } else {
+//                 // Clear districts if no state selected
+//                 setDistrictsData(prev => ({
+//                     ...prev,
+//                     [fieldName]: []
+//                 }));
+//             }
+//         }
+//     };
+
+//     const handleAadhaarChange = (fieldName, index, value) => {
+//         const currentAadhaar = formData[fieldName] || Array(12).fill('');
+//         const newAadhaar = [...currentAadhaar];
+//         const sanitizedValue = value.replace(/\D/g, '');
+
+//         if (sanitizedValue.length > 1) return;
+
+//         newAadhaar[index] = sanitizedValue;
+
+//         setFormData(prev => ({
+//             ...prev,
+//             [fieldName]: newAadhaar
+//         }));
+
+//         if (sanitizedValue && index < 11) {
+//             const nextInput = document.getElementById(`${fieldName}-${index + 1}`);
+//             if (nextInput) {
+//                 nextInput.focus();
+//             }
+//         }
+
+//         const fullAadhaar = newAadhaar.filter(Boolean).join('');
+//         if (fullAadhaar.length === 12 || !isFieldRequired(fieldName)) {
+//             setErrors(prev => ({
+//                 ...prev,
+//                 [fieldName]: ''
+//             }));
+//         }
+//     };
+
+//     const handleFileUpload = async (fieldName, file) => {
+//         if (!file) return;
+
+//         // File size validation
+//         const isPic = fieldName === 'candidate_pic';
+//         const isSignature = fieldName === 'candidate_signature';
+        
+//         if (isPic && file.size > 50 * 1024) {
+//             toast.error('Profile photo must be less than 50KB.');
+//             return;
+//         }
+        
+//         if (isSignature && file.size > 20 * 1024) {
+//             toast.error('Signature must be less than 20KB.');
+//             return;
+//         }
+
+//         // Create preview URL
+//         const url = URL.createObjectURL(file);
+//         createdObjectUrls.current.push(url);
+
+//         // Check for image blur for specific image fields
+//         const isImageField = fieldName === 'candidate_pic' || fieldName === 'candidate_signature';
+        
+//         if (isImageField && file.type.startsWith('image/')) {
+//             const blurCheckToast = toast.loading('Checking image quality...');
+            
+//             try {
+//                 const blurry = await isImageBlurred(url, 200, 200);
+//                 toast.dismiss(blurCheckToast);
+                
+//                 if (blurry) {
+//                     toast.error("The uploaded image is too blurry. Please upload a clearer image.");
+//                     URL.revokeObjectURL(url);
+//                     return; // Don't proceed with blurry image
+//                 } else {
+//                     toast.success('Image quality is good!');
+//                 }
+//             } catch (error) {
+//                 toast.dismiss(blurCheckToast);
+//                 console.error('Error checking image blur:', error);
+//                 toast.error('Error checking image quality. Please try again.');
+//             }
+//         }
+
+//         setFormData(prev => {
+//             const nextData = { ...prev, [fieldName]: file };
+//             // Set preview fields
+//             if (fieldName === 'candidate_pic') {
+//                 nextData['customer_pic_preview'] = url;
+//             } else if (fieldName === 'candidate_signature') {
+//                 nextData['signature_pic_preview'] = url;
+//             } else if (fieldName === 'caste_certificate') {
+//                 nextData['caste_certificate_preview'] = url;
+//             }
+//             return nextData;
+//         });
+
+//         setErrors(prev => ({
+//             ...prev,
+//             [fieldName]: ''
+//         }));
+
+//         toast.success('File uploaded successfully!');
+//     };
+
+//     const handleBlur = (fieldName) => {
+//         setTouched(prev => ({
+//             ...prev,
+//             [fieldName]: true
+//         }));
+
+//         if (isFieldRequired(fieldName)) {
+//             const value = formData[fieldName];
+//             let isValid = true;
+
+//             if (fieldName === 'adhar' || fieldName === 'adharCard') {
+//                 const fullAadhaar = (value || []).filter(Boolean).join('');
+//                 isValid = fullAadhaar.length === 12;
+//             } else if (fieldName.includes('candidate_pic') || fieldName.includes('signature') || fieldName.includes('file')) {
+//                 isValid = !!value;
+//             } else {
+//                 isValid = !!value && value.toString().trim() !== '';
+//             }
+
+//             if (!isValid) {
+//                 const validationMessage = formConfig.required_child.find(f => f.name === fieldName)?.validation_message || 'This field is required.';
+//                 setErrors(prev => ({
+//                     ...prev,
+//                     [fieldName]: validationMessage
+//                 }));
+//             }
+//         }
+//     };
+
+//     const shouldShowError = (fieldName) => {
+//         return touched[fieldName] && errors[fieldName];
+//     };
+
+//     // --- Layout Helper Functions ---
+//     const getGridColumns = (section) => {
+//         let baseCols = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+
+//         if (section.children.length <= 4 && section.children.every(f => f.type !== 'file_button' && f.type !== 'para')) {
+//             baseCols = 'grid-cols-1 md:grid-cols-2';
+//         }
+
+//         if (section.children.length === 1 && (section.children[0].type === 'heading' || section.children[0].type === 'para')) {
+//             return '';
+//         }
+
+//         return baseCols;
+//     };
+
+//     const getFieldWidth = (field) => {
+//         if (field.type === 'heading' || field.type === 'para' || field.type === 'checkbox') {
+//             return 'col-span-full';
+//         }
+//         if (field.type === 'adhar') return 'lg:col-span-2 md:col-span-full';
+//         if (field.type === 'file_button') return 'lg:col-span-1 md:col-span-1';
+//         return '';
+//     };
+
+//     // Get district options for a specific state field
+//     const getDistrictOptions = (stateFieldName) => {
+//         const districtData = districtsData[stateFieldName];
+//         console.log('Getting districts for:', stateFieldName, 'Data:', districtData);
+        
+//         if (districtData && districtData.length > 0) {
+//             return districtData;
+//         }
+//         return [{ value: "", text: "Select State First" }];
+//     };
+
+//     // Check if state is selected for a district field
+//     const isStateSelected = (districtFieldName) => {
+//         let stateFieldName = '';
+//         if (districtFieldName === 'selectDistrict') {
+//             stateFieldName = 'selectBelong';
+//         } else if (districtFieldName.includes('_district')) {
+//             stateFieldName = districtFieldName.replace('_district', '_state');
+//         } else if (districtFieldName === 'address_district') {
+//             stateFieldName = 'address_state';
+//         }
+
+//         return !!formData[stateFieldName];
+//     };
+
+//     // --- Renderer Functions ---
+//     const renderField = (field) => {
+//         const fieldName = field.name;
+//         const commonBase = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0369a1] focus:border-[#0369a1] transition-all duration-200 bg-white text-gray-800 shadow-sm text-base";
+//         let commonClass = commonBase;
+//         const fieldValue = formData[fieldName] ?? '';
+
+//         if (shouldShowError(fieldName)) {
+//             commonClass = commonClass.replace('border-gray-300', 'border-red-500')
+//                                      .replace('focus:ring-[#0369a1]', 'focus:ring-red-500')
+//                                      .replace('focus:border-[#0369a1]', 'focus:border-red-500');
+//         }
+
+//         switch (field.type) {
+//             case 'text':
+//             case 'number':
+//             case 'email':
+//                 return (
+//                     <input
+//                         key={field.id}
+//                         className={commonClass}
+//                         type={field.type === 'text' ? 'text' : (field.type === 'number' ? 'number' : 'email')}
+//                         placeholder={field.label}
+//                         value={fieldValue}
+//                         onChange={(e) => handleInputChange(fieldName, e.target.value)}
+//                         onBlur={() => handleBlur(fieldName)}
+//                     />
+//                 );
+
+//             case 'select': {
+//                 const isStateField = fieldName === 'selectBelong' || fieldName === 'address_state' || fieldName.includes('_state');
+//                 const isDistrictField = fieldName === 'selectDistrict' || fieldName === 'address_district' || fieldName.includes('_district');
+
+//                 let options = field.options || [];
+//                 const selectProps = { 
+//                     className: commonClass, 
+//                     value: fieldValue,
+//                     onChange: (e) => {
+//                         const value = e.target.value;
+//                         if (isStateField) {
+//                             handleStateChange(fieldName, value);
+//                         } else {
+//                             handleInputChange(fieldName, value);
+//                         }
+//                     },
+//                     onBlur: () => handleBlur(fieldName)
+//                 };
+
+//                 // Handle district fields
+//                 if (isDistrictField) {
+//                     let stateFieldNameForDistricts = '';
+//                     if (fieldName === 'selectDistrict') {
+//                         stateFieldNameForDistricts = 'selectBelong';
+//                     } else if (fieldName.includes('_district')) {
+//                         stateFieldNameForDistricts = fieldName.replace('_district', '_state');
+//                     }
+
+//                     options = getDistrictOptions(stateFieldNameForDistricts);
+
+//                     // Disable district if state not selected
+//                     if (!isStateSelected(fieldName)) {
+//                         selectProps.disabled = true;
+//                         selectProps.className += ' bg-gray-100 cursor-not-allowed';
+//                         // Ensure we show "Select State First" when disabled
+//                         if (options.length === 0 || (options.length === 1 && options[0].value === "")) {
+//                             options = [{ value: "", text: "Select State First" }];
+//                         }
+//                     }
+//                 }
+
+//                 return (
+//                     <div className="relative" key={field.id}>
+//                         <select {...selectProps}>
+//                             <option value="">
+//                                 {isDistrictField ? 'Select District' : `Select ${field.label || 'Option'}`}
+//                             </option>
+//                             {options.map(opt => (
+//                                 <option key={opt.value} value={opt.value}>
+//                                     {(opt.text)}
+//                                 </option>
+//                             ))}
+//                         </select>
+//                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+//                             <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+//                                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+//                             </svg>
+//                         </div>
+//                     </div>
+//                 );
+//             }
+
+//             case 'date':
+//                 return (
+//                     <input
+//                         key={field.id}
+//                         className={commonClass}
+//                         type="date"
+//                         value={fieldValue}
+//                         onChange={(e) => handleInputChange(fieldName, e.target.value)}
+//                         onBlur={() => handleBlur(fieldName)}
+//                     />
+//                 );
+
+//             case 'adhar':
+//                 return (
+//                     <div className="flex space-x-1 lg:space-x-1 bg-white rounded-lg p-2 border border-gray-300 shadow-sm">
+//                         {Array(12).fill('').map((_, index) => (
+//                             <input
+//                                 key={index}
+//                                 id={`${fieldName}-${index}`}
+//                                 placeholder="0"
+//                                 maxLength="1"
+//                                 className={`w-8 h-8 px-1 py-1 border rounded-md text-center text-base font-mono focus:ring-1 focus:ring-blue-500 transition-all ${shouldShowError(fieldName) ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+//                                 type="text"
+//                                 inputMode="numeric"
+//                                 value={formData[fieldName]?.[index] || ''}
+//                                 onChange={(e) => handleAadhaarChange(fieldName, index, e.target.value)}
+//                                 onBlur={() => handleBlur(fieldName)}
+//                             />
+//                         ))}
+//                     </div>
+//                 );
+
+//             case 'file_button': {
+//                 const file = formData[fieldName];
+//                 const isPic = fieldName === 'candidate_pic';
+//                 const isSignature = fieldName === 'candidate_signature';
+
+//                 let previewUrl = '';
+//                 if (file instanceof File) {
+//                     previewUrl = URL.createObjectURL(file);
+//                 } else if (isPic && formData['customer_pic_preview']) {
+//                     previewUrl = formData['customer_pic_preview'];
+//                 } else if (isSignature && formData['signature_pic_preview']) {
+//                     previewUrl = formData['signature_pic_preview'];
+//                 } else if (fieldName === 'caste_certificate' && formData['caste_certificate_preview']) {
+//                     previewUrl = formData['caste_certificate_preview'];
+//                 }
+
+//                 return (
+//                     <div key={field.id} className="text-center space-y-3 p-4 bg-white rounded-xl border-2 border-dashed border-[#a3e635] hover:border-[#1e40af] transition-all duration-300">
+//                         <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-2 overflow-hidden shadow-md">
+//                             {previewUrl ? (
+//                                 <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+//                             ) : (
+//                                 <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+//                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+//                                 </svg>
+//                             )}
+//                         </div>
+//                         <p className="text-sm text-gray-700 font-semibold mb-2">
+//                             {isPic ? 'Profile Photo (max 50kb)' : 
+//                              isSignature ? 'Candidate Signature (max 20kb)' : 
+//                              'Upload Certificate'}
+//                         </p>
+//                         <input
+//                             type="file"
+//                             id={fieldName}
+//                             className="hidden"
+//                             onChange={(e) => handleFileUpload(fieldName, e.target.files[0])}
+//                             accept="image/*"
+//                             onBlur={() => handleBlur(fieldName)}
+//                         />
+//                         <label
+//                             htmlFor={fieldName}
+//                             className={`bg-gradient-to-r ${isPic ? 'from-[#3b82f6] to-[#2563eb]' : 
+//                                       isSignature ? 'from-[#ef4444] to-[#dc2626]' : 
+//                                       'from-[#10b981] to-[#059669]'} text-white px-4 py-2 rounded-full text-sm font-bold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300 w-full cursor-pointer block`}
+//                         >
+//                             {file ? 'Change File' : `Select ${isPic ? 'Image' : isSignature ? 'Signature' : 'File'}`}
+//                         </label>
+//                     </div>
+//                 );
+//             }
+
+//             case 'image': {
+//                 // Display preview (180x180) if available; otherwise placeholder box
+//                 const previewSrc = formData[fieldName] || '';
+//                 return (
+//                     <div key={field.id} className="flex items-center justify-center">
+//                         {previewSrc ? (
+//                             <img src={previewSrc} alt="preview" width={180} height={180} className="rounded-md object-cover border shadow-sm" />
+//                         ) : (
+//                             <div className="w-[180px] h-[180px] rounded-md bg-gray-100 flex items-center justify-center border border-dashed text-gray-400">
+//                                 <span className="text-xs">180 x 180</span>
+//                             </div>
+//                         )}
+//                     </div>
+//                 );
+//             }
+
+//             case 'checkbox':
+//                 return (
+//                     <label key={field.id} className="flex items-start space-x-3 cursor-pointer p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
+//                         <div className="flex items-center h-5">
+//                             <input
+//                                 type="checkbox"
+//                                 className="w-5 h-5 text-[#1e40af] border-gray-400 rounded focus:ring-[#1e40af]"
+//                                 checked={!!formData[fieldName]}
+//                                 onChange={(e) => handleInputChange(fieldName, e.target.checked)}
+//                                 onBlur={() => handleBlur(fieldName)}
+//                             />
+//                         </div>
+//                         <div className="text-sm text-gray-700">
+//                             <span className="font-medium">{field.label || 'I agree to the terms and conditions.'}</span>
+//                         </div>
+//                     </label>
+//                 );
+
+//             case 'heading':
+//                 return (
+//                     <h4 key={field.id} className="text-xl font-extrabold text-[#1e40af] border-b-2 border-[#1e40af]/30 pb-2 mb-4">
+//                         {field.label || 'Section Title'}
+//                     </h4>
+//                 );
+
+//             case 'para':
+//                 return (
+//                     <p key={field.id} className="text-base text-gray-600 italic border-l-4 border-gray-300 pl-3">
+//                         {field.label}
+//                     </p>
+//                 );
+
+//             default:
+//                 return <div key={field.id} className="text-red-500">Unsupported field type: <strong>{field.type}</strong></div>;
+//         }
+//     };
+
+//     const renderSection = (section, index) => {
+//         const sectionClasses = index % 2 === 0
+//             ? 'bg-white p-6 rounded-xl shadow-inner border border-gray-100'
+//             : 'bg-gray-50 p-6 rounded-xl border border-gray-200';
+
+//         const gridTemplate = getGridColumns(section);
+//         const hasGrid = gridTemplate !== '';
+
+//         const customWidth = section.width
+//             ? { width: typeof section.width === 'number' ? `${section.width}%` : section.width }
+//             : { width: '100%' };
+
+//         return (
+//             <div key={index} className={`mb-8 ${sectionClasses}`} style={customWidth}>
+//                 {section.label && (
+//                     <h3 className="text-xl font-bold mb-4 text-[#dc2626] border-b pb-2">
+//                         {section.label}
+//                     </h3>
+//                 )}
+
+//                 <div className={`${hasGrid ? 'grid gap-6' : 'space-y-6'} ${gridTemplate}`}>
+//                     {section.children.map(field => (
+//                         <div key={field.id} className={`${getFieldWidth(field)} space-y-1`}>
+//                             {field.label && field.type !== 'heading' && field.type !== 'para' && field.type !== 'checkbox' && (
+//                                 <label className="block text-sm font-medium text-gray-700 transition-colors duration-200">
+//                                     {field.label}
+//                                     {isFieldRequired(field.name) && <span className="text-red-500 ml-1">*</span>}
+//                                 </label>
+//                             )}
+
+//                             {renderField(field)}
+
+//                             {shouldShowError(field.name) && (
+//                                 <p className="text-red-600 text-xs mt-1 font-medium flex items-center">
+//                                     <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+//                                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+//                                     </svg>
+//                                     {errors[field.name]}
+//                                 </p>
+//                             )}
+//                         </div>
+//                     ))}
+//                 </div>
+//             </div>
+//         );
+//     };
+
+//     // --- Loading/Error States ---
+//     if (loading) {
+//         return <Loader />;
+//     }
+
+//     if (!formConfig || !formConfig.data) {
+//         return <div className="min-h-screen flex items-center justify-center text-red-600 bg-gray-100">❌ Error loading form configuration.</div>;
+//     }
+
+//     // --- Main Component Render ---
+//     return (
+//         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200">
+//             <Header instituteName={formConfig.header?.name || 'Application Portal'} />
+
+//             <div className="mx-full py-8 px-4 sm:px-6 lg:px-8">
+//                 <div className="group relative">
+//                     <div className="absolute -inset-0.5 bg-gradient-to-r from-[#1e40af] to-[#dc2626] rounded-xl blur-sm opacity-20 group-hover:opacity-100 transition duration-500"></div>
+
+//                     <div className="relative bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
+//                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e40af] to-[#dc2626]"></div>
+
+//                         <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/10 to-[#dc2626]/10">
+//                             <h2 className="text-center text-2xl font-extrabold text-[#1e40af] flex items-center justify-center">
+//                                 <svg className="w-6 h-6 mr-3 text-[#dc2626]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+//                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+//                                 </svg>
+//                                 Steps For Application Form
+//                             </h2>
+//                             <p className="text-center text-sm text-gray-600 mt-1">Please fill in all the required details carefully.</p>
+//                         </div>
+
+//                         <form className="p-6 flex flex-wrap">
+//                             {formConfig.data.map((section, index) => renderSection(section, index))}
+//                         </form>
+
+//                         <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+//                             <div className="flex justify-end">
+//                                 <button
+//                                     type="button"
+//                                     className="bg-gradient-to-r from-[#059669] to-[#d97706] text-white px-8 py-3 rounded-full font-bold text-lg hover:shadow-2xl hover:shadow-yellow-300/50 transform hover:scale-105 transition-all duration-300 flex items-center"
+//                                     onClick={(e) => {
+//                                         e.preventDefault();
+//                                         const allTouched = {};
+//                                         Object.keys(formData).forEach(key => {
+//                                             allTouched[key] = true;
+//                                         });
+//                                         setTouched(allTouched);
+                                        
+//                                         // Form validation
+//                                         const hasErrors = Object.values(errors).some(error => error !== '');
+//                                         const requiredFields = formConfig.required_child.map(field => field.name);
+//                                         const missingFields = requiredFields.filter(field => !formData[field] || formData[field].toString().trim() === '');
+                                        
+//                                         if (hasErrors || missingFields.length > 0) {
+//                                             toast.error('Please fill all required fields correctly.');
+//                                         } else {
+//                                             toast.success('Form successfully validated! Submitting...');
+//                                             // TODO: implement form submission
+//                                             console.log('Form Data:', formData);
+//                                         }
+//                                     }}
+//                                 >
+//                                     Submit Application &nbsp; &rarr;
+//                                 </button>
+//                             </div>
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+
+//             <Footer />
+//         </div>
+//     );
+// };
+
+// export default DynamicApply;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router';
 import Header from '../Common/Header';
 import Footer from '../Common/Footer';
-import Loader from 'src/Frontend/Common/Loader'; // 1. Custom Loader Import
+import Loader from 'src/Frontend/Common/Loader';
+import toast from 'react-hot-toast';
+import { Alert, Button, Card } from 'flowbite-react';
+import { HiCheckCircle, HiArrowLeft, HiArrowRight } from 'react-icons/hi';
+
+const baseUrl = 'https://rainbowsolutionandtechnology.com/NewAdmissionPortal/public/';
+
+// Image blur detection function
+const isImageBlurred = (src, width, height) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = src;
+    
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = width || 100;
+      canvas.height = height || 100;
+      
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      let contrast = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
+        contrast += Math.abs(brightness - 128);
+      }
+      
+      const avgContrast = contrast / (data.length / 4);
+      resolve(avgContrast < 25); // Threshold for blur detection
+    };
+    
+    img.onerror = () => resolve(false);
+  });
+};
+
+// Custom Stepper Component
+const CustomStepper = ({ steps, activeStep }) => {
+  return (
+    <div className="flex items-center w-full mb-8 overflow-x-auto">
+      {steps.map((step, index) => (
+        <React.Fragment key={step}>
+          <div className="flex flex-col items-center min-w-max">
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                index <= activeStep ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
+              }`}
+            >
+              {index + 1}
+            </div>
+            <span
+              className={`text-xs mt-1 text-center max-w-20 break-words ${
+                index <= activeStep ? 'text-blue-600 font-medium' : 'text-gray-500'
+              }`}
+            >
+              {step}
+            </span>
+          </div>
+
+          {index < steps.length - 1 && (
+            <div
+              className={`flex-1 h-1 mx-2 min-w-8 ${
+                index < activeStep ? 'bg-blue-600' : 'bg-gray-200'
+              }`}
+            />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+};
 
 const DynamicApply = () => {
     const { institute_id } = useParams();
@@ -2016,42 +3628,46 @@ const DynamicApply = () => {
     const [touched, setTouched] = useState({});
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(true);
+    const [districtsData, setDistrictsData] = useState({});
+    const [activeStep, setActiveStep] = useState(0);
+    const [submitMessage, setSubmitMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Helper to decode Base64 options (assuming options might be encoded)
-    const decodeBase64 = (str) => {
-        try {
-            return atob(str);
-        } catch (e) {
-            return str;
-        }
-    };
-    
+    const createdObjectUrls = useRef([]);
+
+    // Steps configuration
+    const steps = ['FILL APPLICATION', 'CONFIRM & PAY', 'INVOICE'];
+
     // --- Data Fetching and Initialization ---
-
     useEffect(() => {
         const fetchFormConfig = async () => {
             try {
-                const response = await fetch('https://rainbowsolutionandtechnology.com/NewAdmissionPortal/public/api/Public/Get-apply-form', {
+                const response = await fetch(baseUrl + 'api/Public/Get-apply-form', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ unique_code: "EeOEBgpF7O3oC4O" })
                 });
 
                 const data = await response.json();
+                console.log('Form config loaded:', data);
                 setFormConfig(data);
 
                 // Initialize form data
-                const initialData = {};
+                const initialFormData = {};
                 data.data.forEach(section => {
                     section.children.forEach(field => {
                         if (field.name) {
-                            initialData[field.name] = (field.type === 'adhar') ? Array(12).fill('') : (field.value || '');
+                            if (field.type === 'adhar') {
+                                initialFormData[field.name] = Array(12).fill('');
+                            } else if (field.type === 'checkbox') {
+                                initialFormData[field.name] = false;
+                            } else {
+                                initialFormData[field.name] = field.value || '';
+                            }
                         }
                     });
                 });
-                setFormData(initialData);
+                setFormData(initialFormData);
 
                 // Initialize errors from required_child
                 const initialErrors = {};
@@ -2063,25 +3679,93 @@ const DynamicApply = () => {
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching form config:', error);
+                toast.error('Failed to load form configuration. Please refresh the page.');
                 setLoading(false);
             }
         };
 
         fetchFormConfig();
+
+        // Cleanup on unmount
+        return () => {
+            createdObjectUrls.current.forEach(url => URL.revokeObjectURL(url));
+            createdObjectUrls.current = [];
+        };
     }, []);
 
-    // --- Validation and State Handlers (Unchanged from previous revision for core logic) ---
+    // --- District fetching ---
+    const fetchDistricts = useCallback(async (stateId, stateFieldName) => {
+        if (!stateId) {
+            console.log('No state ID provided for district fetch');
+            return;
+        }
+
+        console.log('Fetching districts for state:', stateId, 'field:', stateFieldName);
+
+        const loadingToast = toast.loading('Loading districts...');
+
+        try {
+            const res = await fetch(baseUrl + 'api/frontend/get_district_by_state_id', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ state_id: stateId })
+            });
+
+            const data = await res.json();
+            console.log('District API response:', data);
+
+            let districtOptions = [];
+            
+            // Handle different response formats
+            if (data.status && Array.isArray(data.districts)) {
+                districtOptions = data.districts.map(district => ({
+                    value: district.id,
+                    text: district.district_title || district.district_name || district.name || 'District'
+                }));
+            } else if (Array.isArray(data)) {
+                districtOptions = data.map(district => ({
+                    value: district.id,
+                    text: district.district_name || district.name || 'District'
+                }));
+            } else {
+                console.warn('Unexpected district API response format:', data);
+                districtOptions = [{ value: "", text: "No districts available" }];
+            }
+
+            // Store districts in state with stateFieldName as key
+            setDistrictsData(prev => ({
+                ...prev,
+                [stateFieldName]: districtOptions
+            }));
+
+            toast.success('Districts loaded successfully!', { id: loadingToast });
+            console.log('Processed district options:', districtOptions);
+
+        } catch (err) {
+            console.error('Error fetching districts:', err);
+            toast.error('Failed to load districts. Please try again.', { id: loadingToast });
+            setDistrictsData(prev => ({
+                ...prev,
+                [stateFieldName]: [{ value: "", text: "Error loading districts" }]
+            }));
+        }
+    }, []);
+
+    // --- Validation and State Handlers ---
 
     const isFieldRequired = (fieldName) => {
-        return formConfig?.required_child.some(field => field.name === fieldName);
+        return formConfig?.required_child?.some(field => field.name === fieldName);
     };
 
     const handleInputChange = (fieldName, value) => {
+        console.log('Field changed:', fieldName, 'Value:', value);
+        
         setFormData(prev => ({
             ...prev,
             [fieldName]: value
         }));
 
+        // Clear error when field has value
         if (value && value.toString().trim() !== '') {
             setErrors(prev => ({
                 ...prev,
@@ -2090,11 +3774,54 @@ const DynamicApply = () => {
         }
     };
 
+    // Handle state selection and trigger district fetch
+    const handleStateChange = async (fieldName, value) => {
+        console.log('State changed:', fieldName, 'Value:', value);
+        
+        // Update state field
+        handleInputChange(fieldName, value);
+
+        // Determine corresponding district field name
+        let districtFieldName = '';
+        if (fieldName === 'selectBelong') {
+            districtFieldName = 'selectDistrict';
+        } else if (fieldName.includes('_state')) {
+            districtFieldName = fieldName.replace('_state', '_district');
+        } else if (fieldName === 'address_state') {
+            districtFieldName = 'address_district';
+        }
+
+        if (districtFieldName) {
+            // Reset district field
+            setFormData(prev => ({
+                ...prev,
+                [districtFieldName]: ''
+            }));
+
+            // Clear district error
+            setErrors(prev => ({
+                ...prev,
+                [districtFieldName]: ''
+            }));
+
+            // Fetch districts if state is selected
+            if (value) {
+                await fetchDistricts(value, fieldName);
+            } else {
+                // Clear districts if no state selected
+                setDistrictsData(prev => ({
+                    ...prev,
+                    [fieldName]: []
+                }));
+            }
+        }
+    };
+
     const handleAadhaarChange = (fieldName, index, value) => {
         const currentAadhaar = formData[fieldName] || Array(12).fill('');
         const newAadhaar = [...currentAadhaar];
         const sanitizedValue = value.replace(/\D/g, '');
-        
+
         if (sanitizedValue.length > 1) return;
 
         newAadhaar[index] = sanitizedValue;
@@ -2106,7 +3833,9 @@ const DynamicApply = () => {
 
         if (sanitizedValue && index < 11) {
             const nextInput = document.getElementById(`${fieldName}-${index + 1}`);
-            nextInput?.focus();
+            if (nextInput) {
+                nextInput.focus();
+            }
         }
 
         const fullAadhaar = newAadhaar.filter(Boolean).join('');
@@ -2118,18 +3847,70 @@ const DynamicApply = () => {
         }
     };
 
-    const handleFileUpload = (fieldName, file) => {
-        setFormData(prev => ({
+    const handleFileUpload = async (fieldName, file) => {
+        if (!file) return;
+
+        // File size validation
+        const isPic = fieldName === 'candidate_pic';
+        const isSignature = fieldName === 'candidate_signature';
+        
+        if (isPic && file.size > 50 * 1024) {
+            toast.error('Profile photo must be less than 50KB.');
+            return;
+        }
+        
+        if (isSignature && file.size > 20 * 1024) {
+            toast.error('Signature must be less than 20KB.');
+            return;
+        }
+
+        // Create preview URL
+        const url = URL.createObjectURL(file);
+        createdObjectUrls.current.push(url);
+
+        // Check for image blur for specific image fields
+        const isImageField = fieldName === 'candidate_pic' || fieldName === 'candidate_signature';
+        
+        if (isImageField && file.type.startsWith('image/')) {
+            const blurCheckToast = toast.loading('Checking image quality...');
+            
+            try {
+                const blurry = await isImageBlurred(url, 200, 200);
+                toast.dismiss(blurCheckToast);
+                
+                if (blurry) {
+                    toast.error("The uploaded image is too blurry. Please upload a clearer image.");
+                    URL.revokeObjectURL(url);
+                    return; // Don't proceed with blurry image
+                } else {
+                    toast.success('Image quality is good!');
+                }
+            } catch (error) {
+                toast.dismiss(blurCheckToast);
+                console.error('Error checking image blur:', error);
+                toast.error('Error checking image quality. Please try again.');
+            }
+        }
+
+        setFormData(prev => {
+            const nextData = { ...prev, [fieldName]: file };
+            // Set preview fields
+            if (fieldName === 'candidate_pic') {
+                nextData['customer_pic_preview'] = url;
+            } else if (fieldName === 'candidate_signature') {
+                nextData['signature_pic_preview'] = url;
+            } else if (fieldName === 'caste_certificate') {
+                nextData['caste_certificate_preview'] = url;
+            }
+            return nextData;
+        });
+
+        setErrors(prev => ({
             ...prev,
-            [fieldName]: file
+            [fieldName]: ''
         }));
 
-        if (file) {
-            setErrors(prev => ({
-                ...prev,
-                [fieldName]: ''
-            }));
-        }
+        toast.success('File uploaded successfully!');
     };
 
     const handleBlur = (fieldName) => {
@@ -2137,15 +3918,15 @@ const DynamicApply = () => {
             ...prev,
             [fieldName]: true
         }));
-        
+
         if (isFieldRequired(fieldName)) {
             const value = formData[fieldName];
             let isValid = true;
-            
-            if (fieldName === 'adhar') {
-                const fullAadhaar = value.filter(Boolean).join('');
+
+            if (fieldName === 'adhar' || fieldName === 'adharCard') {
+                const fullAadhaar = (value || []).filter(Boolean).join('');
                 isValid = fullAadhaar.length === 12;
-            } else if (fieldName.includes('candidate_pic') || fieldName.includes('signature')) {
+            } else if (fieldName.includes('candidate_pic') || fieldName.includes('signature') || fieldName.includes('file')) {
                 isValid = !!value;
             } else {
                 isValid = !!value && value.toString().trim() !== '';
@@ -2164,55 +3945,135 @@ const DynamicApply = () => {
     const shouldShowError = (fieldName) => {
         return touched[fieldName] && errors[fieldName];
     };
-    
-    // --- Layout Helper Functions (Optimized Grid and Full Width Logic) ---
 
-    const getGridColumns = (section) => {
-        // Full width container mein default 3 columns on large screens
-        let baseCols = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'; 
-        
-        // Agar section mein kam fields hain, toh 2 columns tak rakhenge
-        if (section.children.length <= 4 && section.children.every(f => f.type !== 'file_button' && f.type !== 'para')) {
-             baseCols = 'grid-cols-1 md:grid-cols-2';
+    // Stepper navigation handlers
+    const handleNext = () => {
+        // Validate current step before proceeding
+        if (activeStep === 0) {
+            // Validate FILL APPLICATION step
+            const allTouched = {};
+            Object.keys(formData).forEach(key => {
+                allTouched[key] = true;
+            });
+            setTouched(allTouched);
+
+            const hasErrors = Object.values(errors).some(error => error !== '');
+            const requiredFields = formConfig?.required_child?.map(field => field.name) || [];
+            const missingFields = requiredFields.filter(field => !formData[field] || 
+                (Array.isArray(formData[field]) ? formData[field].join('').length !== 12 : formData[field].toString().trim() === '')
+            );
+
+            if (hasErrors || missingFields.length > 0) {
+                toast.error('Please fill all required fields correctly before proceeding.');
+                return;
+            }
         }
-        
+
+        setActiveStep((prev) => Math.min(prev + 1, steps.length - 1));
+    };
+
+    const handleBack = () => {
+        setActiveStep((prev) => Math.max(prev - 1, 0));
+    };
+
+    // Form submission handler
+    const handleSubmit = async () => {
+        setIsSubmitting(true);
+        setSubmitMessage('');
+
+        try {
+            // Simulate form submission
+            console.log('Form Data:', formData);
+            
+            // TODO: Implement actual form submission API call
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            setSubmitMessage('Application submitted successfully!');
+            toast.success('Application submitted successfully!');
+            setActiveStep(2); // Move to INVOICE step
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            setSubmitMessage('Error submitting application. Please try again.');
+            toast.error('Error submitting application. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handlePayment = async () => {
+        setIsSubmitting(true);
+        try {
+            // Simulate payment processing
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            toast.success('Payment processed successfully!');
+            setActiveStep(2); // Move to INVOICE step
+        } catch (error) {
+            toast.error('Payment failed. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    // --- Layout Helper Functions ---
+    const getGridColumns = (section) => {
+        let baseCols = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+
+        if (section.children.length <= 4 && section.children.every(f => f.type !== 'file_button' && f.type !== 'para')) {
+            baseCols = 'grid-cols-1 md:grid-cols-2';
+        }
+
         if (section.children.length === 1 && (section.children[0].type === 'heading' || section.children[0].type === 'para')) {
             return '';
         }
-        
+
         return baseCols;
     };
 
     const getFieldWidth = (field) => {
         if (field.type === 'heading' || field.type === 'para' || field.type === 'checkbox') {
-            return 'col-span-full'; // Full width on all screen sizes
+            return 'col-span-full';
         }
-        // Aadhaar will take 2 columns in a 3-column grid, giving it enough space
-        if (field.type === 'adhar') return 'lg:col-span-2 md:col-span-full'; 
-        
-        if (field.type === 'file_button') return 'lg:col-span-1 md:col-span-1'; 
-        
-        return ''; // Default to 1 grid cell (or 1 column in md:grid-cols-2)
+        if (field.type === 'adhar') return 'lg:col-span-2 md:col-span-full';
+        if (field.type === 'file_button') return 'lg:col-span-1 md:col-span-1';
+        return '';
     };
-    
-    // --- Renderer Functions ---
 
+    // Get district options for a specific state field
+    const getDistrictOptions = (stateFieldName) => {
+        const districtData = districtsData[stateFieldName];
+        console.log('Getting districts for:', stateFieldName, 'Data:', districtData);
+        
+        if (districtData && districtData.length > 0) {
+            return districtData;
+        }
+        return [{ value: "", text: "Select State First" }];
+    };
+
+    // Check if state is selected for a district field
+    const isStateSelected = (districtFieldName) => {
+        let stateFieldName = '';
+        if (districtFieldName === 'selectDistrict') {
+            stateFieldName = 'selectBelong';
+        } else if (districtFieldName.includes('_district')) {
+            stateFieldName = districtFieldName.replace('_district', '_state');
+        } else if (districtFieldName === 'address_district') {
+            stateFieldName = 'address_state';
+        }
+
+        return !!formData[stateFieldName];
+    };
+
+    // --- Renderer Functions ---
     const renderField = (field) => {
         const fieldName = field.name;
-        
-        // Unified attractive input styling
-        const commonProps = {
-            key: field.id,
-            className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0369a1] focus:border-[#0369a1] transition-all duration-200 bg-white text-gray-800 shadow-sm text-base",
-            value: formData[fieldName] || '',
-            onChange: (e) => handleInputChange(fieldName, e.target.value),
-            onBlur: () => handleBlur(fieldName)
-        };
+        const commonBase = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0369a1] focus:border-[#0369a1] transition-all duration-200 bg-white text-gray-800 shadow-sm text-base";
+        let commonClass = commonBase;
+        const fieldValue = formData[fieldName] ?? '';
 
         if (shouldShowError(fieldName)) {
-            commonProps.className = commonProps.className.replace('border-gray-300', 'border-red-500');
-            commonProps.className = commonProps.className.replace('focus:ring-[#0369a1]', 'focus:ring-red-500');
-            commonProps.className = commonProps.className.replace('focus:border-[#0369a1]', 'focus:border-red-500');
+            commonClass = commonClass.replace('border-gray-300', 'border-red-500')
+                                     .replace('focus:ring-[#0369a1]', 'focus:ring-red-500')
+                                     .replace('focus:border-[#0369a1]', 'focus:border-red-500');
         }
 
         switch (field.type) {
@@ -2221,36 +4082,91 @@ const DynamicApply = () => {
             case 'email':
                 return (
                     <input
-                        {...commonProps}
+                        key={field.id}
+                        className={commonClass}
                         type={field.type === 'text' ? 'text' : (field.type === 'number' ? 'number' : 'email')}
                         placeholder={field.label}
+                        value={fieldValue}
+                        onChange={(e) => handleInputChange(fieldName, e.target.value)}
+                        onBlur={() => handleBlur(fieldName)}
                     />
                 );
 
-            case 'select':
+            case 'select': {
+                const isStateField = fieldName === 'selectBelong' || fieldName === 'address_state' || fieldName.includes('_state');
+                const isDistrictField = fieldName === 'selectDistrict' || fieldName === 'address_district' || fieldName.includes('_district');
+
+                let options = field.options || [];
+                const selectProps = { 
+                    className: commonClass, 
+                    value: fieldValue,
+                    onChange: (e) => {
+                        const value = e.target.value;
+                        if (isStateField) {
+                            handleStateChange(fieldName, value);
+                        } else {
+                            handleInputChange(fieldName, value);
+                        }
+                    },
+                    onBlur: () => handleBlur(fieldName)
+                };
+
+                // Handle district fields
+                if (isDistrictField) {
+                    let stateFieldNameForDistricts = '';
+                    if (fieldName === 'selectDistrict') {
+                        stateFieldNameForDistricts = 'selectBelong';
+                    } else if (fieldName.includes('_district')) {
+                        stateFieldNameForDistricts = fieldName.replace('_district', '_state');
+                    }
+
+                    options = getDistrictOptions(stateFieldNameForDistricts);
+
+                    // Disable district if state not selected
+                    if (!isStateSelected(fieldName)) {
+                        selectProps.disabled = true;
+                        selectProps.className += ' bg-gray-100 cursor-not-allowed';
+                        // Ensure we show "Select State First" when disabled
+                        if (options.length === 0 || (options.length === 1 && options[0].value === "")) {
+                            options = [{ value: "", text: "Select State First" }];
+                        }
+                    }
+                }
+
                 return (
-                    <div className="relative">
-                        <select {...commonProps}>
-                            <option value="">Select {field.label}</option>
-                            {field.options?.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {decodeBase64(option.text)}
+                    <div className="relative" key={field.id}>
+                        <select {...selectProps}>
+                            <option value="">
+                                {isDistrictField ? 'Select District' : `Select ${field.label || 'Option'}`}
+                            </option>
+                            {options.map(opt => (
+                                <option key={opt.value} value={opt.value}>
+                                    {(opt.text)}
                                 </option>
                             ))}
                         </select>
                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                            <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
                         </div>
                     </div>
                 );
+            }
 
             case 'date':
                 return (
-                    <input {...commonProps} type="date" />
+                    <input
+                        key={field.id}
+                        className={commonClass}
+                        type="date"
+                        value={fieldValue}
+                        onChange={(e) => handleInputChange(fieldName, e.target.value)}
+                        onBlur={() => handleBlur(fieldName)}
+                    />
                 );
 
             case 'adhar':
-                // 2. Aadhaar input styling made smaller (w-8 h-8, text-base)
                 return (
                     <div className="flex space-x-1 lg:space-x-1 bg-white rounded-lg p-2 border border-gray-300 shadow-sm">
                         {Array(12).fill('').map((_, index) => (
@@ -2259,9 +4175,7 @@ const DynamicApply = () => {
                                 id={`${fieldName}-${index}`}
                                 placeholder="0"
                                 maxLength="1"
-                                className={`w-8 h-8 px-1 py-1 border rounded-md text-center text-base font-mono focus:ring-1 focus:ring-blue-500 transition-all ${
-                                    shouldShowError(fieldName) ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                                }`}
+                                className={`w-8 h-8 px-1 py-1 border rounded-md text-center text-base font-mono focus:ring-1 focus:ring-blue-500 transition-all ${shouldShowError(fieldName) ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                                 type="text"
                                 inputMode="numeric"
                                 value={formData[fieldName]?.[index] || ''}
@@ -2272,25 +4186,37 @@ const DynamicApply = () => {
                     </div>
                 );
 
-            case 'file_button':
+            case 'file_button': {
                 const file = formData[fieldName];
                 const isPic = fieldName === 'candidate_pic';
-                
+                const isSignature = fieldName === 'candidate_signature';
+
+                let previewUrl = '';
+                if (file instanceof File) {
+                    previewUrl = URL.createObjectURL(file);
+                } else if (isPic && formData['customer_pic_preview']) {
+                    previewUrl = formData['customer_pic_preview'];
+                } else if (isSignature && formData['signature_pic_preview']) {
+                    previewUrl = formData['signature_pic_preview'];
+                } else if (fieldName === 'caste_certificate' && formData['caste_certificate_preview']) {
+                    previewUrl = formData['caste_certificate_preview'];
+                }
+
                 return (
-                    <div className="text-center space-y-3 p-4 bg-white rounded-xl border-2 border-dashed border-[#a3e635] hover:border-[#1e40af] transition-all duration-300">
+                    <div key={field.id} className="text-center space-y-3 p-4 bg-white rounded-xl border-2 border-dashed border-[#a3e635] hover:border-[#1e40af] transition-all duration-300">
                         <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-2 overflow-hidden shadow-md">
-                            {file instanceof File ? (
-                                <img
-                                    src={URL.createObjectURL(file)}
-                                    alt="Preview"
-                                    className="w-full h-full object-cover"
-                                />
+                            {previewUrl ? (
+                                <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
                             ) : (
-                                <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                </svg>
                             )}
                         </div>
                         <p className="text-sm text-gray-700 font-semibold mb-2">
-                            {isPic ? 'Profile Photo (max 50kb)' : 'Candidate Signature (max 20kb)'}
+                            {isPic ? 'Profile Photo (max 50kb)' : 
+                             isSignature ? 'Candidate Signature (max 20kb)' : 
+                             'Upload Certificate'}
                         </p>
                         <input
                             type="file"
@@ -2302,23 +4228,39 @@ const DynamicApply = () => {
                         />
                         <label
                             htmlFor={fieldName}
-                            className={`bg-gradient-to-r ${
-                                isPic ? 'from-[#3b82f6] to-[#2563eb]' : 'from-[#ef4444] to-[#dc2626]'
-                            } text-white px-4 py-2 rounded-full text-sm font-bold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300 w-full cursor-pointer block`}
+                            className={`bg-gradient-to-r ${isPic ? 'from-[#3b82f6] to-[#2563eb]' : 
+                                      isSignature ? 'from-[#ef4444] to-[#dc2626]' : 
+                                      'from-[#10b981] to-[#059669]'} text-white px-4 py-2 rounded-full text-sm font-bold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300 w-full cursor-pointer block`}
                         >
-                            {file ? 'Change File' : `Select ${isPic ? 'Image' : 'Signature'}`}
+                            {file ? 'Change File' : `Select ${isPic ? 'Image' : isSignature ? 'Signature' : 'File'}`}
                         </label>
                     </div>
                 );
+            }
+
+            case 'image': {
+                const previewSrc = formData[fieldName] || '';
+                return (
+                    <div key={field.id} className="flex items-center justify-center">
+                        {previewSrc ? (
+                            <img src={previewSrc} alt="preview" width={180} height={180} className="rounded-md object-cover border shadow-sm" />
+                        ) : (
+                            <div className="w-[180px] h-[180px] rounded-md bg-gray-100 flex items-center justify-center border border-dashed text-gray-400">
+                                <span className="text-xs">180 x 180</span>
+                            </div>
+                        )}
+                    </div>
+                );
+            }
 
             case 'checkbox':
                 return (
-                    <label className="flex items-start space-x-3 cursor-pointer p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
+                    <label key={field.id} className="flex items-start space-x-3 cursor-pointer p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
                         <div className="flex items-center h-5">
                             <input
                                 type="checkbox"
                                 className="w-5 h-5 text-[#1e40af] border-gray-400 rounded focus:ring-[#1e40af]"
-                                checked={formData[fieldName] || false}
+                                checked={!!formData[fieldName]}
                                 onChange={(e) => handleInputChange(fieldName, e.target.checked)}
                                 onBlur={() => handleBlur(fieldName)}
                             />
@@ -2331,20 +4273,20 @@ const DynamicApply = () => {
 
             case 'heading':
                 return (
-                    <h4 className="text-xl font-extrabold text-[#1e40af] border-b-2 border-[#1e40af]/30 pb-2 mb-4">
+                    <h4 key={field.id} className="text-xl font-extrabold text-[#1e40af] border-b-2 border-[#1e40af]/30 pb-2 mb-4">
                         {field.label || 'Section Title'}
                     </h4>
                 );
 
             case 'para':
                 return (
-                    <p className="text-base text-gray-600 italic border-l-4 border-gray-300 pl-3">
+                    <p key={field.id} className="text-base text-gray-600 italic border-l-4 border-gray-300 pl-3">
                         {field.label}
                     </p>
                 );
 
             default:
-                return <div className="text-red-500">Unsupported field type: **{field.type}**</div>;
+                return <div key={field.id} className="text-red-500">Unsupported field type: <strong>{field.type}</strong></div>;
         }
     };
 
@@ -2352,24 +4294,22 @@ const DynamicApply = () => {
         const sectionClasses = index % 2 === 0
             ? 'bg-white p-6 rounded-xl shadow-inner border border-gray-100'
             : 'bg-gray-50 p-6 rounded-xl border border-gray-200';
-        
+
         const gridTemplate = getGridColumns(section);
         const hasGrid = gridTemplate !== '';
 
-         const sectionWidth = section.width ? `w-[${section.width}]` : 'w-full';
-    // OR if width is numeric, append '%' automatically:
-    const customWidth = section.width 
-        ? { width: typeof section.width === 'number' ? `${section.width}%` : section.width }
-        : { width: '100%' };
+        const customWidth = section.width
+            ? { width: typeof section.width === 'number' ? `${section.width}%` : section.width }
+            : { width: '100%' };
 
         return (
-            <div key={index} className={`mb-8 ${sectionClasses}`}  style={customWidth}>
+            <div key={index} className={`mb-8 ${sectionClasses}`} style={customWidth}>
                 {section.label && (
                     <h3 className="text-xl font-bold mb-4 text-[#dc2626] border-b pb-2">
                         {section.label}
                     </h3>
                 )}
-                
+
                 <div className={`${hasGrid ? 'grid gap-6' : 'space-y-6'} ${gridTemplate}`}>
                     {section.children.map(field => (
                         <div key={field.id} className={`${getFieldWidth(field)} space-y-1`}>
@@ -2379,12 +4319,14 @@ const DynamicApply = () => {
                                     {isFieldRequired(field.name) && <span className="text-red-500 ml-1">*</span>}
                                 </label>
                             )}
-                            
+
                             {renderField(field)}
-                            
+
                             {shouldShowError(field.name) && (
                                 <p className="text-red-600 text-xs mt-1 font-medium flex items-center">
-                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path></svg>
+                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    </svg>
                                     {errors[field.name]}
                                 </p>
                             )}
@@ -2395,66 +4337,209 @@ const DynamicApply = () => {
         );
     };
 
+    // Step content renderer
+    const renderStepContent = (step) => {
+        switch (step) {
+            case 0: // FILL APPLICATION
+                return (
+                    <div className="space-y-6">
+                        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/10 to-[#dc2626]/10 rounded-t-xl">
+                            <h2 className="text-center text-2xl font-extrabold text-[#1e40af] flex items-center justify-center">
+                                <svg className="w-6 h-6 mr-3 text-[#dc2626]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                </svg>
+                                Application Form
+                            </h2>
+                            <p className="text-center text-sm text-gray-600 mt-1">Please fill in all the required details carefully.</p>
+                        </div>
+
+                        <form className="flex flex-wrap">
+                            {formConfig?.data?.map((section, index) => renderSection(section, index))}
+                        </form>
+                    </div>
+                );
+
+            case 1: // CONFIRM & PAY
+                return (
+                    <div className="space-y-6">
+                        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#059669]/10 to-[#d97706]/10 rounded-t-xl">
+                            <h2 className="text-center text-2xl font-extrabold text-[#059669] flex items-center justify-center">
+                                <HiCheckCircle className="w-6 h-6 mr-3 text-[#d97706]" />
+                                Confirm & Pay
+                            </h2>
+                            <p className="text-center text-sm text-gray-600 mt-1">Review your application and proceed with payment.</p>
+                        </div>
+
+                        <Card>
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-800">Application Summary</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <h4 className="font-medium text-gray-700">Personal Details</h4>
+                                        <p className="text-sm text-gray-600 mt-2">Please review all your personal information</p>
+                                    </div>
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <h4 className="font-medium text-gray-700">Payment Amount</h4>
+                                        <p className="text-2xl font-bold text-[#059669] mt-2">₹500.00</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="border-t pt-4">
+                                    <h4 className="font-medium text-gray-700 mb-3">Payment Methods</h4>
+                                    <div className="space-y-3">
+                                        <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                            <input type="radio" name="payment" className="text-blue-600" defaultChecked />
+                                            <span>Credit/Debit Card</span>
+                                        </label>
+                                        <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                            <input type="radio" name="payment" className="text-blue-600" />
+                                            <span>Net Banking</span>
+                                        </label>
+                                        <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                            <input type="radio" name="payment" className="text-blue-600" />
+                                            <span>UPI</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                );
+
+            case 2: // INVOICE
+                return (
+                    <div className="space-y-6">
+                        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#3b82f6]/10 to-[#8b5cf6]/10 rounded-t-xl">
+                            <h2 className="text-center text-2xl font-extrabold text-[#3b82f6] flex items-center justify-center">
+                                <HiCheckCircle className="w-6 h-6 mr-3 text-[#8b5cf6]" />
+                                Invoice
+                            </h2>
+                            <p className="text-center text-sm text-gray-600 mt-1">Your application has been submitted successfully.</p>
+                        </div>
+
+                        <Card>
+                            <div className="space-y-4">
+                                <div className="text-center">
+                                    <HiCheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                                    <h3 className="text-xl font-bold text-gray-800">Application Submitted Successfully!</h3>
+                                    <p className="text-gray-600 mt-2">Your application ID: <strong>APP{Date.now().toString().slice(-6)}</strong></p>
+                                </div>
+
+                                <div className="border rounded-lg p-4 bg-gray-50">
+                                    <h4 className="font-semibold text-gray-700 mb-3">Invoice Details</h4>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                            <span>Application Fee:</span>
+                                            <span>₹500.00</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Service Tax:</span>
+                                            <span>₹90.00</span>
+                                        </div>
+                                        <div className="flex justify-between border-t pt-2 font-semibold">
+                                            <span>Total Amount:</span>
+                                            <span>₹590.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="text-center pt-4">
+                                    <Button color="blue" className="mr-3">
+                                        Download Invoice
+                                    </Button>
+                                    <Button color="light">
+                                        Print Receipt
+                                    </Button>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                );
+
+            default:
+                return null;
+        }
+    };
 
     // --- Loading/Error States ---
-
     if (loading) {
-        // 1. Using the provided custom Loader component
-        return <Loader />; 
+        return <Loader />;
     }
 
     if (!formConfig || !formConfig.data) {
         return <div className="min-h-screen flex items-center justify-center text-red-600 bg-gray-100">❌ Error loading form configuration.</div>;
     }
 
-
     // --- Main Component Render ---
-
     return (
-        // 3. Removed max-width container, using mx-full
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200">
             <Header instituteName={formConfig.header?.name || 'Application Portal'} />
 
             <div className="mx-full py-8 px-4 sm:px-6 lg:px-8">
                 <div className="group relative">
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-[#1e40af] to-[#dc2626] rounded-xl blur-sm opacity-20 group-hover:opacity-100 transition duration-500"></div>
-                    
+
                     <div className="relative bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e40af] to-[#dc2626]"></div>
 
-                        {/* Form Header */}
-                        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/10 to-[#dc2626]/10">
-                            <h2 className="text-center text-2xl font-extrabold text-[#1e40af] flex items-center justify-center">
-                                <svg className="w-6 h-6 mr-3 text-[#dc2626]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                                Dynamic Application Form
-                            </h2>
-                            <p className="text-center text-sm text-gray-600 mt-1">Please fill in all the required details carefully.</p>
-                        </div>
+                        <div className="p-6">
+                            <CustomStepper steps={steps} activeStep={activeStep} />
 
-                        <form className="p-6 flex flex-wrap">
-                            {/* Render all sections dynamically */}
-                            {formConfig.data.map((section, index) => renderSection(section, index))}
-                        </form>
-
-                        {/* Submit Button */}
-                        <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
-                            <div className="flex justify-end">
-                                <button
-                                    className="bg-gradient-to-r from-[#059669] to-[#d97706] text-white px-8 py-3 rounded-full font-bold text-lg hover:shadow-2xl hover:shadow-yellow-300/50 transform hover:scale-105 transition-all duration-300 flex items-center"
-                                    onClick={() => {
-                                        const allTouched = {};
-                                        Object.keys(formData).forEach(key => {
-                                            allTouched[key] = true;
-                                        });
-                                        setTouched(allTouched);
-                                        // TODO: Implement full validation logic and submission here
-                                        console.log('Form Data:', formData);
-                                        console.log('Errors:', errors);
-                                    }}
+                            {submitMessage && (
+                                <Alert
+                                    color={submitMessage.includes('successfully') ? 'success' : 'failure'}
+                                    className="mb-4 break-words"
                                 >
-                                    Submit Application &nbsp; &rarr;
-                                </button>
-                            </div>
+                                    {submitMessage}
+                                </Alert>
+                            )}
+
+                            {activeStep === steps.length ? (
+                                <Alert color="success" className="mb-4">
+                                    All steps completed - you're finished
+                                </Alert>
+                            ) : (
+                                <>
+                                    <div className="mb-8">{renderStepContent(activeStep)}</div>
+
+                                    <div className="flex justify-between items-center flex-wrap gap-4">
+                                        <Button
+                                            color="light"
+                                            onClick={handleBack}
+                                            disabled={activeStep === 0}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <HiArrowLeft className="w-4 h-4" />
+                                            Back
+                                        </Button>
+
+                                        {activeStep === steps.length - 1 ? (
+                                            <div className="text-center">
+                                                <p className="text-sm text-gray-600 mb-2">Application completed successfully!</p>
+                                            </div>
+                                        ) : activeStep === steps.length - 2 ? (
+                                            <Button 
+                                                onClick={handlePayment} 
+                                                color="green" 
+                                                className="flex items-center gap-2"
+                                                disabled={isSubmitting}
+                                            >
+                                                {isSubmitting ? 'Processing...' : 'Proceed to Pay'}
+                                                <HiCheckCircle className="w-4 h-4" />
+                                            </Button>
+                                        ) : (
+                                            <Button 
+                                                onClick={handleNext} 
+                                                color="blue" 
+                                                className="flex items-center gap-2"
+                                            >
+                                                Next
+                                                <HiArrowRight className="w-4 h-4" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
