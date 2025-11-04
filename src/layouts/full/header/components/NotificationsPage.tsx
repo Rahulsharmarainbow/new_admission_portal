@@ -1,100 +1,178 @@
-// pages/NotificationsPage.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from 'flowbite-react';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router';
+import axios from 'axios';
+import Loader from 'src/Frontend/Common/Loader';
+import { useAuth } from 'src/hook/useAuth';
 
 interface Notification {
   id: number;
   title: string;
   message: string;
-  time: string;
-  read: boolean;
-  type: string;
+  created_at: string;
+  s_id: number;
+  is_read: number;
+}
+
+interface NotificationsResponse {
+  status: boolean;
+  rows: Notification[];
+  total: number;
 }
 
 const NotificationsPage: React.FC = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: 1,
-      title: 'New Message Received',
-      message: 'You have a new message from John Doe regarding your recent project submission. Please check your inbox for more details.',
-      time: '5 min ago',
-      read: false,
-      type: 'message'
-    },
-    {
-      id: 2,
-      title: 'Payment Successful',
-      message: 'Your payment of $299 has been processed successfully. Transaction ID: TXN123456. You will receive a confirmation email shortly.',
-      time: '1 hour ago',
-      read: false,
-      type: 'payment'
-    },
-    {
-      id: 3,
-      title: 'System Update Completed',
-      message: 'Scheduled system maintenance has been completed successfully. All services are now running optimally.',
-      time: '2 hours ago',
-      read: true,
-      type: 'system'
-    },
-    {
-      id: 4,
-      title: 'New Follower',
-      message: 'Sarah Johnson started following your profile. Check out their profile to connect and network.',
-      time: '5 hours ago',
-      read: true,
-      type: 'social'
-    },
-    {
-      id: 5,
-      title: 'Order Shipped',
-      message: 'Your order #12345 has been shipped. Tracking number: TRK789012. Expected delivery within 2-3 business days.',
-      time: '1 day ago',
-      read: true,
-      type: 'order'
-    },
-    {
-      id: 6,
-      title: 'Meeting Reminder',
-      message: 'Team meeting scheduled for today at 3:00 PM in Conference Room B. Please bring your project updates and progress reports.',
-      time: '2 days ago',
-      read: true,
-      type: 'reminder'
-    },
-    {
-      id: 7,
-      title: 'Security Alert',
-      message: 'New login detected from an unknown device. If this was not you, please secure your account immediately by changing your password.',
-      time: '3 days ago',
-      read: true,
-      type: 'system'
-    },
-    {
-      id: 8,
-      title: 'Subscription Renewal',
-      message: 'Your premium subscription will renew in 7 days. Please review your payment method to ensure uninterrupted service.',
-      time: '4 days ago',
-      read: true,
-      type: 'payment'
-    }
-  ]);
-
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [markingAsRead, setMarkingAsRead] = useState<number | null>(null);
+  const [markingAllAsRead, setMarkingAllAsRead] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [pagination, setPagination] = useState({
+    page: 0,
+    rowsPerPage: 10,
+    total: 0
+  });
+  
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const apiUrl = import.meta.env.VITE_API_URL;
 
-  const getNotificationIcon = (type: string) => {
+  // 🔹 Fetch notifications from API
+  const fetchNotifications = async () => {
+    if (!user?.id) return;
+
+    setLoading(true);
+    try {
+      const response = await axios.post<NotificationsResponse>(
+        `${apiUrl}/${user?.role}/Notifications/all-noitifications`,
+        {
+          page: pagination.page,
+          rowsPerPage: pagination.rowsPerPage,
+          order: 'desc',
+          orderBy: 'id',
+          search: '',
+          s_id: user.id
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${user?.token}`,
+            'superadmin_auth_token': user?.token,
+            'accept': 'application/json',
+            'content-type': 'application/json',
+          }
+        }
+      );
+
+      if (response.data.status) {
+        setNotifications(response.data.rows || []);
+        setPagination(prev => ({
+          ...prev,
+          total: response.data.total
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      setNotifications([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [user, pagination.page, pagination.rowsPerPage]);
+
+  // 🔹 Mark single notification as read
+  const markAsRead = async (id: number) => {
+    setMarkingAsRead(id);
+    try {
+      await axios.post(
+        `${apiUrl}/${user?.role}/Notifications/read-noitifications`,
+        { id },
+        {
+          headers: {
+            'Authorization': `Bearer ${user?.token}`,
+            'superadmin_auth_token': user?.token,
+            'accept': 'application/json',
+            'content-type': 'application/json',
+          }
+        }
+      );
+
+      // Update local state
+      setNotifications(
+        notifications.map((notification) =>
+          notification.id === id ? { ...notification, is_read: 1 } : notification
+        )
+      );
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    } finally {
+      setMarkingAsRead(null);
+    }
+  };
+
+  // 🔹 Mark all notifications as read
+  const markAllAsRead = async () => {
+    if (!user?.id) return;
+
+    setMarkingAllAsRead(true);
+    try {
+      await axios.post(
+        `${apiUrl}/${user?.role}/Notifications/all-read-noitifications`,
+        { s_id: user.id },
+        {
+          headers: {
+            'Authorization': `Bearer ${user?.token}`,
+            'superadmin_auth_token': user?.token,
+            'accept': 'application/json',
+            'content-type': 'application/json',
+          }
+        }
+      );
+
+      // Update local state
+      setNotifications(
+        notifications.map((notification) => ({ ...notification, is_read: 1 }))
+      );
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    } finally {
+      setMarkingAllAsRead(false);
+    }
+  };
+
+  // 🔹 Get notification type from title/message
+  const getNotificationType = (notification: Notification): string => {
+    const title = notification.title.toLowerCase();
+    const message = notification.message.toLowerCase();
+
+    if (title.includes('admission') || message.includes('application')) {
+      return 'admission';
+    } else if (title.includes('payment') || message.includes('payment')) {
+      return 'payment';
+    } else if (title.includes('college') || message.includes('college')) {
+      return 'college';
+    } else if (title.includes('school') || message.includes('school')) {
+      return 'school';
+    } else {
+      return 'system';
+    }
+  };
+
+  // 🔹 Get notification icon and color
+  const getNotificationIcon = (notification: Notification) => {
+    const type = getNotificationType(notification);
+    
     const iconConfig = {
-      message: { icon: "solar:chat-line-line-duotone", color: "text-blue-500 bg-blue-100" },
+      admission: { icon: "solar:document-line-duotone", color: "text-blue-500 bg-blue-100" },
       payment: { icon: "solar:card-line-duotone", color: "text-green-500 bg-green-100" },
-      system: { icon: "solar:settings-line-duotone", color: "text-purple-500 bg-purple-100" },
-      social: { icon: "solar:user-hand-up-line-duotone", color: "text-pink-500 bg-pink-100" },
-      order: { icon: "solar:box-line-duotone", color: "text-orange-500 bg-orange-100" },
-      reminder: { icon: "solar:clock-circle-line-duotone", color: "text-yellow-500 bg-yellow-100" }
+      college: { icon: "solar:building-line-duotone", color: "text-purple-500 bg-purple-100" },
+      school: { icon: "solar:school-line-duotone", color: "text-orange-500 bg-orange-100" },
+      system: { icon: "solar:settings-line-duotone", color: "text-gray-500 bg-gray-100" }
     };
 
-    const config = iconConfig[type as keyof typeof iconConfig] || iconConfig.message;
+    const config = iconConfig[type as keyof typeof iconConfig] || iconConfig.system;
     
     return (
       <div className={`p-3 rounded-xl ${config.color}`}>
@@ -103,29 +181,69 @@ const NotificationsPage: React.FC = () => {
     );
   };
 
-  const markAsRead = (id: number) => {
-    setNotifications(notifications.map(notification => 
-      notification.id === id ? { ...notification, read: true } : notification
-    ));
+  // 🔹 Format date to relative time
+  const formatRelativeTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(notification => ({ ...notification, read: true })));
+  // 🔹 Get type display name
+  const getTypeDisplayName = (notification: Notification) => {
+    const type = getNotificationType(notification);
+    
+    const typeNames = {
+      admission: 'Admission',
+      payment: 'Payment',
+      college: 'College',
+      school: 'School',
+      system: 'System'
+    };
+
+    return typeNames[type as keyof typeof typeNames] || 'Notification';
   };
 
-  const deleteNotification = (id: number) => {
-    setNotifications(notifications.filter(notification => notification.id !== id));
-  };
+  // 🔹 Get type badge color
+  const getTypeBadgeColor = (notification: Notification) => {
+    const type = getNotificationType(notification);
+    
+    const badgeColors = {
+      admission: 'bg-blue-100 text-blue-800',
+      payment: 'bg-green-100 text-green-800',
+      college: 'bg-purple-100 text-purple-800',
+      school: 'bg-orange-100 text-orange-800',
+      system: 'bg-gray-100 text-gray-800'
+    };
 
-  const clearAll = () => {
-    setNotifications([]);
+    return badgeColors[type as keyof typeof badgeColors] || 'bg-gray-100 text-gray-800';
   };
 
   const filteredNotifications = filter === 'unread' 
-    ? notifications.filter(n => !n.read)
+    ? notifications.filter(n => !n.is_read)
     : notifications;
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  // 🔹 Handle pagination
+  const handlePageChange = (newPage: number) => {
+    setPagination(prev => ({
+      ...prev,
+      page: newPage
+    }));
+  };
+
+  const totalPages = Math.ceil(pagination.total / pagination.rowsPerPage);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
@@ -158,7 +276,7 @@ const NotificationsPage: React.FC = () => {
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
-                  All Notifications
+                  All Notifications ({notifications.length})
                 </button>
                 <button
                   onClick={() => setFilter('unread')}
@@ -177,22 +295,16 @@ const NotificationsPage: React.FC = () => {
                 {unreadCount > 0 && (
                   <Button
                     onClick={markAllAsRead}
+                    disabled={markingAllAsRead}
                     color="light"
                     className="flex items-center gap-2 border border-gray-300 shadow-sm"
                   >
-                    <Icon icon="solar:check-read-line-duotone" height={16} />
-                    Mark all read
-                  </Button>
-                )}
-                
-                {notifications.length > 0 && (
-                  <Button
-                    onClick={clearAll}
-                    color="light"
-                    className="flex items-center gap-2 text-red-600 hover:text-red-700 border border-gray-300 shadow-sm"
-                  >
-                    <Icon icon="solar:trash-bin-trash-line-duotone" height={16} />
-                    Clear all
+                    {markingAllAsRead ? (
+                      <Loader size="sm" />
+                    ) : (
+                      <Icon icon="solar:check-read-line-duotone" height={16} />
+                    )}
+                    {markingAllAsRead ? 'Marking all...' : 'Mark all read'}
                   </Button>
                 )}
               </div>
@@ -200,112 +312,142 @@ const NotificationsPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
+            <Loader size="lg" />
+            <p className="text-gray-600 mt-4">Loading notifications...</p>
+          </div>
+        )}
+
         {/* Notifications List */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          {filteredNotifications.length > 0 ? (
-            <div className="divide-y divide-gray-100">
-              {filteredNotifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`p-6 hover:bg-gray-50 transition-all duration-200 ${
-                    !notification.read ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-                  }`}
-                >
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0">
-                      {getNotificationIcon(notification.type)}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h3 className={`text-base font-semibold ${
-                            !notification.read ? 'text-gray-900' : 'text-gray-700'
-                          }`}>
-                            {notification.title}
-                          </h3>
-                          <p className="text-gray-600 text-sm mt-2 leading-relaxed">
-                            {notification.message}
-                          </p>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 ml-4">
-                          {!notification.read && (
-                            <button
-                              onClick={() => markAsRead(notification.id)}
-                              className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors duration-200"
-                              title="Mark as read"
-                            >
-                              <Icon icon="solar:check-read-line-duotone" height={18} />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => deleteNotification(notification.id)}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                            title="Delete notification"
-                          >
-                            <Icon icon="solar:trash-bin-trash-line-duotone" height={18} />
-                          </button>
-                        </div>
+        {!loading && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            {filteredNotifications.length > 0 ? (
+              <div className="divide-y divide-gray-100">
+                {filteredNotifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`p-6 hover:bg-gray-50 transition-all duration-200 ${
+                      !notification.is_read ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                    }`}
+                  >
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        {getNotificationIcon(notification)}
                       </div>
                       
-                      <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm text-gray-500 flex items-center gap-1">
-                            <Icon icon="solar:clock-circle-line-duotone" height={14} />
-                            {notification.time}
-                          </span>
-                          <span className={`text-xs font-medium px-3 py-1 rounded-full ${
-                            notification.type === 'message' ? 'bg-blue-100 text-blue-800' :
-                            notification.type === 'payment' ? 'bg-green-100 text-green-800' :
-                            notification.type === 'system' ? 'bg-purple-100 text-purple-800' :
-                            notification.type === 'social' ? 'bg-pink-100 text-pink-800' :
-                            notification.type === 'order' ? 'bg-orange-100 text-orange-800' :
-                            'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}
-                          </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h3 className={`text-base font-semibold ${
+                              !notification.is_read ? 'text-gray-900' : 'text-gray-700'
+                            }`}>
+                              {notification.title}
+                            </h3>
+                            <p className="text-gray-600 text-sm mt-2 leading-relaxed">
+                              {notification.message}
+                            </p>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 ml-4">
+                            {!notification.is_read && (
+                              <button
+                                onClick={() => markAsRead(notification.id)}
+                                disabled={markingAsRead === notification.id}
+                                className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors duration-200 disabled:opacity-50"
+                                title="Mark as read"
+                              >
+                                {markingAsRead === notification.id ? (
+                                  <Loader size="sm" />
+                                ) : (
+                                  <Icon icon="solar:check-read-line-duotone" height={18} />
+                                )}
+                              </button>
+                            )}
+                          </div>
                         </div>
                         
-                        {!notification.read && (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                            <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
-                            Unread
-                          </span>
-                        )}
+                        <div className="flex items-center justify-between mt-4">
+                          <div className="flex items-center gap-4">
+                            <span className="text-sm text-gray-500 flex items-center gap-1">
+                              <Icon icon="solar:clock-circle-line-duotone" height={14} />
+                              {formatRelativeTime(notification.created_at)}
+                            </span>
+                            {/* <span className={`text-xs font-medium px-3 py-1 rounded-full ${getTypeBadgeColor(notification)}`}>
+                              {getTypeDisplayName(notification)}
+                            </span> */}
+                          </div>
+                          
+                          {!notification.is_read && (
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+                              Unread
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16">
-              <div className="max-w-md mx-auto">
-                <Icon icon="solar:check-read-line-duotone" height={80} className="text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
-                </h3>
-                <p className="text-gray-500 mb-6">
-                  {filter === 'unread' 
-                    ? "You're all caught up! There are no unread notifications."
-                    : "You don't have any notifications at the moment. They'll appear here when you receive updates."
-                  }
-                </p>
-                {filter === 'unread' && (
-                  <Button
-                    onClick={() => setFilter('all')}
-                    color="light"
-                    className="inline-flex items-center gap-2"
-                  >
-                    <Icon icon="solar:eye-line-duotone" height={16} />
-                    View all notifications
-                  </Button>
-                )}
+                ))}
               </div>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="text-center py-16">
+                <div className="max-w-md mx-auto">
+                  <Icon icon="solar:check-read-line-duotone" height={80} className="text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
+                  </h3>
+                  <p className="text-gray-500 mb-6">
+                    {filter === 'unread' 
+                      ? "You're all caught up! There are no unread notifications."
+                      : "You don't have any notifications at the moment. They'll appear here when you receive updates."
+                    }
+                  </p>
+                  {filter === 'unread' && (
+                    <Button
+                      onClick={() => setFilter('all')}
+                      color="light"
+                      className="inline-flex items-center gap-2"
+                    >
+                      <Icon icon="solar:eye-line-duotone" height={16} />
+                      View all notifications
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    Showing {filteredNotifications.length} of {pagination.total} notifications
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handlePageChange(pagination.page - 1)}
+                      disabled={pagination.page === 0}
+                      color="light"
+                      size="sm"
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      onClick={() => handlePageChange(pagination.page + 1)}
+                      disabled={pagination.page >= totalPages - 1}
+                      color="light"
+                      size="sm"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Back Button */}
         <div className="mt-8 text-center">
@@ -315,7 +457,7 @@ const NotificationsPage: React.FC = () => {
             className="inline-flex items-center gap-2 border border-gray-300 shadow-sm"
           >
             <Icon icon="solar:arrow-left-line-duotone" height={16} />
-            Back to Dashboard
+             Back
           </Button>
         </div>
       </div>
