@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from 'flowbite-react';
 import axios from 'axios';
 import { useAuth } from 'src/hook/useAuth';
+import toast from 'react-hot-toast';
 
 interface StateItem {
   id: number;
@@ -39,12 +40,12 @@ const EditStateModal: React.FC<EditStateModalProps> = ({
     e.preventDefault();
     
     if (!name.trim()) {
-      alert('Please enter state name');
+      toast.error('Please enter state name');
       return;
     }
 
     if (!selectedItem) {
-      alert('No state selected for editing');
+      toast.error('No state selected for editing');
       return;
     }
 
@@ -81,15 +82,14 @@ const EditStateModal: React.FC<EditStateModalProps> = ({
       );
 
       if (response.data?.status) {
-        alert('State updated successfully!');
+        toast.success('State updated successfully!');
         setName('');
         onSuccess();
       } else {
-        alert(response.data?.message || 'Failed to update state');
+        toast.error(response.data?.message || 'Failed to update state');
       }
     } catch (error: any) {
       console.error('Error updating state:', error);
-      alert(error.response?.data?.message || 'Failed to update state. Please try again.');
     } finally {
       setLoading(false);
     }

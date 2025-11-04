@@ -52,11 +52,12 @@ const ContentForm: React.FC<ContentFormProps> = ({
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
+  // FIXED: Editor configuration for focus issues
   const editorConfig = {
     readonly: false,
     height: 400,
     toolbarAdaptive: false,
-    toolbarSticky: true,
+    toolbarSticky: false, // Changed to false for focus fix
     buttons: [
       'source',
       '|',
@@ -104,13 +105,15 @@ const ContentForm: React.FC<ContentFormProps> = ({
     style: {
       font: '14px Arial, sans-serif',
     },
-    events: {
-      afterInit: (editor: any) => {
-        editorInstanceRef.current = editor;
-      }
-    }
+    direction: 'ltr',
+    language: 'en',
+    defaultMode: '1',
+    iframe: false,
+    saveHeightInStorage: false,
+    triggerChangeEvent: false, // Reduce unnecessary re-renders
   };
 
+  // FIXED: Reset form with proper cleanup
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -125,13 +128,17 @@ const ContentForm: React.FC<ContentFormProps> = ({
     }
   }, [isOpen, editingContent]);
 
+  // FIXED: Validate form with direct editor content check
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
 
     if (!formData.academic_id) newErrors.academic_id = "Academic is required";
     if (!formData.page_name.trim()) newErrors.page_name = "Page name is required";
     if (!formData.page_route.trim()) newErrors.page_route = "Page route is required";
-    if (!formData.html_content.trim()) newErrors.html_content = "Content is required";
+    
+    // Check content from editor instance directly
+    const currentContent = editorInstanceRef.current?.value || formData.html_content;
+    if (!currentContent.trim()) newErrors.html_content = "Content is required";
 
     const routeRegex = /^[a-z0-9_-]+$/;
     if (formData.page_route && !routeRegex.test(formData.page_route)) {
@@ -142,23 +149,48 @@ const ContentForm: React.FC<ContentFormProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
+  // FIXED: Handle submit with direct editor content
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if(formData.academic_id === ''){
+    // Get latest content from editor before validation
+    const latestContent = editorInstanceRef.current?.value || formData.html_content;
+    
+    // Update form data with latest content
+    const finalFormData = {
+      ...formData,
+      html_content: latestContent
+    };
+
+    if(finalFormData.academic_id === '' && user?.role !== 'CustomerAdmin'){
       toast.error('Please select an academic');
       return;
     }
 
-    if (!validateForm()) return;
+    // Validate with latest content
+    const newErrors: Partial<FormData> = {};
+    if (!finalFormData.academic_id && user?.role !== 'CustomerAdmin') newErrors.academic_id = "Academic is required";
+    if (!finalFormData.page_name.trim()) newErrors.page_name = "Page name is required";
+    if (!finalFormData.page_route.trim()) newErrors.page_route = "Page route is required";
+    if (!finalFormData.html_content.trim()) newErrors.html_content = "Content is required";
+
+    const routeRegex = /^[a-z0-9_-]+$/;
+    if (finalFormData.page_route && !routeRegex.test(finalFormData.page_route)) {
+      newErrors.page_route = "Page route can only contain lowercase letters, numbers, underscores, and hyphens";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
     setLoading(true);
     try {
       const payload = {
-        academic_id: formData.academic_id,
-        page_name: formData.page_name,
-        page_route: formData.page_route,
-        html_content: formData.html_content,
+        academic_id: finalFormData.academic_id,
+        page_name: finalFormData.page_name,
+        page_route: finalFormData.page_route,
+        html_content: finalFormData.html_content,
         s_id: user?.id,
       };
 
@@ -211,6 +243,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
     }
   };
 
+  // FIXED: Input change handlers
   const handleInputChange = useCallback((field: keyof FormData, value: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -263,277 +296,164 @@ const ContentForm: React.FC<ContentFormProps> = ({
     setAutoGenerateRoute(false);
   }, [handleInputChange]);
 
-  const handleEditorChange = useCallback((newContent: string) => {
-    handleInputChange("html_content", newContent);
-  }, [handleInputChange]);
+  // FIXED: Editor change handler - ONLY onBlur
+  const handleEditorBlur = useCallback((newContent: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      html_content: newContent,
+    }));
+    
+    if (errors.html_content) {
+      setErrors((prev) => ({
+        ...prev,
+        html_content: undefined,
+      }));
+    }
+  }, [errors.html_content]);
+
+  // FIXED: Editor init handler
+  const handleEditorInit = useCallback((editor: any) => {
+    editorInstanceRef.current = editor;
+  }, []);
 
   return (
-    // <Modal show={isOpen} onClose={onClose} size="5xl">
-    //   <ModalHeader>
-    //     {editingContent ? "Edit Content" : "Add New Content"}
-    //   </ModalHeader>
-      
-    //   <ModalBody>
-    //     <form onSubmit={handleSubmit} className="space-y-5">
-    //       {/* School, Page Name, and Page Route in ONE ROW */}
-    //       <div className="flex flex-row gap-4">
-    //         {/* Academic Dropdown */}
-    //         <div className="flex-1">
-    //           <Label className="block mb-2">
-    //             School <span className="text-red-500">*</span>
-    //           </Label>
-    //           <AcademicDropdown
-    //             value={formData.academic_id}
-    //             onChange={handleAcademicChange}
-    //             placeholder="Select academics..."
-    //             includeAllOption={true}
-    //             label=""
-    //           />
-    //           {errors.academic_id && (
-    //             <p className="text-red-500 text-sm mt-1">{errors.academic_id}</p>
-    //           )}
-    //         </div>
-
-    //         {/* Page Name Input */}
-    //         <div className="flex-1">
-    //           <Label className="block mb-2">
-    //             Page Name <span className="text-red-500">*</span>
-    //           </Label>
-    //           <TextInput
-    //             id="page_name"
-    //             type="text"
-    //             value={formData.page_name}
-    //             onChange={(e) => handlePageNameChange(e.target.value)}
-    //             placeholder="e.g., Declaration Forms, Terms and Conditions"
-    //             color={errors.page_name ? "failure" : "gray"}
-    //           />
-    //           {errors.page_name && (
-    //             <p className="text-red-500 text-sm mt-1">{errors.page_name}</p>
-    //           )}
-    //         </div>
-
-    //         {/* Page Route Input */}
-    //         <div className="flex-1">
-    //           <Label className="block mb-2">
-    //             Page Route <span className="text-red-500">*</span>
-    //           </Label>
-    //           <TextInput
-    //             id="page_route"
-    //             type="text"
-    //             value={formData.page_route}
-    //             onChange={(e) => handlePageRouteChange(e.target.value)}
-    //             placeholder="e.g., declaration_forms"
-    //             color={errors.page_route ? "failure" : "gray"}
-    //           />
-    //           {errors.page_route ? (
-    //             <p className="text-red-500 text-sm mt-1">{errors.page_route}</p>
-    //           ) : (
-    //             <p className="text-gray-500 text-sm mt-1">
-    //               Use lowercase letters, numbers, underscores, and hyphens only.
-    //               {autoGenerateRoute && " (Auto-generated)"}
-    //             </p>
-    //           )}
-    //         </div>
-    //       </div>
-
-    //       {/* HTML Content Editor */}
-    //       <div>
-    //         <Label className="block mb-2">
-    //           HTML Content <span className="text-red-500">*</span>
-    //         </Label>
-    //         <div className="border border-gray-300 rounded-lg overflow-hidden">
-    //           <JoditEditor
-    //             ref={editorRef}
-    //             value={formData.html_content}
-    //             config={editorConfig}
-    //             onBlur={handleEditorChange}
-    //             onChange={handleEditorChange}
-    //           />
-    //         </div>
-    //         {errors.html_content && (
-    //           <p className="text-red-500 text-sm mt-1">{errors.html_content}</p>
-    //         )}
-    //       </div>
-
-    //       {/* Content Preview */}
-    //       {formData.html_content && (
-    //         <div>
-    //           <Label className="block mb-2">
-    //             Content Preview : 
-    //           </Label>
-    //           <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 max-h-60 overflow-y-auto">
-    //             <div 
-    //               className="prose prose-sm max-w-none"
-    //               dangerouslySetInnerHTML={{ __html: formData.html_content }}
-    //             />
-    //           </div>
-    //         </div>
-    //       )}
-    //     </form>
-    //   </ModalBody>
-
-    //   <ModalFooter>
-    //     <div className="flex justify-end space-x-3 w-full">
-    //       <Button 
-    //         color="alternative" 
-    //         onClick={onClose} 
-    //         disabled={loading}
-    //         type="button"
-    //       >
-    //         Cancel
-    //       </Button>
-    //       <Button 
-    //         onClick={handleSubmit}
-    //         gradientDuoTone="cyanToBlue" 
-    //         disabled={loading}
-    //         type="button"
-    //       >
-    //         {loading ? (
-    //           <div className="flex items-center gap-2">
-    //             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-    //             {editingContent ? "Updating..." : "Adding..."}
-    //           </div>
-    //         ) : editingContent ? (
-    //           "Update Content"
-    //         ) : (
-    //           "Add Content"
-    //         )}
-    //       </Button>
-    //     </div>
-    //   </ModalFooter>
-    // </Modal>
     <Modal show={isOpen} onClose={onClose} size="5xl">
-  <ModalHeader>
-    {editingContent ? "Edit Content" : "Add New Content"}
-  </ModalHeader>
+      <ModalHeader>
+        {editingContent ? "Edit Content" : "Add New Content"}
+      </ModalHeader>
 
-  <ModalBody>
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {/* School, Page Name, and Page Route in ONE ROW */}
-      <div className="flex flex-wrap sm:flex-nowrap gap-4">
-        {/* Academic Dropdown */}
-       {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  ( <div className="w-full sm:w-1/3">
-          <Label className="block mb-2">
-            School <span className="text-red-500">*</span>
-          </Label>
-          <AcademicDropdown
-            value={formData.academic_id}
-            onChange={handleAcademicChange}
-            placeholder="Select academics..."
-            includeAllOption={true}
-            label=""
-          />
-          {errors.academic_id && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.academic_id}
-            </p>
-          )}
-        </div>)}
+      <ModalBody>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* School, Page Name, and Page Route in ONE ROW */}
+          <div className="flex flex-wrap sm:flex-nowrap gap-4">
+            {/* Academic Dropdown */}
+            {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && ( 
+              <div className="w-full sm:w-1/3">
+                <Label className="block mb-2">
+                  Collage <span className="text-red-500">*</span>
+                </Label>
+                <AcademicDropdown
+                  value={formData.academic_id}
+                  onChange={handleAcademicChange}
+                  placeholder="Select academics..."
+                  includeAllOption={true}
+                  label=""
+                />
+                {errors.academic_id && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.academic_id}
+                  </p>
+                )}
+              </div>
+            )}
 
-        {/* Page Name Input */}
-        <div className="w-full sm:w-1/3">
-          <Label className="block mb-2">
-            Page Name <span className="text-red-500">*</span>
-          </Label>
-          <TextInput
-            id="page_name"
-            type="text"
-            value={formData.page_name}
-            onChange={(e) => handlePageNameChange(e.target.value)}
-            placeholder="e.g., Declaration Forms, Terms and Conditions"
-            color={errors.page_name ? "failure" : "gray"}
-          />
-          {errors.page_name && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.page_name}
-            </p>
-          )}
-        </div>
+            {/* Page Name Input */}
+            <div className="w-full sm:w-1/3">
+              <Label className="block mb-2">
+                Page Name <span className="text-red-500">*</span>
+              </Label>
+              <TextInput
+                id="page_name"
+                type="text"
+                value={formData.page_name}
+                onChange={(e) => handlePageNameChange(e.target.value)}
+                placeholder="e.g., Declaration Forms, Terms and Conditions"
+                color={errors.page_name ? "failure" : "gray"}
+              />
+              {errors.page_name && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.page_name}
+                </p>
+              )}
+            </div>
 
-        {/* Page Route Input */}
-        <div className="w-full sm:w-1/3">
-          <Label className="block mb-2">
-            Page Route <span className="text-red-500">*</span>
-          </Label>
-          <TextInput
-            id="page_route"
-            type="text"
-            value={formData.page_route}
-            onChange={(e) => handlePageRouteChange(e.target.value)}
-            placeholder="e.g., declaration_forms"
-            color={errors.page_route ? "failure" : "gray"}
-          />
-         
-        </div>
-      </div>
-
-      {/* HTML Content Editor */}
-      <div>
-        <Label className="block mb-2">
-          HTML Content <span className="text-red-500">*</span>
-        </Label>
-        <div className="border border-gray-300 rounded-lg overflow-hidden">
-          <JoditEditor
-            ref={editorRef}
-            value={formData.html_content}
-            config={editorConfig}
-            onBlur={handleEditorChange}
-            onChange={handleEditorChange}
-          />
-        </div>
-        {errors.html_content && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.html_content}
-          </p>
-        )}
-      </div>
-
-      {/* Content Preview */}
-      {formData.html_content && (
-        <div>
-          <Label className="block mb-2">Content Preview :</Label>
-          <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 max-h-60 overflow-y-auto">
-            <div
-              className="prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ __html: formData.html_content }}
-            />
+            {/* Page Route Input */}
+            <div className="w-full sm:w-1/3">
+              <Label className="block mb-2">
+                Page Route <span className="text-red-500">*</span>
+              </Label>
+              <TextInput
+                id="page_route"
+                type="text"
+                value={formData.page_route}
+                onChange={(e) => handlePageRouteChange(e.target.value)}
+                placeholder="e.g., declaration_forms"
+                color={errors.page_route ? "failure" : "gray"}
+              />
+              {errors.page_route && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.page_route}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </form>
-  </ModalBody>
 
-  <ModalFooter>
-    <div className="flex justify-end space-x-3 w-full">
-      <Button
-        color="alternative"
-        onClick={onClose}
-        disabled={loading}
-        type="button"
-      >
-        Cancel
-      </Button>
-      <Button
-        onClick={handleSubmit}
-        gradientDuoTone="cyanToBlue"
-        disabled={loading}
-        type="button"
-      >
-        {loading ? (
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            {editingContent ? "Updating..." : "Adding..."}
+          {/* HTML Content Editor - FIXED */}
+          <div>
+            <Label className="block mb-2">
+              HTML Content <span className="text-red-500">*</span>
+            </Label>
+            <div className="border border-gray-300 rounded-lg overflow-hidden">
+              <JoditEditor
+                ref={editorRef}
+                value={formData.html_content}
+                config={editorConfig}
+                onBlur={handleEditorBlur} // ONLY onBlur - no onChange
+                onInit={handleEditorInit}
+              />
+            </div>
+            {errors.html_content && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.html_content}
+              </p>
+            )}
           </div>
-        ) : editingContent ? (
-          "Update Content"
-        ) : (
-          "Add Content"
-        )}
-      </Button>
-    </div>
-  </ModalFooter>
-</Modal>
 
+          {/* Content Preview */}
+          {/* {formData.html_content && (
+            <div>
+              <Label className="block mb-2">Content Preview :</Label>
+              <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 max-h-60 overflow-y-auto">
+                <div
+                  className="prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: formData.html_content }}
+                />
+              </div>
+            </div>
+          )} */}
+        </form>
+      </ModalBody>
+
+      <ModalFooter>
+        <div className="flex justify-end space-x-3 w-full">
+          <Button
+            color="alternative"
+            onClick={onClose}
+            disabled={loading}
+            type="button"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            gradientDuoTone="cyanToBlue"
+            disabled={loading}
+            type="button"
+          >
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                {editingContent ? "Updating..." : "Adding..."}
+              </div>
+            ) : editingContent ? (
+              "Update Content"
+            ) : (
+              "Add Content"
+            )}
+          </Button>
+        </div>
+      </ModalFooter>
+    </Modal>
   );
 };
 

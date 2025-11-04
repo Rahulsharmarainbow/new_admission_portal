@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from 'flowbite-react';
 import axios from 'axios';
 import { useAuth } from 'src/hook/useAuth';
+import toast from 'react-hot-toast';
 
 interface CasteItem {
   id: number;
@@ -103,17 +104,17 @@ const EditCasteModal: React.FC<EditCasteModalProps> = ({
     e.preventDefault();
     
     if (!name.trim()) {
-      alert('Please enter district name');
+      toast.error('Please enter district name');
       return;
     }
 
     if (!selectedState) {
-      alert('Please select a state');
+      toast.error('Please select a state');
       return;
     }
 
     if (!selectedItem) {
-      alert('No district selected for editing');
+      toast.error('No district selected for editing');
       return;
     }
 
@@ -151,16 +152,15 @@ const EditCasteModal: React.FC<EditCasteModalProps> = ({
       );
 
       if (response.data?.status) {
-        alert('District updated successfully!');
+        toast.success('District updated successfully!');
         setName('');
         setSelectedState('');
         onSuccess();
       } else {
-        alert(response.data?.message || 'Failed to update district');
+        toast.error(response.data?.message || 'Failed to update district');
       }
     } catch (error: any) {
       console.error('Error updating district:', error);
-      alert(error.response?.data?.message || 'Failed to update district. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -521,7 +521,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
                             </button>
 
                             {/* Green Check Icon - For Open Tickets */}
-                            {status === 'open' && (
+                            {status === 'open' && (user?.role === "SuperAdmin" || user?.role === "SupportAdmin") && (
                               <button 
                                 className="text-green-500 hover:text-green-700 p-1"
                                 onClick={() => handleAcceptTicket(ticket.ticket_id)}

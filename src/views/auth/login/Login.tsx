@@ -39,8 +39,15 @@ export const LoginPage: React.FC = () => {
           email_status: response.email_status,
           sms_status: response.sms_status,
           academic_type: response.academic_type || null,
-          academic_id : response.academic_id || null
+          academic_id : response.academic_id || null, 
+          token : response.two_step_auth == 0 ? response.auth_token : null 
         };
+
+        if(response.two_step_auth === 0) {
+          login(userData);
+          redirectToDashboard(response.login_type);
+          return
+        }
 
         // Check if two-step verification is needed
         const availableMethods = [];

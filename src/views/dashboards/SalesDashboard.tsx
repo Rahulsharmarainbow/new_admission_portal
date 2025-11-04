@@ -314,8 +314,8 @@ const SalesDashboard = () => {
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
             <div>
-              <h5 className="text-lg font-semibold text-gray-900">Recently Added Application</h5>
-              <h6 className="text-sm text-gray-600">Application List across all Academic</h6>
+              <h5 className="text-lg font-semibold text-gray-900">Recently Added Academic</h5>
+              <h6 className="text-sm text-gray-600">Academic List across all Academic</h6>
             </div>
            <div className="relative w-full lg:w-auto">
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -323,7 +323,7 @@ const SalesDashboard = () => {
       </div>
       <input
         type="text"
-        placeholder="Search Applications..."
+        placeholder="Search Academic..."
         value={filters.search}
         onChange={(e) => handleSearchChange(e.target.value)}
         className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full lg:w-64"

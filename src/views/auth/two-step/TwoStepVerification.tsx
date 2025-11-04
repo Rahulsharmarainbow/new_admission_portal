@@ -693,9 +693,9 @@ export const TwoStepVerification: React.FC = () => {
         {/* Header Section */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-blue-50 rounded-full">
+            {/* <div className="p-3 bg-blue-50 rounded-full">
               <FiShield className="h-8 w-8 text-blue-600" />
-            </div>
+            </div> */}
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             {mode === "login" ? "Two-Step Verification" : "Password Reset"}

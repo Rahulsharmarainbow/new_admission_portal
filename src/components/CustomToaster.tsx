@@ -153,7 +153,7 @@ const CustomToaster = () => {
     <Toaster
       position="bottom-center"
       toastOptions={{
-        duration: 4000,
+        duration: 2000,
         style: {
           background: "#363636",
           color: "#fff",
@@ -162,7 +162,7 @@ const CustomToaster = () => {
           minWidth: "300px",
         },
         success: {
-          duration: 3000,
+          duration: 2000,
           icon: <AiOutlineCheckCircle size={20} color="#FFFFFF" />,
           style: {
             background: "#059669",
@@ -170,7 +170,7 @@ const CustomToaster = () => {
           },
         },
         error: {
-          duration: 3000,
+          duration: 2000,
           icon: <AiOutlineCloseCircle size={20} color="#FFFFFF" />,
           style: {
             background: "#DC2626",

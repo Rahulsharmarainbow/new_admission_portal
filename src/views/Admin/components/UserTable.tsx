@@ -234,19 +234,14 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
 
         if (response.data.status === false) {
           console.error('Delete failed:', response.data.message);
-          alert(`Delete failed: ${response.data.message}`);
+            toast.error(`Delete failed: ${response.data.message}`);
           return;
         }
 
-        alert('User deleted successfully!');
+        toast.success('User deleted successfully!');
         fetchUsers();
       } catch (error: any) {
         console.error('Error deleting user:', error);
-        if (error.response?.data?.message) {
-          alert(`Delete failed: ${error.response.data.message}`);
-        } else {
-          alert('Delete failed. Please try again.');
-        }
       } finally {
         setShowDeleteModal(false);
         setUserToDelete(null);
@@ -524,7 +519,6 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
                   </p>
                   <Button 
                     onClick={handleAddUser} 
-                    gradientDuoTone="cyanToBlue"
                     className="px-6 py-2.5 rounded-lg font-medium transition-all duration-200 hover:scale-105 hover:shadow-md"
                   >
                     <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

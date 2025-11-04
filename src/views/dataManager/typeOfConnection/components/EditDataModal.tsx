@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, TextInput } from 'flowbite-react';
 import axios from 'axios';
 import { useAuth } from 'src/hook/useAuth';
+import toast from 'react-hot-toast';
 
 interface DataItem {
   id: number;
@@ -90,7 +91,7 @@ const EditDataModal: React.FC<EditDataModalProps> = ({
       );
 
       if (response.data?.status) {
-        alert('Data updated successfully!');
+        toast.success('Data updated successfully!');
         setName('');
         onSuccess();
       } else {
