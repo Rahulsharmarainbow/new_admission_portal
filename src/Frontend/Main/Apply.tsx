@@ -2356,8 +2356,14 @@ const DynamicApply = () => {
         const gridTemplate = getGridColumns(section);
         const hasGrid = gridTemplate !== '';
 
+         const sectionWidth = section.width ? `w-[${section.width}]` : 'w-full';
+    // OR if width is numeric, append '%' automatically:
+    const customWidth = section.width 
+        ? { width: typeof section.width === 'number' ? `${section.width}%` : section.width }
+        : { width: '100%' };
+
         return (
-            <div key={index} className={`mb-8 ${sectionClasses}`}>
+            <div key={index} className={`mb-8 ${sectionClasses}`}  style={customWidth}>
                 {section.label && (
                     <h3 className="text-xl font-bold mb-4 text-[#dc2626] border-b pb-2">
                         {section.label}
@@ -2425,7 +2431,7 @@ const DynamicApply = () => {
                             <p className="text-center text-sm text-gray-600 mt-1">Please fill in all the required details carefully.</p>
                         </div>
 
-                        <form className="p-6 divide-y divide-gray-200">
+                        <form className="p-6 flex flex-wrap">
                             {/* Render all sections dynamically */}
                             {formConfig.data.map((section, index) => renderSection(section, index))}
                         </form>
