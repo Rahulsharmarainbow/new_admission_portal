@@ -5,6 +5,7 @@ import FormStep from './FormStep';
 import PreviewStep from '../schoolApply/PreviewStep';
 import SuccessStep from '../schoolApply/SuccessStep';
 import toast from 'react-hot-toast';
+import { S } from 'node_modules/react-router/dist/development/context-CIdFp11b.d.mts';
 
 interface ApplyFormProps {
   academic_id: string;
@@ -324,98 +325,64 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
     [checkValidation],
   );
 
-  // Handle file change
-  // const handleFileChange = useCallback(
-  //   (name: string, file: File, previewUrl: string, fieldConfig?: any) => {
-  //     setFileData((prev) => ({
-  //       ...prev,
-  //       [name]: {
-  //         file,
-  //         previewUrl,
-  //         width: fieldConfig?.resolution?.split('x')[0] || 150,
-  //         height: fieldConfig?.resolution?.split('x')[1] || 150,
-  //       },
-  //     }));
-
-  //     if (errors[name]) {
-  //       setErrors((prev) => ({
-  //         ...prev,
-  //         [name]: '',
-  //       }));
-  //     }
-
-  //     // Check validation for required files
-  //     if (fieldConfig?.required) {
-  //       checkValidation(
-  //         name,
-  //         fieldConfig.type,
-  //         fieldConfig.validation,
-  //         fieldConfig.validation_message,
-  //       );
-  //     }
-  //   },
-  //   [errors, checkValidation],
-  // );
-
   const handleFileChange = useCallback(
-  (name: string, file: File, fieldConfig?: any) => {
-    if (!file) return;
+    (name: string, file: File, fieldConfig?: any) => {
+      if (!file) return;
 
-    // ✅ Validate image type
-    if (!file.type.match(/image\/(jpeg|png)/)) {
-      toast.error("Please upload a valid JPEG or PNG image.");
-      return;
-    }
-
-    // ✅ Validate file size (1MB limit)
-    if (file.size > 1048576) {
-      toast.error("File size should be less than 1 MB.");
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      const base64 = reader.result as string;
-      let width = 150;
-      let height = 150;
-
-      if (fieldConfig?.resolution) {
-        const [w, h] = fieldConfig.resolution.split("x");
-        width = parseInt(w, 10);
-        height = parseInt(h, 10);
+      // ✅ Validate image type
+      if (!file.type.match(/image\/(jpeg|png)/)) {
+        toast.error('Please upload a valid JPEG or PNG image.');
+        return;
       }
 
-      // ✅ Backend compatible structure
-      setFileData((prev) => ({
-        ...prev,
-        [name]: base64,
-      }));
+      // ✅ Validate file size (1MB limit)
+      if (file.size > 1048576) {
+        toast.error('File size should be less than 1 MB.');
+        return;
+      }
 
-      // ✅ remove error if previously set
-      if (errors[name]) {
-        setErrors((prev) => ({
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        let width = 150;
+        let height = 150;
+
+        if (fieldConfig?.resolution) {
+          const [w, h] = fieldConfig.resolution.split('x');
+          width = parseInt(w, 10);
+          height = parseInt(h, 10);
+        }
+
+        // ✅ Backend compatible structure
+        setFileData((prev) => ({
           ...prev,
-          [name]: '',
+          [name]: base64,
         }));
-      }
 
-      // ✅ validate if required
-      if (fieldConfig?.required) {
-        checkValidation(
-          name,
-          fieldConfig.type,
-          fieldConfig.validation,
-          fieldConfig.validation_message,
-        );
-      }
-    };
+        // ✅ remove error if previously set
+        if (errors[name]) {
+          setErrors((prev) => ({
+            ...prev,
+            [name]: '',
+          }));
+        }
 
-    reader.readAsDataURL(file); // ✅ Base64 generation
-  },
-  [errors, checkValidation]
-);
+        // ✅ validate if required
+        if (fieldConfig?.required) {
+          checkValidation(
+            name,
+            fieldConfig.type,
+            fieldConfig.validation,
+            fieldConfig.validation_message,
+          );
+        }
+      };
 
+      reader.readAsDataURL(file); // ✅ Base64 generation
+    },
+    [errors, checkValidation],
+  );
 
   const validateStep = useCallback(
     (step: number) => {
@@ -494,7 +461,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
       });
 
       const order = response.data;
-
+      console.log('ooooooooo', order);
       const options = {
         key: cdata.razorpay_api_key,
         amount: order.amount,
@@ -505,7 +472,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
         handler: async (paymentResponse: any) => {
           try {
             const verifyResponse = await axios.post(
-              `${apiUrl}/api/frontend/college/save_final_step_data`,
+              `${apiUrl}/frontend/college-save-final-step-data`,
               {
                 razorpay_payment_id: paymentResponse.razorpay_payment_id,
                 razorpay_order_id: paymentResponse.razorpay_order_id,
@@ -553,23 +520,23 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
       console.log('formData', fileData);
       try {
         const payableResponse = await axios.post(`${apiUrl}/Public/Get-payable-amount`, {
-            caste_id: formData.category,
-            academic_id: academic_id,
-            location_id: formData.selectBelong,
-          });
-        console.log('payableResponse',payableResponse.data.success);
+          caste_id: formData.category,
+          academic_id: academic_id,
+          location_id: formData.selectBelong,
+        });
+        console.log('payableResponse', payableResponse.data.success);
         if (payableResponse.data?.total_payable_fee) {
           setPaymentData(payableResponse.data);
 
           const response = await axios.post(`${apiUrl}/frontend/college-save-first-step-data`, {
-          c_id: cdata.c_id,
-          cookieData: formData,
-          amount: payableResponse.data.total_payable_fee,
-          files: fileData,
-          academic_id: academic_id,
-        }); 
+            c_id: cdata.c_id,
+            cookieData: formData,
+            amount: payableResponse.data.total_payable_fee,
+            files: fileData,
+            academic_id: academic_id,
+          });
 
-        setFormData((prev) => ({
+          setFormData((prev) => ({
             ...prev,
             application_id: response.data?.application_id,
             transaction_id: response.data?.transaction_id,
@@ -577,9 +544,9 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
           }));
 
           setActiveStep((prev) => prev + 1);
-        }else{
+        } else {
           toast.error('Total payable fee not found. Please try again.');
-          return
+          return;
         }
       } catch (error) {
         console.error('Error saving form data:', error);
@@ -592,6 +559,41 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
       setActiveStep((prev) => prev + 1);
     }
   }, [activeStep, formData, fileData, validateStep, academic_id, cdata, apiUrl]);
+
+
+const handleDownloadReceipt = async (application_id: String) => {
+  try {
+    const response = await axios.post(
+      `${apiUrl}/frontend/download-receipt`,
+      { application_id },
+      {
+        responseType: "blob",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // 👉 Create blob url
+    const file = new Blob([response.data], { type: "application/pdf" });
+    const fileURL = URL.createObjectURL(file);
+
+    // 👉 Create a temporary link for download
+    const link = document.createElement("a");
+    link.href = fileURL;
+    link.setAttribute("download", `receipt-${application_id}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+
+    // 👉 Cleanup
+    link.remove();
+    URL.revokeObjectURL(fileURL);
+
+  } catch (error) {
+    console.error("Receipt download failed:", error);
+  }
+};
+
 
   const renderStep = (step: number) => {
     switch (step) {
@@ -625,9 +627,10 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
         return (
           <SuccessStep
             applicationId={formData.application_id}
-            onDownloadReceipt={() => {
-              /* Handle download */
-            }}
+            transactionId={formData.transaction_id}
+            amount={paymentData?.total_payable_fee}
+            onDownloadReceipt={handleDownloadReceipt}
+            onNewApplication= {handleReset}
           />
         );
       default:

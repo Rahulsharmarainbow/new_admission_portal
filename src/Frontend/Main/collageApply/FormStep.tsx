@@ -31,23 +31,26 @@ const FormStep: React.FC<FormStepProps> = ({
   onFileChange,
   formRefs,
 }) => {
-
   console.log('Form data:', formData);
   console.log('File data:', fileData);
 
   console.log('erorrr', errors);
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, fieldName: string, fieldConfig: any) => {
+  const handleFileUpload = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    fieldName: string,
+    fieldConfig: any,
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       // Validate file type
       if (!file.type.match(/image\/(jpeg|png)/)) {
-        toast.error("Please upload a valid JPEG or PNG image.");
+        toast.error('Please upload a valid JPEG or PNG image.');
         return;
       }
 
       // Validate file size (1MB limit)
       if (file.size > 1048576) {
-        toast.error("File size should be less than 1 MB.");
+        toast.error('File size should be less than 1 MB.');
         return;
       }
 
@@ -59,7 +62,7 @@ const FormStep: React.FC<FormStepProps> = ({
   const handleAadhaarVisibility = (name: string) => {
     const isVisible = !formData[`${name}_visible`];
     onInputChange(`${name}_visible`, isVisible);
-    
+
     // Toggle input types
     const inputs = document.querySelectorAll(`input[name^="${name}_"]`);
     inputs.forEach((input: any) => {
@@ -79,7 +82,7 @@ const FormStep: React.FC<FormStepProps> = ({
     // Skip rendering if v_target condition doesn't meet
     if (child.v_target) {
       const targetValue = formData[`s_${child.h_target}`];
-      if (!child.v_target.split(",").includes(targetValue)) {
+      if (!child.v_target.split(',').includes(targetValue)) {
         return null;
       }
     }
@@ -92,7 +95,7 @@ const FormStep: React.FC<FormStepProps> = ({
       apiurl: child.apiurl,
       target: child.target,
       h_target: child.h_target,
-      resolution: child.resolution
+      resolution: child.resolution,
     };
 
     switch (child.type) {
@@ -125,7 +128,7 @@ const FormStep: React.FC<FormStepProps> = ({
               onChange={(e) => onCheckboxChange(child.name, e.target.checked, fieldConfig)}
               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
             />
-            <label 
+            <label
               htmlFor={child.name}
               className={`text-sm ${errors[child.name] ? 'text-red-600' : 'text-gray-700'}`}
             >
@@ -199,7 +202,13 @@ const FormStep: React.FC<FormStepProps> = ({
               {...commonProps}
               type="date"
               onChange={(e) => onDateChange(child.name, e.target.value, fieldConfig)}
-              max={child.max_date ? new Date(new Date().getFullYear() - child.max_date, 0, 1).toISOString().split('T')[0] : undefined}
+              max={
+                child.max_date
+                  ? new Date(new Date().getFullYear() - child.max_date, 0, 1)
+                      .toISOString()
+                      .split('T')[0]
+                  : undefined
+              }
               className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
                 errors[child.name] ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -242,7 +251,7 @@ const FormStep: React.FC<FormStepProps> = ({
                 <div className="mx-auto w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
                   {fileData[child.name] ? (
                     <img
-                      src={fileData[child.name].previewUrl}
+                      src={fileData[child.name]}
                       alt={child.label}
                       className="w-full h-full object-cover rounded-lg"
                     />
@@ -298,7 +307,9 @@ const FormStep: React.FC<FormStepProps> = ({
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Backspace' && !formData[`${child.name}_${index}`] && index > 0) {
-                      const prevInput = document.querySelector(`input[name="${child.name}_${index - 1}"]`) as HTMLInputElement;
+                      const prevInput = document.querySelector(
+                        `input[name="${child.name}_${index - 1}"]`,
+                      ) as HTMLInputElement;
                       prevInput?.focus();
                     }
                   }}
@@ -312,9 +323,13 @@ const FormStep: React.FC<FormStepProps> = ({
                 onClick={() => handleAadhaarVisibility(child.name)}
                 className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
               >
-                <Icon 
-                  icon={formData[`${child.name}_visible`] ? "solar:eye-line-duotone" : "solar:eye-closed-line-duotone"} 
-                  className="w-5 h-5" 
+                <Icon
+                  icon={
+                    formData[`${child.name}_visible`]
+                      ? 'solar:eye-line-duotone'
+                      : 'solar:eye-closed-line-duotone'
+                  }
+                  className="w-5 h-5"
                 />
               </button>
             </div>
@@ -475,64 +490,77 @@ const FormStep: React.FC<FormStepProps> = ({
 
         return (
           <div
-            key={boxIndex}
-            className={`${colClass} bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 transition-all duration-300 hover:shadow-lg hover:border-blue-300 group`}
+  key={boxIndex}
+  className={`${colClass} bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 transition-all duration-300 hover:shadow-lg hover:border-blue-300 group`}
+>
+  {/* Box Header with optional icon */}
+  {box.title && (
+    <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+      {box.icon && (
+        <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+          <Icon icon={box.icon} className="w-5 h-5" />
+        </div>
+      )}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
+          {box.title}
+        </h3>
+        {box.description && (
+          <p className="text-sm text-gray-600 mt-1">{box.description}</p>
+        )}
+      </div>
+    </div>
+  )}
+
+  {/* Box Content with improved grid system */}
+  <div className="w-full">
+    <div
+      className="grid gap-3 md:gap-4 auto-rows-min"
+      style={{
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        justifyContent: box.justify || 'stretch',
+        alignItems: box.align || 'start',
+      }}
+    >
+      {box?.children?.map((child: any, childIndex: number) => {
+        const childWidth = child.width || '100%';
+        const childWidthValue = parseInt(childWidth);
+
+        // Smart grid column span calculation
+        const getColumnSpan = () => {
+          if (childWidthValue >= 95) return 'full';
+          if (childWidthValue >= 80) return 'wide';
+          if (childWidthValue >= 60) return 'medium';
+          return 'normal';
+        };
+
+        const spanClass = {
+          'full': 'col-span-full',
+          'wide': 'col-span-full md:col-span-2',
+          'medium': 'col-span-full sm:col-span-1 md:col-span-2',
+          'normal': 'col-span-full sm:col-span-1'
+        }[getColumnSpan()];
+
+        return (
+          <div
+            key={childIndex}
+            className={`${spanClass} transition-all duration-200 hover:transform hover:scale-[1.01]`}
+            style={{
+              minWidth: child.minWidth || '180px',
+              // Ensure proper width for different content types
+              ...(child.type === 'heading' || child.type === 'heading2' ? {
+                width: '100%',
+                gridColumn: '1 / -1'
+              } : {})
+            }}
           >
-            {/* Box Header with optional icon */}
-            {box.title && (
-              <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
-                {box.icon && (
-                  <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-                    <Icon icon={box.icon} className="w-5 h-5" />
-                  </div>
-                )}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
-                    {box.title}
-                  </h3>
-                  {box.description && (
-                    <p className="text-sm text-gray-600 mt-1">{box.description}</p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Box Content */}
-            <div
-              className="flex flex-wrap w-full"
-              style={{
-                justifyContent: box.justify || 'flex-start',
-                gap: `${box.gap || 0.5}rem`,
-                alignItems: box.align || 'stretch',
-              }}
-            >
-              {box?.children?.map((child: any, childIndex: number) => {
-                const childWidth = child.width || '100%';
-                const childWidthValue = parseInt(childWidth);
-
-                const getChildWidthClass = () => {
-                  if (childWidthValue >= 80) return 'w-full';
-                  if (childWidthValue >= 50) return 'w-full xs:w-1/2';
-                  if (childWidthValue >= 33) return 'w-full xs:w-1/2 md:w-1/3';
-                  if (childWidthValue >= 25) return 'w-full xs:w-1/2 md:w-1/4';
-                  return 'w-auto flex-1';
-                };
-
-                return (
-                  <div
-                    key={childIndex}
-                    className={`${getChildWidthClass()} transition-all duration-200 hover:transform hover:scale-[1.01] min-w-0`}
-                    style={{
-                      minWidth: child.minWidth || '120px',
-                      flex: child.flex || 'none',
-                    }}
-                  >
-                    {renderField(child, boxIndex, childIndex)}
-                  </div>
-                );
-              })}
-            </div>
+            {renderField(child, boxIndex, childIndex)}
           </div>
+        );
+      })}
+    </div>
+  </div>
+</div>
         );
       })}
     </div>

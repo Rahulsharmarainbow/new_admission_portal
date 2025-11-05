@@ -6,7 +6,7 @@ interface SuccessStepProps {
   applicationId: string;
   transactionId?: string;
   amount?: number;
-  onDownloadReceipt: () => void;
+  onDownloadReceipt: (applicationId: string) => Promise<void>;
   onNewApplication?: () => void;
 }
 
@@ -22,11 +22,12 @@ const SuccessStep: React.FC<SuccessStepProps> = ({
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      await onDownloadReceipt();
+      await onDownloadReceipt(applicationId);
     } catch (error) {
       console.error('Download failed:', error);
     } finally {
       setDownloading(false);
+      onNewApplication && onNewApplication();
     }
   };
 

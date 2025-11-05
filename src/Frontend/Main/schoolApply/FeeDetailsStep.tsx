@@ -1,18 +1,4 @@
-// components/FormSteps/FeeDetailsStep.tsx
 import React from 'react';
-import { 
-  Box, 
-  FormControlLabel, 
-  Checkbox, 
-  Typography, 
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper
-} from '@mui/material';
 
 interface FeeDetailsStepProps {
   classes: any[];
@@ -43,123 +29,152 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
   };
 
   return (
-    <Box className="fee-tables">
+    <div className="fee-tables space-y-6">
       {/* Caution Deposit */}
-      <Box className="tbl_header flex justify-between items-center mb-4 p-4 bg-gray-50 rounded-lg">
-        <Typography variant="h6" className="font-bold">
+      <div className="tbl_header flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <h6 className="text-lg font-bold text-gray-800">
           Caution Deposit (Refundable):
-        </Typography>
-        <Typography variant="h6" className="font-bold text-blue-600">
+        </h6>
+        <h6 className="text-lg font-bold text-blue-600">
           {formatPrice(transportation_setting)} /-
-        </Typography>
-      </Box>
+        </h6>
+      </div>
 
       {/* Tuition Fee Table */}
-      <TableContainer component={Paper} className="mb-6">
-        <Table>
-          <TableHead>
-            <TableRow className="bg-gray-100">
-              <TableCell className="font-bold">Class Name</TableCell>
-              <TableCell className="font-bold">Tuition Fee-I (June 24 to Sept 24)</TableCell>
-              <TableCell className="font-bold">Tuition Fee-II (Oct 24 to Jan 25)</TableCell>
-              <TableCell className="font-bold">Tuition Fee-III (Feb 25 to May 25)</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      <div className="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                Class Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                Tuition Fee-I (June 24 to Sept 24)
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                Tuition Fee-II (Oct 24 to Jan 25)
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                Tuition Fee-III (Feb 25 to May 25)
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
             {classes?.map((classData, index) => (
-              <TableRow key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                <TableCell className="font-medium">{classData.class_name}</TableCell>
-                <TableCell>{formatPrice(classData.tution_fee_1)}</TableCell>
-                <TableCell>{formatPrice(classData.tution_fee_2)}</TableCell>
-                <TableCell>{formatPrice(classData.tution_fee_3)}</TableCell>
-              </TableRow>
+              <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {classData.class_name}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {formatPrice(classData.tution_fee_1)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {formatPrice(classData.tution_fee_2)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {formatPrice(classData.tution_fee_3)}
+                </td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </tbody>
+        </table>
+      </div>
 
       {/* Transportation Fee Section */}
-      <Box className="tbl_header mb-4 p-4 bg-yellow-50 rounded-lg">
-        <Typography variant="h6" className="font-bold text-gray-800">
+      <div className="tbl_header p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+        <h6 className="text-lg font-bold text-gray-800">
           TRANSPORTATION: OPTIONAL
-        </Typography>
-        <Typography variant="body2" className="text-gray-600 mt-1">
+        </h6>
+        <p className="text-sm text-gray-600 mt-1">
           Available only on the routes operated by the school
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
-      <TableContainer component={Paper} className="mb-6">
-        <Table>
-          <TableHead>
-            <TableRow className="bg-gray-100">
-              <TableCell className="font-bold">Distance</TableCell>
-              <TableCell className="font-bold">(June 24 to Sept 24)</TableCell>
-              <TableCell className="font-bold">(Oct 24 to Jan 25)</TableCell>
-              <TableCell className="font-bold">(Feb 25 to May 25)</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      <div className="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                Distance
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                (June 24 to Sept 24)
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                (Oct 24 to Jan 25)
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                (Feb 25 to May 25)
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
             {transportation_fee?.map((transportData, index) => (
-              <TableRow key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                <TableCell className="font-medium">{transportData.distance}</TableCell>
-                <TableCell>{formatPrice(transportData.fee1)}</TableCell>
-                <TableCell>{formatPrice(transportData.fee2)}</TableCell>
-                <TableCell>{formatPrice(transportData.fee3)}</TableCell>
-              </TableRow>
+              <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {transportData.distance}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {formatPrice(transportData.fee1)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {formatPrice(transportData.fee2)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {formatPrice(transportData.fee3)}
+                </td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </tbody>
+        </table>
+      </div>
 
       {/* Parent Agreement Section */}
-      <Box className="disclaimer_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
-        <Box>
-          <Typography variant="body2" className="font-semibold">
+      <div className="disclaimer_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
+        <div>
+          <p className="text-sm font-semibold text-gray-800">
             I accept to pay the tuition fee as above.
-          </Typography>
-        </Box>
+          </p>
+        </div>
         
-        <Box className="text-center">
-          <Typography variant="body2" className="font-semibold mb-2">
+        <div className="text-center">
+          <p className="text-sm font-semibold text-gray-800 mb-2">
             Parent Name: {getParentName()}
-          </Typography>
+          </p>
           {formData.signature_pic_preview && (
             <img
               src={formData.signature_pic_preview}
               alt="Parent Signature"
-              className="w-32 h-16 object-contain block mx-auto mb-2 border border-gray-300"
+              className="w-32 h-16 object-contain block mx-auto mb-2 border border-gray-300 rounded"
             />
           )}
-          <Typography variant="body2" className="font-semibold">
+          <p className="text-sm font-semibold text-gray-800">
             Parent Signature
-          </Typography>
-        </Box>
-      </Box>
+          </p>
+        </div>
+      </div>
 
       {/* Agreement Checkbox */}
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={accepted}
-            onChange={(e) => onConditionChange('fee', e.target.checked)}
-            color="primary"
-          />
-        }
-        label={
-          <Typography variant="body2">
-            I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
-          </Typography>
-        }
-        className="mt-6"
-      />
+      <div className="flex items-start space-x-3 mt-6 p-4 bg-gray-50 rounded-lg">
+        <input
+          type="checkbox"
+          id="fee-checkbox"
+          checked={accepted}
+          onChange={(e) => onConditionChange('fee', e.target.checked)}
+          className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1"
+        />
+        <label htmlFor="fee-checkbox" className="text-sm text-gray-700">
+          I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
+        </label>
+      </div>
 
       {/* Important Note */}
-      <Box className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-        <Typography variant="body2" className="text-red-700 font-semibold text-center">
+      <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p className="text-sm text-red-700 font-semibold text-center">
           Tuition fee and Transport Fee once paid will not be refunded in any case
-        </Typography>
-      </Box>
-    </Box>
+        </p>
+      </div>
+    </div>
   );
 };
 

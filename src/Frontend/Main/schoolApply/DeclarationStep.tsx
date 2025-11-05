@@ -1,6 +1,4 @@
-// components/FormSteps/DeclarationStep.tsx
 import React from 'react';
-import { Box, FormControlLabel, Checkbox, Typography } from '@mui/material';
 
 interface DeclarationStepProps {
   content: string;
@@ -20,7 +18,6 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
   const formatContent = (htmlContent: string) => {
     let formattedContent = htmlContent;
     
-    // Replace placeholders with form data
     Object.keys(formData).forEach(key => {
       const placeholder = `{${key}}`;
       let value = formData[`s_${key}`] || formData[key] || '';
@@ -30,7 +27,6 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
       );
     });
 
-    // Remove any remaining placeholders
     formattedContent = formattedContent.replace(/{[^}]*}/g, '');
 
     return formattedContent;
@@ -50,64 +46,61 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
   };
 
   return (
-    <Box className="school_paragraph">
-      <Typography variant="h6" className="text-center mb-4 text-gray-700">
+    <div className="school_paragraph">
+      <h6 className="text-center mb-4 text-gray-700 font-semibold">
         (Please read carefully before signing)
-      </Typography>
+      </h6>
       
       <div 
         dangerouslySetInnerHTML={{ 
           __html: formatContent(content) 
         }} 
-        className="prose max-w-none mb-6"
+        className="prose max-w-none mb-6 text-gray-700 leading-relaxed"
       />
       
-      <Box className="declaration_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
-        <Box>
-          <Typography variant="body2" className="font-semibold">
+      <div className="declaration_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
+        <div>
+          <p className="text-sm font-semibold text-gray-800">
             Place: {formData['city'] || 'Hyderabad'}
-          </Typography>
-          <Typography variant="body2" className="font-semibold mt-2">
+          </p>
+          <p className="text-sm font-semibold text-gray-800 mt-2">
             Date: {getCurrentDate()}
-          </Typography>
-        </Box>
+          </p>
+        </div>
         
-        <Box className="text-center">
+        <div className="text-center">
           {fileData.signature_pic_preview && (
             <img
               src={fileData.signature_pic_preview.previewUrl}
               alt="Signature Preview"
-              className="w-48 h-20 object-contain block mx-auto mb-2"
+              className="w-48 h-20 object-contain block mx-auto mb-2 border border-gray-300 rounded"
             />
           )}
-          <Typography variant="body2" className="font-semibold">
+          <p className="text-sm font-semibold text-gray-800">
             Signature of Parent or Legal Guardian
-          </Typography>
-          <Typography variant="caption" className="text-gray-600 block">
+          </p>
+          <p className="text-xs text-gray-600 block mt-1">
             (Legal Guardian only if they have authority from the child's parent)
-          </Typography>
-          <Typography variant="body2" className="mt-2">
+          </p>
+          <p className="text-sm text-gray-800 mt-2">
             Name: <strong>{getParentName()}</strong>
-          </Typography>
-        </Box>
-      </Box>
+          </p>
+        </div>
+      </div>
 
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={accepted}
-            onChange={(e) => onConditionChange('declaration', e.target.checked)}
-            color="primary"
-          />
-        }
-        label={
-          <Typography variant="body2">
-            I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
-          </Typography>
-        }
-        className="mt-6"
-      />
-    </Box>
+      <div className="flex items-start space-x-3 mt-6 p-4 bg-gray-50 rounded-lg">
+        <input
+          type="checkbox"
+          id="declaration-checkbox"
+          checked={accepted}
+          onChange={(e) => onConditionChange('declaration', e.target.checked)}
+          className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1"
+        />
+        <label htmlFor="declaration-checkbox" className="text-sm text-gray-700">
+          I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
+        </label>
+      </div>
+    </div>
   );
 };
 

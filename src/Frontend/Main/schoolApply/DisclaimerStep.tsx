@@ -1,6 +1,5 @@
-// components/FormSteps/DisclaimerStep.tsx
 import React from 'react';
-import { Box, FormControlLabel, Checkbox, Typography } from '@mui/material';
+import { Icon } from '@iconify/react';
 
 interface DisclaimerStepProps {
   content: string;
@@ -20,7 +19,6 @@ const DisclaimerStep: React.FC<DisclaimerStepProps> = ({
   const formatContent = (htmlContent: string) => {
     let formattedContent = htmlContent;
     
-    // Replace placeholders with form data
     Object.keys(formData).forEach(key => {
       const placeholder = `{${key}}`;
       const value = formData[key] || '';
@@ -30,61 +28,57 @@ const DisclaimerStep: React.FC<DisclaimerStepProps> = ({
       );
     });
 
-    // Remove any remaining placeholders
     formattedContent = formattedContent.replace(/{[^}]*}/g, '');
 
     return formattedContent;
   };
 
   return (
-    <Box className="school_paragraph">
+    <div className="school_paragraph">
       <div 
         dangerouslySetInnerHTML={{ 
           __html: formatContent(content) 
         }} 
-        className="prose max-w-none mb-6"
+        className="prose max-w-none mb-6 text-gray-700 leading-relaxed"
       />
       
-      <Box className="disclaimer_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
-        <Box>
-          <Typography variant="body2" className="font-semibold">
+      <div className="disclaimer_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
+        <div>
+          <p className="text-sm font-semibold text-gray-800">
             Signature & Seal of School
-          </Typography>
-        </Box>
+          </p>
+        </div>
         
-        <Box className="text-center">
+        <div className="text-center">
           {fileData.signature_pic_preview && (
             <img
               src={fileData.signature_pic_preview.previewUrl}
               alt="Signature Preview"
-              className="w-48 h-20 object-contain block mx-auto mb-2"
+              className="w-48 h-20 object-contain block mx-auto mb-2 border border-gray-300 rounded"
             />
           )}
-          <Typography variant="body2" className="font-semibold">
+          <p className="text-sm font-semibold text-gray-800">
             Signature of Parent or Legal Guardian
-          </Typography>
-          <Typography variant="caption" className="text-gray-600">
+          </p>
+          <p className="text-xs text-gray-600 mt-1">
             (Legal Guardian only if they have authority from the child's parent)
-          </Typography>
-        </Box>
-      </Box>
+          </p>
+        </div>
+      </div>
 
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={accepted}
-            onChange={(e) => onConditionChange('disclaimer', e.target.checked)}
-            color="primary"
-          />
-        }
-        label={
-          <Typography variant="body2">
-            I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
-          </Typography>
-        }
-        className="mt-6"
-      />
-    </Box>
+      <div className="flex items-start space-x-3 mt-6 p-4 bg-gray-50 rounded-lg">
+        <input
+          type="checkbox"
+          id="disclaimer-checkbox"
+          checked={accepted}
+          onChange={(e) => onConditionChange('disclaimer', e.target.checked)}
+          className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1"
+        />
+        <label htmlFor="disclaimer-checkbox" className="text-sm text-gray-700">
+          I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
+        </label>
+      </div>
+    </div>
   );
 };
 
