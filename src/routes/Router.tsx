@@ -63,6 +63,7 @@ import PopupEditing from 'src/views/frontedEditing/popup/PopupEditing';
 import AddLiveAccount from 'src/views/accounts/live/components/AddLiveAccount';
 import NotificationsPage from 'src/layouts/full/header/components/NotificationsPage';
 import ApplicationEditPage from 'src/views/applicationForms/ApplicationEditPage';
+import ApplicationDetailsPage from 'src/views/applicationForms/schoolApplications/components/ApplicationDetailsPage';
 
 
 /* ***Layouts**** */
@@ -150,6 +151,7 @@ const Router = [
       { path: 'notifications', element: <NotificationsPage/> },
       { path: '/SuperAdmin/school-applications/edit/:applicationId', element: <ApplicationEditPage/> },
       { path: '/SuperAdmin/college-applications/edit/:applicationId', element: <ApplicationEditPage/> },
+      { path: '/SuperAdmin/application-details/:applicationId', element: <ApplicationDetailsPage/> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },

@@ -2490,80 +2490,171 @@ const ApplicationEditPage: React.FC = () => {
           />
         );
 
-      case 'file_button':
-        const selectedFile = selectedFiles[field.name];
-        const existingFileUrl = formData[field.name] && typeof formData[field.name] === 'string' ? `${apiAssetsUrl}/${formData[field.name]}` : '';
-        const previewUrl = filePreviews[field.name] || existingFileUrl;
+    //   case 'file_button':
+    //     const selectedFile = selectedFiles[field.name];
+    //     const existingFileUrl = formData[field.name] && typeof formData[field.name] === 'string' ? `${apiAssetsUrl}/${formData[field.name]}` : '';
+    //     const previewUrl = filePreviews[field.name] || existingFileUrl;
         
-        return (
-          <div className="flex flex-col items-center space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-            {/* File Preview Section */}
-            <div className="text-center w-full">
-              <p className="text-sm font-medium text-gray-700 mb-3">
-                {getFieldLabel(field)} {field.required === 1 && <span className="text-red-500">*</span>}
-              </p>
+    //     return (
+    //       <div className="flex flex-row items-center space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+    //         {/* File Preview Section */}
+    //         <div className=" text-center w-base">
+    //           <p className="text-sm font-medium text-gray-700 mb-3">
+    //             {getFieldLabel(field)} {field.required === 1 && <span className="text-red-500">*</span>}
+    //           </p>
               
-              {/* Preview Image */}
-              {previewUrl && (
-                <div className="mb-3">
-                  <p className="text-xs text-gray-600 mb-2">Preview:</p>
-                  {field.name.includes('signature') ? (
-                    <img
-                      src={previewUrl}
-                      alt="Signature Preview"
-                      className="w-40 h-20 object-contain border-2 border-blue-300 rounded mx-auto"
-                    />
-                  ) : (
-                    <img
-                      src={previewUrl}
-                      alt="Image Preview"
-                      className="w-32 h-32 object-cover border-2 border-blue-300 rounded-lg mx-auto"
-                    />
-                  )}
-                </div>
-              )}
+    //           {/* Preview Image */}
+    //           {previewUrl && (
+    //             <div className="mb-3">
+    //               <p className="text-xs text-gray-600 mb-2">Preview:</p>
+    //               {field.name.includes('signature') ? (
+    //                 <img
+    //                   src={previewUrl}
+    //                   alt="Signature Preview"
+    //                   className="w-40 h-20 object-contain border-2 border-blue-300 rounded mx-auto"
+    //                 />
+    //               ) : (
+    //                 <img
+    //                   src={previewUrl}
+    //                   alt="Image Preview"
+    //                   className="w-32 h-32 object-cover border-2 border-blue-300 rounded-lg mx-auto"
+    //                 />
+    //               )}
+    //             </div>
+    //           )}
               
-              {/* File Info */}
-              {(selectedFile || existingFileUrl) && (
-                <div className="text-xs text-gray-600 bg-white p-2 rounded border">
-                  {selectedFile ? (
-                    <p>Selected: <strong>{selectedFile.name}</strong> ({(selectedFile.size / 1024).toFixed(1)} KB)</p>
-                  ) : (
-                    <p>Current: <strong>{formData[field.name]?.split('/').pop()}</strong></p>
-                  )}
-                </div>
-              )}
-            </div>
+    //           {/* File Info */}
+    //           {(selectedFile || existingFileUrl) && (
+    //             <div className="text-xs text-gray-600 bg-white p-2 rounded border">
+    //               {selectedFile ? (
+    //                 <p>Selected: <strong>{selectedFile.name}</strong> ({(selectedFile.size / 1024).toFixed(1)} KB)</p>
+    //               ) : (
+    //                 <p>Current: <strong>{formData[field.name]?.split('/').pop()}</strong></p>
+    //               )}
+    //             </div>
+    //           )}
+    //         </div>
             
-            {/* Upload Button */}
-            <div className="w-full">
-              <input
-                type="file"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    handleFileSelect(field.name, e.target.files[0]);
-                  }
-                }}
-                className="hidden"
-                id={field.name}
-                accept="image/*"
-              />
-              <label
-                htmlFor={field.name}
-                className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-block w-full text-center"
-              >
-                {field.content || `📁 Upload ${getFieldLabel(field)}`}
-              </label>
-            </div>
+    //         {/* Upload Button */}
+    //         <div className="w-base">
+    //           <input
+    //             type="file"
+    //             onChange={(e) => {
+    //               if (e.target.files && e.target.files[0]) {
+    //                 handleFileSelect(field.name, e.target.files[0]);
+    //               }
+    //             }}
+    //             className="hidden"
+    //             id={field.name}
+    //             accept="image/*"
+    //           />
+    //           <label
+    //             htmlFor={field.name}
+    //             className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-block w-full text-center"
+    //           >
+    //             {field.content || `📁 Upload ${getFieldLabel(field)}`}
+    //           </label>
+    //         </div>
 
-            {/* Resolution Info */}
-            {field.resolution && (
-              <p className="text-xs text-gray-500 text-center">
-                Recommended: {field.resolution}
-              </p>
+    //         {/* Resolution Info */}
+    //         {field.resolution && (
+    //           <p className="text-xs text-gray-500 text-justify">
+    //             Recommended: {field.resolution}
+    //           </p>
+    //         )}
+    //       </div>
+    //     );
+
+    case 'file_button':
+  const selectedFile = selectedFiles[field.name];
+  const existingFileUrl =
+    formData[field.name] && typeof formData[field.name] === 'string'
+      ? `${apiAssetsUrl}/${formData[field.name]}`
+      : '';
+  const previewUrl = filePreviews[field.name] || existingFileUrl;
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col justify-between transition hover:shadow-md h-full">
+      {/* Header: Label */}
+      <div className="mb-3">
+        <p className="text-sm font-semibold text-gray-800 mb-1">
+          {getFieldLabel(field)}{" "}
+          {field.required === 1 && (
+            <span className="text-red-500 ml-1">*</span>
+          )}
+        </p>
+        {field.resolution && (
+          <p className="text-xs text-gray-500">
+            Recommended: {field.resolution}
+          </p>
+        )}
+      </div>
+
+      {/* Preview Section */}
+      <div className="flex flex-col items-center justify-center text-center bg-gray-50 border border-gray-100 rounded-lg p-3 mb-3">
+        {previewUrl ? (
+          <>
+            <p className="text-xs text-gray-600 mb-2">Preview:</p>
+            {field.name.includes("signature") ? (
+              <img
+                src={previewUrl}
+                alt="Signature Preview"
+                className="w-36 h-20 object-contain border border-blue-300 rounded"
+              />
+            ) : (
+              <img
+                src={previewUrl}
+                alt="Image Preview"
+                className="w-32 h-32 object-cover border border-blue-300 rounded-lg"
+              />
             )}
+          </>
+        ) : (
+          <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-xs">
+            No file selected
           </div>
-        );
+        )}
+      </div>
+
+      {/* File Info */}
+      {(selectedFile || existingFileUrl) && (
+        <div className="text-xs text-gray-700 bg-gray-50 p-2 rounded border border-gray-100 mb-3 text-center">
+          {selectedFile ? (
+            <p>
+              Selected: <strong>{selectedFile.name}</strong> (
+              {(selectedFile.size / 1024).toFixed(1)} KB)
+            </p>
+          ) : (
+            <p>
+              Current:{" "}
+              <strong>{formData[field.name]?.split("/").pop()}</strong>
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Upload Button */}
+      <div>
+        <input
+          type="file"
+          id={field.name}
+          accept="image/*"
+          onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+              handleFileSelect(field.name, e.target.files[0]);
+            }
+          }}
+          className="hidden"
+        />
+        <label
+          htmlFor={field.name}
+          className="cursor-pointer bg-[#0084DA] text-white px-4 py-2 rounded-lg hover:bg-[#0070B8] transition-colors w-full text-center text-sm font-medium"
+        >
+          {field.content || `📁 Upload ${getFieldLabel(field)}`}
+        </label>
+      </div>
+    </div>
+  );
 
       default:
         return (
@@ -2628,28 +2719,46 @@ const ApplicationEditPage: React.FC = () => {
         {/* Form */}
         <form onSubmit={handleSubmit}>
           <div className="space-y-6">
-            {formSections.map((section, sectionIndex) => (
-              <Card key={sectionIndex} className="p-6">
-                <div className={`grid ${getGridColumns(section)} gap-6`}>
-                  {section.children.map((field) => (
-                    <div 
-                      key={field.id}
-                      className="space-y-2"
-                    >
-                      {field.type !== 'file_button' && (
-                        <label className="block text-sm font-medium text-gray-700">
-                          {getFieldLabel(field)}
-                          {field.required === 1 && (
-                            <span className="text-red-500 ml-1">*</span>
-                          )}
-                        </label>
-                      )}
-                      {renderFormField(field)}
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            ))}
+           {formSections.map((section, sectionIndex) => {
+  // Separate file fields from normal fields
+  const fileFields = section.children.filter(f => f.type === "file_button");
+  const normalFields = section.children.filter(f => f.type !== "file_button");
+
+  return (
+    <Card key={sectionIndex} className="p-6">
+      {/* Normal fields (text, select, etc.) */}
+      {normalFields.length > 0 && (
+        <div className={`grid ${getGridColumns(section)} gap-6`}>
+          {normalFields.map((field) => (
+            <div key={field.id} className="space-y-2">
+              {field.type !== "file_button" && (
+                <label className="block text-sm font-medium text-gray-700">
+                  {getFieldLabel(field)}
+                  {field.required === 1 && (
+                    <span className="text-red-500 ml-1">*</span>
+                  )}
+                </label>
+              )}
+              {renderFormField(field)}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* File Upload Cards in 2-column grid */}
+      {fileFields.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 items-stretch">
+          {fileFields.map((field) => (
+            <div key={field.id} className="w-full">
+              {renderFormField(field)}
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+})}
+
           </div>
 
           {/* Submit Button */}
