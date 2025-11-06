@@ -1,6 +1,7 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 import toast from 'react-hot-toast';
+import { max } from 'lodash';
 
 interface FormStepProps {
   dynamicBoxes: any[];
@@ -55,7 +56,7 @@ const FormStep: React.FC<FormStepProps> = ({
       }
 
       const previewUrl = URL.createObjectURL(file);
-      onFileChange(fieldName, file, previewUrl, fieldConfig);
+      onFileChange(fieldName, file, fieldConfig);
     }
   };
 
@@ -96,7 +97,10 @@ const FormStep: React.FC<FormStepProps> = ({
       target: child.target,
       h_target: child.h_target,
       resolution: child.resolution,
+      max_date: child.max_date,
     };
+
+    if (child.type === 'file_button') console.log(fieldConfig);
 
     switch (child.type) {
       case 'heading':
@@ -120,23 +124,29 @@ const FormStep: React.FC<FormStepProps> = ({
 
       case 'checkbox':
         return (
-          <div className="flex items-start space-x-3">
-            <input
-              type="checkbox"
-              id={child.name}
-              checked={formData[child.name] === 1}
-              onChange={(e) => onCheckboxChange(child.name, e.target.checked, fieldConfig)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-            />
-            <label
-              htmlFor={child.name}
-              className={`text-sm ${errors[child.name] ? 'text-red-600' : 'text-gray-700'}`}
-            >
-              {child.content}
-              {child.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-start space-x-3">
+              <input
+                type="checkbox"
+                id={child.name}
+                checked={formData[child.name] === 1}
+                onChange={(e) => onCheckboxChange(child.name, e.target.checked, fieldConfig)}
+                className={`w-4 h-4 mt-1 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
+                  errors[child.name] ? 'border-red-500' : 'border-gray-300'
+                }`}
+              />
+              <label
+                htmlFor={child.name}
+                className={`text-sm leading-tight ${
+                  errors[child.name] ? 'text-red-600' : 'text-gray-700'
+                }`}
+              >
+                {child.content}
+                {child.required && <span className="text-red-500 ml-1">*</span>}
+              </label>
+            </div>
             {errors[child.name] && (
-              <p className="text-red-500 text-xs mt-1 w-full">{errors[child.name]}</p>
+              <p className="text-red-500 text-xs mt-1 ml-7">{errors[child.name]}</p>
             )}
           </div>
         );
@@ -192,6 +202,30 @@ const FormStep: React.FC<FormStepProps> = ({
         );
 
       case 'date':
+        // Calculate min and max dates based on max_date configuration
+        const getMinDate = () => {
+          if (child.max_date) {
+            const today = new Date();
+            // For max_date = 5, min date should be 5 years ago from today
+            const minDate = new Date(
+              today.getFullYear() - child.max_date,
+              today.getMonth(),
+              today.getDate(),
+            );
+            return minDate.toISOString().split('T')[0];
+          }
+          return undefined;
+        };
+
+        const getMaxDate = () => {
+          if (child.max_date) {
+            const today = new Date();
+            // Max date should be today (can't select future dates)
+            return today.toISOString().split('T')[0];
+          }
+          return undefined;
+        };
+
         return (
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-gray-700">
@@ -202,13 +236,8 @@ const FormStep: React.FC<FormStepProps> = ({
               {...commonProps}
               type="date"
               onChange={(e) => onDateChange(child.name, e.target.value, fieldConfig)}
-              max={
-                child.max_date
-                  ? new Date(new Date().getFullYear() - child.max_date, 0, 1)
-                      .toISOString()
-                      .split('T')[0]
-                  : undefined
-              }
+              min={getMinDate()} // This restricts to dates from 5 years ago
+              max={getMaxDate()} // This prevents selecting future dates
               className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
                 errors[child.name] ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -449,7 +478,11 @@ const FormStep: React.FC<FormStepProps> = ({
               placeholder={child.placeholder}
               pattern="[0-9]{10}"
               maxLength={10}
-              onChange={(e) => onInputChange(child.name, e.target.value, fieldConfig)}
+              onInput={(e) => {
+                // Only allow numbers
+                e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '');
+                onInputChange(child.name, e.currentTarget.value, fieldConfig);
+              }}
               className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
                 errors[child.name] ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -467,100 +500,91 @@ const FormStep: React.FC<FormStepProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-12 gap-4 md:gap-6 w-full auto-rows-min">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 w-full">
       {dynamicBoxes?.map((box, boxIndex) => {
-        const boxWidth = parseInt(box.width || '100%');
-        const columnSpan = Math.max(1, Math.min(12, Math.round((boxWidth / 100) * 12)));
+        const boxWidth = box.width || '100%';
+        const boxWidthValue = parseInt(boxWidth);
 
-        const getColClass = (span: number) => {
-          const baseClass = 'col-span-1';
-
-          if (span <= 3) {
-            return `${baseClass} xs:col-span-1 md:col-span-${span}`;
-          } else if (span <= 6) {
-            return `${baseClass} xs:col-span-2 md:col-span-${span}`;
-          } else if (span <= 9) {
-            return `${baseClass} xs:col-span-2 md:col-span-6 lg:col-span-${span}`;
-          } else {
-            return `${baseClass} xs:col-span-2 md:col-span-12 lg:col-span-${span}`;
-          }
+        // Simple column span calculation
+        const getGridCols = () => {
+          if (boxWidthValue >= 70 && boxWidthValue <= 80) return 'lg:col-span-9';
+          if (boxWidthValue >= 20 && boxWidthValue <= 30) return 'lg:col-span-3';
+          if (boxWidthValue >= 45 && boxWidthValue <= 55) return 'lg:col-span-6';
+          return 'lg:col-span-12';
         };
-
-        const colClass = getColClass(columnSpan);
 
         return (
           <div
-  key={boxIndex}
-  className={`${colClass} bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 transition-all duration-300 hover:shadow-lg hover:border-blue-300 group`}
->
-  {/* Box Header with optional icon */}
-  {box.title && (
-    <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
-      {box.icon && (
-        <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-          <Icon icon={box.icon} className="w-5 h-5" />
-        </div>
-      )}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
-          {box.title}
-        </h3>
-        {box.description && (
-          <p className="text-sm text-gray-600 mt-1">{box.description}</p>
-        )}
-      </div>
-    </div>
-  )}
-
-  {/* Box Content with improved grid system */}
-  <div className="w-full">
-    <div
-      className="grid gap-3 md:gap-4 auto-rows-min"
-      style={{
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        justifyContent: box.justify || 'stretch',
-        alignItems: box.align || 'start',
-      }}
-    >
-      {box?.children?.map((child: any, childIndex: number) => {
-        const childWidth = child.width || '100%';
-        const childWidthValue = parseInt(childWidth);
-
-        // Smart grid column span calculation
-        const getColumnSpan = () => {
-          if (childWidthValue >= 95) return 'full';
-          if (childWidthValue >= 80) return 'wide';
-          if (childWidthValue >= 60) return 'medium';
-          return 'normal';
-        };
-
-        const spanClass = {
-          'full': 'col-span-full',
-          'wide': 'col-span-full md:col-span-2',
-          'medium': 'col-span-full sm:col-span-1 md:col-span-2',
-          'normal': 'col-span-full sm:col-span-1'
-        }[getColumnSpan()];
-
-        return (
-          <div
-            key={childIndex}
-            className={`${spanClass} transition-all duration-200 hover:transform hover:scale-[1.01]`}
-            style={{
-              minWidth: child.minWidth || '180px',
-              // Ensure proper width for different content types
-              ...(child.type === 'heading' || child.type === 'heading2' ? {
-                width: '100%',
-                gridColumn: '1 / -1'
-              } : {})
-            }}
+            key={boxIndex}
+            className={`col-span-12 ${getGridCols()} bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 transition-all duration-300 hover:shadow-lg hover:border-blue-300 group`}
           >
-            {renderField(child, boxIndex, childIndex)}
+            {/* Box Header - same as above */}
+            {box.title && (
+              <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+                {box.icon && (
+                  <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                    <Icon icon={box.icon} className="w-5 h-5" />
+                  </div>
+                )}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
+                    {box.title}
+                  </h3>
+                  {box.description && (
+                    <p className="text-sm text-gray-600 mt-1">{box.description}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Box Content - same flex system as above */}
+            <div className="w-full">
+              <div className="flex flex-wrap gap-3 md:gap-4">
+                {box?.children?.map((child: any, childIndex: number) => {
+                  if (child.v_target) {
+                    const targetValue = formData[`s_${child.h_target}`];
+                    if (!child.v_target.split(',').includes(targetValue)) {
+                      return null;
+                    }
+                  }
+
+                  const childWidth = child.width || '100%';
+
+                  return (
+                    <div
+                      key={childIndex}
+                      style={{
+                        width: childWidth,
+                        flex: `0 0 ${childWidth}`,
+                        ...(child.type === 'heading' || child.type === 'heading2'
+                          ? {
+                              width: '100%',
+                              flex: '0 0 100%',
+                            }
+                          : {}),
+                        ...(child.type === 'file_button'
+                          ? {
+                              display: 'flex',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              flexDirection: 'column',
+                            }
+                          : {}),
+                        ...(child.type === 'adhar'
+                          ? {
+                              width: '100%',
+                              flex: '0 0 100%',
+                            }
+                          : {}),
+                      }}
+                    >
+                      {renderField(child, boxIndex, childIndex)}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-        );
-      })}
-    </div>
-  </div>
-</div>
         );
       })}
     </div>

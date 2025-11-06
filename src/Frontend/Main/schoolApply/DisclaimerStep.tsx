@@ -16,22 +16,30 @@ const DisclaimerStep: React.FC<DisclaimerStepProps> = ({
   accepted,
   onConditionChange
 }) => {
-  const formatContent = (htmlContent: string) => {
-    let formattedContent = htmlContent;
-    
-    Object.keys(formData).forEach(key => {
-      const placeholder = `{${key}}`;
-      const value = formData[key] || '';
-      formattedContent = formattedContent.replace(
-        new RegExp(placeholder, 'g'),
-        `<strong>${value}</strong>`
-      );
-    });
 
-    formattedContent = formattedContent.replace(/{[^}]*}/g, '');
+  console.log("all data", {content, formData, fileData, accepted})
+const formatContent = (htmlContent: string | null | undefined) => {
+  if (!htmlContent) return "";
 
-    return formattedContent;
-  };
+  let formattedContent: string = htmlContent ?? "";
+
+  const data = formData ?? {};
+
+  Object.keys(data).forEach((key) => {
+    const placeholder = `{${key}}`;
+    const value = data[key] ? String(data[key]) : ""; // always string ✅
+
+    formattedContent = formattedContent?.replace?.(
+      new RegExp(placeholder, "g"),
+      `<strong>${value}</strong>`
+    ) ?? formattedContent;
+  });
+
+  formattedContent = formattedContent?.replace?.(/{[^}]*}/g, "") ?? formattedContent;
+
+  return formattedContent;
+};
+
 
   return (
     <div className="school_paragraph">
@@ -50,9 +58,9 @@ const DisclaimerStep: React.FC<DisclaimerStepProps> = ({
         </div>
         
         <div className="text-center">
-          {fileData.signature_pic_preview && (
+          {fileData["candidate_signature"] && (
             <img
-              src={fileData.signature_pic_preview.previewUrl}
+              src={fileData["candidate_signature"]}
               alt="Signature Preview"
               className="w-48 h-20 object-contain block mx-auto mb-2 border border-gray-300 rounded"
             />

@@ -15,22 +15,27 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
   accepted,
   onConditionChange
 }) => {
-  const formatContent = (htmlContent: string) => {
-    let formattedContent = htmlContent;
-    
-    Object.keys(formData).forEach(key => {
-      const placeholder = `{${key}}`;
-      let value = formData[`s_${key}`] || formData[key] || '';
-      formattedContent = formattedContent.replace(
-        new RegExp(placeholder, 'g'),
-        `<strong>${value}</strong>`
-      );
-    });
+ const formatContent = (htmlContent: string | null | undefined) => {
+  if (!htmlContent) return "";
 
-    formattedContent = formattedContent.replace(/{[^}]*}/g, '');
+  let formattedContent: string = htmlContent ?? "";
 
-    return formattedContent;
-  };
+  const data = formData ?? {};
+
+  Object.keys(data).forEach((key) => {
+    const placeholder = `{${key}}`;
+    const value = data[key] ? String(data[key]) : ""; // always string ✅
+
+    formattedContent = formattedContent?.replace?.(
+      new RegExp(placeholder, "g"),
+      `<strong>${value}</strong>`
+    ) ?? formattedContent;
+  });
+
+  formattedContent = formattedContent?.replace?.(/{[^}]*}/g, "") ?? formattedContent;
+
+  return formattedContent;
+};
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -69,9 +74,9 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
         </div>
         
         <div className="text-center">
-          {fileData.signature_pic_preview && (
+          {fileData["candidate_signature"] && (
             <img
-              src={fileData.signature_pic_preview.previewUrl}
+              src={fileData["candidate_signature"]}
               alt="Signature Preview"
               className="w-48 h-20 object-contain block mx-auto mb-2 border border-gray-300 rounded"
             />

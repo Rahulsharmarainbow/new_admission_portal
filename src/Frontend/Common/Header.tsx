@@ -1,9 +1,11 @@
 import React from 'react';
 
+  const assetUrl = import.meta.env.VITE_ASSET_URL;
+
 const Header = ({ instituteName, logo, address }) => {
   const headerData = {
     logo: {
-      src: logo || "https://admissionportalbackend.testingscrew.com/public/company_logos/1752817396_academic.jpg",
+      src: assetUrl +"/" + logo || "https://admissionportalbackend.testingscrew.com/public/company_logos/1752817396_academic.jpg",
       alt: "University Logo",
       width: "100",
       height: "100"

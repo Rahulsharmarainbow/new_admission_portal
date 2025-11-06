@@ -5,7 +5,7 @@ import FormStep from './FormStep';
 import PreviewStep from '../schoolApply/PreviewStep';
 import SuccessStep from '../schoolApply/SuccessStep';
 import toast from 'react-hot-toast';
-import { S } from 'node_modules/react-router/dist/development/context-CIdFp11b.d.mts';
+import { isImageBlurred } from '../schoolApply/Blurred';
 
 interface ApplyFormProps {
   academic_id: string;
@@ -51,18 +51,24 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
       } else {
         if (name === 'adharCard') {
           let aadhaarCard = '';
-          for (let i = 0; i < 12; i++) {
+          let isValid = true;
+
+          for (let i = 0; i < 11; i++) {
             const digit = formData[`adharCard_${i}`];
             if (!digit) {
               validationErrors.current[name] = 'All Aadhaar card digits are required';
+              isValid = false;
               break;
             }
             aadhaarCard += digit;
           }
-          if (aadhaarCard.length === 12) {
+
+          // Clear error if all digits are properly filled
+          if (isValid && aadhaarCard.length === 11) {
             validationErrors.current[name] = '';
           }
-        } else if (!formData[name]) {
+        } else if (!formData[name] && formData[name] !== 0) {
+          // Fix: allow 0 as valid value
           validationErrors.current[name] = validation_message;
         } else if (validation === 'email') {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -72,7 +78,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
             validationErrors.current[name] = '';
           }
         } else if (validation === 'mobile') {
-          const phoneRegex = /^\d{10}$/;
+          const phoneRegex = /^\d{9}$/;
           if (!phoneRegex.test(formData[name])) {
             validationErrors.current[name] = 'Phone number must be 10 digits';
           } else {
@@ -249,39 +255,37 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   );
 
   // Handle date change
+  // Handle date change
   const handleDateChange = useCallback(
     (name: string, date: any, fieldConfig?: any) => {
-      let value = '';
-      try {
-        const adjustedDate = new Date(date);
-        adjustedDate.setDate(adjustedDate.getDate() + 1);
-        value = adjustedDate.toISOString().split('T')[0] || '';
-      } catch (error) {
-        console.error('Date parsing error:', error);
-      }
-
+      // Directly use the selected date without adjustment
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: date,
       }));
 
-      if (fieldConfig?.required) {
-        checkValidation(
-          name,
-          fieldConfig.type,
-          fieldConfig.validation,
-          fieldConfig.validation_message,
-        );
+      // Clear error immediately when date is selected
+      if (errors[name]) {
+        setErrors((prev) => ({
+          ...prev,
+          [name]: '',
+        }));
       }
 
-      // Handle API calls for date fields if needed
-      if (fieldConfig?.apiurl && fieldConfig?.target) {
-        // Similar API call logic as handleInputChange
-      }
+      // Check validation after a small delay to ensure state is updated
+      setTimeout(() => {
+        if (fieldConfig?.required) {
+          checkValidation(
+            name,
+            fieldConfig.type,
+            fieldConfig.validation,
+            fieldConfig.validation_message,
+          );
+        }
+      }, 100);
     },
-    [checkValidation],
+    [checkValidation, errors],
   );
-
   // Handle Aadhaar change
   const handleAadhaarChange = useCallback(
     (index: number, value: string, name: string, fieldConfig?: any) => {
@@ -329,13 +333,16 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
     (name: string, file: File, fieldConfig?: any) => {
       if (!file) return;
 
-      // ✅ Validate image type
+      const { resolution, target, type, validation, validation_message, required } =
+        fieldConfig || {};
+
+      // ✅ Validate Type
       if (!file.type.match(/image\/(jpeg|png)/)) {
         toast.error('Please upload a valid JPEG or PNG image.');
         return;
       }
 
-      // ✅ Validate file size (1MB limit)
+      // ✅ Validate Size (< 1 MB)
       if (file.size > 1048576) {
         toast.error('File size should be less than 1 MB.');
         return;
@@ -343,43 +350,74 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
 
       const reader = new FileReader();
 
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
         const base64 = reader.result as string;
-        let width = 150;
-        let height = 150;
 
-        if (fieldConfig?.resolution) {
-          const [w, h] = fieldConfig.resolution.split('x');
-          width = parseInt(w, 10);
-          height = parseInt(h, 10);
-        }
+        const img = new window.Image();
+        img.src = base64;
 
-        // ✅ Backend compatible structure
-        setFileData((prev) => ({
-          ...prev,
-          [name]: base64,
-        }));
+        img.onload = async () => {
+          const imgWidth = img.width;
+          const imgHeight = img.height;
 
-        // ✅ remove error if previously set
-        if (errors[name]) {
-          setErrors((prev) => ({
+          let targetWidth = imgWidth;
+          let targetHeight = imgHeight;
+
+          // ✅ Resolution check (if required)
+          if (resolution) {
+            const [w, h] = resolution.split('x');
+            targetWidth = parseInt(w, 10);
+            targetHeight = parseInt(h, 10);
+
+            if (imgWidth !== targetWidth || imgHeight !== targetHeight) {
+              toast.error(`The uploaded image must be ${targetWidth}x${targetHeight} pixels.`);
+              return;
+            }
+          }
+
+          // ✅ Blur Detection
+          try {
+            const blurry = await isImageBlurred(img.src, targetWidth, targetHeight);
+            if (blurry) {
+              toast.error('The uploaded image is too blurry. Please upload a clearer image.');
+              return;
+            }
+          } catch (err) {
+            console.error('Blur check failed:', err);
+            toast.error('There was an issue processing the image.');
+            return;
+          }
+
+          // ✅ Save base64 for backend submission
+          setFileData((prev) => ({
             ...prev,
-            [name]: '',
+            [name]: base64,
           }));
-        }
 
-        // ✅ validate if required
-        if (fieldConfig?.required) {
-          checkValidation(
-            name,
-            fieldConfig.type,
-            fieldConfig.validation,
-            fieldConfig.validation_message,
-          );
-        }
+          // ✅ Preview target if defined
+          if (target) {
+            setFileData((prev) => ({
+              ...prev,
+              [target]: base64,
+            }));
+          }
+
+          // ✅ Remove error if previously set
+          if (errors[name]) {
+            setErrors((prev) => ({
+              ...prev,
+              [name]: '',
+            }));
+          }
+
+          // ✅ Perform extra validation if required
+          if (required) {
+            checkValidation(name, type, validation, validation_message);
+          }
+        };
       };
 
-      reader.readAsDataURL(file); // ✅ Base64 generation
+      reader.readAsDataURL(file);
     },
     [errors, checkValidation],
   );
@@ -397,15 +435,22 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
           } else {
             if (child.name === 'adharCard') {
               let aadhaarCard = '';
+              let hasError = false;
               for (let i = 0; i < 12; i++) {
                 const digit = formData[`adharCard_${i}`];
                 if (!digit) {
                   newErrors[child.name] = 'All Aadhaar card digits are required';
+                  hasError = true;
                   break;
                 }
                 aadhaarCard += digit;
               }
-            } else if (!formData[child.name]) {
+              // Clear error if all digits are filled
+              if (!hasError && aadhaarCard.length === 12) {
+                delete newErrors[child.name];
+              }
+            } else if (!formData[child.name] && formData[child.name] !== 0) {
+              // Fix: Check for undefined, null, empty string, but allow 0
               newErrors[child.name] = child.validation_message || `${child.label} is required`;
             } else if (child.validation === 'email') {
               const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -416,6 +461,29 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
               const phoneRegex = /^\d{10}$/;
               if (!phoneRegex.test(formData[child.name])) {
                 newErrors[child.name] = 'Phone number must be 10 digits';
+              }
+            } else if (child.type === 'date') {
+              if (!formData[child.name]) {
+                newErrors[child.name] = child.validation_message || `${child.label} is required`;
+              } else if (child.max_date) {
+                const inputDate = new Date(formData[child.name]);
+                const today = new Date();
+
+                if (isNaN(inputDate.getTime())) {
+                  newErrors[child.name] = 'Invalid date format';
+                } else {
+                  const minAllowedDate = new Date(
+                    today.getFullYear() - child.max_date,
+                    today.getMonth(),
+                    today.getDate(),
+                  );
+
+                  if (inputDate < minAllowedDate) {
+                    newErrors[
+                      child.name
+                    ] = `Student must be ${child.max_date} years old or younger`;
+                  }
+                }
               }
             }
           }
@@ -430,6 +498,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
           newErrors['caste_certificate'] = 'Caste certificate preview is required';
         }
       }
+
       console.log('Validation errors:', newErrors);
       setErrors(newErrors);
       validationErrors.current = newErrors;
@@ -437,7 +506,6 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
     },
     [formData, fileData, required_child],
   );
-
   const handleBack = useCallback(() => {
     setActiveStep((prev) => prev - 1);
   }, []);
@@ -534,6 +602,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
             amount: payableResponse.data.total_payable_fee,
             files: fileData,
             academic_id: academic_id,
+            application_id: formData.application_id,
           });
 
           setFormData((prev) => ({
@@ -560,40 +629,37 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
     }
   }, [activeStep, formData, fileData, validateStep, academic_id, cdata, apiUrl]);
 
-
-const handleDownloadReceipt = async (application_id: String) => {
-  try {
-    const response = await axios.post(
-      `${apiUrl}/frontend/download-receipt`,
-      { application_id },
-      {
-        responseType: "blob",
-        headers: {
-          "Content-Type": "application/json",
+  const handleDownloadReceipt = async (application_id: String) => {
+    try {
+      const response = await axios.post(
+        `${apiUrl}/frontend/download-receipt`,
+        { application_id },
+        {
+          responseType: 'blob',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      }
-    );
+      );
 
-    // 👉 Create blob url
-    const file = new Blob([response.data], { type: "application/pdf" });
-    const fileURL = URL.createObjectURL(file);
+      // 👉 Create blob url
+      const file = new Blob([response.data], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(file);
 
-    // 👉 Create a temporary link for download
-    const link = document.createElement("a");
-    link.href = fileURL;
-    link.setAttribute("download", `receipt-${application_id}.pdf`);
-    document.body.appendChild(link);
-    link.click();
+      // 👉 Create a temporary link for download
+      const link = document.createElement('a');
+      link.href = fileURL;
+      link.setAttribute('download', `receipt-${application_id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
 
-    // 👉 Cleanup
-    link.remove();
-    URL.revokeObjectURL(fileURL);
-
-  } catch (error) {
-    console.error("Receipt download failed:", error);
-  }
-};
-
+      // 👉 Cleanup
+      link.remove();
+      URL.revokeObjectURL(fileURL);
+    } catch (error) {
+      console.error('Receipt download failed:', error);
+    }
+  };
 
   const renderStep = (step: number) => {
     switch (step) {
@@ -630,7 +696,7 @@ const handleDownloadReceipt = async (application_id: String) => {
             transactionId={formData.transaction_id}
             amount={paymentData?.total_payable_fee}
             onDownloadReceipt={handleDownloadReceipt}
-            onNewApplication= {handleReset}
+            onNewApplication={handleReset}
           />
         );
       default:
@@ -641,15 +707,11 @@ const handleDownloadReceipt = async (application_id: String) => {
   return (
     <div className="group relative mb-8">
       <div className="absolute -inset-1 bg-gradient-to-r from-[#1e40af] to-[#dc2626] rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
-      <div className="relative bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      <div className="relative bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#1e40af] to-[#dc2626]"></div>
 
         {/* Form Header */}
         <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
-          <h4 className="text-center text-xl font-bold text-[#1e40af] inline-flex items-center justify-center">
-            <Icon icon="solar:document-line-duotone" className="w-5 h-5 mr-2" />
-            College Application Form
-          </h4>
           <p className="text-center text-gray-600 mt-2">
             {home_other_lines?.[1]?.title || 'Online Application Form'}
           </p>
@@ -772,7 +834,7 @@ const handleDownloadReceipt = async (application_id: String) => {
 
       {/* Payment Confirmation Dialog */}
       {showPaymentDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 scale-100">
             {/* Dialog Header */}
             <div className="p-6 border-b border-gray-200">

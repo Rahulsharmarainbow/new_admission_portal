@@ -1,6 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Icon } from '@iconify/react';
-import FormStep from '../collageApply/FormStep';
 import DisclaimerStep from './DisclaimerStep';
 import DeclarationStep from './DeclarationStep';
 import FeeDetailsStep from './FeeDetailsStep';
@@ -8,6 +7,7 @@ import PreviewStep from './PreviewStep';
 import SuccessStep from './SuccessStep';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import FormStep from '../collageApply/FormStep';
 
 interface SchoolApplyFormProps {
   academic_id: string;
@@ -552,7 +552,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
       setLoading(true);
       try {
         // For school, calculate payable amount based on class and other factors
-        const payableResponse = await axios.post(`${apiUrl}/Public/Get-school-payable-amount`, {
+        const payableResponse = await axios.post(`${apiUrl}/Public/Get-payable-amount`, {
           class_id: formData.class,
           academic_id: academic_id,
           transportation_required: formData.transportation_required,
@@ -563,7 +563,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
 
           const response = await axios.post(`${apiUrl}/frontend/school-save-first-step-data`, {
             c_id: cdata.c_id,
-            formData: formData,
+            cookieData: formData,
             files: fileData,
             amount: payableResponse.data.total_payable_fee,
             academic_id: academic_id,
@@ -629,6 +629,10 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
     }
   };
 
+
+  console.log(content_managment[0].html_content
+);
+
   const renderStep = (step: number) => {
     switch (step) {
       case 0:
@@ -651,7 +655,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
       case 1:
         return (
           <DisclaimerStep
-            content={content_managment?.disclaimer_form}
+            content={content_managment?.[0].html_content}
             formData={formData}
             fileData={fileData}
             accepted={conditions.disclaimer}
@@ -661,7 +665,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
       case 2:
         return (
           <DeclarationStep
-            content={content_managment?.declaration_form}
+            content={content_managment?.[1].html_content}
             formData={formData}
             fileData={fileData}
             accepted={conditions.declaration}
@@ -711,10 +715,10 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
 
         {/* Form Header */}
         <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
-          <h4 className="text-center text-xl font-bold text-[#1e40af] inline-flex items-center justify-center">
+          {/* <h4 className="text-center text-xl font-bold text-[#1e40af] inline-flex items-center justify-center">
             <Icon icon="solar:school-line-duotone" className="w-5 h-5 mr-2" />
             School Application Form
-          </h4>
+          </h4> */}
           <p className="text-center text-gray-600 mt-2">
             {home_other_lines?.[1]?.title || 'Online Application Form'}
           </p>

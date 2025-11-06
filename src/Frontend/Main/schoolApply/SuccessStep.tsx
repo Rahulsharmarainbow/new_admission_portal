@@ -150,38 +150,6 @@ const SuccessStep: React.FC<SuccessStepProps> = ({
             New Application
           </button>
         )}
-
-        <button
-          onClick={() => window.print()}
-          className="flex items-center gap-2 px-6 py-3 text-gray-600 rounded-lg font-semibold hover:bg-gray-100 hover:shadow-md transition-all duration-200"
-        >
-          <Icon icon="solar:printer-line-duotone" className="w-5 h-5" />
-          Print
-        </button>
-      </div>
-
-      {/* Additional Information */}
-      <div className="mt-8 p-6 bg-blue-50 rounded-xl max-w-2xl mx-auto border border-blue-200">
-        <p className="text-blue-700 text-center font-medium">
-          <strong>Next Steps:</strong> Keep your application ID handy for future reference. 
-          You will be contacted for document verification and further admission process.
-        </p>
-      </div>
-
-      {/* Quick Links */}
-      <div className="flex justify-center gap-6 mt-6">
-        <a href="/" className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
-          <Icon icon="solar:home-line-duotone" className="w-4 h-4" />
-          Back to Home
-        </a>
-        <a href="/applications" className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
-          <Icon icon="solar:document-line-duotone" className="w-4 h-4" />
-          View Applications
-        </a>
-        <a href="/contact" className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
-          <Icon icon="solar:phone-line-duotone" className="w-4 h-4" />
-          Contact Support
-        </a>
       </div>
     </div>
   );

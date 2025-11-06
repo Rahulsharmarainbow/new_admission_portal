@@ -38,7 +38,7 @@ const Apply = () => {
         const response = await axios.post(
           `${apiUrl}/Public/Get-apply-form`,
           {
-            unique_code: 'EeOEBgpF7O3oC4O',
+            unique_code: institute_id,
           },
           {
             headers: {
@@ -114,12 +114,12 @@ const Apply = () => {
 console.log(applyData)
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Header instituteName={applyData.header?.name} />
+      <Header instituteName={applyData.header?.name} logo={applyData.header?.logo} address={applyData.header?.address} />
 
       <div className="py-2 px-10">
         {applyData.academic_type === 1 ? (
           <SchoolApplyForm
-            academic_id={applyData.cdata?.c_id}
+            academic_id={applyData.academic_id}
             dynamicBoxes={applyData.data}
             required_child={applyData.required_child}
             home_other_lines={applyData.home_other_lines}
