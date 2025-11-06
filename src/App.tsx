@@ -83,6 +83,52 @@
 
 
 
+// import { RouterProvider } from 'react-router';
+// import { ThemeModeScript, ThemeProvider } from 'flowbite-react';
+// import customTheme from './utils/theme/custom-theme';
+// import router from './routes/Router';
+// import { AuthProvider } from './hook/useAuth';
+// import { CookiesProvider } from 'react-cookie';
+// import { Toaster } from 'react-hot-toast';
+// import React from 'react';
+// import CustomToaster from './components/CustomToaster';
+// import { SidebarProvider } from './layouts/full/sidebar/SidebarContext'; // ✅ Import SidebarProvider
+
+// function App() {
+//   return (
+//     <>
+//       <CustomToaster /> {/* toast file with title and description*/ }
+
+//       <CookiesProvider>
+//         <React.StrictMode>
+//           <AuthProvider>
+//             {/* ✅ Wrap with SidebarProvider */}
+//             <SidebarProvider>
+//               <ThemeModeScript />
+//               <ThemeProvider theme={customTheme}>
+//                 <RouterProvider router={router} />
+//               </ThemeProvider>
+//             </SidebarProvider>
+//           </AuthProvider>
+//         </React.StrictMode>
+//       </CookiesProvider>
+//     </>
+//   );
+// }
+
+// export default App;
+
+
+
+
+
+
+
+
+
+
+
+
 import { RouterProvider } from 'react-router';
 import { ThemeModeScript, ThemeProvider } from 'flowbite-react';
 import customTheme from './utils/theme/custom-theme';
@@ -92,7 +138,8 @@ import { CookiesProvider } from 'react-cookie';
 import { Toaster } from 'react-hot-toast';
 import React from 'react';
 import CustomToaster from './components/CustomToaster';
-import { SidebarProvider } from './layouts/full/sidebar/SidebarContext'; // ✅ Import SidebarProvider
+import { SidebarProvider } from './layouts/full/sidebar/SidebarContext';
+import { NotificationProvider } from './layouts/full/header/components/NotificationContext'; // ✅ Import NotificationProvider
 
 function App() {
   return (
@@ -102,13 +149,15 @@ function App() {
       <CookiesProvider>
         <React.StrictMode>
           <AuthProvider>
-            {/* ✅ Wrap with SidebarProvider */}
-            <SidebarProvider>
-              <ThemeModeScript />
-              <ThemeProvider theme={customTheme}>
-                <RouterProvider router={router} />
-              </ThemeProvider>
-            </SidebarProvider>
+            {/* ✅ Wrap with NotificationProvider */}
+            <NotificationProvider>
+              <SidebarProvider>
+                <ThemeModeScript />
+                <ThemeProvider theme={customTheme}>
+                  <RouterProvider router={router} />
+                </ThemeProvider>
+              </SidebarProvider>
+            </NotificationProvider>
           </AuthProvider>
         </React.StrictMode>
       </CookiesProvider>

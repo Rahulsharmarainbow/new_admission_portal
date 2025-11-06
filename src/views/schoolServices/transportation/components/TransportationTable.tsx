@@ -422,14 +422,22 @@ const TransportationTable: React.FC = () => {
                     </Tooltip>
                   </td>
                   <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                    ₹{transportation.fee1}
-                  </td>
-                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                    ₹{transportation.fee2}
-                  </td>
-                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                    ₹{transportation.fee3}
-                  </td>
+  {isNaN(Number(transportation.fee1))
+    ? transportation.fee1
+    : `₹${transportation.fee1}`}
+</td>
+
+<td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+  {isNaN(Number(transportation.fee2))
+    ? transportation.fee2
+    : `₹${transportation.fee2}`}
+</td>
+
+<td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+  {isNaN(Number(transportation.fee3))
+    ? transportation.fee3
+    : `₹${transportation.fee3}`}
+</td>
                   <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
                     {new Date(transportation.creation_date).toLocaleDateString()}
                   </td>

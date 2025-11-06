@@ -151,18 +151,7 @@ const SidebarContent: Record<number, MenuItem[]> = {
               url: '/SuperAdmin/frontend-editing/home',
               isPro: false,
             },
-            {
-              name: 'Footer',
-              id: uniqueId(),
-              url: '/SuperAdmin/frontend-editing/footer',
-              isPro: false,
-            },
-            {
-              name: 'Popups',
-              id: uniqueId(),
-              url: '/SuperAdmin/frontend-editing/popups',
-              isPro: false,
-            },
+            
           ],
         },
 

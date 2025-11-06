@@ -14,6 +14,7 @@ import { useDebounce } from 'src/hook/useDebounce';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import ApplicationDetailModal from '../schoolApplications/components/ApplicationDetailModal';
 import CollegeFilterSidebar from './components/CollegeFilterSidebar';
+import { useNavigate } from 'react-router';
 
 interface Application {
   id: number;
@@ -65,6 +66,7 @@ interface ClassOption {
 
 const CollegeApplicationManagementTable: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<Filters>({
@@ -269,8 +271,7 @@ const CollegeApplicationManagementTable: React.FC = () => {
 
   // Handle edit
   const handleEdit = (application: Application) => {
-    console.log('Edit application:', application);
-    toast.success('Edit functionality to be implemented');
+    navigate(`/${user?.role}/college-applications/edit/${application.id}`);
   };
 
   // Handle download Excel

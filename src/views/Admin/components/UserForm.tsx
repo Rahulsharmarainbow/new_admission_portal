@@ -504,7 +504,7 @@ const UserForm: React.FC = () => {
   };
 
   const handleCancel = () => {
-    navigate(`/admin/${getAdminTypeRoute()}`);
+    navigate(`/${user?.role}/${getAdminTypeRoute()}`);
   };
 
   // Get color classes for Tailwind
