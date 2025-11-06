@@ -967,10 +967,17 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
   };
 
   // Navigate to website
+  // const handleWebsiteClick = (code: number) => {
+  //   navigate(`/Frontend/${code}`);
+  //   setActiveDropdown(null);
+  // };
+
   const handleWebsiteClick = (code: number) => {
-    navigate(`/Frontend/${code}`);
-    setActiveDropdown(null);
-  };
+  const url = `/Frontend/${code}`;
+  window.open(url, '_blank'); // ✅ opens in a new tab
+  setActiveDropdown(null);
+};
+
 
   // Navigate to make live
   const handleMakeLive = (accountId: number) => {
