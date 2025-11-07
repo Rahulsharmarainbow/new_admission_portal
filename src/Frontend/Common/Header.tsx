@@ -1,8 +1,9 @@
 import React from 'react';
+import { Link } from 'react-router';
 
   const assetUrl = import.meta.env.VITE_ASSET_URL;
 
-const Header = ({ instituteName, logo, address }) => {
+const Header = ({ institute_id,instituteName, logo, address }) => {
   const headerData = {
     logo: {
       src: assetUrl +"/" + logo || "https://admissionportalbackend.testingscrew.com/public/company_logos/1752817396_academic.jpg",
@@ -10,6 +11,8 @@ const Header = ({ instituteName, logo, address }) => {
       width: "100",
       height: "100"
     },
+    unique_code:institute_id,
+
     university: {
       name: instituteName || "University",
       address: address || "University Address"
@@ -19,34 +22,34 @@ const Header = ({ instituteName, logo, address }) => {
   const { logo: logoData, university } = headerData;
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 bg-white shadow-sm">
-      <div className="flex items-center justify-center mb-4">
-        <div className="flex items-center">
-          {/* Logo - university name के आगे (left side) */}
-          <div className="mr-4">
-            <img 
-              alt={logoData.alt} 
-              loading="lazy" 
-              width={logoData.width} 
-              height={logoData.height} 
-              decoding="async" 
-              src={logoData.src} 
-              className="object-contain"
-            />
+    <header className="bg-white shadow-lg border-b border-gray-200">
+        <div className="bg-white shadow-md  container mx-auto px-4 py-1 rounded-b-2xl">
+          <div className="flex flex-col md:flex-row items-center justify-center text-center md:text-left">
+            {headerData?.logo && (
+              <Link to={`/Frontend/${headerData.unique_code}`} reloadDocument>
+                <img 
+                  src={`${headerData.logo.src}`} 
+                  alt="Institute Logo" 
+                  className="h-20 w-48 md:w-20 object-contain mr-3 cursor-pointer"
+                />
+              </Link>
+            )}
+
+            <div className="text-center">
+              <h1 className="md:text-3xl xl:text-4xl font-bold text-gray-900 underline underline-offset-4 decoration-red-800 inline-block pb-1 uppercase">
+                {headerData.university?.name || 'Institute Name'}
+              </h1>
+              {headerData.university?.address && (
+                <p className="text-sm text-gray-600 mt-1">
+                  {headerData.university.address}
+                </p>
+              )}
+              
+            </div>
           </div>
-          
-          {/* University Name - Center में */}
-          <div className="text-center">
-            <p className="text-3xl font-bold text-gray-800">
-              {university.name}
-            </p>
-            <p className="text-sm text-gray-600 mt-2">
-              {university.address}
-            </p>
-          </div>
+
         </div>
-      </div>
-    </div>
+      </header>
   );
 };
 

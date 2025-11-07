@@ -23,7 +23,7 @@ export const useAllAcademics = () => {
 
     try {
       const res = await axios.post(
-        `${apiUrl}/SuperAdmin/Dropdown/get-all-academic`,
+        `${apiUrl}/${user?.role}/Dropdown/get-all-academic`,
         {},
         {
           headers: {

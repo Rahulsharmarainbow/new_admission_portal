@@ -35,87 +35,96 @@ const CollegeDataExport: React.FC = () => {
   };
 
   // Handle export
-  const handleExport = async () => {
-    // Validation
-    if (!formData.startDate || !formData.endDate) {
-      toast.error('Please select both start date and end date');
+const handleExport = async () => {
+  // Validation
+  if (!formData.startDate || !formData.endDate) {
+    toast.error("Please select both start date and end date");
+    return;
+  }
+
+  if (new Date(formData.startDate) > new Date(formData.endDate)) {
+    toast.error("Start date cannot be greater than end date");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const payload = {
+      id: formData.academic_id || "all",
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      s_id: user?.id,
+    };
+
+    const response = await axios.post(
+      `${apiUrl}/${user?.role}/Applications/Export-college-data`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // ❌ If backend returned no success
+    if (!response.data.success) {
+      toast.error(response.data.error || "No data found");
       return;
     }
 
-    if (new Date(formData.startDate) > new Date(formData.endDate)) {
-      toast.error('Start date cannot be greater than end date');
+    // ✅ Extract data
+    const { filename, excel_base64 } = response.data.data;
+
+    if (!excel_base64) {
+      toast.error("Excel file generation failed!");
       return;
     }
 
-    setLoading(true);
-    try {
-      const payload = {
-        id: formData.academic_id || "all", // Send "all" if no academic selected
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        s_id: user?.id
-      };
+    // ✅ Decode Base64 → Real Binary
+    const binaryString = atob(excel_base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
 
-      const response = await axios.post(
-        `${apiUrl}/${user?.role}/Applications/Export-college-data`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-            accept: '/',
-            'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
-            'Content-Type': 'application/json',
-          },
-          responseType: 'blob' // Important for file download
-        }
-      );
-
-      // Create blob and download file
-      const blob = new Blob([response.data]);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      
-      // Get filename from response headers or use default
-      const contentDisposition = response.headers['content-disposition'];
-      let filename = 'college_data_export.xlsx';
-      
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
-        if (filenameMatch && filenameMatch[1]) {
-          filename = filenameMatch[1];
-        }
-      }
-      
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      toast.success('College data exported successfully!');
-      
-      // Reset form after successful export
-      setFormData(prev => ({
-        ...prev,
-        startDate: '',
-        endDate: ''
-      }));
-
-    } catch (error: any) {
-      console.error('Error exporting college data:', error);
-      
-      if (error.response?.status === 404) {
-        toast.error('No data found for the selected criteria');
-      } else if (error.response?.status === 500) {
-        toast.error('Server error occurred while exporting data');
-      } else {
-        toast.error('Failed to export college data');
-      }
-    } finally {
-      setLoading(false);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
     }
-  };
+
+    const blob = new Blob([bytes], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    // ✅ Create download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename || "college_data.xlsx";
+    link.click();
+
+    window.URL.revokeObjectURL(url);
+
+    toast.success("College data exported successfully!");
+
+    // ✅ Reset dates
+    setFormData((prev) => ({
+      ...prev,
+      startDate: "",
+      endDate: "",
+    }));
+  } catch (error: any) {
+    console.error("Error exporting college data:", error);
+
+    if (error.response?.data?.error) {
+      toast.error(error.response.data.error);
+    } else {
+      toast.error("Failed to export college data");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // Get today's date for max date restriction
   const getTodayDate = () => {

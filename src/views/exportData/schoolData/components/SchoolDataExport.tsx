@@ -347,86 +347,55 @@ const SchoolDataExport: React.FC = () => {
 
   // Handle export
   const handleExport = async () => {
-    // Validation
-    if (!formData.startDate || !formData.endDate) {
-      toast.error('Please select both start date and end date');
+  if (new Date(formData.startDate) > new Date(formData.endDate)) {
+    toast.error("Start date cannot be greater than end date");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const payload = {
+      id: formData.school_id || "all",
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      s_id: user?.id,
+    };
+
+    const response = await axios.post(
+      `${apiUrl}/${user?.role}/Applications/Export-school-data`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          "Content-Type": "application/json",
+        },
+        responseType: "json", // ✅ IMPORTANT FIX
+      }
+    );
+
+    if (!response.data.success) {
+      toast.error(response.data.error || "No data found for the provided criteria");
       return;
     }
 
-    if (new Date(formData.startDate) > new Date(formData.endDate)) {
-      toast.error('Start date cannot be greater than end date');
-      return;
-    }
+    const { excel_base64, filename } = response.data.data;
 
-    setLoading(true);
-    try {
-      const payload = {
-        id: formData.school_id || "all", // Send "all" if no school selected
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        s_id: user?.id
-      };
+    const link = document.createElement("a");
+    link.href =
+      "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," +
+      excel_base64;
+    link.download = filename;
+    link.click();
 
-      const response = await axios.post(
-        `${apiUrl}/${user?.role}/Applications/Export-school-data`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-            accept: '/',
-            'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
-            'Content-Type': 'application/json',
-          },
-          responseType: 'blob' // Important for file download
-        }
-      );
+    toast.success("School data exported successfully!");
 
-      // Create blob and download file
-      const blob = new Blob([response.data]);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      
-      // Get filename from response headers or use default
-      const contentDisposition = response.headers['content-disposition'];
-      let filename = 'school_data_export.xlsx';
-      
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
-        if (filenameMatch && filenameMatch[1]) {
-          filename = filenameMatch[1];
-        }
-      }
-      
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      toast.success('School data exported successfully!');
-      
-      // Reset form after successful export
-      setFormData(prev => ({
-        ...prev,
-        startDate: '',
-        endDate: ''
-      }));
-
-    } catch (error: any) {
-      console.error('Error exporting school data:', error);
-      
-      if (error.response?.status === 404) {
-        toast.error('No data found for the selected criteria');
-      } else if (error.response?.status === 500) {
-        toast.error('Server error occurred while exporting data');
-      } else {
-        toast.error('Failed to export school data');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    toast.error("Export failed");
+    console.log(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Get today's date for max date restriction
   const getTodayDate = () => {
@@ -632,7 +601,7 @@ const SchoolDataExport: React.FC = () => {
             <div className="lg:col-span-1">
               <Button
                 onClick={handleExport}
-                disabled={loading || !formData.startDate || !formData.endDate}
+                disabled={loading}
                 gradientDuoTone="greenToBlue"
                 className="w-full lg:w-auto min-w-[140px]"
               >

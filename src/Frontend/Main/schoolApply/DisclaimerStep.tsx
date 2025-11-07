@@ -7,35 +7,61 @@ interface DisclaimerStepProps {
   fileData: { [key: string]: any };
   accepted: boolean;
   onConditionChange: (condition: string, value: boolean) => void;
+  directorSignature: string;
 }
+
+  const assetUrl = import.meta.env.VITE_ASSET_URL;
 
 const DisclaimerStep: React.FC<DisclaimerStepProps> = ({
   content,
   formData,
   fileData,
   accepted,
-  onConditionChange
+  onConditionChange,
+  directorSignature,
 }) => {
+// const formatContent = (htmlContent: string | null | undefined) => {
+//   if (!htmlContent) return "";
 
-  console.log("all data", {content, formData, fileData, accepted})
+//   let formattedContent: string = htmlContent ?? "";
+
+//   const data = formData ?? {};
+
+//   Object.keys(data).forEach((key) => {
+//     const placeholder = `{${key}}`;
+//     const value = data[key] ? String(data[key]) : ""; 
+
+//     formattedContent = formattedContent?.replace?.(
+//       new RegExp(placeholder, "g"),
+//       `<strong>${value}</strong>`
+//     ) ?? formattedContent;
+//   });
+
+//   formattedContent = formattedContent?.replace?.(/{[^}]*}/g, "") ?? formattedContent;
+
+//   return formattedContent;
+// };
+
 const formatContent = (htmlContent: string | null | undefined) => {
   if (!htmlContent) return "";
 
   let formattedContent: string = htmlContent ?? "";
-
   const data = formData ?? {};
 
   Object.keys(data).forEach((key) => {
     const placeholder = `{${key}}`;
-    const value = data[key] ? String(data[key]) : ""; // always string ✅
+    let value = data[key] ? String(data[key]) : "";
+
+    // ✅ Special condition for "class"
+    if (key === "class" && value.includes("$")) {
+      value = value.split("$")[1] ?? ""; // "$" ke baad ki value
+    }
 
     formattedContent = formattedContent?.replace?.(
       new RegExp(placeholder, "g"),
       `<strong>${value}</strong>`
     ) ?? formattedContent;
   });
-
-  formattedContent = formattedContent?.replace?.(/{[^}]*}/g, "") ?? formattedContent;
 
   return formattedContent;
 };
@@ -47,11 +73,18 @@ const formatContent = (htmlContent: string | null | undefined) => {
         dangerouslySetInnerHTML={{ 
           __html: formatContent(content) 
         }} 
-        className="prose max-w-none mb-6 text-gray-700 leading-relaxed"
+        className="prose max-w-none mb-6 text-gray-700 leading-relaxed text-sm"
       />
       
       <div className="disclaimer_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
         <div>
+          {directorSignature && (
+            <img
+              src={assetUrl + '/' + directorSignature}
+              alt="Signature Preview"
+              className="w-48 h-20 object-contain block mx-auto mb-2 border border-gray-300 rounded"
+            />
+          )}
           <p className="text-sm font-semibold text-gray-800">
             Signature & Seal of School
           </p>
