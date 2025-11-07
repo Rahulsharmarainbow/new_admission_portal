@@ -430,7 +430,7 @@ const SidebarContent: Record<number, MenuItem[]> = {
             {
               name: 'Content Management',
               id: uniqueId(),
-              url: '/SupportAdmin/content-Management',
+              url: '/SupportAdmin/college-content-Management',
               isPro: false,
             },
           ],

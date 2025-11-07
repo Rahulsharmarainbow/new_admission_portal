@@ -162,7 +162,7 @@ const TextInput = ({
 };
 
 const AccountTab = () => {
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUpdating2, setIsUpdating2] = useState(false);
@@ -213,6 +213,14 @@ const AccountTab = () => {
         setCurrentPassword(profileData.d_password || '');
         // setAddress(profileData.address || '');
         setIs2faEnabled(profileData.two_step_auth === 1);
+
+        const userData = {
+          ...user,
+          profile: profileData.profile,
+          name: profileData.name,
+        }
+
+        login(userData)
         
         // Set profile image URL
         if (profileData.profile) {

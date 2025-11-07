@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {Link, useParams } from 'react-router';
+import { Helmet } from 'react-helmet-async';
+
 import Header from '../Common/Header';
 import Footer from '../Common/Footer';
 import Loader from '../Common/Loader';
@@ -134,9 +136,28 @@ const Home = () => {
   const transformedData = transformApiData(institute);
   const { examInfo, alert, cards } = transformedData;
   return (
+   
+  
+
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+       <Helmet>
+        <title>{institute?.header?.name || 'Institute Portal'}</title>
+        <link
+          rel="icon"
+          type="image/png"
+          href={
+            institute?.header?.logo
+              ? `${assetUrl}/${institute.header.logo}`
+              : '/favicon.ico'
+          }
+        />
+        <meta
+          name="description"
+          content={`Welcome to ${institute?.header?.name || 'Institute'} admission portal`}
+        />
+      </Helmet>
       {/* Custom Header with logo on left and name in center */}
-      <header className="bg-white shadow-lg border-b border-gray-200">
+      {/* <header className="bg-white shadow-lg border-b border-gray-200">
         <div className="bg-white shadow-md  container mx-auto px-4 py-1 rounded-b-2xl">
           <div className="flex flex-col md:flex-row items-center justify-center text-center md:text-left">
             {institute.header?.logo && (
@@ -163,7 +184,8 @@ const Home = () => {
           </div>
 
         </div>
-      </header>
+      </header> */}
+      <Header institute_id={institute.unique_code} instituteName={institute.header?.name} logo={institute.header?.logo} address={institute.header?.address} />
 
       {/* Main Content Section */}
       <div className="bg-transparent mx-2 md:mx-8 py-8">
@@ -314,24 +336,48 @@ const Home = () => {
       </div>
 
       <div className="p-6 flex-grow flex items-center bg-gray-50 rounded-b-2xl">
-  <div className="flex flex-col gap-3 w-full">
-    {institute.buttons && institute.buttons.length > 0 ? (
-      institute.buttons.map((btn, index) => (
-        <a
+  
+
+<div className="flex flex-col gap-3 w-full">
+  {institute.buttons && institute.buttons.length > 0 ? (
+    institute.buttons.map((btn, index) => {
+      const targetUrl = btn.url?.startsWith("http")
+        ? btn.url
+        : `/Frontend/${institute_id}/${btn.url}`;
+
+      // For external links
+      if (btn.url?.startsWith("http")) {
+        return (
+          <a
+            key={index}
+            href={targetUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-bold text-white text-sm sm:text-base bg-gradient-to-r from-[#dc2626] to-[#ea580c] px-4 py-3 rounded-full text-center shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex justify-center items-center gap-2"
+          >
+            {btn.text || "Open"}
+            {btn.new === 1 && <NewBadge className="ml-2" />}
+          </a>
+        );
+      }
+
+      // For internal links
+      return (
+        <Link
           key={index}
-          href={btn.url?.startsWith("http") ? btn.url : `/Frontend/${institute_id}/${btn.url}`}
-          target="_blank"
-          rel="noopener noreferrer"
+          to={targetUrl}
           className="font-bold text-white text-sm sm:text-base bg-gradient-to-r from-[#dc2626] to-[#ea580c] px-4 py-3 rounded-full text-center shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex justify-center items-center gap-2"
         >
           {btn.text || "Open"}
           {btn.new === 1 && <NewBadge className="ml-2" />}
-        </a>
-      ))
-    ) : (
-      <p className="text-gray-500 text-center py-8">No applications available</p>
-    )}
-  </div>
+        </Link>
+      );
+    })
+  ) : (
+    <p className="text-gray-500 text-center py-8">No applications available</p>
+  )}
+</div>
+
 </div>
 
     </div>

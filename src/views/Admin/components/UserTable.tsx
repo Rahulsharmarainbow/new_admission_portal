@@ -223,6 +223,7 @@ const UserTable: React.FC<UserTableProps> = ({ type }) => {
           {
             id: [userToDelete],
             s_id: user?.id,
+              type: type,
           },
           {
             headers: {

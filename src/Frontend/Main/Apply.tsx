@@ -145,7 +145,7 @@ console.log(applyData)
         )}
       </div>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

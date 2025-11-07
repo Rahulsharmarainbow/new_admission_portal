@@ -516,6 +516,7 @@ import BarChart from './BarChart';
 import { BsFillSearchHeartFill, BsSearch } from 'react-icons/bs';
 import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
 import { HiChevronDown } from 'react-icons/hi';
+import AllAcademicsDropdown from 'src/Frontend/Common/AllAcademicsDropdown';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -633,7 +634,7 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
           {/* Academic Dropdown */}
           {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  (
             <div className="relative w-full sm:w-auto ">
-            <AcademicDropdown
+            <AllAcademicsDropdown
               name="academic"
               formData={filters}
               setFormData={setFilters}

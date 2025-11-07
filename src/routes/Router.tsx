@@ -340,8 +340,10 @@ const Router = [
       { path: '404', element: <Error /> },
       { path: '/auth/404', element: <Error /> },
       { path: '/Frontend/:institute_id', element: <Home /> },
-      { path: '/page/:pageType', element: <TypePage /> },
+      // { path: '/page/:pageType', element: <TypePage /> },
       { path: '/Frontend/:institute_id/apply', element: <Apply /> },
+      { path: '/Frontend/:institute_id/:page_route', element: <TypePage /> },
+
       { path: '/Form-view', element: <FormView /> },
       { path: '/Confirmation', element: <Confirmation /> },
       { 
