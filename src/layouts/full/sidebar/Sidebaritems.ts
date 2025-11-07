@@ -360,6 +360,20 @@ const SidebarContent: Record<number, MenuItem[]> = {
           ],
         },
         {
+          name: 'Fronted Management',
+          id: uniqueId(),
+          icon: 'solar:monitor-line-duotone',
+          children: [
+            {
+              name: 'Home Page',
+              id: uniqueId(),
+              url: '/SupportAdmin/frontend-editing/home',
+              isPro: false,
+            },
+            
+          ],
+        },
+        {
           name: 'Ticket',
           id: uniqueId(),
           icon: 'solar:ticket-line-duotone',

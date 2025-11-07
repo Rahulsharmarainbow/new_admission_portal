@@ -348,10 +348,10 @@ const SchoolDataExport: React.FC = () => {
   // Handle export
   const handleExport = async () => {
     // Validation
-    if (!formData.startDate || !formData.endDate) {
-      toast.error('Please select both start date and end date');
-      return;
-    }
+    // if (!formData.startDate || !formData.endDate) {
+    //   toast.error('Please select both start date and end date');
+    //   return;
+    // }
 
     if (new Date(formData.startDate) > new Date(formData.endDate)) {
       toast.error('Start date cannot be greater than end date');
@@ -632,7 +632,7 @@ const SchoolDataExport: React.FC = () => {
             <div className="lg:col-span-1">
               <Button
                 onClick={handleExport}
-                disabled={loading || !formData.startDate || !formData.endDate}
+                disabled={loading}
                 gradientDuoTone="greenToBlue"
                 className="w-full lg:w-auto min-w-[140px]"
               >

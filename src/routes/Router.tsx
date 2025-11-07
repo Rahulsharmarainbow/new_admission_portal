@@ -64,6 +64,7 @@ import AddLiveAccount from 'src/views/accounts/live/components/AddLiveAccount';
 import NotificationsPage from 'src/layouts/full/header/components/NotificationsPage';
 import ApplicationEditPage from 'src/views/applicationForms/ApplicationEditPage';
 import ApplicationDetailsPage from 'src/views/applicationForms/schoolApplications/components/ApplicationDetailsPage';
+import HomeEditing from 'src/views/frontedEditing/home/Home';
 
 
 /* ***Layouts**** */
@@ -145,7 +146,7 @@ const Router = [
       { path: '/SuperAdmin/college-data', element: <CollegeDataExport/> },
       { path: '/SuperAdmin/demo-accounts/add', element: <Add /> },
       { path: '/SuperAdmin/activity', element: <ActivitiesTable/>},
-      { path: '/SuperAdmin/frontend-editing/home', element: <ActivitiesTable/>},
+      { path: '/SuperAdmin/frontend-editing/home', element: <HomeEditing/>},
       { path: '/SuperAdmin/frontend-editing/footer', element: <FooterEditing/>},
       { path: '/SuperAdmin/frontend-editing/popups', element: <PopupEditing />},
       { path: 'notifications', element: <NotificationsPage/> },
@@ -206,7 +207,7 @@ const Router = [
       { path: 'college-data', element: <CollegeDataExport/> },
       { path: 'demo-accounts/add', element: <Add /> },
       { path: 'activity', element: <ActivitiesTable/>},
-      { path: 'frontend-editing/home', element: <ActivitiesTable/>},
+      { path: 'frontend-editing/home', element: <HomeEditing/>},
       { path: 'frontend-editing/footer', element: <FooterEditing/>},
       { path: 'frontend-editing/popups', element: <PopupEditing />},
       { path: '*', element: <Navigate to="/auth/404" /> },
@@ -263,7 +264,7 @@ const Router = [
       { path: 'college-data', element: <CollegeDataExport/> },
       { path: 'demo-accounts/add', element: <Add /> },
       { path: 'activity', element: <ActivitiesTable/>},
-      { path: 'frontend-editing/home', element: <ActivitiesTable/>},
+      { path: 'frontend-editing/home', element: <HomeEditing/>},
       { path: 'frontend-editing/footer', element: <FooterEditing/>},
       { path: 'frontend-editing/popups', element: <PopupEditing />},
       { path: '*', element: <Navigate to="/auth/404" /> },
@@ -320,7 +321,7 @@ const Router = [
       { path: 'college-data', element: <CollegeDataExport/> },
       { path: 'demo-accounts/add', element: <Add /> },
       { path: 'activity', element: <ActivitiesTable/>},
-      { path: 'frontend-editing/home', element: <ActivitiesTable/>},
+      { path: 'frontend-editing/home', element: <HomeEditing/>},
       { path: 'frontend-editing/footer', element: <FooterEditing/>},
       { path: 'frontend-editing/popups', element: <PopupEditing />},
       { path: '*', element: <Navigate to="/auth/404" /> },
