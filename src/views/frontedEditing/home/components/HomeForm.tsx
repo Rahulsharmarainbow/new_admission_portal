@@ -11,6 +11,7 @@ import { useAuth } from 'src/hook/useAuth';
 import ApplicationTabs from './Tabs/ApplicationTabs';
 import HomeLinesEditor from './Tabs/HomeLinesEditor';
 import PopupEditor from './Tabs/PopupEditor';
+import AllAcademicsDropdown from 'src/Frontend/Common/AllAcademicsDropdown';
 
 const HomeForm = () => {
   const { user } = useAuth();
@@ -33,7 +34,7 @@ const HomeForm = () => {
           {/* Academic Dropdown (Global for all tabs) */}
           <div className="w-64">
             {user && (
-                 <AcademicDropdown
+                 <AllAcademicsDropdown
                     value={selectedAcademic}
                     onChange={handleAcademicSelect}
                     label="First Select Academic"
