@@ -53,7 +53,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
           let aadhaarCard = '';
           let isValid = true;
 
-          for (let i = 0; i < 11; i++) {
+          for (let i = 0; i < 12; i++) {
             const digit = formData[`adharCard_${i}`];
             if (!digit) {
               validationErrors.current[name] = 'All Aadhaar card digits are required';
@@ -64,7 +64,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
           }
 
           // Clear error if all digits are properly filled
-          if (isValid && aadhaarCard.length === 11) {
+          if (isValid && aadhaarCard.length === 12) {
             validationErrors.current[name] = '';
           }
         } else if (!formData[name] && formData[name] !== 0) {
@@ -78,7 +78,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
             validationErrors.current[name] = '';
           }
         } else if (validation === 'mobile') {
-          const phoneRegex = /^\d{9}$/;
+          const phoneRegex = /^\d{10}$/;
           if (!phoneRegex.test(formData[name])) {
             validationErrors.current[name] = 'Phone number must be 10 digits';
           } else {
@@ -92,6 +92,20 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
     },
     [formData],
   );
+
+  useEffect(() => {
+    required_child.forEach((child) => {
+      // Only validate fields that have values or are required
+      if (formData[child.name] !== undefined || child.required) {
+        checkValidation(
+          child.name,
+          child.type,
+          child.validation,
+          child.validation_message
+        );
+      }
+    });
+  }, [formData, required_child]);
 
   // Handle input change with API calls
   const handleInputChange = useCallback(
@@ -151,16 +165,16 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
       }
 
       // Check validation if field has validation rules
-      if (fieldConfig?.validation) {
-        checkValidation(
-          name,
-          fieldConfig.type,
-          fieldConfig.validation,
-          fieldConfig.validation_message,
-        );
-      }
+      // if (fieldConfig?.validation) {
+      //   checkValidation(
+      //     name,
+      //     fieldConfig.type,
+      //     fieldConfig.validation,
+      //     fieldConfig.validation_message,
+      //   );
+      // }
     },
-    [errors, apiUrl, academic_id, cdata, checkValidation],
+    [errors, apiUrl, academic_id, cdata],
   );
 
   // Handle select change
@@ -222,16 +236,16 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
       }
 
       // Check validation
-      if (fieldConfig?.validation) {
-        checkValidation(
-          name,
-          fieldConfig.type,
-          fieldConfig.validation,
-          fieldConfig.validation_message,
-        );
-      }
+      // if (fieldConfig?.validation) {
+      //   checkValidation(
+      //     name,
+      //     fieldConfig.type,
+      //     fieldConfig.validation,
+      //     fieldConfig.validation_message,
+      //   );
+      // }
     },
-    [errors, apiUrl, checkValidation],
+    [errors, apiUrl],
   );
 
   // Handle checkbox change
@@ -242,50 +256,47 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
         [name]: value ? 1 : 0,
       }));
 
-      if (fieldConfig?.required) {
-        checkValidation(
-          name,
-          fieldConfig.type,
-          fieldConfig.validation,
-          fieldConfig.validation_message,
-        );
-      }
+      // if (fieldConfig?.required) {
+      //   checkValidation(
+      //     name,
+      //     fieldConfig.type,
+      //     fieldConfig.validation,
+      //     fieldConfig.validation_message,
+      //   );
+      // }
     },
-    [checkValidation],
+    [],
   );
 
   // Handle date change
   // Handle date change
-  const handleDateChange = useCallback(
-    (name: string, date: any, fieldConfig?: any) => {
-      // Directly use the selected date without adjustment
-      setFormData((prev) => ({
+  const handleDateChange = useCallback((name: string, date: any, fieldConfig?: any) => {
+    // Directly use the selected date without adjustment
+    setFormData((prev) => ({
+      ...prev,
+      [name]: date,
+    }));
+
+    // Clear error immediately when date is selected
+    if (errors[name]) {
+      setErrors((prev) => ({
         ...prev,
-        [name]: date,
+        [name]: '',
       }));
+    }
 
-      // Clear error immediately when date is selected
-      if (errors[name]) {
-        setErrors((prev) => ({
-          ...prev,
-          [name]: '',
-        }));
-      }
-
-      // Check validation after a small delay to ensure state is updated
-      setTimeout(() => {
-        if (fieldConfig?.required) {
-          checkValidation(
-            name,
-            fieldConfig.type,
-            fieldConfig.validation,
-            fieldConfig.validation_message,
-          );
-        }
-      }, 100);
-    },
-    [checkValidation, errors],
-  );
+    // Check validation after a small delay to ensure state is updated
+    // setTimeout(() => {
+    //   if (fieldConfig?.required) {
+    //     checkValidation(
+    //       name,
+    //       fieldConfig.type,
+    //       fieldConfig.validation,
+    //       fieldConfig.validation_message,
+    //     );
+    //   }
+    // }, 100);
+  }, []);
   // Handle Aadhaar change
   const handleAadhaarChange = useCallback(
     (index: number, value: string, name: string, fieldConfig?: any) => {
@@ -304,12 +315,12 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
             nextInput?.focus();
           }
 
-          checkValidation(
-            name,
-            fieldConfig.type,
-            fieldConfig.validation,
-            fieldConfig.validation_message,
-          );
+          // checkValidation(
+          //   name,
+          //   fieldConfig.type,
+          //   fieldConfig.validation,
+          //   fieldConfig.validation_message,
+          // );
         }
       } else if (value === '') {
         setFormData((prev) => ({
@@ -326,7 +337,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
         }
       }
     },
-    [checkValidation],
+    [],
   );
 
   const handleFileChange = useCallback(
@@ -411,15 +422,15 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
           }
 
           // ✅ Perform extra validation if required
-          if (required) {
-            checkValidation(name, type, validation, validation_message);
-          }
+          // if (required) {
+          //   checkValidation(name, type, validation, validation_message);
+          // }
         };
       };
 
       reader.readAsDataURL(file);
     },
-    [errors, checkValidation],
+    [errors],
   );
 
   const validateStep = useCallback(
@@ -462,27 +473,21 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
               if (!phoneRegex.test(formData[child.name])) {
                 newErrors[child.name] = 'Phone number must be 10 digits';
               }
-            } else if (child.type === 'date') {
-              if (!formData[child.name]) {
-                newErrors[child.name] = child.validation_message || `${child.label} is required`;
+            } else if (child.type === 'date' && formData[child.name]) {
+              // Validate date format and range
+              const inputDate = new Date(formData[child.name]);
+              const today = new Date();
+
+              if (isNaN(inputDate.getTime())) {
+                newErrors[child.name] = 'Invalid date format';
               } else if (child.max_date) {
-                const inputDate = new Date(formData[child.name]);
-                const today = new Date();
-
-                if (isNaN(inputDate.getTime())) {
-                  newErrors[child.name] = 'Invalid date format';
-                } else {
-                  const minAllowedDate = new Date(
-                    today.getFullYear() - child.max_date,
-                    today.getMonth(),
-                    today.getDate(),
-                  );
-
-                  if (inputDate < minAllowedDate) {
-                    newErrors[
-                      child.name
-                    ] = `Student must be ${child.max_date} years old or younger`;
-                  }
+                const maxAllowedDate = new Date(
+                  today.getFullYear() - child.max_date,
+                  today.getMonth(),
+                  today.getDate(),
+                );
+                if (inputDate > maxAllowedDate) {
+                  newErrors[child.name] = `Age must be at most ${child.max_date} years`;
                 }
               }
             }

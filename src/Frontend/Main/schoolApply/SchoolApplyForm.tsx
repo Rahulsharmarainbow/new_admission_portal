@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import DisclaimerStep from './DisclaimerStep';
 import DeclarationStep from './DeclarationStep';
@@ -69,48 +69,70 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
   const apiUrl = import.meta.env.VITE_API_URL;
 
   // Check validation function
-  const checkValidation = useCallback(
-    (name: string, type: string, validation: string, validation_message: string) => {
-      if (type === 'file_button') {
-        validationErrors.current[name] = '';
-      } else {
-        if (name === 'adharCard') {
-          let aadhaarCard = '';
-          for (let i = 0; i < 12; i++) {
-            const digit = formData[`adharCard_${i}`];
-            if (!digit) {
-              validationErrors.current[name] = 'All Aadhaar card digits are required';
-              break;
-            }
-            aadhaarCard += digit;
+// Fix the checkValidation function first
+const checkValidation = useCallback(
+  (name: string, type: string, validation: string, validation_message: string) => {
+    if (type === 'file_button') {
+      validationErrors.current[name] = '';
+    } else {
+      if (name === 'adharCard') {
+        let aadhaarCard = '';
+        let hasError = false;
+        
+        for (let i = 0; i < 12; i++) {
+          const digit = formData[`adharCard_${i}`];
+          if (!digit) {
+            validationErrors.current[name] = 'All Aadhaar card digits are required';
+            hasError = true;
+            break;
           }
-          if (aadhaarCard.length === 12) {
-            validationErrors.current[name] = '';
-          }
-        } else if (!formData[name]) {
-          validationErrors.current[name] = validation_message;
-        } else if (validation === 'email') {
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailRegex.test(formData[name])) {
-            validationErrors.current[name] = 'Invalid email address';
-          } else {
-            validationErrors.current[name] = '';
-          }
-        } else if (validation === 'mobile') {
-          const phoneRegex = /^\d{10}$/;
-          if (!phoneRegex.test(formData[name])) {
-            validationErrors.current[name] = 'Phone number must be 10 digits';
-          } else {
-            validationErrors.current[name] = '';
-          }
+          aadhaarCard += digit;
+        }
+        
+        // Clear error if all digits are properly filled
+        if (!hasError && aadhaarCard.length === 12) {
+          validationErrors.current[name] = '';
+        }
+      } else if (!formData[name] && formData[name] !== 0) {
+        // Fix: Check for empty string, null, undefined but allow 0
+        validationErrors.current[name] = validation_message;
+      } else if (validation === 'email') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData[name])) {
+          validationErrors.current[name] = 'Invalid email address';
         } else {
           validationErrors.current[name] = '';
         }
+      } else if (validation === 'mobile') {
+        const phoneRegex = /^\d{10}$/; // Fix: 10 digits, not 9
+        if (!phoneRegex.test(formData[name])) {
+          validationErrors.current[name] = 'Phone number must be 10 digits';
+        } else {
+          validationErrors.current[name] = '';
+        }
+      } else {
+        validationErrors.current[name] = '';
       }
-      setErrors((prev) => ({ ...prev, [name]: validationErrors.current[name] }));
-    },
-    [formData],
-  );
+    }
+    setErrors((prev) => ({ ...prev, [name]: validationErrors.current[name] }));
+  },
+  [formData],
+);
+
+// Improved useEffect with better filtering
+useEffect(() => {
+  required_child.forEach((child) => {
+    // Only validate fields that have values or are required
+    if (formData[child.name] !== undefined || child.required) {
+      checkValidation(
+        child.name,
+        child.type,
+        child.validation,
+        child.validation_message
+      );
+    }
+  });
+}, [formData, required_child]);
 
   // Handle input change with API calls
   const handleInputChange = useCallback(
@@ -170,16 +192,16 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
       }
 
       // Check validation if field has validation rules
-      if (fieldConfig?.validation) {
-        checkValidation(
-          name,
-          fieldConfig.type,
-          fieldConfig.validation,
-          fieldConfig.validation_message,
-        );
-      }
+      // if (fieldConfig?.validation) {
+      //   checkValidation(
+      //     name,
+      //     fieldConfig.type,
+      //     fieldConfig.validation,
+      //     fieldConfig.validation_message,
+      //   );
+      // }
     },
-    [errors, apiUrl, academic_id, cdata, checkValidation],
+    [errors, apiUrl, academic_id, cdata],
   );
 
   // Handle select change
@@ -233,37 +255,34 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
       }
 
       // Check validation
-      if (fieldConfig?.validation) {
-        checkValidation(
-          name,
-          fieldConfig.type,
-          fieldConfig.validation,
-          fieldConfig.validation_message,
-        );
-      }
+      // if (fieldConfig?.validation) {
+      //   checkValidation(
+      //     name,
+      //     fieldConfig.type,
+      //     fieldConfig.validation,
+      //     fieldConfig.validation_message,
+      //   );
+      // }
     },
-    [errors, apiUrl, checkValidation],
+    [errors, apiUrl],
   );
 
   // Handle checkbox change
-  const handleCheckboxChange = useCallback(
-    (name: string, value: boolean, fieldConfig?: any) => {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value ? 1 : 0,
-      }));
+const handleCheckboxChange = useCallback(
+  (name: string, value: boolean, fieldConfig?: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value ? 1 : 0,
+    }));
 
-      if (fieldConfig?.required) {
-        checkValidation(
-          name,
-          fieldConfig.type,
-          fieldConfig.validation,
-          fieldConfig.validation_message,
-        );
-      }
-    },
-    [checkValidation],
-  );
+    // Immediately clear error for this field
+    setErrors((prev) => ({
+      ...prev,
+      [name]: '',
+    }));
+  },
+  [], // Remove dependencies
+);
 
   // Handle date change
   const handleDateChange = useCallback(
@@ -283,18 +302,18 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
       }
 
       // Check validation after a small delay to ensure state is updated
-      setTimeout(() => {
-        if (fieldConfig?.required) {
-          checkValidation(
-            name,
-            fieldConfig.type,
-            fieldConfig.validation,
-            fieldConfig.validation_message,
-          );
-        }
-      }, 100);
+      // setTimeout(() => {
+      //   if (fieldConfig?.required) {
+      //     checkValidation(
+      //       name,
+      //       fieldConfig.type,
+      //       fieldConfig.validation,
+      //       fieldConfig.validation_message,
+      //     );
+      //   }
+      // }, 100);
     },
-    [checkValidation, errors],
+    [],
   );
 
   // Handle Aadhaar change
@@ -315,12 +334,12 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
             nextInput?.focus();
           }
 
-          checkValidation(
-            name,
-            fieldConfig.type,
-            fieldConfig.validation,
-            fieldConfig.validation_message,
-          );
+          // checkValidation(
+          //   name,
+          //   fieldConfig.type,
+          //   fieldConfig.validation,
+          //   fieldConfig.validation_message,
+          // );
         }
       } else if (value === '') {
         setFormData((prev) => ({
@@ -337,7 +356,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
         }
       }
     },
-    [checkValidation],
+    [],
   );
 
   const handleFileChange = useCallback(
@@ -422,15 +441,15 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
           }
 
           // ✅ Perform extra validation if required
-          if (required) {
-            checkValidation(name, type, validation, validation_message);
-          }
+          // if (required) {
+          //   checkValidation(name, type, validation, validation_message);
+          // }
         };
       };
 
       reader.readAsDataURL(file);
     },
-    [errors, checkValidation],
+    [errors],
   );
 
   const handleConditionChange = useCallback((condition: string, value: boolean) => {
@@ -939,13 +958,3 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
 };
 
 export default SchoolApplyForm;
-
-// import React from 'react'
-
-// const SchoolApplyForm = () => {
-//   return (
-//     <div>SchoolApplyForm</div>
-//   )
-// }
-
-// export default SchoolApplyForm

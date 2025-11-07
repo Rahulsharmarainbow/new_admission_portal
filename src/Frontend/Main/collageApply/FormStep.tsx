@@ -202,26 +202,30 @@ const FormStep: React.FC<FormStepProps> = ({
         );
 
       case 'date':
-        // Calculate min and max dates based on max_date configuration
-        const getMinDate = () => {
+        // Calculate max date based on max_date configuration (maximum age)
+        const getMaxDate = () => {
           if (child.max_date) {
             const today = new Date();
-            // For max_date = 5, min date should be 5 years ago from today
-            const minDate = new Date(
+            const maxDate = new Date(
               today.getFullYear() - child.max_date,
               today.getMonth(),
               today.getDate(),
             );
-            return minDate.toISOString().split('T')[0];
+            return maxDate.toISOString().split('T')[0];
           }
           return undefined;
         };
 
-        const getMaxDate = () => {
-          if (child.max_date) {
+        // Calculate min date (optional, you can set this if needed)
+        const getMinDate = () => {
+          if (child.min_date) {
             const today = new Date();
-            // Max date should be today (can't select future dates)
-            return today.toISOString().split('T')[0];
+            const minDate = new Date(
+              today.getFullYear() - child.min_date,
+              today.getMonth(),
+              today.getDate(),
+            );
+            return minDate.toISOString().split('T')[0];
           }
           return undefined;
         };
@@ -236,8 +240,8 @@ const FormStep: React.FC<FormStepProps> = ({
               {...commonProps}
               type="date"
               onChange={(e) => onDateChange(child.name, e.target.value, fieldConfig)}
-              min={getMinDate()} // This restricts to dates from 5 years ago
-              max={getMaxDate()} // This prevents selecting future dates
+              max={getMaxDate()} // This will restrict dates - hides recent years based on max_date
+              min={getMinDate()} // Optional: for minimum age restriction
               className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
                 errors[child.name] ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -499,105 +503,105 @@ const FormStep: React.FC<FormStepProps> = ({
     }
   };
 
-  console.log('dynamicBoxesssssss', dynamicBoxes);
-
   return (
-   <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 w-full">
-  {dynamicBoxes?.map((box, boxIndex) => {
-    const boxWidth = box.width || '100%';
-    const boxWidthValue = parseInt(boxWidth);
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 w-full">
+      {dynamicBoxes?.map((box, boxIndex) => {
+        const boxWidth = box.width || '100%';
+        const boxWidthValue = parseInt(boxWidth);
 
-    const getGridCols = () => {
-      if (boxWidthValue >= 70 && boxWidthValue <= 80) return 'lg:col-span-9';
-      if (boxWidthValue >= 20 && boxWidthValue <= 30) return 'lg:col-span-3';
-      if (boxWidthValue >= 45 && boxWidthValue <= 55) return 'lg:col-span-6';
-      return 'lg:col-span-12';
-    };
+        const getGridCols = () => {
+          if (boxWidthValue >= 70 && boxWidthValue <= 80) return 'lg:col-span-9';
+          if (boxWidthValue >= 20 && boxWidthValue <= 30) return 'lg:col-span-3';
+          if (boxWidthValue >= 45 && boxWidthValue <= 55) return 'lg:col-span-6';
+          return 'lg:col-span-12';
+        };
 
-    return (
-      <div
-        key={boxIndex}
-        className={`col-span-12 ${getGridCols()} bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 transition-all duration-300 hover:shadow-lg hover:border-blue-300 group`}
-      >
-        {/* Box Header */}
-        {box.title && (
-          <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
-            {box.icon && (
-              <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-                <Icon icon={box.icon} className="w-5 h-5" />
+        return (
+          <div
+            key={boxIndex}
+            className={`col-span-12 ${getGridCols()} bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 transition-all duration-300 hover:shadow-lg hover:border-blue-300 group`}
+          >
+            {/* Box Header */}
+            {box.title && (
+              <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+                {box.icon && (
+                  <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                    <Icon icon={box.icon} className="w-5 h-5" />
+                  </div>
+                )}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
+                    {box.title}
+                  </h3>
+                  {box.description && (
+                    <p className="text-sm text-gray-600 mt-1">{box.description}</p>
+                  )}
+                </div>
               </div>
             )}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
-                {box.title}
-              </h3>
-              {box.description && (
-                <p className="text-sm text-gray-600 mt-1">{box.description}</p>
-              )}
+
+            {/* Box Content with dynamic grid columns */}
+            <div className="w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                {box?.children?.map((child: any, childIndex: number) => {
+                  if (child.v_target) {
+                    const targetValue = formData[`s_${child.h_target}`];
+                    if (!child.v_target.split(',').includes(targetValue)) {
+                      return null;
+                    }
+                  }
+
+                  const childWidth = child.width || '100%';
+                  const childWidthValue = parseInt(childWidth);
+
+                  // Calculate column span based on width percentage
+                  const getColumnSpan = () => {
+                    // Full width elements
+                    // if (child.type === 'heading' || child.type === 'heading2' || child.type === 'para') {
+                    //   return 'full';
+                    // }
+
+                    // Width-based spans
+                    if (childWidthValue >= 80) return 'full';
+                    if (childWidthValue >= 60) return 'span-2';
+                    if (childWidthValue >= 40) return 'span-2';
+                    if (childWidthValue >= 30) return 'span-1';
+                    if (childWidthValue >= 20) return 'span-1';
+                    return 'span-1';
+                  };
+
+                  const spanClass = {
+                    full: 'col-span-full',
+                    'span-2': 'col-span-2',
+                    'span-1': 'col-span-1',
+                  }[getColumnSpan()];
+
+                  return (
+                    <div
+                      key={childIndex}
+                      className={`${spanClass} transition-all duration-200`}
+                      style={{
+                        minWidth: '150px',
+                        ...(child.type === 'file_button'
+                          ? {
+                              display: 'flex',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              flexDirection: 'column',
+                            }
+                          : {}),
+                      }}
+                    >
+                      {renderField(child, boxIndex, childIndex)}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        )}
-
-        {/* Box Content with dynamic grid columns */}
-        <div className="w-full">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-            {box?.children?.map((child: any, childIndex: number) => {
-              if (child.v_target) {
-                const targetValue = formData[`s_${child.h_target}`];
-                if (!child.v_target.split(',').includes(targetValue)) {
-                  return null;
-                }
-              }
-
-              const childWidth = child.width || '100%';
-              const childWidthValue = parseInt(childWidth);
-
-              // Calculate column span based on width percentage
-              const getColumnSpan = () => {
-                // Full width elements
-                // if (child.type === 'heading' || child.type === 'heading2' || child.type === 'para') {
-                //   return 'full';
-                // }
-                
-                // Width-based spans
-                if (childWidthValue >= 80) return 'full';
-                if (childWidthValue >= 60) return 'span-2';
-                if (childWidthValue >= 40) return 'span-2';
-                if (childWidthValue >= 30) return 'span-1';
-                if (childWidthValue >= 20) return 'span-1';
-                return 'span-1';
-              };
-
-              const spanClass = {
-                'full': 'col-span-full',
-                'span-2': 'col-span-2',
-                'span-1': 'col-span-1'
-              }[getColumnSpan()];
-
-              return (
-                <div
-                  key={childIndex}
-                  className={`${spanClass} transition-all duration-200`}
-                  style={{
-                    minWidth: '150px',
-                    ...(child.type === 'file_button' ? {
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      flexDirection: 'column'
-                    } : {})
-                  }}
-                >
-                  {renderField(child, boxIndex, childIndex)}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    );
-  })}
-</div>
+        );
+      })}
+    </div>
   );
 };
 
