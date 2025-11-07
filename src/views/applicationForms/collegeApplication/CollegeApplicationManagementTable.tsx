@@ -57,11 +57,16 @@ interface Filters {
   contact: string;
   fromDate: string;
   toDate: string;
+  email: string;
 }
 
 interface ClassOption {
   value: string;
   label: string;
+}
+
+interface CdFilters {
+  [key: string]: string[]; // Dynamic filter structure for API
 }
 
 const CollegeApplicationManagementTable: React.FC = () => {
@@ -92,7 +97,9 @@ const CollegeApplicationManagementTable: React.FC = () => {
     contact: '',
     fromDate: '',
     toDate: '',
+    email: '',
   });
+  const [cdFilters, setCdFilters] = useState<CdFilters>({});
   const [total, setTotal] = useState(0);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
@@ -133,39 +140,55 @@ const CollegeApplicationManagementTable: React.FC = () => {
     if (filters.annual) count++;
     if (filters.special) count++;
     if (filters.localarea) count++;
+    
+    // Count dynamic cdFilters
+    Object.keys(cdFilters).forEach(key => {
+      if (cdFilters[key] && cdFilters[key].length > 0) {
+        count++;
+      }
+    });
+    
     setActiveFiltersCount(count);
-  }, [filters]);
+  }, [filters, cdFilters]);
 
   // Fetch applications data
   const fetchApplications = async () => {
     setLoading(true);
     try {
+      const requestBody: any = {
+        academic_id: filters.academic_id || undefined,
+        year: filters.year || undefined,
+        degree: filters.degree || undefined,
+        paymentStatus: filters.paymentStatus || undefined,
+        applicationNumber: filters.applicationNumber || undefined,
+        transactions_id: filters.transactions_id || undefined,
+        amounts: filters.amounts || undefined,
+        gender: filters.gender || undefined,
+        special: filters.special || undefined,
+        annual: filters.annual || undefined,
+        state: filters.state || undefined,
+        district: filters.district || undefined,
+        localarea: filters.localarea || undefined,
+        caste: filters.caste || undefined,
+        contact: filters.contact || undefined,
+        email: filters.email || undefined,
+        fromDate: filters.fromDate || undefined,
+        toDate: filters.toDate || undefined,
+        page: filters.page,
+        rowsPerPage: filters.rowsPerPage,
+        order: filters.order,
+        orderBy: filters.orderBy,
+        search: filters.search,
+      };
+
+      // Add cdFilters if they exist
+      if (Object.keys(cdFilters).length > 0) {
+        requestBody.cdFilters = cdFilters;
+      }
+
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Applications/get-college-applications`,
-        {
-          academic_id: filters.academic_id || undefined,
-          year: filters.year || undefined,
-          degree: filters.degree || undefined,
-          paymentStatus: filters.paymentStatus || undefined,
-          applicationNumber: filters.applicationNumber || undefined,
-          transactions_id: filters.transactions_id || undefined,
-          amounts: filters.amounts || undefined,
-          gender: filters.gender || undefined,
-          special: filters.special || undefined,
-          annual: filters.annual || undefined,
-          state: filters.state || undefined,
-          district: filters.district || undefined,
-          localarea: filters.localarea || undefined,
-          caste: filters.caste || undefined,
-          contact: filters.contact || undefined,
-          fromDate: filters.fromDate || undefined,
-          toDate: filters.toDate || undefined,
-          page: filters.page,
-          rowsPerPage: filters.rowsPerPage,
-          order: filters.order,
-          orderBy: filters.orderBy,
-          search: filters.search,
-        },
+        requestBody,
         {
           headers: {
             Authorization: `Bearer ${user?.token}`,
@@ -204,13 +227,15 @@ const CollegeApplicationManagementTable: React.FC = () => {
     filters.fromDate,
     filters.toDate,
     filters.contact,
+    filters.email,
     filters.applicationNumber,
     filters.state,
     filters.district,
     filters.caste,
     filters.annual,
     filters.special,
-    filters.localarea
+    filters.localarea,
+    cdFilters
   ]);
 
   // Handle search
@@ -265,8 +290,6 @@ const CollegeApplicationManagementTable: React.FC = () => {
 
   // Handle view details
   const handleViewDetails = (application: Application) => {
-    // setSelectedApplication(application);
-    // setShowDetailModal(true);
     navigate(`/${user?.role}/application-details/${application.id}`);
   };
 
@@ -276,15 +299,12 @@ const CollegeApplicationManagementTable: React.FC = () => {
   };
 
   // Handle download Excel
- // Handle download Excel with API integration
-const handleDownloadExcel = async () => {
-  try {
-    setLoading(true);
-    toast.loading('Preparing Excel file...', { id: 'download-excel' });
+  const handleDownloadExcel = async () => {
+    try {
+      setLoading(true);
+      toast.loading('Preparing Excel file...', { id: 'download-excel' });
 
-    const response = await axios.post(
-      `${apiUrl}/${user?.role}/Applications/Export-college-Applications`,
-      {
+      const requestBody: any = {
         academic_id: filters.academic_id || "",
         s_id: user?.id || "",
         degree: filters.degree || "",
@@ -300,75 +320,83 @@ const handleDownloadExcel = async () => {
         contact: filters.contact || "",
         applicationNumber: filters.applicationNumber || "",
         paymentStatus: filters.paymentStatus || "",
-        email: filters.search.includes('@') ? filters.search : "" // If search contains @, treat as email
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-          accept: '/',
-          'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
-          'Content-Type': 'application/json',
-        },
-        // responseType: 'json' remove karna hai kyunki ab JSON response aa raha hai
-      }
-    );
+        email: filters.search.includes('@') ? filters.search : "",
+      };
 
-    // Check if response is successful
-    if (response.data.success && response.data.data) {
-      const { filename, excel_base64 } = response.data.data;
-      
-      // Base64 decode karo
-      const binaryString = atob(excel_base64);
-      const bytes = new Uint8Array(binaryString.length);
-      
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+      // Add cdFilters if they exist
+      if (Object.keys(cdFilters).length > 0) {
+        requestBody.cdFilters = cdFilters;
+      }
+
+      const response = await axios.post(
+        `${apiUrl}/${user?.role}/Applications/Export-college-Applications`,
+        requestBody,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            accept: '/',
+            'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.data.success && response.data.data) {
+        const { filename, excel_base64 } = response.data.data;
+        
+        const binaryString = atob(excel_base64);
+        const bytes = new Uint8Array(binaryString.length);
+        
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        const blob = new Blob([bytes], { 
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+        
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename || 'college-applications.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        toast.success('Excel file downloaded successfully!', { id: 'download-excel' });
+      } else {
+        throw new Error(response.data.message || 'Failed to generate Excel file');
       }
       
-      // Blob create karo
-      const blob = new Blob([bytes], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-      });
+    } catch (error: any) {
+      console.error('Error downloading Excel:', error);
       
-      // Download link create karo
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', filename || 'college-applications.xlsx');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      toast.success('Excel file downloaded successfully!', { id: 'download-excel' });
-    } else {
-      throw new Error(response.data.message || 'Failed to generate Excel file');
+      if (error.response?.status === 404) {
+        toast.error('No data found to export', { id: 'download-excel' });
+      } else if (error.response?.status === 500) {
+        toast.error('Server error while generating Excel file', { id: 'download-excel' });
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message, { id: 'download-excel' });
+      } else {
+        toast.error('Failed to download Excel file', { id: 'download-excel' });
+      }
+    } finally {
+      setLoading(false);
     }
-    
-  } catch (error: any) {
-    console.error('Error downloading Excel:', error);
-    
-    if (error.response?.status === 404) {
-      toast.error('No data found to export', { id: 'download-excel' });
-    } else if (error.response?.status === 500) {
-      toast.error('Server error while generating Excel file', { id: 'download-excel' });
-    } else if (error.response?.data?.message) {
-      toast.error(error.response.data.message, { id: 'download-excel' });
-    } else {
-      toast.error('Failed to download Excel file', { id: 'download-excel' });
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // Handle filter change from sidebar
-  const handleFilterChange = (newFilters: Partial<Filters>) => {
+  const handleFilterChange = (newFilters: Partial<Filters>, newCdFilters?: CdFilters) => {
     setFilters(prev => ({
       ...prev,
       ...newFilters,
       page: 0
     }));
+    
+    if (newCdFilters) {
+      setCdFilters(newCdFilters);
+    }
   };
 
   // Clear all filters
@@ -396,7 +424,9 @@ const handleDownloadExcel = async () => {
       contact: '',
       fromDate: '',
       toDate: '',
+      email: '',
     });
+    setCdFilters({});
     setSort({ key: 'id', direction: 'desc' });
   };
 
@@ -404,11 +434,11 @@ const handleDownloadExcel = async () => {
   const getPaymentStatus = (status: string) => {
     switch (status) {
       case '1':
-        return { text: 'Paid', color: 'text-green-600 bg-green-50' };
+        return { text: 'captured', color: 'text-green-600 bg-green-50' };
       case '0':
-        return { text: 'Unpaid', color: 'text-red-600 bg-red-50' };
+        return { text: 'intilized', color: 'text-red-600 bg-red-50' };
       default:
-        return { text: 'Unknown', color: 'text-gray-600 bg-gray-50' };
+        return { text: 'intilized ', color: 'text-gray-600 bg-gray-50' };
     }
   };
 
@@ -496,8 +526,14 @@ const handleDownloadExcel = async () => {
                       <th className="w-16 py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         S.NO
                       </th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
-                        Applicant Name
+                      <th 
+                        className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px] cursor-pointer select-none"
+                        onClick={() => handleSort('applicant_name')}
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Applicant Name</span>
+                          {getSortIcon('applicant_name')}
+                        </div>
                       </th>
                       <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
                         Candidate Pic
@@ -517,8 +553,14 @@ const handleDownloadExcel = async () => {
                       <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
                         Academic Name
                       </th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
-                        Degree
+                      <th 
+                        className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px] cursor-pointer select-none"
+                        onClick={() => handleSort('degree_name')}
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Degree</span>
+                          {getSortIcon('degree_name')}
+                        </div>
                       </th>
                       <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
                         Payment Status
@@ -665,6 +707,7 @@ const handleDownloadExcel = async () => {
           isOpen={showFilterSidebar}
           onClose={() => setShowFilterSidebar(false)}
           filters={filters}
+          cdFilters={cdFilters}
           onFilterChange={handleFilterChange}
           onClearFilters={handleClearFilters}
         />

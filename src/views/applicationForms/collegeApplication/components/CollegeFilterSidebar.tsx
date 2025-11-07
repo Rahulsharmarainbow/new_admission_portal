@@ -31,34 +31,41 @@ interface Filters {
   contact: string;
   fromDate: string;
   toDate: string;
+  email: string;
+}
+
+interface CdFilters {
+  [key: string]: string[];
 }
 
 interface CollegeFilterSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   filters: Filters;
-  onFilterChange: (filters: Partial<Filters>) => void;
+  cdFilters: CdFilters;
+  onFilterChange: (filters: Partial<Filters>, cdFilters?: CdFilters) => void;
   onClearFilters: () => void;
 }
 
 interface FilterOptions {
-  blood_group: Array<{ id: number; name: string }>;
-  local_area: Array<{ id: number; name: string }>;
-  year: Array<{ id: number; name: string }>;
-  gender: Array<{ id: number; name: string }>;
-  income: Array<{ id: number; name: string }>;
-  caste: Array<{ id: number; name: string }>;
-  boards: Array<{ id: number; name: string }>;
-  special_category: Array<{ id: number; name: string }>;
+  filters: {
+    [key: string]: Array<{ id: number; name: string }>;
+  };
   degreeList: Array<{ id: number; name: string }>;
-  paymentList: Array<{ id: number; name: string }>;
-  amountList: Array<{ id: number; name: string }>;
+}
+
+interface DynamicFilter {
+  key: string;
+  label: string;
+  options: Array<{ value: string; label: string }>;
+  isMulti: boolean;
 }
 
 const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
   isOpen,
   onClose,
   filters,
+  cdFilters,
   onFilterChange,
   onClearFilters,
 }) => {
@@ -66,6 +73,7 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
   const { states: statelist, loading: statesLoading } = useStates();
   const { caste: castelist, loading: casteLoading } = useCaste();
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
+  const [dynamicFilters, setDynamicFilters] = useState<DynamicFilter[]>([]);
   const [loading, setLoading] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -97,13 +105,20 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
     label: caste.name,
   }));
 
+  // Set academic_id for CustomerAdmin
+  useEffect(() => {
+    if (user?.role === 'CustomerAdmin' && !filters.academic_id) {
+      handleInputChange('academic_id', user?.academic_id?.toString() || '');
+    }
+  }, [user]);
+
   // Fetch filter options when academic_id changes
   useEffect(() => {
-   if(user?.role === 'CustomerAdmin') handleInputChange('academic_id', user?.academic_id?.toString() || '');
     if (filters.academic_id && isOpen) {
       fetchFilterOptions();
     } else {
       setFilterOptions(null);
+      setDynamicFilters([]);
     }
   }, [filters.academic_id, isOpen]);
 
@@ -127,12 +142,56 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
 
       if (response.data) {
         setFilterOptions(response.data);
+        
+        // Convert filters to dynamic filter format
+        const dynamicFiltersList: DynamicFilter[] = [];
+        
+        if (response.data.filters) {
+          Object.keys(response.data.filters).forEach(filterKey => {
+            const filterItems = response.data.filters[filterKey];
+            if (filterItems && filterItems.length > 0) {
+              dynamicFiltersList.push({
+                key: filterKey,
+                label: formatFilterLabel(filterKey),
+                options: filterItems.map(item => ({
+                  value: item.id?.toString(),
+                  label: item.name,
+                })),
+                isMulti: false, // Changed to single select
+              });
+            }
+          });
+        }
+        
+        setDynamicFilters(dynamicFiltersList);
       }
     } catch (error) {
       console.error('Error fetching filter options:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Format filter key to readable label
+  const formatFilterLabel = (key: string): string => {
+    const labelMap: { [key: string]: string } = {
+      blood_group: 'Blood Group',
+      local_area: 'Local Area',
+      year: 'Year',
+      gender: 'Gender',
+      income: 'Annual Income',
+      caste: 'Caste',
+      boards: 'Board',
+      special_category: 'Special Category',
+      relationships: 'Relationship',
+      yesno: 'Yes/No',
+      board: 'Board',
+      type_of_plot: 'Type of Plot',
+    };
+    
+    return labelMap[key] || key.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   };
 
   const handleInputChange = (field: keyof Filters, value: string) => {
@@ -143,13 +202,27 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
     onFilterChange({ [field]: selectedOption?.value || '' });
   };
 
-  const handleMultiSelectChange = (field: keyof Filters, selectedOptions: any) => {
-    const values = selectedOptions ? selectedOptions.map((option: any) => option.value).join(',') : '';
-    onFilterChange({ [field]: values });
+  // Handle dynamic filter changes - single select
+  const handleDynamicFilterChange = (filterKey: string, selectedOption: any) => {
+    const value = selectedOption ? [selectedOption.value] : [];
+    const newCdFilters = { ...cdFilters };
+    
+    if (value.length > 0) {
+      newCdFilters[filterKey] = value;
+    } else {
+      delete newCdFilters[filterKey];
+    }
+    
+    onFilterChange({}, newCdFilters);
   };
 
   const handleApplyFilters = () => {
     onClose();
+  };
+
+  const handleClearAllFilters = () => {
+    onClearFilters();
+    setDynamicFilters([]);
   };
 
   const customStyles = {
@@ -190,18 +263,20 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Academic Dropdown */}
-           {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  (<div>
-            <Label htmlFor="academic" className="block mb-2 text-sm font-medium text-gray-700">
-              Academic
-            </Label>
-            <AcademicDropdown
-              value={filters.academic_id}
-              onChange={(value) => handleInputChange('academic_id', value)}
-              placeholder="Select academic..."
-              includeAllOption={true}
-              label=""
-            />
-          </div>)}
+          {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && (
+            <div>
+              <Label htmlFor="academic" className="block mb-2 text-sm font-medium text-gray-700">
+                Academic
+              </Label>
+              <AcademicDropdown
+                value={filters.academic_id}
+                onChange={(value) => handleInputChange('academic_id', value)}
+                placeholder="Select academic..."
+                includeAllOption={true}
+                label=""
+              />
+            </div>
+          )}
 
           {/* Year Dropdown */}
           <div>
@@ -218,6 +293,29 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
               classNamePrefix="react-select"
             />
           </div>
+
+          {/* Degree Dropdown from filter options */}
+          {filterOptions?.degreeList && filterOptions.degreeList.length > 0 && (
+            <div>
+              <Label htmlFor="degree" className="block mb-2 text-sm font-medium text-gray-700">
+                Degree/Stream
+              </Label>
+              <Select
+                options={filterOptions.degreeList.map(degree => ({
+                  value: degree.id?.toString(),
+                  label: degree.name,
+                }))}
+                value={filterOptions.degreeList
+                  .map(degree => ({ value: degree.id?.toString(), label: degree.name }))
+                  .find(option => option.value === filters.degree)}
+                onChange={(option) => handleSelectChange('degree', option)}
+                placeholder="Select stream..."
+                isClearable
+                className="react-select-container"
+                classNamePrefix="react-select"
+              />
+            </div>
+          )}
 
           {/* Date Range */}
           <div className="grid grid-cols-2 gap-4">
@@ -308,19 +406,18 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
             />
           </div>
 
-          {/* State Dropdown */}
+          {/* State Dropdown - Changed to single select */}
           <div>
             <Label htmlFor="state" className="block mb-2 text-sm font-medium text-gray-700">
               State
             </Label>
             <Select
               id="state"
-              isMulti
               options={stateOptions}
-              value={stateOptions.filter(option => filters.state.split(',').includes(option.value))}
-              onChange={(options) => handleMultiSelectChange('state', options)}
+              value={stateOptions.find(option => option.value === filters.state)}
+              onChange={(option) => handleSelectChange('state', option)}
               styles={customStyles}
-              placeholder="Select states..."
+              placeholder="Select state..."
               isSearchable
               isClearable
               className="react-select-container"
@@ -329,31 +426,20 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
                 inputValue ? `No states found for "${inputValue}"` : 'No states available'
               }
             />
-            {filters.state && (
-              <div className="mt-2">
-                <span className="text-sm text-blue-600 font-medium">
-                  Selected: {filters.state.split(',').length} state(s)
-                </span>
-              </div>
-            )}
           </div>
 
-         
-          
-
-          {/* Caste Dropdown */}
+          {/* Caste Dropdown - Changed to single select */}
           <div>
             <Label htmlFor="caste" className="block mb-2 text-sm font-medium text-gray-700">
               Caste
             </Label>
             <Select
               id="caste"
-              isMulti
               options={casteOptions}
-              value={casteOptions.filter(option => filters.caste.split(',').includes(option.value))}
-              onChange={(options) => handleMultiSelectChange('caste', options)}
+              value={casteOptions.find(option => option.value === filters.caste)}
+              onChange={(option) => handleSelectChange('caste', option)}
               styles={customStyles}
-              placeholder="Select castes..."
+              placeholder="Select caste..."
               isSearchable
               isClearable
               className="react-select-container"
@@ -362,134 +448,33 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
                 inputValue ? `No castes found for "${inputValue}"` : 'No castes available'
               }
             />
-            {filters.caste && (
-              <div className="mt-2">
-                <span className="text-sm text-blue-600 font-medium">
-                  Selected: {filters.caste.split(',').length} caste(s)
-                </span>
-              </div>
-            )}
           </div>
 
-          {/* Academic-specific filters (only show when academic is selected) */}
-          {filterOptions && filters.academic_id && (
-            <>
-              {/* Degree/Stream */}
-              {filterOptions.degreeList && filterOptions.degreeList.length > 0 && (
-                <div>
-                  <Label htmlFor="degree" className="block mb-2 text-sm font-medium text-gray-700">
-                    Stream Applied
-                  </Label>
-                  <Select
-                    options={filterOptions.degreeList.map(degree => ({
-                      value: degree.id?.toString(),
-                      label: degree.name,
-                    }))}
-                    value={filterOptions.degreeList
-                      .map(degree => ({ value: degree.id?.toString(), label: degree.name }))
-                      .find(option => option.value === filters.degree)}
-                    onChange={(option) => handleSelectChange('degree', option)}
-                    placeholder="Select stream..."
-                    isClearable
-                    className="react-select-container"
-                    classNamePrefix="react-select"
-                  />
-                </div>
-              )}
-
-              {/* Gender */}
-              {filterOptions.gender && filterOptions.gender.length > 0 && (
-                <div>
-                  <Label htmlFor="gender" className="block mb-2 text-sm font-medium text-gray-700">
-                    Gender
-                  </Label>
-                  <Select
-                    options={filterOptions.gender.map(gender => ({
-                      value: gender.id?.toString(),
-                      label: gender.name,
-                    }))}
-                    value={filterOptions.gender
-                      .map(gender => ({ value: gender.id?.toString(), label: gender.name }))
-                      .find(option => option.value === filters.gender)}
-                    onChange={(option) => handleSelectChange('gender', option)}
-                    placeholder="Select gender..."
-                    isClearable
-                    className="react-select-container"
-                    classNamePrefix="react-select"
-                  />
-                </div>
-              )}
-
-              {/* Annual Income */}
-              {filterOptions.income && filterOptions.income.length > 0 && (
-                <div>
-                  <Label htmlFor="annual" className="block mb-2 text-sm font-medium text-gray-700">
-                    Annual Income
-                  </Label>
-                  <Select
-                    options={filterOptions.income.map(income => ({
-                      value: income.id?.toString(),
-                      label: income.name,
-                    }))}
-                    value={filterOptions.income
-                      .map(income => ({ value: income.id?.toString(), label: income.name }))
-                      .find(option => option.value === filters.annual)}
-                    onChange={(option) => handleSelectChange('annual', option)}
-                    placeholder="Select annual income..."
-                    isClearable
-                    className="react-select-container"
-                    classNamePrefix="react-select"
-                  />
-                </div>
-              )}
-
-              {/* Special Category */}
-              {filterOptions.special_category && filterOptions.special_category.length > 0 && (
-                <div>
-                  <Label htmlFor="special" className="block mb-2 text-sm font-medium text-gray-700">
-                    Special Category
-                  </Label>
-                  <Select
-                    options={filterOptions.special_category.map(special => ({
-                      value: special.id?.toString(),
-                      label: special.name,
-                    }))}
-                    value={filterOptions.special_category
-                      .map(special => ({ value: special.id?.toString(), label: special.name }))
-                      .find(option => option.value === filters.special)}
-                    onChange={(option) => handleSelectChange('special', option)}
-                    placeholder="Select special category..."
-                    isClearable
-                    className="react-select-container"
-                    classNamePrefix="react-select"
-                  />
-                </div>
-              )}
-
-              {/* Local Area */}
-              {filterOptions.local_area && filterOptions.local_area.length > 0 && (
-                <div>
-                  <Label htmlFor="localarea" className="block mb-2 text-sm font-medium text-gray-700">
-                    Local Area
-                  </Label>
-                  <Select
-                    options={filterOptions.local_area.map(area => ({
-                      value: area.id?.toString(),
-                      label: area.name,
-                    }))}
-                    value={filterOptions.local_area
-                      .map(area => ({ value: area.id?.toString(), label: area.name }))
-                      .find(option => option.value === filters.localarea)}
-                    onChange={(option) => handleSelectChange('localarea', option)}
-                    placeholder="Select local area..."
-                    isClearable
-                    className="react-select-container"
-                    classNamePrefix="react-select"
-                  />
-                </div>
-              )}
-            </>
-          )}
+          {/* Dynamic Filters from API - All single select now */}
+          {dynamicFilters.map((filter) => (
+            <div key={filter.key}>
+              <Label htmlFor={filter.key} className="block mb-2 text-sm font-medium text-gray-700">
+                {filter.label}
+              </Label>
+              <Select
+                id={filter.key}
+                options={filter.options}
+                value={filter.options.find(option => 
+                  cdFilters[filter.key]?.[0] === option.value
+                )}
+                onChange={(option) => handleDynamicFilterChange(filter.key, option)}
+                styles={customStyles}
+                placeholder={`Select ${filter.label.toLowerCase()}...`}
+                isSearchable
+                isClearable
+                className="react-select-container"
+                classNamePrefix="react-select"
+                noOptionsMessage={({ inputValue }) =>
+                  inputValue ? `No ${filter.label.toLowerCase()} found for "${inputValue}"` : `No ${filter.label.toLowerCase()} available`
+                }
+              />
+            </div>
+          ))}
 
           {loading && (
             <div className="text-center py-4">
@@ -503,7 +488,7 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
         <div className="sticky bottom-0 left-0 right-0 p-6 border-t bg-white">
           <div className="flex gap-3">
             <Button
-              onClick={onClearFilters}
+              onClick={handleClearAllFilters}
               color="alternative"
               className="flex-1"
             >
