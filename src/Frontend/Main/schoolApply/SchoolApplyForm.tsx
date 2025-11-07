@@ -8,6 +8,7 @@ import SuccessStep from './SuccessStep';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import FormStep from '../collageApply/FormStep';
+import { isImageBlurred } from './Blurred';
 
 interface SchoolApplyFormProps {
   academic_id: string;
@@ -267,30 +268,33 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
   // Handle date change
   const handleDateChange = useCallback(
     (name: string, date: any, fieldConfig?: any) => {
-      let value = '';
-      try {
-        const adjustedDate = new Date(date);
-        adjustedDate.setDate(adjustedDate.getDate() + 1);
-        value = adjustedDate.toISOString().split('T')[0] || '';
-      } catch (error) {
-        console.error('Date parsing error:', error);
-      }
-
+      // Directly use the selected date without adjustment
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: date,
       }));
 
-      if (fieldConfig?.required) {
-        checkValidation(
-          name,
-          fieldConfig.type,
-          fieldConfig.validation,
-          fieldConfig.validation_message,
-        );
+      // Clear error immediately when date is selected
+      if (errors[name]) {
+        setErrors((prev) => ({
+          ...prev,
+          [name]: '',
+        }));
       }
+
+      // Check validation after a small delay to ensure state is updated
+      setTimeout(() => {
+        if (fieldConfig?.required) {
+          checkValidation(
+            name,
+            fieldConfig.type,
+            fieldConfig.validation,
+            fieldConfig.validation_message,
+          );
+        }
+      }, 100);
     },
-    [checkValidation],
+    [checkValidation, errors],
   );
 
   // Handle Aadhaar change
@@ -340,13 +344,16 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
     (name: string, file: File, fieldConfig?: any) => {
       if (!file) return;
 
-      // Validate image type
+      const { resolution, target, type, validation, validation_message, required } =
+        fieldConfig || {};
+
+      // ✅ Validate Type
       if (!file.type.match(/image\/(jpeg|png)/)) {
         toast.error('Please upload a valid JPEG or PNG image.');
         return;
       }
 
-      // Validate file size (1MB limit)
+      // ✅ Validate Size (< 1 MB)
       if (file.size > 1048576) {
         toast.error('File size should be less than 1 MB.');
         return;
@@ -354,43 +361,74 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
 
       const reader = new FileReader();
 
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
         const base64 = reader.result as string;
-        let width = 150;
-        let height = 150;
 
-        if (fieldConfig?.resolution) {
-          const [w, h] = fieldConfig.resolution.split('x');
-          width = parseInt(w, 10);
-          height = parseInt(h, 10);
-        }
+        const img = new window.Image();
+        img.src = base64;
 
-        // Backend compatible structure
-        setFileData((prev) => ({
-          ...prev,
-          [name]: base64,
-        }));
+        img.onload = async () => {
+          const imgWidth = img.width;
+          const imgHeight = img.height;
 
-        // remove error if previously set
-        if (errors[name]) {
-          setErrors((prev) => ({
+          let targetWidth = imgWidth;
+          let targetHeight = imgHeight;
+
+          // ✅ Resolution check (if required)
+          if (resolution) {
+            const [w, h] = resolution.split('x');
+            targetWidth = parseInt(w, 10);
+            targetHeight = parseInt(h, 10);
+
+            if (imgWidth !== targetWidth || imgHeight !== targetHeight) {
+              toast.error(`The uploaded image must be ${targetWidth}x${targetHeight} pixels.`);
+              return;
+            }
+          }
+
+          // ✅ Blur Detection
+          try {
+            const blurry = await isImageBlurred(img.src, targetWidth, targetHeight);
+            if (blurry) {
+              toast.error('The uploaded image is too blurry. Please upload a clearer image.');
+              return;
+            }
+          } catch (err) {
+            console.error('Blur check failed:', err);
+            toast.error('There was an issue processing the image.');
+            return;
+          }
+
+          // ✅ Save base64 for backend submission
+          setFileData((prev) => ({
             ...prev,
-            [name]: '',
+            [name]: base64,
           }));
-        }
 
-        // validate if required
-        if (fieldConfig?.required) {
-          checkValidation(
-            name,
-            fieldConfig.type,
-            fieldConfig.validation,
-            fieldConfig.validation_message,
-          );
-        }
+          // ✅ Preview target if defined
+          if (target) {
+            setFileData((prev) => ({
+              ...prev,
+              [target]: base64,
+            }));
+          }
+
+          // ✅ Remove error if previously set
+          if (errors[name]) {
+            setErrors((prev) => ({
+              ...prev,
+              [name]: '',
+            }));
+          }
+
+          // ✅ Perform extra validation if required
+          if (required) {
+            checkValidation(name, type, validation, validation_message);
+          }
+        };
       };
 
-      reader.readAsDataURL(file); // Base64 generation
+      reader.readAsDataURL(file);
     },
     [errors, checkValidation],
   );
@@ -492,7 +530,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
 
       const order = response.data;
       console.log('Payment order:', order);
-      
+
       const options = {
         key: cdata.razorpay_api_key,
         amount: order.amount,
@@ -601,34 +639,32 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
         `${apiUrl}/frontend/download-school-receipt`,
         { application_id },
         {
-          responseType: "blob",
+          responseType: 'blob',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       // Create blob url
-      const file = new Blob([response.data], { type: "application/pdf" });
+      const file = new Blob([response.data], { type: 'application/pdf' });
       const fileURL = URL.createObjectURL(file);
 
       // Create a temporary link for download
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = fileURL;
-      link.setAttribute("download", `school-receipt-${application_id}.pdf`);
+      link.setAttribute('download', `school-receipt-${application_id}.pdf`);
       document.body.appendChild(link);
       link.click();
 
       // Cleanup
       link.remove();
       URL.revokeObjectURL(fileURL);
-
     } catch (error) {
-      console.error("Receipt download failed:", error);
-      toast.error("Receipt download failed. Please try again.");
+      console.error('Receipt download failed:', error);
+      toast.error('Receipt download failed. Please try again.');
     }
   };
-
 
   const renderStep = (step: number) => {
     switch (step) {
