@@ -328,11 +328,7 @@ export const ForgotPassword: React.FC = () => {
       <div className="w-full max-w-md mx-auto">
         {/* Header Section */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-red-50 rounded-full">
-              <FiLock className="h-8 w-8 text-red-600" />
-            </div>
-          </div>
+         
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Forgot Password?
           </h1>

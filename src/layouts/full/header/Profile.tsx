@@ -20,7 +20,7 @@ const Profile = () => {
       {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="h-10 w-10 hover:text-primary hover:bg-lightprimary rounded-full flex justify-center items-center cursor-pointer"
+        className="h-15 w-15 hover:text-primary hover:bg-lightprimary rounded-full flex justify-center items-center cursor-pointer"
       >
         <img
          src={`${assetUrl}/${user?.profile}`}

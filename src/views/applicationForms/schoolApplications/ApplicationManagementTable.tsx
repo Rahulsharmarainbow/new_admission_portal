@@ -323,8 +323,9 @@ const ApplicationManagementTable: React.FC = () => {
 
   // Handle view details
   const handleViewDetails = (application: Application) => {
-    setSelectedApplication(application);
-    setShowDetailModal(true);
+    // setSelectedApplication(application);
+    // setShowDetailModal(true);
+    navigate(`/${user?.role}/application-details/${application.id}`);
   };
 
   // Handle edit

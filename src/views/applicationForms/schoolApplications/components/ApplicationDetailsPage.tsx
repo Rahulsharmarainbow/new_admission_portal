@@ -63,6 +63,7 @@ interface ApiResponse {
 }
 
 const apiUrl = import.meta.env.VITE_API_URL;
+const assetUrl = import.meta.env.VITE_ASSET_URL;
 
 const ApplicationDetailsPage: React.FC = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
@@ -72,6 +73,7 @@ const ApplicationDetailsPage: React.FC = () => {
   const [candidateDetails, setCandidateDetails] = useState<CandidateDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
   
   // State for image loading errors
   const [imageErrors, setImageErrors] = useState({
@@ -164,7 +166,7 @@ const ApplicationDetailsPage: React.FC = () => {
     if (imageErrors.candidatePic || !applicationData?.candidate_pic) {
       return 'https://via.placeholder.com/128x128?text=No+Image';
     }
-    return `${apiUrl}/${applicationData.candidate_pic}`;
+    return `${assetUrl}/${applicationData.candidate_pic}`;
   };
 
   // Get signature URL with error handling
@@ -172,7 +174,7 @@ const ApplicationDetailsPage: React.FC = () => {
     if (imageErrors.signature || !applicationData?.candidate_signature) {
       return 'https://via.placeholder.com/192x96?text=No+Signature';
     }
-    return `${apiUrl}/${applicationData.candidate_signature}`;
+    return `${assetUrl}/${applicationData.candidate_signature}`;
   };
 
   const handleBack = () => {

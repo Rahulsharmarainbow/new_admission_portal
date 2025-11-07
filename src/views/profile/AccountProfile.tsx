@@ -32,7 +32,7 @@ const TabButton = ({
 
 const AccountProfile = () => {
   const [activeTab, setActiveTab] = useState('account');
-  const { user } = useAuth();
+  const { user, login } = useAuth();
 
   useEffect(() => {
     if(user?.role === 'CustomerAdmin' || user?.role === 'SalesAdmin')
