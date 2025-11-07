@@ -114,7 +114,7 @@ const Apply = () => {
 console.log(applyData)
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Header instituteName={applyData.header?.name} logo={applyData.header?.logo} address={applyData.header?.address} />
+      <Header institute_id={applyData.unique_code} instituteName={applyData.header?.name} logo={applyData.header?.logo} address={applyData.header?.address} />
 
       <div className="py-2 px-10">
         {applyData.academic_type === 1 ? (
