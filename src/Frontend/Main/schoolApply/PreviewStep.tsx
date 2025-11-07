@@ -20,6 +20,8 @@ const PreviewStep: React.FC<PreviewStepProps> = ({
   onPayment
 }) => {
 
+  console.log("preview step", dynamicBoxes)
+
   const formatPrice = (amount: number) => {
     return `₹ ${amount.toLocaleString('en-IN')}`;
   };

@@ -319,7 +319,7 @@ const FormStep: React.FC<FormStepProps> = ({
       case 'adhar':
         return (
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="flex text-sm font-semibold text-gray-700">
               {child.label}
               {child.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -499,95 +499,105 @@ const FormStep: React.FC<FormStepProps> = ({
     }
   };
 
+  console.log('dynamicBoxesssssss', dynamicBoxes);
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 w-full">
-      {dynamicBoxes?.map((box, boxIndex) => {
-        const boxWidth = box.width || '100%';
-        const boxWidthValue = parseInt(boxWidth);
+   <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 w-full">
+  {dynamicBoxes?.map((box, boxIndex) => {
+    const boxWidth = box.width || '100%';
+    const boxWidthValue = parseInt(boxWidth);
 
-        // Simple column span calculation
-        const getGridCols = () => {
-          if (boxWidthValue >= 70 && boxWidthValue <= 80) return 'lg:col-span-9';
-          if (boxWidthValue >= 20 && boxWidthValue <= 30) return 'lg:col-span-3';
-          if (boxWidthValue >= 45 && boxWidthValue <= 55) return 'lg:col-span-6';
-          return 'lg:col-span-12';
-        };
+    const getGridCols = () => {
+      if (boxWidthValue >= 70 && boxWidthValue <= 80) return 'lg:col-span-9';
+      if (boxWidthValue >= 20 && boxWidthValue <= 30) return 'lg:col-span-3';
+      if (boxWidthValue >= 45 && boxWidthValue <= 55) return 'lg:col-span-6';
+      return 'lg:col-span-12';
+    };
 
-        return (
-          <div
-            key={boxIndex}
-            className={`col-span-12 ${getGridCols()} bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 transition-all duration-300 hover:shadow-lg hover:border-blue-300 group`}
-          >
-            {/* Box Header - same as above */}
-            {box.title && (
-              <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
-                {box.icon && (
-                  <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-                    <Icon icon={box.icon} className="w-5 h-5" />
-                  </div>
-                )}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
-                    {box.title}
-                  </h3>
-                  {box.description && (
-                    <p className="text-sm text-gray-600 mt-1">{box.description}</p>
-                  )}
-                </div>
+    return (
+      <div
+        key={boxIndex}
+        className={`col-span-12 ${getGridCols()} bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 transition-all duration-300 hover:shadow-lg hover:border-blue-300 group`}
+      >
+        {/* Box Header */}
+        {box.title && (
+          <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            {box.icon && (
+              <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                <Icon icon={box.icon} className="w-5 h-5" />
               </div>
             )}
-
-            {/* Box Content - same flex system as above */}
-            <div className="w-full">
-              <div className="flex flex-wrap gap-3 md:gap-4">
-                {box?.children?.map((child: any, childIndex: number) => {
-                  if (child.v_target) {
-                    const targetValue = formData[`s_${child.h_target}`];
-                    if (!child.v_target.split(',').includes(targetValue)) {
-                      return null;
-                    }
-                  }
-
-                  const childWidth = child.width || '100%';
-
-                  return (
-                    <div
-                      key={childIndex}
-                      style={{
-                        width: childWidth,
-                        flex: `0 0 ${childWidth}`,
-                        ...(child.type === 'heading' || child.type === 'heading2'
-                          ? {
-                              width: '100%',
-                              flex: '0 0 100%',
-                            }
-                          : {}),
-                        ...(child.type === 'file_button'
-                          ? {
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              flexDirection: 'column',
-                            }
-                          : {}),
-                        ...(child.type === 'adhar'
-                          ? {
-                              width: '100%',
-                              flex: '0 0 100%',
-                            }
-                          : {}),
-                      }}
-                    >
-                      {renderField(child, boxIndex, childIndex)}
-                    </div>
-                  );
-                })}
-              </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
+                {box.title}
+              </h3>
+              {box.description && (
+                <p className="text-sm text-gray-600 mt-1">{box.description}</p>
+              )}
             </div>
           </div>
-        );
-      })}
-    </div>
+        )}
+
+        {/* Box Content with dynamic grid columns */}
+        <div className="w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            {box?.children?.map((child: any, childIndex: number) => {
+              if (child.v_target) {
+                const targetValue = formData[`s_${child.h_target}`];
+                if (!child.v_target.split(',').includes(targetValue)) {
+                  return null;
+                }
+              }
+
+              const childWidth = child.width || '100%';
+              const childWidthValue = parseInt(childWidth);
+
+              // Calculate column span based on width percentage
+              const getColumnSpan = () => {
+                // Full width elements
+                // if (child.type === 'heading' || child.type === 'heading2' || child.type === 'para') {
+                //   return 'full';
+                // }
+                
+                // Width-based spans
+                if (childWidthValue >= 80) return 'full';
+                if (childWidthValue >= 60) return 'span-2';
+                if (childWidthValue >= 40) return 'span-2';
+                if (childWidthValue >= 30) return 'span-1';
+                if (childWidthValue >= 20) return 'span-1';
+                return 'span-1';
+              };
+
+              const spanClass = {
+                'full': 'col-span-full',
+                'span-2': 'col-span-2',
+                'span-1': 'col-span-1'
+              }[getColumnSpan()];
+
+              return (
+                <div
+                  key={childIndex}
+                  className={`${spanClass} transition-all duration-200`}
+                  style={{
+                    minWidth: '150px',
+                    ...(child.type === 'file_button' ? {
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      flexDirection: 'column'
+                    } : {})
+                  }}
+                >
+                  {renderField(child, boxIndex, childIndex)}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  })}
+</div>
   );
 };
 

@@ -630,9 +630,6 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
   };
 
 
-  console.log(content_managment[0].html_content
-);
-
   const renderStep = (step: number) => {
     switch (step) {
       case 0:
@@ -660,6 +657,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
             fileData={fileData}
             accepted={conditions.disclaimer}
             onConditionChange={handleConditionChange}
+            directorSignature={header?.director_signature}
           />
         );
       case 2:
@@ -670,6 +668,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
             fileData={fileData}
             accepted={conditions.declaration}
             onConditionChange={handleConditionChange}
+            directorSignature={header?.director_signature}
           />
         );
       case 3:
@@ -679,6 +678,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
             transportation_fee={transportation_fee}
             transportation_setting={transportation_setting}
             formData={formData}
+            fileData={fileData}
             accepted={conditions.fee}
             onConditionChange={handleConditionChange}
           />
@@ -715,10 +715,6 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
 
         {/* Form Header */}
         <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
-          {/* <h4 className="text-center text-xl font-bold text-[#1e40af] inline-flex items-center justify-center">
-            <Icon icon="solar:school-line-duotone" className="w-5 h-5 mr-2" />
-            School Application Form
-          </h4> */}
           <p className="text-center text-gray-600 mt-2">
             {home_other_lines?.[1]?.title || 'Online Application Form'}
           </p>

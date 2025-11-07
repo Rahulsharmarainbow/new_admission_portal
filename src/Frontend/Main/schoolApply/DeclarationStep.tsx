@@ -6,33 +6,61 @@ interface DeclarationStepProps {
   fileData: { [key: string]: any };
   accepted: boolean;
   onConditionChange: (condition: string, value: boolean) => void;
+  directorSignature: string
 }
+
+  const assetUrl = import.meta.env.VITE_ASSET_URL;
 
 const DeclarationStep: React.FC<DeclarationStepProps> = ({
   content,
   formData,
   fileData,
   accepted,
-  onConditionChange
+  onConditionChange,
+  directorSignature
 }) => {
- const formatContent = (htmlContent: string | null | undefined) => {
+//  const formatContent = (htmlContent: string | null | undefined) => {
+//   if (!htmlContent) return "";
+
+//   let formattedContent: string = htmlContent ?? "";
+
+//   const data = formData ?? {};
+
+//   Object.keys(data).forEach((key) => {
+//     const placeholder = `{${key}}`;
+//     const value = data[key] ? String(data[key]) : ""; // always string ✅
+
+//     formattedContent = formattedContent?.replace?.(
+//       new RegExp(placeholder, "g"),
+//       `<strong>${value}</strong>`
+//     ) ?? formattedContent;
+//   });
+
+//   formattedContent = formattedContent?.replace?.(/{[^}]*}/g, "") ?? formattedContent;
+
+//   return formattedContent;
+// };
+
+const formatContent = (htmlContent: string | null | undefined) => {
   if (!htmlContent) return "";
 
   let formattedContent: string = htmlContent ?? "";
-
   const data = formData ?? {};
 
   Object.keys(data).forEach((key) => {
     const placeholder = `{${key}}`;
-    const value = data[key] ? String(data[key]) : ""; // always string ✅
+    let value = data[key] ? String(data[key]) : "";
+
+    // ✅ Special condition for "class"
+    if (key === "class" && value.includes("$")) {
+      value = value.split("$")[1] ?? ""; // "$" ke baad ki value
+    }
 
     formattedContent = formattedContent?.replace?.(
       new RegExp(placeholder, "g"),
       `<strong>${value}</strong>`
     ) ?? formattedContent;
   });
-
-  formattedContent = formattedContent?.replace?.(/{[^}]*}/g, "") ?? formattedContent;
 
   return formattedContent;
 };
@@ -60,13 +88,13 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
         dangerouslySetInnerHTML={{ 
           __html: formatContent(content) 
         }} 
-        className="prose max-w-none mb-6 text-gray-700 leading-relaxed"
+        className="prose max-w-none mb-6 text-gray-700 leading-relaxed text-sm"
       />
       
       <div className="declaration_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
         <div>
           <p className="text-sm font-semibold text-gray-800">
-            Place: {formData['city'] || 'Hyderabad'}
+            Place: {formData['address_street'] || 'Hyderabad'}
           </p>
           <p className="text-sm font-semibold text-gray-800 mt-2">
             Date: {getCurrentDate()}

@@ -5,15 +5,19 @@ interface FeeDetailsStepProps {
   transportation_fee: any[];
   transportation_setting: any;
   formData: { [key: string]: any };
+  fileData: { [key: string]: any };
   accepted: boolean;
   onConditionChange: (condition: string, value: boolean) => void;
 }
+
+  const assetUrl = import.meta.env.VITE_ASSET_URL;
 
 const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
   classes,
   transportation_fee,
   transportation_setting,
   formData,
+  fileData,
   accepted,
   onConditionChange
 }) => {
@@ -141,9 +145,9 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
           <p className="text-sm font-semibold text-gray-800 mb-2">
             Parent Name: {getParentName()}
           </p>
-          {formData.signature_pic_preview && (
+          {fileData["candidate_signature"] && (
             <img
-              src={formData.signature_pic_preview}
+              src={fileData["candidate_signature"]}
               alt="Parent Signature"
               className="w-32 h-16 object-contain block mx-auto mb-2 border border-gray-300 rounded"
             />
