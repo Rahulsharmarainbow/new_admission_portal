@@ -13,6 +13,8 @@ export interface FormData {
   academicDescription: string;
   academicLogo: File | null;
   previewImage: string | null;
+  director_signature?: File;  
+  previewSignature?: string;
 
   // Contact Information
   technicalName: string;

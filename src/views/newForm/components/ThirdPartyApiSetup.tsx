@@ -1,15 +1,26 @@
+
+
+
+
+
+
+
 // import React, { useState } from "react";
 // import { Card, Label, Select, TextInput, Textarea, Checkbox, Alert } from "flowbite-react";
 // import { HiInformationCircle, HiEye, HiEyeOff } from "react-icons/hi";
 // import { FormData } from "src/types/formTypes";
-// import PasswordInput from "./PasswordInput";
 
 // interface ThirdPartyApiSetupProps {
 //   formData: FormData;
 //   updateFormData: (updates: Partial<FormData>) => void;
+//   errors?: Record<string, string>;
 // }
 
-// const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({ formData, updateFormData }) => {
+// const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({ 
+//   formData, 
+//   updateFormData,
+//   errors = {} 
+// }) => {
 //   const [showApiKey, setShowApiKey] = useState(false);
 //   const [showPassword, setShowPassword] = useState(false);
 //   const [showSecretKey, setShowSecretKey] = useState(false);
@@ -17,6 +28,7 @@
 //   const [showSmtpPassword, setShowSmtpPassword] = useState(false);
 //   const [showRazorpayApiKey, setShowRazorpayApiKey] = useState(false);
 
+  
 //   const handleCheckboxChange = (field: string, value: boolean) => {
 //     updateFormData({ [field]: value });
 //   };
@@ -25,57 +37,66 @@
 //     updateFormData({ [field]: value });
 //   };
 
-// //  const PasswordInput = ({ 
-// //   id, 
-// //   value, 
-// //   onChange, 
-// //   showPassword, 
-// //   setShowPassword, 
-// //   placeholder 
-// // }: {
-// //   id: string;
-// //   value: string;
-// //   onChange: (value: string) => void;
-// //   showPassword: boolean;
-// //   setShowPassword: (value: boolean) => void;
-// //   placeholder?: string;
-// // }) => {
-// //   const inputRef = React.useRef<HTMLInputElement>(null);
+//   const PasswordInput = ({ 
+//     id, 
+//     value, 
+//     onChange, 
+//     showPassword, 
+//     setShowPassword, 
+//     placeholder,
+//     error
+//   }: {
+//     id: string;
+//     value: string;
+//     onChange: (value: string) => void;
+//     showPassword: boolean;
+//     setShowPassword: (value: boolean) => void;
+//     placeholder?: string;
+//     error?: string;
+//   }) => {
+//     const inputRef = React.useRef<HTMLInputElement>(null);
 
-// //   const handleToggle = () => {
-// //     setShowPassword(!showPassword);
-// //     // Focus maintain करने के लिए
-// //     setTimeout(() => {
-// //       if (inputRef.current) {
-// //         inputRef.current.focus();
-// //         // Cursor को end में move करें
-// //         const length = inputRef.current.value.length;
-// //         inputRef.current.setSelectionRange(length, length);
-// //       }
-// //     }, 0);
-// //   };
+//     const handleToggle = () => {
+//       setShowPassword(!showPassword);
+//       setTimeout(() => {
+//         if (inputRef.current) {
+//           inputRef.current.focus();
+//           const length = inputRef.current.value.length;
+//           inputRef.current.setSelectionRange(length, length);
+//         }
+//       }, 0);
+//     };
+//     console.log("UserId value:", formData.UserId);
 
-// //   return (
-// //     <div className="relative">
-// //       <input
-// //         ref={inputRef}
-// //         id={id}
-// //         type={showPassword ? "text" : "password"}
-// //         value={value}
-// //         onChange={(e) => onChange(e.target.value)}
-// //         placeholder={placeholder}
-// //         className="block w-full border border-gray-300 rounded-lg bg-white p-2.5 text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 pr-10"
-// //       />
-// //       <button
-// //         type="button"
-// //         className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-// //         onClick={handleToggle}
-// //       >
-// //         {showPassword ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
-// //       </button>
-// //     </div>
-// //   );
-// // };
+
+//     return (
+//       <div className="relative">
+//         <input
+//           ref={inputRef}
+//           id={id}
+//           type={showPassword ? "text" : "password"}
+//           value={value}
+//           onChange={(e) => onChange(e.target.value)}
+//           placeholder={placeholder}
+//           className={`block w-full border rounded-lg bg-white p-2.5 text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 pr-10 ${
+//             error ? 'border-red-500' : 'border-gray-300'
+//           }`}
+//         />
+//         <button
+//           type="button"
+//           className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+//           onClick={handleToggle}
+//         >
+//           {showPassword ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
+//         </button>
+//         {error && (
+//           <p className="mt-1 text-sm text-red-600">{error}</p>
+//         )}
+//       </div>
+//     );
+//   };
+
+
 
 //   return (
 //     <div className="space-y-6">
@@ -108,6 +129,8 @@
 //                   id="emailService"
 //                   value={formData.selectedServicesOption}
 //                   onChange={(e) => handleInputChange('selectedServicesOption', e.target.value)}
+//                   color={errors.selectedServicesOption ? "failure" : "gray"}
+//                   helperText={errors.selectedServicesOption}
 //                   className="w-full"
 //                 >
 //                   <option value="">Please Select</option>
@@ -128,7 +151,8 @@
 //                   onChange={(e) => handleInputChange('emailTemplate', e.target.value)}
 //                   rows={4}
 //                   placeholder="Enter email template"
-//                   required
+//                   color={errors.emailTemplate ? "failure" : "gray"}
+//                   helperText={errors.emailTemplate}
 //                   className="w-full resize-vertical"
 //                 />
 //               </div>
@@ -143,6 +167,8 @@
 //                     id="fromEmail"
 //                     value={formData.fromEmail}
 //                     onChange={(e) => handleInputChange('fromEmail', e.target.value)}
+//                     color={errors.fromEmail ? "failure" : "gray"}
+//                     helperText={errors.fromEmail}
 //                     className="w-full"
 //                   />
 //                 </div>
@@ -152,6 +178,8 @@
 //                     id="smtpHost"
 //                     value={formData.smtpHost}
 //                     onChange={(e) => handleInputChange('smtpHost', e.target.value)}
+//                     color={errors.smtpHost ? "failure" : "gray"}
+//                     helperText={errors.smtpHost}
 //                     className="w-full"
 //                   />
 //                 </div>
@@ -161,6 +189,8 @@
 //                     id="smtpPort"
 //                     value={formData.smtpPort}
 //                     onChange={(e) => handleInputChange('smtpPort', e.target.value)}
+//                     color={errors.smtpPort ? "failure" : "gray"}
+//                     helperText={errors.smtpPort}
 //                     className="w-full"
 //                   />
 //                 </div>
@@ -197,6 +227,7 @@
 //                     onChange={(value) => handleInputChange('zohoApiKey', value)}
 //                     showPassword={showApiKey}
 //                     setShowPassword={setShowApiKey}
+//                     error={errors.zohoApiKey}
 //                   />
 //                 </div>
 //                 <div>
@@ -205,6 +236,8 @@
 //                     id="zohoFromEmail"
 //                     value={formData.zohoFromEmail}
 //                     onChange={(e) => handleInputChange('zohoFromEmail', e.target.value)}
+//                     color={errors.zohoFromEmail ? "failure" : "gray"}
+//                     helperText={errors.zohoFromEmail}
 //                     className="w-full"
 //                   />
 //                 </div>
@@ -247,6 +280,8 @@
 //                 id="whatsappTemplate"
 //                 value={formData.whatsappTemplate}
 //                 onChange={(e) => handleInputChange('whatsappTemplate', e.target.value)}
+//                 color={errors.whatsappTemplate ? "failure" : "gray"}
+//                 helperText={errors.whatsappTemplate}
 //                 required
 //                 className="w-full"
 //               />
@@ -298,6 +333,8 @@
 //                 id="smsTemplate"
 //                 value={formData.smsTemplate}
 //                 onChange={(e) => handleInputChange('smsTemplate', e.target.value)}
+//                 color={errors.smsTemplate ? "failure" : "gray"}
+//                 helperText={errors.smsTemplate}
 //                 required
 //                 className="w-full"
 //               />
@@ -326,106 +363,78 @@
 //       </Card>
 
 //       {/* Razorpay Integration */}
-//       {/* <Card>
-//         <h5 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 break-words">Razorpay Integration</h5>
+//       <Card className="p-4">
+//         <h5 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 break-words">
+//           Razorpay Integration
+//         </h5>
 //         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 //           <div>
 //             <Label htmlFor="razorpayApiKey" className="mb-2 block">
-//               API Key <span className="text-red-600">*</span>
+//               API Key
 //             </Label>
-//             <PasswordInput
-//               id="razorpayApiKey"
-//               value={formData.razorpayApikey}
-//               onChange={(value) => handleInputChange('razorpayApikey', value)}
-//               showPassword={showRazorpayApiKey}
-//               setShowPassword={setShowRazorpayApiKey}
-//             />
+//             <div className="relative">
+//               <TextInput
+//                 id="razorpayApiKey"
+//                 type={showRazorpayApiKey ? "text" : "password"}
+//                 value={formData.razorpayApikey}
+//                 onChange={(e) => handleInputChange('razorpayApikey', e.target.value)}
+//                 color={errors.razorpayApikey ? "failure" : "gray"}
+//                 helperText={errors.razorpayApikey}
+//                 className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+//               />
+//               <button
+//                 type="button"
+//                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+//                 onClick={() => setShowRazorpayApiKey(!showRazorpayApiKey)}
+//               >
+//                 {showRazorpayApiKey ? (
+//                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+//                   </svg>
+//                 ) : (
+//                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+//                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+//                   </svg>
+//                 )}
+//               </button>
+//             </div>
 //           </div>
+          
 //           <div>
 //             <Label htmlFor="razorpaySecretKey" className="mb-2 block">
-//               Secret Key <span className="text-red-600">*</span>
+//               Secret Key
 //             </Label>
-//             <PasswordInput
-//               id="razorpaySecretKey"
-//               value={formData.razorpaySecretkey}
-//               onChange={(value) => handleInputChange('razorpaySecretkey', value)}
-//               showPassword={showRazorpaySecretKey}
-//               setShowPassword={setShowRazorpaySecretKey}
-//             />
+//             <div className="relative">
+//               <TextInput
+//                 id="razorpaySecretKey"
+//                 type={showRazorpaySecretKey ? "text" : "password"}
+//                 value={formData.razorpaySecretkey}
+//                 onChange={(e) => handleInputChange('razorpaySecretkey', e.target.value)}
+//                 color={errors.razorpaySecretkey ? "failure" : "gray"}
+//                 helperText={errors.razorpaySecretkey}
+//                 className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+//               />
+//               <button
+//                 type="button"
+//                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+//                 onClick={() => setShowRazorpaySecretKey(!showRazorpaySecretKey)}
+//               >
+//                 {showRazorpaySecretKey ? (
+//                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+//                   </svg>
+//                 ) : (
+//                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+//                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+//                   </svg>
+//                 )}
+//               </button>
+//             </div>
 //           </div>
 //         </div>
-//       </Card> */}
-
-//     <Card className="p-4">
-//   <h5 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 break-words">
-//     Razorpay Integration
-//   </h5>
-//   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//     <div>
-//       <Label htmlFor="razorpayApiKey" className="mb-2 block">
-//         API Key <span className="text-red-600">*</span>
-//       </Label>
-//       <div className="relative">
-//         <TextInput
-//           id="razorpayApiKey"
-//           type={showRazorpayApiKey ? "text" : "password"}
-//           value={formData.razorpayApikey}
-//           onChange={(e) => handleInputChange('razorpayApikey', e.target.value)}
-//           className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-//         />
-//         <button
-//           type="button"
-//           className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-//           onClick={() => setShowRazorpayApiKey(!showRazorpayApiKey)}
-//         >
-//           {showRazorpayApiKey ? (
-//             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-//             </svg>
-//           ) : (
-//             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-//               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-//             </svg>
-//           )}
-//         </button>
-//       </div>
-//     </div>
-    
-//     <div>
-//       <Label htmlFor="razorpaySecretKey" className="mb-2 block">
-//         Secret Key <span className="text-red-600">*</span>
-//       </Label>
-//       <div className="relative">
-//         <TextInput
-//           id="razorpaySecretKey"
-//           type={showRazorpaySecretKey ? "text" : "password"}
-//           value={formData.razorpaySecretkey}
-//           onChange={(e) => handleInputChange('razorpaySecretkey', e.target.value)}
-//           className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-//         />
-//         <button
-//           type="button"
-//           className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-//           onClick={() => setShowRazorpaySecretKey(!showRazorpaySecretKey)}
-//         >
-//           {showRazorpaySecretKey ? (
-//             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-//             </svg>
-//           ) : (
-//             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-//               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-//             </svg>
-//           )}
-//         </button>
-//       </div>
-//     </div>
-//   </div>
-// </Card>
-
-
+//       </Card>
 //     </div>
 //   );
 // };
@@ -445,13 +454,7 @@
 
 
 
-
-
-
-
-
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Label, Select, TextInput, Textarea, Checkbox, Alert } from "flowbite-react";
 import { HiInformationCircle, HiEye, HiEyeOff } from "react-icons/hi";
 import { FormData } from "src/types/formTypes";
@@ -473,24 +476,41 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
   const [showRazorpaySecretKey, setShowRazorpaySecretKey] = useState(false);
   const [showSmtpPassword, setShowSmtpPassword] = useState(false);
   const [showRazorpayApiKey, setShowRazorpayApiKey] = useState(false);
+console.log('Rendering ThirdPartyApiSetup Component',formData);
+  // Debug effect
+  useEffect(() => {
+    console.log('ThirdPartyApiSetup - Current UserId:', formData.UserId);
+  }, [formData.UserId]);
 
-  const handleCheckboxChange = (field: string, value: boolean) => {
+  const handleCheckboxChange = (field: keyof FormData, value: boolean) => {
+    console.log(`Checkbox ${field}:`, value);
     updateFormData({ [field]: value });
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: keyof FormData, value: string) => {
+    console.log(`Input ${field}:`, value);
     updateFormData({ [field]: value });
   };
 
-  const PasswordInput = ({ 
-    id, 
-    value, 
-    onChange, 
-    showPassword, 
-    setShowPassword, 
-    placeholder,
-    error
-  }: {
+  const handleSelectChange = (field: keyof FormData, value: string) => {
+    console.log(`Select ${field}:`, value);
+    updateFormData({ [field]: value });
+  };
+
+  const handleTextareaChange = (field: keyof FormData, value: string) => {
+    console.log(`Textarea ${field}:`, value);
+    updateFormData({ [field]: value });
+  };
+
+  // Specific handler for UserId
+  const handleUserIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    console.log('UserId changing to:', value);
+    updateFormData({ UserId: value });
+  };
+
+  // Password Input Component - FIXED SYNTAX
+  interface PasswordInputProps {
     id: string;
     value: string;
     onChange: (value: string) => void;
@@ -498,6 +518,16 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
     setShowPassword: (value: boolean) => void;
     placeholder?: string;
     error?: string;
+  }
+
+  const PasswordInput: React.FC<PasswordInputProps> = ({ 
+    id, 
+    value, 
+    onChange, 
+    showPassword, 
+    setShowPassword, 
+    placeholder,
+    error
   }) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -512,6 +542,10 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
       }, 0);
     };
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange(e.target.value);
+    };
+
     return (
       <div className="relative">
         <input
@@ -519,7 +553,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
           id={id}
           type={showPassword ? "text" : "password"}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={handleChange}
           placeholder={placeholder}
           className={`block w-full border rounded-lg bg-white p-2.5 text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 pr-10 ${
             error ? 'border-red-500' : 'border-gray-300'
@@ -536,6 +570,23 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
           <p className="mt-1 text-sm text-red-600">{error}</p>
         )}
       </div>
+    );
+  };
+
+  // Razorpay Password Visibility Icons - FIXED JSX
+  const EyeIcon = ({ show }: { show: boolean }) => {
+    if (show) {
+      return (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+      </svg>
     );
   };
 
@@ -569,7 +620,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                 <Select
                   id="emailService"
                   value={formData.selectedServicesOption}
-                  onChange={(e) => handleInputChange('selectedServicesOption', e.target.value)}
+                  onChange={(e) => handleSelectChange('selectedServicesOption', e.target.value)}
                   color={errors.selectedServicesOption ? "failure" : "gray"}
                   helperText={errors.selectedServicesOption}
                   className="w-full"
@@ -589,7 +640,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                 <Textarea
                   id="emailTemplate"
                   value={formData.emailTemplate}
-                  onChange={(e) => handleInputChange('emailTemplate', e.target.value)}
+                  onChange={(e) => handleTextareaChange('emailTemplate', e.target.value)}
                   rows={4}
                   placeholder="Enter email template"
                   color={errors.emailTemplate ? "failure" : "gray"}
@@ -727,15 +778,22 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                 className="w-full"
               />
             </div>
+            
+            {/* UserId Input - FIXED */}
             <div>
               <Label htmlFor="userId" className="mb-2 block">User ID</Label>
               <TextInput
                 id="userId"
                 value={formData.UserId}
-                onChange={(e) => handleInputChange('UserId', e.target.value)}
+                onChange={handleUserIdChange}
                 className="w-full"
+                placeholder="Enter User ID"
               />
+              <div className="mt-1 text-xs text-gray-500">
+                Current Value: {formData.UserId || 'Empty'}
+              </div>
             </div>
+            
             <div>
               <Label htmlFor="wPassword" className="mb-2 block">Password</Label>
               <PasswordInput
@@ -803,7 +861,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
         )}
       </Card>
 
-      {/* Razorpay Integration */}
+      {/* Razorpay Integration - FIXED JSX */}
       <Card className="p-4">
         <h5 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 break-words">
           Razorpay Integration
@@ -828,16 +886,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                 onClick={() => setShowRazorpayApiKey(!showRazorpayApiKey)}
               >
-                {showRazorpayApiKey ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
+                <EyeIcon show={showRazorpayApiKey} />
               </button>
             </div>
           </div>
@@ -861,16 +910,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                 onClick={() => setShowRazorpaySecretKey(!showRazorpaySecretKey)}
               >
-                {showRazorpaySecretKey ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
+                <EyeIcon show={showRazorpaySecretKey} />
               </button>
             </div>
           </div>

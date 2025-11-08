@@ -1,3 +1,7 @@
+
+
+
+
 // import React, { useState, useEffect } from 'react';
 // import { Alert, Breadcrumb, Button, Card } from 'flowbite-react';
 // import {
@@ -74,7 +78,7 @@
 //   const authToken = user?.token;
 //   const { id } = useParams<{ id: string }>();
 //   const navigate = useNavigate();
-//   const [step0Errors, setStep0Errors] = useState<Record<string, string>>({});
+//   const [stepErrors, setStepErrors] = useState<Record<number, Record<string, string>>>({});
 
 //   const [formData, setFormData] = useState<FormDataType>({
 //     // Academic Information
@@ -151,11 +155,159 @@
 //     credentialsData: null,
 //   });
 
+//   // Validation functions
+//   const validateAcademicInfo = (data: FormDataType) => {
+//     const errors: Record<string, string> = {};
+
+//     const isEmpty = (v: string | null | undefined) => !v || String(v).trim() === '';
+//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+//     const urlRegex = /^(https?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\.~:\/?#\[\]@!$&'()*+,;=.]+$/i;
+//     const pinRegex = /^\d{6}$/;
+
+//     if (isEmpty(data.selectType)) errors.selectType = 'Please select organization type.';
+//     if (data.selectType === '3' && isEmpty(data.selectSubtype)) {
+//       errors.selectSubtype = 'Please select subtype for University.';
+//     }
+//     if (isEmpty(data.academicName)) errors.academicName = 'Organization name is required.';
+//     if (isEmpty(data.selectState)) errors.selectState = 'State is required.';
+//     if (isEmpty(data.selectDistrict)) errors.selectDistrict = 'District is required.';
+//     if (isEmpty(data.Pincode) || !pinRegex.test(data.Pincode)) errors.Pincode = 'Enter a valid 6-digit pincode.';
+//     if (isEmpty(data.website_url) || !urlRegex.test(data.website_url)) errors.website_url = 'Enter a valid URL starting with http or https.';
+//     if (isEmpty(data.primary_email) || !emailRegex.test(data.primary_email)) errors.primary_email = 'Enter a valid email.';
+//     if (isEmpty(data.academicAddress)) errors.academicAddress = 'Full address is required.';
+//     if (isEmpty(data.academicDescription)) errors.academicDescription = 'Description is required.';
+
+//     const hasExistingLogo = Boolean(data.previewImage) || Boolean(data.academicData?.academic_logo);
+//     if (!hasExistingLogo && !data.academicLogo) {
+//       errors.academicLogo = 'Logo is required.';
+//     }
+
+//     return errors;
+//   };
+
+//   const validateContactInfo = (data: FormDataType) => {
+//     const errors: Record<string, string> = {};
+//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//     const phoneRegex = /^\d{10}$/;
+
+//     // Technical Contact Validation
+//     if (data.technicalName && !data.technicalEmail) {
+//       errors.technicalEmail = 'Email is required when name is provided';
+//     }
+//     if (data.technicalEmail && !emailRegex.test(data.technicalEmail)) {
+//       errors.technicalEmail = 'Please enter a valid email address';
+//     }
+//     if (data.technicalPhone && !phoneRegex.test(data.technicalPhone.replace(/\D/g, ''))) {
+//       errors.technicalPhone = 'Please enter a valid 10-digit phone number';
+//     }
+
+//     // Billing Contact Validation
+//     if (data.billingName && !data.billingEmail) {
+//       errors.billingEmail = 'Email is required when name is provided';
+//     }
+//     if (data.billingEmail && !emailRegex.test(data.billingEmail)) {
+//       errors.billingEmail = 'Please enter a valid email address';
+//     }
+//     if (data.billingPhone && !phoneRegex.test(data.billingPhone.replace(/\D/g, ''))) {
+//       errors.billingPhone = 'Please enter a valid 10-digit phone number';
+//     }
+
+//     // Additional Contact Validation
+//     if (data.additionalName && !data.additionalEmail) {
+//       errors.additionalEmail = 'Email is required when name is provided';
+//     }
+//     if (data.additionalEmail && !emailRegex.test(data.additionalEmail)) {
+//       errors.additionalEmail = 'Please enter a valid email address';
+//     }
+//     if (data.additionalPhone && !phoneRegex.test(data.additionalPhone.replace(/\D/g, ''))) {
+//       errors.additionalPhone = 'Please enter a valid 10-digit phone number';
+//     }
+
+//     return errors;
+//   };
+
+//   const validateThirdPartyApi = (data: FormDataType) => {
+//     const errors: Record<string, string> = {};
+
+//     // Email Service Validation
+//     if (data.isDropdownEnabled) {
+//       if (!data.selectedServicesOption) {
+//         errors.selectedServicesOption = 'Please select an email service';
+//       }
+//       if (!data.emailTemplate?.trim()) {
+//         errors.emailTemplate = 'Email template is required when email service is enabled';
+//       }
+
+//       // Zoho API Validation
+//       if (data.selectedServicesOption === 'Zoho Api') {
+//         if (!data.zohoApiKey?.trim()) {
+//           errors.zohoApiKey = 'Zoho API Key is required';
+//         }
+//         if (!data.zohoFromEmail?.trim()) {
+//           errors.zohoFromEmail = 'From Email is required';
+//         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.zohoFromEmail)) {
+//           errors.zohoFromEmail = 'Please enter a valid email address';
+//         }
+//       }
+
+//       // SMTP Validation
+//       if (data.selectedServicesOption === 'MailGun SMTP' || data.selectedServicesOption === 'Google SMTP') {
+//         if (!data.fromEmail?.trim()) {
+//           errors.fromEmail = 'From Email is required';
+//         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.fromEmail)) {
+//           errors.fromEmail = 'Please enter a valid email address';
+//         }
+//         if (!data.smtpHost?.trim()) {
+//           errors.smtpHost = 'SMTP Host is required';
+//         }
+//         if (!data.smtpPort?.trim()) {
+//           errors.smtpPort = 'SMTP Port is required';
+//         }
+//       }
+//     }
+
+//     // WhatsApp Service Validation
+//     if (data.isTemplatesVisible) {
+//       if (!data.whatsappTemplate?.trim()) {
+//         errors.whatsappTemplate = 'WhatsApp template is required when WhatsApp service is enabled';
+//       }
+//     }
+
+//     // SMS Service Validation
+//     if (data.isSmsApiEnabled) {
+//       if (!data.smsTemplate?.trim()) {
+//         errors.smsTemplate = 'SMS template is required when SMS service is enabled';
+//       }
+//     }
+
+//     // Razorpay Validation
+//     if (data.razorpayApikey && !data.razorpaySecretkey) {
+//       errors.razorpaySecretkey = 'Razorpay Secret Key is required when API Key is provided';
+//     }
+//     if (data.razorpaySecretkey && !data.razorpayApikey) {
+//       errors.razorpayApikey = 'Razorpay API Key is required when Secret Key is provided';
+//     }
+
+//     return errors;
+//   };
+
+//   const validateDnsConfiguration = (data: FormDataType) => {
+//     const errors: Record<string, string> = {};
+//     const domainNameRegex = /^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+
+//     if (data.configure === "0" && !data.domainName?.trim()) {
+//       errors.domainName = 'Domain name is required';
+//     } else if (data.domainName && !domainNameRegex.test(data.domainName)) {
+//       errors.domainName = 'Please enter a valid domain name (e.g., example.com)';
+//     }
+
+//     return errors;
+//   };
+
 //   // Helper function to decode base64
 //   const decodeBase64 = (str: string): string => {
 //     if (!str) return '';
 //     try {
-//       // Multiple base64 decoding (as per your data structure)
 //       let decoded = str;
 //       for (let i = 0; i < 3; i++) {
 //         try {
@@ -237,9 +389,10 @@
 //       whatsappTemplate: template?.whatsapp_template || '',
 //       smsTemplate: template?.sms_template || '',
 //       emailTemplate: template?.email_template || '',
-//       // Domain configuration
-//       domainName: academic.configured_domain || '',
-//       configure: academic.configured ? '1' : '0',
+//       // Domain configuration - Remove autofill
+//       domainName: '',
+//       configure: "0",
+//       updateConfigure: 0,
 //       // API Configurations
 //       zohoApiKey: credentials?.zoho_api_key || '',
 //       zohoFromEmail: credentials?.zoho_from_email || '',
@@ -341,43 +494,62 @@
 
 //   const steps = getSteps();
 
-//   const validateAcademicInfo = (data: FormDataType) => {
-//     const errors: Record<string, string> = {};
-
-//     const isEmpty = (v: string | null | undefined) => !v || String(v).trim() === '';
-//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
-//     const urlRegex = /^(https?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\.~:\/?#\[\]@!$&'()*+,;=.]+$/i;
-//     const pinRegex = /^\d{6}$/;
-
-//     if (isEmpty(data.selectType)) errors.selectType = 'Please select organization type.';
-//     if (data.selectType === '3' && isEmpty(data.selectSubtype)) {
-//       errors.selectSubtype = 'Please select subtype for University.';
+//   // Check if current step is valid
+//   const isCurrentStepValid = () => {
+//     const currentStepName = steps[activeStep];
+    
+//     switch (currentStepName) {
+//       case 'Academic information':
+//         return Object.keys(validateAcademicInfo(formData)).length === 0;
+      
+//       case 'Contact Information':
+//         return Object.keys(validateContactInfo(formData)).length === 0;
+      
+//       case 'Third party api setup':
+//         return Object.keys(validateThirdPartyApi(formData)).length === 0;
+      
+//       case 'Dns Configuration':
+//         return Object.keys(validateDnsConfiguration(formData)).length === 0;
+      
+//       case 'Roll based access':
+//         // Roll based access doesn't require validation
+//         return true;
+      
+//       default:
+//         return true;
 //     }
-//     if (isEmpty(data.academicName)) errors.academicName = 'Organization name is required.';
-//     if (isEmpty(data.selectState)) errors.selectState = 'State is required.';
-//     if (isEmpty(data.selectDistrict)) errors.selectDistrict = 'District is required.';
-//     if (isEmpty(data.Pincode) || !pinRegex.test(data.Pincode)) errors.Pincode = 'Enter a valid 6-digit pincode.';
-//     if (isEmpty(data.website_url) || !urlRegex.test(data.website_url)) errors.website_url = 'Enter a valid URL starting with http or https.';
-//     if (isEmpty(data.primary_email) || !emailRegex.test(data.primary_email)) errors.primary_email = 'Enter a valid email.';
-//     if (isEmpty(data.academicAddress)) errors.academicAddress = 'Full address is required.';
-//     if (isEmpty(data.academicDescription)) errors.academicDescription = 'Description is required.';
-
-//     const hasExistingLogo = Boolean(data.previewImage) || Boolean(data.academicData?.academic_logo);
-//     if (!hasExistingLogo && !data.academicLogo) {
-//       errors.academicLogo = 'Logo is required.';
-//     }
-
-//     return errors;
 //   };
 
-//   const isAcademicInfoValid = () => Object.keys(validateAcademicInfo(formData)).length === 0;
-
 //   const handleNext = () => {
-//     if (steps[activeStep] === 'Academic information') {
-//       const errors = validateAcademicInfo(formData);
-//       setStep0Errors(errors);
-//       if (Object.keys(errors).length > 0) return;
+//     const currentStepName = steps[activeStep];
+//     let errors: Record<string, string> = {};
+
+//     switch (currentStepName) {
+//       case 'Academic information':
+//         errors = validateAcademicInfo(formData);
+//         setStepErrors(prev => ({ ...prev, 0: errors }));
+//         if (Object.keys(errors).length > 0) return;
+//         break;
+      
+//       case 'Contact Information':
+//         errors = validateContactInfo(formData);
+//         setStepErrors(prev => ({ ...prev, 1: errors }));
+//         if (Object.keys(errors).length > 0) return;
+//         break;
+      
+//       case 'Third party api setup':
+//         errors = validateThirdPartyApi(formData);
+//         setStepErrors(prev => ({ ...prev, 2: errors }));
+//         if (Object.keys(errors).length > 0) return;
+//         break;
+      
+//       case 'Dns Configuration':
+//         errors = validateDnsConfiguration(formData);
+//         setStepErrors(prev => ({ ...prev, 3: errors }));
+//         if (Object.keys(errors).length > 0) return;
+//         break;
 //     }
+
 //     setActiveStep((prev) => Math.min(prev + 1, steps.length - 1));
 //   };
 
@@ -431,17 +603,34 @@
 //   const renderStepContent = (step: number) => {
 //     const stepComponents = {
 //       'Academic information': (
-//         <AcademicInformation formData={formData} updateFormData={updateFormData} errors={step0Errors} />
+//         <AcademicInformation 
+//           formData={formData} 
+//           updateFormData={updateFormData} 
+//           errors={stepErrors[0] || {}} 
+//         />
 //       ),
 //       'Contact Information': (
-//         <ContactInformation formData={formData} updateFormData={updateFormData} />
+//         <ContactInformation 
+//           formData={formData} 
+//           updateFormData={updateFormData} 
+//           errors={stepErrors[1] || {}} 
+//         />
 //       ),
 //       'Third party api setup': (
-//         <ThirdPartyApiSetup formData={formData} updateFormData={updateFormData} />
+//         <ThirdPartyApiSetup 
+//           formData={formData} 
+//           updateFormData={updateFormData} 
+//           errors={stepErrors[2] || {}} 
+//         />
 //       ),
 //       'Roll based access': <RollBasedAccess formData={formData} updateFormData={updateFormData} />,
 //       'Dns Configuration': (
-//         <DnsConfiguration formData={formData} updateFormData={updateFormData} isEditMode={true} />
+//         <DnsConfiguration 
+//           formData={formData} 
+//           updateFormData={updateFormData} 
+//           isEditMode={true} 
+//           errors={stepErrors[3] || {}} 
+//         />
 //       ),
 //     };
 
@@ -507,7 +696,12 @@
 //                         <HiCheckCircle className="w-4 h-4" />
 //                       </Button>
 //                     ) : (
-//                       <Button onClick={handleNext} color="blue" className="flex items-center gap-2" disabled={steps[activeStep] === 'Academic information' && !isAcademicInfoValid()}>
+//                       <Button 
+//                         onClick={handleNext} 
+//                         color="blue" 
+//                         className="flex items-center gap-2"
+//                         disabled={!isCurrentStepValid()}
+//                       >
 //                         Next
 //                         <HiArrowRight className="w-4 h-4" />
 //                       </Button>
@@ -524,6 +718,12 @@
 // };
 
 // export default MakeItLive;
+
+
+
+
+
+
 
 
 
@@ -658,7 +858,7 @@ const MakeItLive: React.FC = () => {
     zohoApiKey: '',
     zohoFromEmail: '',
     bounceAddress: '',
-    UserId: '',
+    UserId: '', // UserId field
     wPassword: '',
     smsApikey: '',
     smsSecretkey: '',
@@ -931,7 +1131,8 @@ const MakeItLive: React.FC = () => {
       domainName: '',
       configure: "0",
       updateConfigure: 0,
-      // API Configurations
+      // API Configurations - INCLUDING UserId
+      UserId: credentials?.user_id || '', // IMPORTANT: UserId को populate करें
       zohoApiKey: credentials?.zoho_api_key || '',
       zohoFromEmail: credentials?.zoho_from_email || '',
       bounceAddress: credentials?.bounce_address || '',
@@ -951,6 +1152,7 @@ const MakeItLive: React.FC = () => {
     };
 
     console.log('Form Data Updates:', updates);
+    console.log('UserId being set to:', updates.UserId);
 
     setFormData((prev) => ({ ...prev, ...updates }));
 
@@ -1008,9 +1210,17 @@ const MakeItLive: React.FC = () => {
     initializeData();
   }, [id, authToken, user?.id]);
 
-  // Update form data
+  // Update form data with debugging
   const updateFormData = (updates: Partial<FormDataType>) => {
-    setFormData((prev) => ({ ...prev, ...updates }));
+    console.log('Updating form data with:', updates);
+    if ('UserId' in updates) {
+      console.log('UserId is being updated to:', updates.UserId);
+    }
+    setFormData((prev) => {
+      const newData = { ...prev, ...updates };
+      console.log('New form data state:', newData);
+      return newData;
+    });
   };
 
   // Steps configuration
@@ -1095,9 +1305,17 @@ const MakeItLive: React.FC = () => {
     setActiveStep((prev) => Math.max(prev - 1, 0));
   };
 
-  // Submit form data
+  
+  // Submit form data with enhanced debugging
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Debug: Check final form data before submit
+    console.log('=== FINAL FORM DATA BEFORE SUBMIT ===');
+    console.log('UserId:', formData.UserId);
+    console.log('Complete formData:', formData);
+    console.log('=====================================');
+    
     if (!id || !user?.id || !authToken) {
       setSubmitMessage('Error: Missing required data');
       return;
