@@ -1429,8 +1429,10 @@ const Header = () => {
       setLoading(true);
       try {
         const response = await axios.post(
-          `${apiUrl}/SuperAdmin/Notifications/search-bar`,
-          { query: searchValue }, 
+          `${apiUrl}/${user.role}/Notifications/search-bar`,
+          { query: searchValue,
+             s_id: user?.id
+           }, 
           {
             headers: {
               'Authorization': `Bearer ${user?.token}`,
@@ -1538,7 +1540,7 @@ const Header = () => {
 
  const handleApplicationClick = (application: ApplicationItem) => {
   // Navigate to application details page
-  navigate(`/SuperAdmin/application-details/${application.application_id || application.id}`);
+  navigate(`/${user.role}/application-details/${application.application_id || application.id}`);
   setSearchValue('');
   setSearchResults({
     academic: [],

@@ -561,6 +561,7 @@ const Dashboard = () => {
     setLoading(true);
     try {
       const data = await dashboardService.getDashboardData(filters, user.id, user.token, user.role);
+      console.log(data);
       setDashboardData(data);
     } catch (error: any) {
       console.error('Error fetching dashboard data:', error);
