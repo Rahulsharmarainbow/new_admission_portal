@@ -833,6 +833,7 @@ const MakeItLive: React.FC = () => {
     academicDescription: '',
     academicLogo: null,
     previewImage: null,
+    director_signature: null,
 
     // Contact Information
     technicalName: '',
@@ -1040,26 +1041,7 @@ const MakeItLive: React.FC = () => {
     }
 
     return errors;
-  };
-
-  // Helper function to decode base64
-  const decodeBase64 = (str: string): string => {
-    if (!str) return '';
-    try {
-      let decoded = str;
-      for (let i = 0; i < 3; i++) {
-        try {
-          decoded = atob(decoded);
-        } catch (e) {
-          break;
-        }
-      }
-      return decoded;
-    } catch (error) {
-      console.error('Error decoding base64:', error);
-      return str;
-    }
-  };
+  }
 
   // Populate form data with API response
   const populateFormData = async (data: any) => {
@@ -1106,6 +1088,8 @@ const MakeItLive: React.FC = () => {
       website_url: academic.academic_website || '',
       selectType: academic.academic_type ? String(academic.academic_type) : '',
       selectSubtype: academic.academic_subtype || '',
+      director_signature: academic.director_signature  ||'',
+      academic_logo: academic.academic_logo || '',
       // Logo preview
       previewImage: academic.academic_logo
         ? `${import.meta.env.VITE_ASSET_URL}/${academic.academic_logo}`

@@ -434,11 +434,11 @@ const CollegeApplicationManagementTable: React.FC = () => {
   const getPaymentStatus = (status: string) => {
     switch (status) {
       case '1':
-        return { text: 'captured', color: 'text-green-600 bg-green-50' };
+        return { text: 'Captured', color: 'bg-green-100 text-green-800' };
       case '0':
-        return { text: 'intilized', color: 'text-red-600 bg-red-50' };
+        return { text: 'Intilized', color: 'bg-yellow-100 text-yellow-800' };
       default:
-        return { text: 'intilized ', color: 'text-gray-600 bg-gray-50' };
+        return { text: 'Intilized ', color: 'text-yellow-600 bg-yellow-50' };
     }
   };
 

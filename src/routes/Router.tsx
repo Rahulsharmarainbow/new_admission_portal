@@ -65,6 +65,8 @@ import NotificationsPage from 'src/layouts/full/header/components/NotificationsP
 import ApplicationEditPage from 'src/views/applicationForms/ApplicationEditPage';
 import ApplicationDetailsPage from 'src/views/applicationForms/schoolApplications/components/ApplicationDetailsPage';
 import HomeEditing from 'src/views/frontedEditing/home/Home';
+import Rankcard from 'src/Frontend/rankcard/Rankcard';
+import HallTicket from 'src/Frontend/hallticket/Hallticket';
 
 
 /* ***Layouts**** */
@@ -327,6 +329,7 @@ const Router = [
       { path: 'frontend-editing/footer', element: <FooterEditing/>},
       { path: 'frontend-editing/popups', element: <PopupEditing />},
        { path: 'notifications', element: <NotificationsPage/> },
+        
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
@@ -346,7 +349,8 @@ const Router = [
       // { path: '/page/:pageType', element: <TypePage /> },
       { path: '/Frontend/:institute_id/apply', element: <Apply /> },
       { path: '/Frontend/:institute_id/:page_route', element: <TypePage /> },
-
+      { path: '/Frontend/:institute_id/rankcard', element: <Rankcard/> },
+      { path: '/Frontend/:institute_id/hallticket', element: <HallTicket/> },
       { path: '/Form-view', element: <FormView /> },
       { path: '/Confirmation', element: <Confirmation /> },
       { 

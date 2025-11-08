@@ -203,17 +203,80 @@ const TransactionManagementTable: React.FC = () => {
   };
 
   // Handle download excel
-  const handleDownloadExcel = async () => {
-    try {
-      toast.loading('Preparing download...');
-      // Add your Excel download logic here
-      // This would typically call a different API endpoint for Excel export
+  // const handleDownloadExcel = async () => {
+  //   try {
+  //     toast.loading('Preparing download...');
+  //     // Add your Excel download logic here
+  //     // This would typically call a different API endpoint for Excel export
+  //     toast.success('Excel file downloaded successfully!');
+  //   } catch (error) {
+  //     console.error('Error downloading Excel:', error);
+  //     toast.error('Failed to download Excel file');
+  //   }
+  // };
+
+  // Update the handleDownloadExcel function
+const handleDownloadExcel = async () => {
+  try {
+    const loadingToast = toast.loading('Preparing download...');
+    
+    const response = await axios.post(
+      `${apiUrl}/${user?.role}/Transactions/export-transaction`,
+      {
+        s_id: "1", // You might want to make this dynamic based on your requirements
+        academic_id: filters.academic_id || "",
+        startDate: filters.startDate || "",
+        endDate: filters.endDate || "",
+        status: filters.status || "",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          accept: '/',
+          'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
+          'Content-Type': 'application/json',
+        },
+        responseType: 'json',
+      }
+    );
+
+    toast.dismiss(loadingToast);
+
+    if (response.data.success) {
+      // Extract the base64 data and filename from the response
+      const { excel_base64, filename } = response.data.data;
+      
+      // Convert base64 to blob
+      const byteCharacters = atob(excel_base64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
       toast.success('Excel file downloaded successfully!');
-    } catch (error) {
-      console.error('Error downloading Excel:', error);
-      toast.error('Failed to download Excel file');
+    } else {
+      toast.error('Failed to prepare Excel file');
     }
-  };
+  } catch (Downloading) {
+    console.error('Error downloading Excel:', Downloading);
+    toast.dismiss();
+    toast.error('Failed to download Excel file');
+  }
+};
 
   // Get status badge
   const getStatusBadge = (status: number) => {

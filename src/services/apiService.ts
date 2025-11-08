@@ -74,7 +74,7 @@ export const fetchAcademicData = async (id: string, userId: string, authToken: s
 export const updateAcademicData = async (formData: FormData, id: string, userId: string, authToken: string, role: string) => {
   try {
     const formDataToSend = new FormData();
-    
+    console.log("ooooooooooooooooo", formData);
     // Add all form fields
     formDataToSend.append('s_id', String(userId));
     formDataToSend.append('account_id', String(id));
@@ -135,8 +135,11 @@ export const updateAcademicData = async (formData: FormData, id: string, userId:
     formDataToSend.append('sms_details_enable', formData.isSmsApiEnabled ? "1" : "0");
     
     // Logo file
-    if (formData.academicLogo) {
+    if (formData.academic_logo) {
       formDataToSend.append('academic_logo', formData.academicLogo);
+    }
+    if (formData.director_signature) {
+      formDataToSend.append('director_signature', formData.director_signature);
     }
 
     const response = await fetch(`${apiUrl}/${role}/Accounts/live-Account-Update`, {
