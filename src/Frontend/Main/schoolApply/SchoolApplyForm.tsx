@@ -52,6 +52,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [fileData, setFileData] = useState<{ [key: string]: any }>({});
   const [loading, setLoading] = useState(false);
+  const [loading2, setLoading2] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
@@ -498,11 +499,20 @@ const handleCheckboxChange = useCallback(
 
         // Special validation for SC/ST categories
         const selectedCategory = formData.s_category;
+        const selectedhalth = formData.child_has_any_issue.split("$")[1];
+        console.log(formData.child_has_any_issue)
+        console.log(formData['specified_health_issue'])
         if (
           (selectedCategory === 'SC' || selectedCategory === 'ST') &&
           !fileData['caste_certificate']
         ) {
           newErrors['caste_certificate'] = 'Caste certificate preview is required';
+        }
+        if (
+          (selectedhalth == "Yes") &&
+          (formData['specified_health_issue'] == "")
+        ) {
+          newErrors['specified_health_issue'] = 'Please specified health issue';
         }
       } else if (step === 1 && !conditions.disclaimer) {
         newErrors.disclaimer = 'Please accept the disclaimer to proceed';
@@ -539,7 +549,7 @@ const handleCheckboxChange = useCallback(
   }, []);
 
   const handlePayment = useCallback(async () => {
-    setLoading(true);
+    setLoading2(true);
     try {
       const response = await axios.post(`${apiUrl}/frontend/razorpay-order`, {
         amount: paymentData.total_payable_fee * 100,
@@ -595,7 +605,7 @@ const handleCheckboxChange = useCallback(
       console.error('Payment initialization failed:', error);
       toast.error('Payment initialization failed. Please try again.');
     } finally {
-      setLoading(false);
+      setLoading2(false);
       setShowPaymentDialog(false);
     }
   }, [paymentData, formData, cdata, header, apiUrl, academic_id]);
@@ -655,7 +665,7 @@ const handleCheckboxChange = useCallback(
   const handleDownloadReceipt = async (application_id: string) => {
     try {
       const response = await axios.post(
-        `${apiUrl}/frontend/download-school-receipt`,
+        `${apiUrl}/frontend/download-receipt`,
         { application_id },
         {
           responseType: 'blob',
@@ -892,7 +902,7 @@ const handleCheckboxChange = useCallback(
 
       {/* Payment Confirmation Dialog */}
       {showPaymentDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 scale-100">
             {/* Dialog Header */}
             <div className="p-6 border-b border-gray-200">
@@ -933,14 +943,14 @@ const handleCheckboxChange = useCallback(
               </button>
               <button
                 onClick={handlePayment}
-                disabled={loading}
+                disabled={loading2}
                 className={`flex-1 px-4 py-2 rounded-lg font-semibold text-white transition-all duration-200 ${
-                  loading
+                  loading2
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-green-600 hover:bg-green-700 hover:shadow-lg'
                 }`}
               >
-                {loading ? (
+                {loading2 ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Processing...

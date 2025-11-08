@@ -184,7 +184,7 @@ const FormStep: React.FC<FormStepProps> = ({
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-gray-700">
               {child.label}
-              {child.required && <span className="text-red-500 ml-1">*</span>}
+              {child?.required == 1 && <span className="text-red-500 ml-1">*</span>}
             </label>
             <input
               {...commonProps}
@@ -293,6 +293,7 @@ const FormStep: React.FC<FormStepProps> = ({
                   )}
                 </div>
                 <p className="text-xs text-gray-600 mb-2">{child.content}</p>
+                {child?.resolution && <p className="text-xs text-gray-600 mb-2">{child.resolution}</p> }
                 <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200">
                   Upload {child.label}
                 </div>
