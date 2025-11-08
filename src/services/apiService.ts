@@ -123,6 +123,8 @@ export const updateAcademicData = async (formData: FormData, id: string, userId:
     formDataToSend.append('zoho_api_key', formData.zohoApiKey);
     formDataToSend.append('zoho_from_email', formData.zohoFromEmail);
     formDataToSend.append('bounce_address', formData.bounceAddress);
+        formDataToSend.append('whatsap_user', formData.UserId);
+
     
     // Permissions
     formDataToSend.append('hallticket_generate_permission', formData.switchState ? "1" : "0");
@@ -216,6 +218,7 @@ export const addLiveAccount = async (formData: FormData, userId: string, authTok
     formDataToSend.append('zoho_api_key', formData.zohoApiKey);
     formDataToSend.append('zoho_from_email', formData.zohoFromEmail);
     formDataToSend.append('bounce_address', formData.bounceAddress);
+    formDataToSend.append('UserId', formData.UserId);
 
     // Permissions
     formDataToSend.append('hallticket_generate_permission', formData.switchState ? "1" : "0");
