@@ -119,7 +119,7 @@ const ApplicationDetailsPage: React.FC = () => {
     setLoading(true);
     try {
       const response = await axios.post<ApiResponse>(
-        `${apiUrl}/SuperAdmin/Applications/get-applications-details`,
+        `${apiUrl}/${user.role}/Applications/get-applications-details`,
         {
           application_id: parseInt(applicationId)
         },
@@ -303,7 +303,7 @@ const ApplicationDetailsPage: React.FC = () => {
       />
       <div className="max-w-7xl mx-auto px-4">
         {/* Header Section */}
-        <div className="bg-white rounded-lg shadow-md mb-6">
+        {/* <div className="bg-white rounded-lg shadow-md mb-6">
           <div className="p-6">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
               <div className="flex-1">
@@ -342,7 +342,7 @@ const ApplicationDetailsPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -464,10 +464,6 @@ const ApplicationDetailsPage: React.FC = () => {
               </h2>
               
               <div className="space-y-4">
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="text-sm font-medium text-gray-600">Application ID</span>
-                  <span className="text-gray-900 font-medium">{applicationData.id}</span>
-                </div>
                 
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm font-medium text-gray-600">Roll Number</span>
@@ -497,17 +493,6 @@ const ApplicationDetailsPage: React.FC = () => {
                       : 'text-red-800 bg-red-100'
                   }`}>
                     {applicationData.payment_status === '1' ? 'Paid' : 'Unpaid'}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-sm font-medium text-gray-600">Status</span>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                    applicationData.activation_status === 1 
-                      ? 'text-green-800 bg-green-100' 
-                      : 'text-yellow-800 bg-yellow-100'
-                  }`}>
-                    {applicationData.activation_status === 1 ? 'Active' : 'Inactive'}
                   </span>
                 </div>
               </div>

@@ -114,7 +114,7 @@ const ApplicationDetailModal: React.FC<ApplicationDetailModalProps> = ({
     setLoading(true);
     try {
       const response = await axios.post<ApiResponse>(
-        `${apiUrl}/SuperAdmin/Applications/get-applications-details`,
+        `${apiUrl}/${user.role}/Applications/get-applications-details`,
         {
           application_id: application.application_id || application.id
         },
@@ -225,7 +225,7 @@ const ApplicationDetailModal: React.FC<ApplicationDetailModalProps> = ({
 
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Applications/approve-application`,
+        `${apiUrl}/${user.role}/Applications/approve-application`,
         {
           application_id: displayData.id
         },
@@ -252,7 +252,7 @@ const ApplicationDetailModal: React.FC<ApplicationDetailModalProps> = ({
 
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Applications/reject-application`,
+        `${apiUrl}/${user.role}/Applications/reject-application`,
         {
           application_id: displayData.id
         },

@@ -70,6 +70,7 @@ const ApplicationEditPage: React.FC = () => {
   const [dynamicOptions, setDynamicOptions] = useState<{[key: string]: Array<{value: number | string; text: string}>}>({});
   const [filePreviews, setFilePreviews] = useState<{[key: string]: string}>({});
   const [selectedFiles, setSelectedFiles] = useState<{[key: string]: File}>({});
+  const [visibleFields, setVisibleFields] = useState<{[key: string]: boolean}>({});
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const apiAssetsUrl = import.meta.env.VITE_ASSET_URL;
@@ -91,7 +92,7 @@ const ApplicationEditPage: React.FC = () => {
 
       if (response.data && response.data.states) {
         stateOptions = response.data.states.map((state: any) => ({
-          value: state.state_id,
+          value: `${state.state_id}$${state.state_title}`,
           text: state.state_title
         }));
       }
@@ -117,9 +118,10 @@ const ApplicationEditPage: React.FC = () => {
         stateFields.forEach(fieldName => {
           const stateValue = formData[fieldName];
           if (stateValue && stateValue !== '') {
+            const stateId = stateValue.split('$')[0];
             const targetField = getTargetFieldForState(fieldName);
-            if (targetField) {
-              fetchDistricts(stateValue, targetField);
+            if (targetField && stateId) {
+              fetchDistricts(stateId, targetField, stateValue);
             }
           }
         });
@@ -146,7 +148,7 @@ const ApplicationEditPage: React.FC = () => {
   };
 
   // Fetch districts by state ID
-  const fetchDistricts = async (stateId: string | number, targetField: string) => {
+  const fetchDistricts = async (stateId: string | number, targetField: string, stateValue?: string) => {
     try {
       const response = await axios.post(
         `${apiUrl}/frontend/get_district_by_state_id`,
@@ -163,7 +165,7 @@ const ApplicationEditPage: React.FC = () => {
 
       if (response.data && response.data.districts) {
         districtOptions = response.data.districts.map((district: any) => ({
-          value: district.id,
+          value: `${district.id}$${district.district_title}`,
           text: district.district_title
         }));
       }
@@ -172,9 +174,62 @@ const ApplicationEditPage: React.FC = () => {
         ...prev,
         [targetField]: districtOptions
       }));
+
+      // Auto-select district if we have a state value and district data in formData
+      if (stateValue && formData[targetField]) {
+        const districtValue = formData[targetField];
+        // Check if the district value exists in the fetched options
+        const districtExists = districtOptions.some(option => 
+          option.value === districtValue || option.value.toString() === districtValue.toString()
+        );
+        
+        if (!districtExists) {
+          // If district doesn't exist in options, clear it
+          setFormData(prev => ({
+            ...prev,
+            [targetField]: ''
+          }));
+        }
+      }
     } catch (error) {
       console.error('Error fetching districts:', error);
     }
+  };
+
+  // Update field visibility based on h_target and v_target
+  const updateFieldVisibility = (fieldName: string, value: string) => {
+    const newVisibleFields = { ...visibleFields };
+    
+    // Find all fields that have this field as their h_target
+    formSections.forEach(section => {
+      section.children.forEach(field => {
+        if (field.h_target === fieldName) {
+          const shouldShow = field.v_target ? value === field.v_target : !!value;
+          newVisibleFields[field.name] = shouldShow;
+        }
+      });
+    });
+    
+    setVisibleFields(newVisibleFields);
+  };
+
+  // Initialize field visibility
+  const initializeFieldVisibility = (data: CandidateDetails) => {
+    const initialVisibility: {[key: string]: boolean} = {};
+    
+    formSections.forEach(section => {
+      section.children.forEach(field => {
+        if (field.h_target) {
+          const targetValue = data[field.h_target];
+          const shouldShow = field.v_target ? targetValue === field.v_target : !!targetValue;
+          initialVisibility[field.name] = shouldShow;
+        } else {
+          initialVisibility[field.name] = true;
+        }
+      });
+    });
+    
+    setVisibleFields(initialVisibility);
   };
 
   // Fetch application form data
@@ -201,7 +256,7 @@ const ApplicationEditPage: React.FC = () => {
         setLookups(response.data.lookups || {});
         setApplication(response.data.application_data);
         
-        // Set form data from candidate_details - FIXED
+        // Set form data from candidate_details
         if (response.data.candidate_details) {
           const candidateData = response.data.candidate_details;
           
@@ -215,9 +270,21 @@ const ApplicationEditPage: React.FC = () => {
               cleanFormData[key] = candidateData[key] || '';
             }
           });
+
+          // Convert state and district values to id$name format
+          if (cleanFormData.address_state && candidateData.Saddress_state) {
+            cleanFormData.address_state = `${cleanFormData.address_state}$${candidateData.Saddress_state}`;
+          }
           
+          if (cleanFormData.address_district && candidateData.Saddress_district) {
+            cleanFormData.address_district = `${cleanFormData.address_district}$${candidateData.Saddress_district}`;
+          }
+
           console.log('Clean Form Data:', cleanFormData);
           setFormData(cleanFormData);
+          
+          // Initialize field visibility
+          initializeFieldVisibility(cleanFormData);
           
           // Set file previews for existing files
           const previews: {[key: string]: string} = {};
@@ -230,13 +297,22 @@ const ApplicationEditPage: React.FC = () => {
           if (candidateData.caste_certificate) {
             previews.caste_certificate = `${apiAssetsUrl}/${candidateData.caste_certificate}`;
           }
+          if (candidateData.birth_certificate) {
+            previews.birth_certificate = `${apiAssetsUrl}/${candidateData.birth_certificate}`;
+          }
+          if (candidateData.transfer_certificate) {
+            previews.transfer_certificate = `${apiAssetsUrl}/${candidateData.transfer_certificate}`;
+          }
+          if (candidateData.final_exam_report_card) {
+            previews.final_exam_report_card = `${apiAssetsUrl}/${candidateData.final_exam_report_card}`;
+          }
           setFilePreviews(previews);
-        }
 
-        // Fetch states after form data is loaded
-        setTimeout(() => {
-          fetchStates();
-        }, 100);
+          // Fetch states after form data is loaded
+          setTimeout(() => {
+            fetchStates();
+          }, 100);
+        }
       }
     } catch (error) {
       console.error('Error fetching application data:', error);
@@ -252,14 +328,19 @@ const ApplicationEditPage: React.FC = () => {
 
   // Handle state change - fetch districts
   const handleStateChange = (fieldName: string, value: string, targetField: string) => {
+    const stateId = value.split('$')[0];
+    
     setFormData(prev => ({
       ...prev,
       [fieldName]: value,
       [targetField]: '' // Clear district when state changes
     }));
 
-    if (value) {
-      fetchDistricts(value, targetField);
+    // Update field visibility
+    updateFieldVisibility(fieldName, value);
+
+    if (stateId && value) {
+      fetchDistricts(stateId, targetField);
     }
   };
 
@@ -269,6 +350,9 @@ const ApplicationEditPage: React.FC = () => {
       ...prev,
       [fieldName]: value
     }));
+
+    // Update field visibility for dependent fields
+    updateFieldVisibility(fieldName, value);
   };
 
   // Handle file selection with preview
@@ -426,6 +510,13 @@ const ApplicationEditPage: React.FC = () => {
   const renderFormField = (field: FormField) => {
     const value = formData[field.name] || '';
     const fieldOptions = getFieldOptions(field);
+    const isVisible = visibleFields[field.name] !== false;
+
+    // Skip rendering if field is not visible
+    if (!isVisible) return null;
+
+    const baseInputClasses = "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors outline-none";
+    const baseSelectClasses = "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors outline-none";
 
     switch (field.type) {
       case 'text':
@@ -436,7 +527,7 @@ const ApplicationEditPage: React.FC = () => {
             value={value}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
             placeholder={field.placeholder}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className={baseInputClasses}
             required={field.required === 1}
           />
         );
@@ -452,7 +543,7 @@ const ApplicationEditPage: React.FC = () => {
               <select
                 value={value}
                 onChange={(e) => handleStateChange(field.name, e.target.value, targetField)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={baseSelectClasses}
                 required={field.required === 1}
               >
                 <option value="">Select {getFieldLabel(field)}</option>
@@ -479,8 +570,8 @@ const ApplicationEditPage: React.FC = () => {
               <select
                 value={value}
                 onChange={(e) => handleInputChange(field.name, e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  isDisabled ? 'bg-gray-100 text-gray-500 border-gray-200' : 'border-gray-300'
+                className={`${baseSelectClasses} ${
+                  isDisabled ? 'bg-gray-100 text-gray-500 border-gray-200' : ''
                 }`}
                 required={field.required === 1}
                 disabled={isDisabled}
@@ -507,7 +598,7 @@ const ApplicationEditPage: React.FC = () => {
               <select
                 value={value}
                 onChange={(e) => handleInputChange(field.name, e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={baseSelectClasses}
                 required={field.required === 1}
               >
                 <option value="">Select {getFieldLabel(field)}</option>
@@ -529,7 +620,7 @@ const ApplicationEditPage: React.FC = () => {
           <select
             value={value}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className={baseSelectClasses}
             required={field.required === 1}
           >
             <option value="">Select {getFieldLabel(field)}</option>
@@ -547,7 +638,7 @@ const ApplicationEditPage: React.FC = () => {
             type="date"
             value={value}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className={baseInputClasses}
             required={field.required === 1}
           />
         );
@@ -594,21 +685,6 @@ const ApplicationEditPage: React.FC = () => {
               )}
             </div>
 
-            {(selectedFile || existingFileUrl) && (
-              <div className="text-xs text-gray-700 bg-gray-50 p-2 rounded border border-gray-100 mb-3 text-center">
-                {selectedFile ? (
-                  <p>
-                    Selected: <strong>{selectedFile.name}</strong> (
-                    {(selectedFile.size / 1024).toFixed(1)} KB)
-                  </p>
-                ) : (
-                  <p>
-                    Current: <strong>{formData[field.name]?.split("/").pop()}</strong>
-                  </p>
-                )}
-              </div>
-            )}
-
             <div>
               <input
                 type="file"
@@ -638,7 +714,7 @@ const ApplicationEditPage: React.FC = () => {
             value={value}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
             placeholder={field.placeholder}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className={baseInputClasses}
           />
         );
     }
@@ -674,17 +750,6 @@ const ApplicationEditPage: React.FC = () => {
           title="Applications Edit"
           paths={[{ name: 'Applications Edit', link: '#' }]}
         />
-          
-          {/* <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Edit Application
-              </h1>
-              <p className="text-gray-600 mt-2">
-                {application?.applicant_name} - Roll No: {application?.id}
-              </p>
-            </div>
-          </div> */}
         </div>
 
         {/* Form */}
