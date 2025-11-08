@@ -4,20 +4,61 @@ import { Button } from 'flowbite-react';
 import axios from 'axios';
 import { useAuth } from 'src/hook/useAuth';
 import Loader from 'src/Frontend/Common/Loader';
+import BreadcrumbHeader from 'src/Frontend/Common/BreadcrumbHeader';
+
+interface FormField {
+  id: number;
+  academic_id: number;
+  name: string;
+  vname: string | null;
+  box_id: number;
+  after_editable: number;
+  max_date: string | null;
+  type: string;
+  apiurl: string;
+  tbl: string | null;
+  label: string;
+  width: string;
+  validation: string | null;
+  validation_message: string;
+  placeholder: string | null;
+  value: any;
+  resolution: string;
+  options: any;
+  content: string | null;
+  src: string | null;
+  target: string | null;
+  h_target: string | null;
+  v_target: string | null;
+  required: number;
+  sequence: number | null;
+  style: string | null;
+}
 
 interface ApplicationData {
   id: number;
   academic_id: number;
+  degree_id: number | null;
+  class_id: number | null;
+  series_id: string;
+  class_series_id: number | null;
   roll_no: string;
+  temp_roll_no: string;
   applicant_name: string;
+  dob: string;
   candidate_pic: string;
   candidate_signature: string;
   gender: string;
-  adhar_no: string;
-  candidate_details: string;
+  adhar_no: string | null;
+  candidate_details: string | any;
+  payment_id: number | null;
   payment_status: string;
   activation_status: number;
+  archive: number;
+  pass_fail: number | null;
   created_at: string;
+  session_token: string | null;
+  rankcard_session_token: string | null;
   email: string;
   mobile_no: string;
   father_name: string;
@@ -27,37 +68,16 @@ interface ApplicationData {
   state: string;
   pincode: string;
   aadhar_no: string;
+  remarks: string;
 }
 
 interface CandidateDetails {
-  name: string;
-  gender: string;
-  Sgender: string;
-  fatherName: string;
-  motherName: string;
-  dob: string;
-  idMark1: string;
-  idMark2: string;
-  adharCard: string;
-  candidate_pic: string;
-  candidate_signature: string;
-  doorNo: string;
-  streetArea: string;
-  address_state: string;
-  Saddress_state: string;
-  address_district: string;
-  Saddress_district: string;
-  cityTown: string;
-  pincode: string;
-  mobile: string;
-  email: string;
-  category: string;
-  Scategory: string;
+  [key: string]: string;
 }
 
 interface ApiResponse {
-  data: any[];
-  file_fields: any[];
+  data: FormField[];
+  file_fields: FormField[];
   application_data: ApplicationData;
   candidate_details: CandidateDetails;
 }
@@ -69,16 +89,18 @@ const ApplicationDetailsPage: React.FC = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [formFields, setFormFields] = useState<FormField[]>([]);
+  const [fileFields, setFileFields] = useState<FormField[]>([]);
   const [applicationData, setApplicationData] = useState<ApplicationData | null>(null);
   const [candidateDetails, setCandidateDetails] = useState<CandidateDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  
   // State for image loading errors
   const [imageErrors, setImageErrors] = useState({
     candidatePic: false,
-    signature: false
+    signature: false,
+    casteCertificate: false
   });
 
   useEffect(() => {
@@ -113,26 +135,31 @@ const ApplicationDetailsPage: React.FC = () => {
 
       console.log('API Response:', response.data);
 
-      if (response.data.application_data) {
+      if (response.data) {
+        setFormFields(response.data.data || []);
+        setFileFields(response.data.file_fields || []);
         setApplicationData(response.data.application_data);
         
         // Reset image errors when new data is loaded
         setImageErrors({
           candidatePic: false,
-          signature: false
+          signature: false,
+          casteCertificate: false
         });
         
-        // Parse candidate_details from JSON string if needed
-        if (typeof response.data.application_data.candidate_details === 'string') {
+        // Parse candidate_details
+        if (response.data.candidate_details) {
+          setCandidateDetails(response.data.candidate_details);
+        } else if (typeof response.data.application_data.candidate_details === 'string') {
           try {
             const parsedDetails = JSON.parse(response.data.application_data.candidate_details);
             setCandidateDetails(parsedDetails);
           } catch (e) {
             console.error('Error parsing candidate details:', e);
-            setCandidateDetails(response.data.candidate_details || {});
+            setCandidateDetails({});
           }
         } else {
-          setCandidateDetails(response.data.candidate_details || {});
+          setCandidateDetails(response.data.application_data.candidate_details || {});
         }
       } else {
         setError('Application data not found in response');
@@ -145,102 +172,87 @@ const ApplicationDetailsPage: React.FC = () => {
     }
   };
 
-  // Handle candidate image error
-  const handleCandidateImageError = () => {
+  // Handle image errors
+  const handleImageError = (imageType: string) => {
     setImageErrors(prev => ({
       ...prev,
-      candidatePic: true
-    }));
-  };
-
-  // Handle signature image error
-  const handleSignatureImageError = () => {
-    setImageErrors(prev => ({
-      ...prev,
-      signature: true
+      [imageType]: true
     }));
   };
 
   // Get image URL with error handling
-  const getCandidateImageUrl = () => {
-    if (imageErrors.candidatePic || !applicationData?.candidate_pic) {
-      return 'https://via.placeholder.com/128x128?text=No+Image';
+  const getImageUrl = (imagePath: string | null | undefined, imageType: string, placeholderText: string) => {
+    if (imageErrors[imageType as keyof typeof imageErrors] || !imagePath) {
+      return `https://via.placeholder.com/300x200?text=${placeholderText}`;
     }
-    return `${assetUrl}/${applicationData.candidate_pic}`;
-  };
-
-  // Get signature URL with error handling
-  const getSignatureImageUrl = () => {
-    if (imageErrors.signature || !applicationData?.candidate_signature) {
-      return 'https://via.placeholder.com/192x96?text=No+Signature';
-    }
-    return `${assetUrl}/${applicationData.candidate_signature}`;
+    return `${assetUrl}/${imagePath}`;
   };
 
   const handleBack = () => {
     navigate(-1);
   };
 
-  const handlePrint = () => {
-    window.print();
+  // Get display value from candidate details
+  const getDisplayValue = (fieldName: string, fallback: string = 'N/A') => {
+    if (!candidateDetails) return fallback;
+    
+    // Try to get the value with "S" prefix first (display value)
+    const displayValue = candidateDetails[`S${fieldName}`] || candidateDetails[fieldName];
+    return displayValue && displayValue !== '' ? displayValue : fallback;
   };
 
-  const handleEdit = () => {
-    navigate(`/SuperAdmin/edit-application/${applicationId}`);
-  };
-
-  const handleApprove = async () => {
-    if (!applicationId || !user?.token) return;
-
-    try {
-      const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Applications/approve-application`,
-        {
-          application_id: parseInt(applicationId)
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${user.token}`,
-            'content-type': 'application/json',
-          }
-        }
-      );
-
-      if (response.data.status === 'success') {
-        alert('Application approved successfully!');
-        fetchApplicationDetails();
+  // Group fields by box_id for better organization
+  const groupFieldsByBox = (fields: FormField[]) => {
+    const grouped: { [key: number]: FormField[] } = {};
+    fields.forEach(field => {
+      if (!grouped[field.box_id]) {
+        grouped[field.box_id] = [];
       }
-    } catch (error) {
-      console.error('Error approving application:', error);
-      alert('Failed to approve application');
-    }
+      grouped[field.box_id].push(field);
+    });
+    return grouped;
   };
 
-  const handleReject = async () => {
-    if (!applicationId || !user?.token) return;
+  // Get box title based on box_id
+  const getBoxTitle = (boxId: number): string => {
+    const boxTitles: { [key: number]: string } = {
+      1: 'Stream Information',
+      2: 'Personal Information',
+      3: 'Candidate Photos',
+      4: 'Contact Information',
+      5: 'Educational Background',
+      6: 'Academic Details',
+      7: 'Category & Additional Information'
+    };
+    return boxTitles[boxId] || ``;
+  };
 
-    try {
-      const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Applications/reject-application`,
-        {
-          application_id: parseInt(applicationId)
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${user.token}`,
-            'content-type': 'application/json',
-          }
-        }
+  // Render field value based on field type
+  const renderFieldValue = (field: FormField) => {
+    const value = getDisplayValue(field.name);
+    
+    if (field.type === 'file_button') {
+      const filePath = candidateDetails?.[field.name];
+      if (!filePath) return 'No file uploaded';
+      
+      return (
+        <div className="mt-2">
+          <img
+            src={getImageUrl(filePath, field.name, 'No+Image')}
+            alt={field.label || 'Uploaded file'}
+            className="w-full h-48 object-contain border rounded-lg bg-gray-50"
+            onError={() => handleImageError(field.name)}
+          />
+          <p className="text-sm text-gray-500 mt-2 text-center truncate">{filePath}</p>
+        </div>
       );
-
-      if (response.data.status === 'success') {
-        alert('Application rejected successfully!');
-        fetchApplicationDetails();
-      }
-    } catch (error) {
-      console.error('Error rejecting application:', error);
-      alert('Failed to reject application');
     }
+    
+    return (
+      <div className="min-h-[24px] py-1 px-3 bg-gray-50 rounded-lg border border-gray-200">
+        {value}
+      </div>
+    );
   };
 
   if (loading) {
@@ -266,220 +278,208 @@ const ApplicationDetailsPage: React.FC = () => {
     );
   }
 
-  // Get display values
-  const getDisplayValue = (value: any, fallback: string = 'N/A') => {
-    return value && value !== '' ? value : fallback;
-  };
-
-  const getGenderDisplay = (gender: string) => {
-    if (candidateDetails?.Sgender) return candidateDetails.Sgender;
-    return gender === '1' ? 'Male' : gender === '2' ? 'Female' : 'N/A';
-  };
+  const groupedFields = groupFieldsByBox([...formFields, ...fileFields]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
+      <BreadcrumbHeader
+                title="Applications Details"
+                paths={[{ name: 'Applications', link: '#' }]}
+              />
+      <div className="max-w-7xl mx-auto px-4">
         {/* Header Section */}
         <div className="bg-white rounded-lg shadow-md mb-6">
-          <div className="p-6 border-b">
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+          <div className="p-6">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+              <div className="flex-1">
+                {/* <h1 className="text-2xl font-bold text-gray-900">
                   Application Details
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Roll No: {applicationData.roll_no} • Applied on: {new Date(applicationData.created_at).toLocaleDateString()}
-                </p>
+                </h1> */}
+                <div className="flex flex-wrap gap-4 mt-2">
+                  <p className="text-gray-600">
+                    <span className="font-medium">Roll No:</span> {applicationData.roll_no}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Applied on:</span> {new Date(applicationData.created_at).toLocaleDateString()}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Application ID:</span> {applicationData.id}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Academic ID:</span> {applicationData.academic_id}
+                  </p>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <Button color="gray" onClick={handleBack}>
-                  Back
-                </Button>
-                <Button color="blue" onClick={handlePrint}>
-                  Print
-                </Button>
-                <Button color="success" onClick={handleEdit}>
-                  Edit
-                </Button>
+              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                <div className="flex gap-2">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                    applicationData.payment_status === '1' 
+                      ? 'text-green-800 bg-green-100' 
+                      : 'text-red-800 bg-red-100'
+                  }`}>
+                    {applicationData.payment_status === '1' ? 'Paid' : 'Unpaid'}
+                  </span>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                    applicationData.activation_status === 1 
+                      ? 'text-green-800 bg-green-100' 
+                      : 'text-yellow-800 bg-yellow-100'
+                  }`}>
+                    {applicationData.activation_status === 1 ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Personal Information */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Personal Information Card */}
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Left Column - Application Sections */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Render each box section */}
+            {Object.entries(groupedFields)
+              .sort(([a], [b]) => parseInt(a) - parseInt(b))
+              .map(([boxId, fields]) => (
+              <div key={boxId} className="bg-white rounded-lg shadow-md p-6">
+                {/* <h2 className="text-xl font-semibold text-gray-900 mb-6 border-b pb-3">
+                  {getBoxTitle(parseInt(boxId))}
+                </h2> */}
+                
+                {/* Regular form fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {fields
+                    .filter(field => field.type !== 'file_button')
+                    .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
+                    .map(field => (
+                    <div key={field.id} className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        {field.label}
+                        {field.required === 1 && <span className="text-red-500 ml-1">*</span>}
+                      </label>
+                      <div className="text-gray-900">
+                        {renderFieldValue(field)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* File upload fields for this box */}
+                {fields.filter(field => field.type === 'file_button').length > 0 && (
+                  <div className="mt-8 pt-6 border-t">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Uploaded Documents</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {fields
+                        .filter(field => field.type === 'file_button')
+                        .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
+                        .map(field => (
+                        <div key={field.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            {field.content || field.label}
+                            {field.required === 1 && <span className="text-red-500 ml-1">*</span>}
+                          </label>
+                          {renderFieldValue(field)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Right Column - Quick Info & Images */}
+          <div className="space-y-6">
+            {/* Candidate Photos */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">
-                Personal Information
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-3">
+                Candidate Photos
               </h2>
               
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* Candidate Photo */}
-                <div className="flex-shrink-0">
-                  <img
-                    src={getCandidateImageUrl()}
-                    alt="Candidate"
-                    className="w-32 h-32 rounded-full object-cover border-4 border-blue-200"
-                    onError={handleCandidateImageError}
-                  />
-                </div>
-
-                {/* Personal Details */}
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Full Name</label>
-                    <p className="mt-1 text-lg font-semibold text-gray-900">
-                      {getDisplayValue(applicationData.applicant_name)}
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Roll Number</label>
-                    <p className="mt-1 text-lg font-semibold text-gray-900">
-                      {getDisplayValue(applicationData.roll_no)}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Gender</label>
-                    <p className="mt-1 text-gray-900">
-                      {getGenderDisplay(applicationData.gender)}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Email</label>
-                    <p className="mt-1 text-gray-900">
-                      {getDisplayValue(candidateDetails?.email || applicationData.email)}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Mobile</label>
-                    <p className="mt-1 text-gray-900">
-                      {getDisplayValue(candidateDetails?.mobile || applicationData.mobile_no)}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Date of Birth</label>
-                    <p className="mt-1 text-gray-900">
-                      {getDisplayValue(candidateDetails?.dob)}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Father's Name</label>
-                    <p className="mt-1 text-gray-900">
-                      {getDisplayValue(candidateDetails?.fatherName || applicationData.father_name)}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Mother's Name</label>
-                    <p className="mt-1 text-gray-900">
-                      {getDisplayValue(candidateDetails?.motherName || applicationData.mother_name)}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Aadhaar Number</label>
-                    <p className="mt-1 text-gray-900">
-                      {getDisplayValue(candidateDetails?.adharCard || applicationData.adhar_no)}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Category</label>
-                    <p className="mt-1 text-gray-900">
-                      {getDisplayValue(candidateDetails?.Scategory)}
-                    </p>
-                  </div>
-
-                  {candidateDetails?.idMark1 && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-600">Identification Mark 1</label>
-                      <p className="mt-1 text-gray-900">{candidateDetails.idMark1}</p>
-                    </div>
-                  )}
-
-                  {candidateDetails?.idMark2 && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-600">Identification Mark 2</label>
-                      <p className="mt-1 text-gray-900">{candidateDetails.idMark2}</p>
-                    </div>
-                  )}
-
-                  {/* Address Information */}
-                  <div className="md:col-span-2 border-t pt-4 mt-4">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Address Information</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-600">Door No</label>
-                        <p className="mt-1 text-gray-900">
-                          {getDisplayValue(candidateDetails?.doorNo)}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-600">Street/Area</label>
-                        <p className="mt-1 text-gray-900">
-                          {getDisplayValue(candidateDetails?.streetArea)}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-600">City/Town</label>
-                        <p className="mt-1 text-gray-900">
-                          {getDisplayValue(candidateDetails?.cityTown || applicationData.city)}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-600">State</label>
-                        <p className="mt-1 text-gray-900">
-                          {getDisplayValue(candidateDetails?.Saddress_state || applicationData.state)}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-600">District</label>
-                        <p className="mt-1 text-gray-900">
-                          {getDisplayValue(candidateDetails?.Saddress_district)}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-600">Pincode</label>
-                        <p className="mt-1 text-gray-900">
-                          {getDisplayValue(candidateDetails?.pincode || applicationData.pincode)}
-                        </p>
-                      </div>
-                    </div>
+              <div className="space-y-6">
+                {/* Candidate Picture */}
+                <div className="text-center">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Candidate Photo
+                  </label>
+                  <div className="flex justify-center">
+                    <img
+                      src={getImageUrl(candidateDetails?.candidate_pic, 'candidatePic', 'No+Photo')}
+                      alt="Candidate"
+                      className="w-40 h-40 rounded-full object-cover border-4 border-blue-200 shadow-sm"
+                      onError={() => handleImageError('candidatePic')}
+                    />
                   </div>
                 </div>
+
+                {/* Signature */}
+                <div className="text-center">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Signature
+                  </label>
+                  <div className="flex justify-center">
+                    <img
+                      src={getImageUrl(candidateDetails?.candidate_signature, 'signature', 'No+Signature')}
+                      alt="Signature"
+                      className="w-48 h-20 object-contain border-2 border-gray-300 rounded bg-white shadow-sm"
+                      onError={() => handleImageError('signature')}
+                    />
+                  </div>
+                </div>
+
+                {/* Caste Certificate */}
+                {candidateDetails?.caste_certificate && (
+                  <div className="text-center">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Caste Certificate
+                    </label>
+                    <div className="flex justify-center">
+                      <img
+                        src={getImageUrl(candidateDetails.caste_certificate, 'casteCertificate', 'No+Certificate')}
+                        alt="Caste Certificate"
+                        className="w-full max-w-48 h-auto max-h-48 object-contain border-2 border-gray-300 rounded bg-white shadow-sm"
+                        onError={() => handleImageError('casteCertificate')}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Academic Information Card */}
+            {/* Application Summary */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">
-                Application Status & Payment Information
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-3">
+                Application Summary
               </h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Application ID</label>
-                  <p className="mt-1 text-lg font-semibold text-gray-900">
-                    {applicationData.id}
-                  </p>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-600">Application ID</span>
+                  <span className="text-gray-900 font-medium">{applicationData.id}</span>
+                </div>
+                
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-600">Roll Number</span>
+                  <span className="text-gray-900 font-medium">{applicationData.roll_no}</span>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Academic ID</label>
-                  <p className="mt-1 text-gray-900">{applicationData.academic_id}</p>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-600">Applicant Name</span>
+                  <span className="text-gray-900 font-medium text-right">{getDisplayValue('name')}</span>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Payment Status</label>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ${
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-600">Stream</span>
+                  <span className="text-gray-900 font-medium">{getDisplayValue('degree')}</span>
+                </div>
+
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-600">Applied Date</span>
+                  <span className="text-gray-900 text-sm">{new Date(applicationData.created_at).toLocaleDateString()}</span>
+                </div>
+
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-600">Payment Status</span>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                     applicationData.payment_status === '1' 
                       ? 'text-green-800 bg-green-100' 
                       : 'text-red-800 bg-red-100'
@@ -488,113 +488,15 @@ const ApplicationDetailsPage: React.FC = () => {
                   </span>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Activation Status</label>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ${
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-sm font-medium text-gray-600">Status</span>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                     applicationData.activation_status === 1 
                       ? 'text-green-800 bg-green-100' 
                       : 'text-yellow-800 bg-yellow-100'
                   }`}>
                     {applicationData.activation_status === 1 ? 'Active' : 'Inactive'}
                   </span>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Applied Date</label>
-                  <p className="mt-1 text-gray-900">
-                    {new Date(applicationData.created_at).toLocaleString()}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Last Updated</label>
-                  <p className="mt-1 text-gray-900">
-                    {new Date(applicationData.created_at).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Additional Information */}
-          <div className="space-y-6">
-            {/* Signature Card */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">
-                Candidate Signature
-              </h2>
-              
-              <div className="flex justify-center">
-                <img
-                  src={getSignatureImageUrl()}
-                  alt="Signature"
-                  className="w-48 h-24 object-contain border-2 border-gray-300 rounded"
-                  onError={handleSignatureImageError}
-                />
-              </div>
-            </div>
-
-            {/* Quick Actions Card */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">
-                Quick Actions
-              </h2>
-              
-              <div className="space-y-3">
-                <Button color="blue" className="w-full justify-center">
-                  Download Documents
-                </Button>
-                <Button 
-                  color="success" 
-                  className="w-full justify-center"
-                  onClick={handleApprove}
-                >
-                  Approve Application
-                </Button>
-                <Button 
-                  color="failure" 
-                  className="w-full justify-center"
-                  onClick={handleReject}
-                >
-                  Reject Application
-                </Button>
-                <Button color="warning" className="w-full justify-center">
-                  Send Message
-                </Button>
-              </div>
-            </div>
-
-            {/* Application Timeline Card */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">
-                Application Timeline
-              </h2>
-              
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-900">Application Submitted</p>
-                    <p className="text-sm text-gray-500">
-                      {new Date(applicationData.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-900">Under Review</p>
-                    <p className="text-sm text-gray-500">In progress</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-900">Final Decision</p>
-                    <p className="text-sm text-gray-500">Pending</p>
-                  </div>
                 </div>
               </div>
             </div>
