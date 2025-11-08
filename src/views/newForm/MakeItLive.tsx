@@ -1116,7 +1116,7 @@ const MakeItLive: React.FC = () => {
       configure: "0",
       updateConfigure: 0,
       // API Configurations - INCLUDING UserId
-      UserId: credentials?.user_id || '', // IMPORTANT: UserId को populate करें
+      UserId: credentials?.wtsp_api_key || '', // IMPORTANT: UserId को populate करें
       zohoApiKey: credentials?.zoho_api_key || '',
       zohoFromEmail: credentials?.zoho_from_email || '',
       bounceAddress: credentials?.bounce_address || '',

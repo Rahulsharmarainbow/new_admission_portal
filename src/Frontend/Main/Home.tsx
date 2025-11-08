@@ -7,6 +7,7 @@ import Footer from '../Common/Footer';
 import Loader from '../Common/Loader';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import NotFound from './NotFound';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 const assetUrl = import.meta.env.VITE_ASSET_URL;
@@ -37,12 +38,12 @@ const Home = () => {
           setInstitute(response.data);
         } else {
           setError('No data found for this institute');
-          toast.error('No data found for this institute');
+          // toast.error('No data found for this institute');
         }
       } catch (err) {
         console.error('Error fetching institute data:', err);
         setError('Failed to load institute data');
-        toast.error('Failed to load institute data');
+        // toast.error('Failed to load institute data');
       } finally {
         setLoading(false);
       }
@@ -77,15 +78,9 @@ const Home = () => {
   }
 
   if (error || !institute) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
-          <p className="text-gray-600">{error || 'Failed to load institute data'}</p>
-        </div>
-      </div>
-    );
+    return <NotFound  />;
   }
+
 
   // Transform API data to match component structure
   const transformApiData = (data) => {
@@ -293,7 +288,14 @@ const Home = () => {
 
                     {note.url ? (
                       <a
-                        href={note.url.startsWith("http") ? note.url : `/Frontend/${institute_id}/${note.url}`}
+                       
+
+                        href={
+                            note.url.startsWith("http")
+                              ? note.url // Full external URL (e.g., https://example.com/doc.pdf)
+                              : `${assetUrl}/${note.url}` // Stored file from backend (e.g., uploads/news.pdf)
+                          }
+
                         target="_blank"
                         rel="noopener noreferrer"
                         className="hover:text-[#1e40af] font-medium transition-colors duration-200"
@@ -411,7 +413,12 @@ const Home = () => {
               <span className="w-2 h-2 bg-[#ea580c] rounded-full mr-3"></span>
               {news.url ? (
                 <a
-                  href={news.url.startsWith("http") ? news.url : `/Frontend/${institute_id}/${news.url}`}
+                  href={
+                    news.url.startsWith("http")
+                      ? news.url // Full external URL (e.g., https://example.com/doc.pdf)
+                      : `${assetUrl}/${news.url}` // Stored file from backend (e.g., uploads/news.pdf)
+                  }
+
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-[#059669] font-medium transition-colors duration-200"

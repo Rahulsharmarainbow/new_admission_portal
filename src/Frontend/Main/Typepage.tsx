@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router"; // ✅ fixed import
+import { useParams } from "react-router";
 import Apply from "./Apply";
 import Loader from "../Common/Loader";
 import { Helmet } from "react-helmet-async";
 import Header from "../Common/Header";
 import Footer from "../Common/Footer";
+import NotFound from "./NotFound";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 const assetUrl = import.meta.env.VITE_ASSET_URL;
@@ -14,15 +15,12 @@ const TypePage = () => {
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Scroll to top when route changes
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [page_route]);
-
+  // ✅ Fetch page data
   useEffect(() => {
     if (!institute_id || !page_route) return;
 
     const fetchPageData = async () => {
+      setLoading(true); // show loader while fetching
       try {
         const response = await fetch(`${apiUrl}/Public/getDynamicPageData`, {
           method: "POST",
@@ -41,22 +39,28 @@ const TypePage = () => {
         console.error("Error fetching page:", error);
       } finally {
         setLoading(false);
+        window.scrollTo({ top: 0, behavior: "smooth" }); // ✅ scroll AFTER load
       }
     };
 
     fetchPageData();
   }, [institute_id, page_route]);
 
-  if (page_route === "apply") return <Apply />;
+  // ✅ Show loader first
   if (loading) return <Loader />;
 
+  // ✅ Handle special route
+  if (page_route === "apply") return <Apply />;
+
+  // ✅ Not found case
   if (!pageData || !pageData.success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500">
-        Page not found or content unavailable
-      </div>
-    );
+    return <NotFound />;
   }
+
+  // ✅ Remove inline font-family
+  const cleanHTML = (html) => {
+    return html.replace(/font-family\s*:[^;"]*;?/gi, "");
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -86,12 +90,11 @@ const TypePage = () => {
         address={pageData.header?.address}
       />
 
-      {/* 🔹 Main content section */}
       <main className="flex-grow bg-transparent mx-3 md:mx-8 py-10 flex justify-center">
         <div className="bg-white w-full max-w-8xl rounded-2xl shadow-lg p-6 sm:p-10">
           <div
             className="prose max-w-none text-gray-700 leading-relaxed prose-headings:text-gray-900 prose-p:my-4 prose-p:text-base prose-p:leading-7 prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-800 prose-li:marker:text-primary"
-            dangerouslySetInnerHTML={{ __html: pageData.data.content }}
+            dangerouslySetInnerHTML={{ __html: cleanHTML(pageData.data.content) }}
           />
         </div>
       </main>
