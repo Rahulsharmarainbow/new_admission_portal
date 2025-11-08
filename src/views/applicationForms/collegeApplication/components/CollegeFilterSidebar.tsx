@@ -6,7 +6,6 @@ import axios from 'axios';
 import { useAuth } from 'src/hook/useAuth';
 import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
 import { useStates } from 'src/hook/useStates';
-import { useCaste } from 'src/hook/useCaste';
 
 interface Filters {
   page: number;
@@ -71,7 +70,6 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
 }) => {
   const { user } = useAuth();
   const { states: statelist, loading: statesLoading } = useStates();
-  const { caste: castelist, loading: casteLoading } = useCaste();
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [dynamicFilters, setDynamicFilters] = useState<DynamicFilter[]>([]);
   const [loading, setLoading] = useState(false);
@@ -97,12 +95,6 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
   const stateOptions = statelist.map(state => ({
     value: state.state_id?.toString(),
     label: state.state_title,
-  }));
-
-  // Caste options
-  const casteOptions = castelist.map(caste => ({
-    value: caste.id?.toString(),
-    label: caste.name,
   }));
 
   // Set academic_id for CustomerAdmin
@@ -424,28 +416,6 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
               classNamePrefix="react-select"
               noOptionsMessage={({ inputValue }) =>
                 inputValue ? `No states found for "${inputValue}"` : 'No states available'
-              }
-            />
-          </div>
-
-          {/* Caste Dropdown - Changed to single select */}
-          <div>
-            <Label htmlFor="caste" className="block mb-2 text-sm font-medium text-gray-700">
-              Caste
-            </Label>
-            <Select
-              id="caste"
-              options={casteOptions}
-              value={casteOptions.find(option => option.value === filters.caste)}
-              onChange={(option) => handleSelectChange('caste', option)}
-              styles={customStyles}
-              placeholder="Select caste..."
-              isSearchable
-              isClearable
-              className="react-select-container"
-              classNamePrefix="react-select"
-              noOptionsMessage={({ inputValue }) =>
-                inputValue ? `No castes found for "${inputValue}"` : 'No castes available'
               }
             />
           </div>

@@ -136,8 +136,14 @@ const ApplicationDetailsPage: React.FC = () => {
       console.log('API Response:', response.data);
 
       if (response.data) {
+        // Remove duplicates from file_fields that already exist in data
+        const dataFieldNames = new Set(response.data.data.map(field => field.name));
+        const uniqueFileFields = response.data.file_fields.filter(field => 
+          !dataFieldNames.has(field.name)
+        );
+
         setFormFields(response.data.data || []);
-        setFileFields(response.data.file_fields || []);
+        setFileFields(uniqueFileFields || []);
         setApplicationData(response.data.application_data);
         
         // Reset image errors when new data is loaded
@@ -222,9 +228,16 @@ const ApplicationDetailsPage: React.FC = () => {
       4: 'Contact Information',
       5: 'Educational Background',
       6: 'Academic Details',
-      7: 'Category & Additional Information'
+      7: 'Category & Additional Information',
+      10: 'Basic Information',
+      11: 'Personal Details',
+      13: 'Father/Guardian Information',
+      14: 'Mother Information',
+      15: 'Educational Background',
+      16: 'Documents',
+      17: 'Address Information'
     };
-    return boxTitles[boxId] || ``;
+    return boxTitles[boxId] || `Section ${boxId}`;
   };
 
   // Render field value based on field type
@@ -278,23 +291,22 @@ const ApplicationDetailsPage: React.FC = () => {
     );
   }
 
-  const groupedFields = groupFieldsByBox([...formFields, ...fileFields]);
+  // Combine form fields and file fields, removing any potential duplicates
+  const allFields = [...formFields, ...fileFields];
+  const groupedFields = groupFieldsByBox(allFields);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <BreadcrumbHeader
-                title="Applications Details"
-                paths={[{ name: 'Applications', link: '#' }]}
-              />
+        title="Applications Details"
+        paths={[{ name: 'Applications', link: '#' }]}
+      />
       <div className="max-w-7xl mx-auto px-4">
         {/* Header Section */}
         <div className="bg-white rounded-lg shadow-md mb-6">
           <div className="p-6">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
               <div className="flex-1">
-                {/* <h1 className="text-2xl font-bold text-gray-900">
-                  Application Details
-                </h1> */}
                 <div className="flex flex-wrap gap-4 mt-2">
                   <p className="text-gray-600">
                     <span className="font-medium">Roll No:</span> {applicationData.roll_no}
@@ -351,7 +363,7 @@ const ApplicationDetailsPage: React.FC = () => {
                     .filter(field => field.type !== 'file_button')
                     .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
                     .map(field => (
-                    <div key={field.id} className="space-y-2">
+                    <div key={`${field.id}-${field.name}`} className="space-y-2">
                       <label className="block text-sm font-medium text-gray-700">
                         {field.label}
                         {field.required === 1 && <span className="text-red-500 ml-1">*</span>}
@@ -365,14 +377,14 @@ const ApplicationDetailsPage: React.FC = () => {
 
                 {/* File upload fields for this box */}
                 {fields.filter(field => field.type === 'file_button').length > 0 && (
-                  <div className="mt-8 pt-6 border-t">
+                  <div className="mt-8 pt-6Uploaded Documents">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Uploaded Documents</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {fields
                         .filter(field => field.type === 'file_button')
                         .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
                         .map(field => (
-                        <div key={field.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                        <div key={`${field.id}-${field.name}`} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                           <label className="block text-sm font-medium text-gray-700 mb-3">
                             {field.content || field.label}
                             {field.required === 1 && <span className="text-red-500 ml-1">*</span>}
@@ -403,7 +415,7 @@ const ApplicationDetailsPage: React.FC = () => {
                   </label>
                   <div className="flex justify-center">
                     <img
-                      src={getImageUrl(candidateDetails?.candidate_pic, 'candidatePic', 'No+Photo')}
+                      src={getImageUrl(applicationData.candidate_pic, 'candidatePic', 'No+Photo')}
                       alt="Candidate"
                       className="w-40 h-40 rounded-full object-cover border-4 border-blue-200 shadow-sm"
                       onError={() => handleImageError('candidatePic')}
@@ -418,7 +430,7 @@ const ApplicationDetailsPage: React.FC = () => {
                   </label>
                   <div className="flex justify-center">
                     <img
-                      src={getImageUrl(candidateDetails?.candidate_signature, 'signature', 'No+Signature')}
+                      src={getImageUrl(applicationData.candidate_signature, 'signature', 'No+Signature')}
                       alt="Signature"
                       className="w-48 h-20 object-contain border-2 border-gray-300 rounded bg-white shadow-sm"
                       onError={() => handleImageError('signature')}
@@ -464,12 +476,12 @@ const ApplicationDetailsPage: React.FC = () => {
 
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm font-medium text-gray-600">Applicant Name</span>
-                  <span className="text-gray-900 font-medium text-right">{getDisplayValue('name')}</span>
+                  <span className="text-gray-900 font-medium text-right">{getDisplayValue('first_name')} {getDisplayValue('middle_name')} {getDisplayValue('last_name')}</span>
                 </div>
 
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="text-sm font-medium text-gray-600">Stream</span>
-                  <span className="text-gray-900 font-medium">{getDisplayValue('degree')}</span>
+                  <span className="text-sm font-medium text-gray-600">Class</span>
+                  <span className="text-gray-900 font-medium">{getDisplayValue('class')}</span>
                 </div>
 
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
