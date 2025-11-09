@@ -43,7 +43,7 @@ const Profile = () => {
             My Profile
           </Link>
           
-          <Link
+          {/* <Link
             to="#"
             className="px-4 py-3 flex items-center hover:bg-gray-100 w-full gap-3 text-sm"
             onClick={() => setIsOpen(false)}
@@ -59,7 +59,7 @@ const Profile = () => {
           >
             <Icon icon="solar:checklist-linear" height={20} />
             My Task
-          </Link>
+          </Link> */}
           
           <div className="border-t border-gray-200">
             <button

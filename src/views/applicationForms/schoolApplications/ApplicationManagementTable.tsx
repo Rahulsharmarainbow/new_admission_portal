@@ -66,7 +66,7 @@ const ApplicationManagementTable: React.FC = () => {
     order: 'desc',
     orderBy: 'id',
     search: '',
-    academic_id: '',
+    academic_id: user?.role === 'CustomerAdmin' ? user?.academic_id : '',
     year: '',
     classAppliedFor: '',
     gender: '',
@@ -109,7 +109,7 @@ const ApplicationManagementTable: React.FC = () => {
   // Calculate active filters count
   useEffect(() => {
     let count = 0;
-    if (filters.academic_id) count++;
+    if (filters.academic_id && user?.role != 'CustomerAdmin') count++;
     if (filters.year) count++;
     if (filters.classAppliedFor) count++;
     if (filters.gender) count++;
@@ -396,7 +396,7 @@ const ApplicationManagementTable: React.FC = () => {
       order: 'desc',
       orderBy: 'id',
       search: '',
-      academic_id: '',
+      academic_id: user?.role === 'CustomerAdmin' ? user?.academic_id : '',
       year: '',
       classAppliedFor: '',
       gender: '',
@@ -657,14 +657,14 @@ const ApplicationManagementTable: React.FC = () => {
                                     <MdOutlineRemoveRedEye className="w-5 h-5" />
                                   </button>
                                 </Tooltip>
-                                <Tooltip content="Edit" placement="top" style="light">
+                               { user?.role != 'CustomerAdmin' && (<Tooltip content="Edit" placement="top" style="light">
                                   <button
                                     onClick={() => handleEdit(application)}
                                     className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
                                   >
                                     <TbEdit className="w-5 h-5" />
                                   </button>
-                                </Tooltip>
+                                </Tooltip>)}
                               </div>
                             </td>
                           </tr>
@@ -845,7 +845,7 @@ const ApplicationManagementTable: React.FC = () => {
             {/* Footer */}
             <div className="absolute bottom-0 left-0 right-0 p-6 border-t bg-white">
               <div className="flex gap-3">
-                <Button onClick={handleClearFilters} color="gray" className="flex-1">
+                <Button onClick={handleClearFilters} color="alternative" className="flex-1">
                   Clear All
                 </Button>
                 <Button

@@ -256,7 +256,7 @@ const ApplicationDetailsPage: React.FC = () => {
             className="w-full h-48 object-contain border rounded-lg bg-gray-50"
             onError={() => handleImageError(field.name)}
           />
-          <p className="text-sm text-gray-500 mt-2 text-center truncate">{filePath}</p>
+          {/* <p className="text-sm text-gray-500 mt-2 text-center truncate">{filePath}</p> */}
         </div>
       );
     }
