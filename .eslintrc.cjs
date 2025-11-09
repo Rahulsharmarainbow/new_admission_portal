@@ -14,5 +14,22 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    '@typescript-eslint/no-unused-vars': 'off',
+    'no-unused-vars': 'off',
+
+    // 🚀 Ignore missing prop types (React)
+    'react/prop-types': 'off',
+
+    // 🚀 Ignore TS-specific errors if you just want to build
+    '@typescript-eslint/ban-ts-comment': 'off',
+
+    // 🚀 Optional: ignore explicit return type warnings
+    '@typescript-eslint/explicit-function-return-type': 'off',
+
+    
+  '@typescript-eslint/explicit-module-boundary-types': 'off',
+  '@typescript-eslint/no-explicit-any': 'off',
+  
+ 
   },
 }

@@ -329,6 +329,25 @@ const SidebarContent: Record<number, MenuItem[]> = {
           ],
         },
         {
+          name: 'Application Forms',
+          id: uniqueId(),
+          icon: 'solar:document-line-duotone',
+          children: [
+            {
+              name: 'School Applications',
+              id: uniqueId(),
+              url: '/SupportAdmin/school-applications',
+              isPro: false,
+            },
+            {
+              name: 'College Applications',
+              id: uniqueId(),
+              url: '/SupportAdmin/college-applications',
+              isPro: false,
+            },
+          ],
+        },
+        {
           name: 'School Services',
           id: uniqueId(),
           icon: 'solar:user-id-line-duotone',
