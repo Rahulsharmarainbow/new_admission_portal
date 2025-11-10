@@ -499,8 +499,14 @@ const handleCheckboxChange = useCallback(
 
         // Special validation for SC/ST categories
         const selectedCategory = formData.s_category;
-        const selectedhalth = formData.child_has_any_issue.split("$")[1];
-        console.log(formData.child_has_any_issue)
+        const selectedhalth =
+  formData?.child_has_any_issue?.includes("$")
+    ? formData.child_has_any_issue.split("$")[1]
+    : "";
+
+        console.log(formData['specified_health_issue'] == "")
+        console.log(selectedhalth)
+        console.log(formData?.child_has_any_issue?.includes("$"))
         console.log(formData['specified_health_issue'])
         if (
           (selectedCategory === 'SC' || selectedCategory === 'ST') &&
@@ -509,11 +515,11 @@ const handleCheckboxChange = useCallback(
           newErrors['caste_certificate'] = 'Caste certificate preview is required';
         }
         if (
-          (selectedhalth == "Yes") &&
-          (formData['specified_health_issue'] == "")
-        ) {
-          newErrors['specified_health_issue'] = 'Please specified health issue';
-        }
+  selectedhalth === "Yes" &&
+  !formData?.specified_health_issue
+) {
+  newErrors['specified_health_issue'] = 'Please specify health issue';
+}
       } else if (step === 1 && !conditions.disclaimer) {
         newErrors.disclaimer = 'Please accept the disclaimer to proceed';
       } else if (step === 2 && !conditions.declaration) {

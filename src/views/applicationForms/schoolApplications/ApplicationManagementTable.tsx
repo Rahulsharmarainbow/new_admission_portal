@@ -160,9 +160,9 @@ const ApplicationManagementTable: React.FC = () => {
               .filter((app: Application) => app.class_name && app.class_id)
               .map((app: Application) => ({
                 id: app.class_id,
-                name: app.class_name
-              }))
-          )
+                name: app.class_name,
+              })),
+          ),
         ).map((classObj: any) => ({
           value: classObj.id.toString(),
           label: classObj.name,
@@ -225,6 +225,7 @@ const ApplicationManagementTable: React.FC = () => {
 
   // Handle class change
   const handleClassChange = (selectedOption: any) => {
+    console.log(selectedOption, 'meeeeeee ayiiiii');
     setFilters((prev) => ({
       ...prev,
       classAppliedFor: selectedOption?.value || '',
@@ -506,7 +507,7 @@ const ApplicationManagementTable: React.FC = () => {
                       <th className="w-16 py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         S.NO
                       </th>
-                      <th 
+                      <th
                         className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px] cursor-pointer select-none"
                         onClick={() => handleSort('applicant_name')}
                       >
@@ -530,7 +531,7 @@ const ApplicationManagementTable: React.FC = () => {
                           {getSortIcon('roll_no')}
                         </div>
                       </th>
-                      <th 
+                      <th
                         className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px] cursor-pointer select-none"
                         onClick={() => handleSort('academic_name')}
                       >
@@ -539,7 +540,7 @@ const ApplicationManagementTable: React.FC = () => {
                           {getSortIcon('academic_name')}
                         </div>
                       </th>
-                      <th 
+                      <th
                         className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px] cursor-pointer select-none"
                         onClick={() => handleSort('class_name')}
                       >
@@ -584,7 +585,9 @@ const ApplicationManagementTable: React.FC = () => {
                                   className="w-12 h-12 rounded-full object-cover border mx-auto"
                                   onError={(e) => {
                                     (e.target as HTMLImageElement).style.display = 'none';
-                                    ((e.target as HTMLImageElement).nextSibling as HTMLElement).style.display = 'flex';
+                                    (
+                                      (e.target as HTMLImageElement).nextSibling as HTMLElement
+                                    ).style.display = 'flex';
                                   }}
                                 />
                               ) : null}
@@ -604,7 +607,9 @@ const ApplicationManagementTable: React.FC = () => {
                                   className="w-20 h-10 object-contain border mx-auto"
                                   onError={(e) => {
                                     (e.target as HTMLImageElement).style.display = 'none';
-                                    ((e.target as HTMLImageElement).nextSibling as HTMLElement).style.display = 'flex';
+                                    (
+                                      (e.target as HTMLImageElement).nextSibling as HTMLElement
+                                    ).style.display = 'flex';
                                   }}
                                 />
                               ) : null}
@@ -657,14 +662,16 @@ const ApplicationManagementTable: React.FC = () => {
                                     <MdOutlineRemoveRedEye className="w-5 h-5" />
                                   </button>
                                 </Tooltip>
-                               { user?.role != 'CustomerAdmin' && (<Tooltip content="Edit" placement="top" style="light">
-                                  <button
-                                    onClick={() => handleEdit(application)}
-                                    className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
-                                  >
-                                    <TbEdit className="w-5 h-5" />
-                                  </button>
-                                </Tooltip>)}
+                                {user?.role != 'CustomerAdmin' && (
+                                  <Tooltip content="Edit" placement="top" style="light">
+                                    <button
+                                      onClick={() => handleEdit(application)}
+                                      className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                                    >
+                                      <TbEdit className="w-5 h-5" />
+                                    </button>
+                                  </Tooltip>
+                                )}
                               </div>
                             </td>
                           </tr>
@@ -775,15 +782,12 @@ const ApplicationManagementTable: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Class Applied For
                 </label>
-                <Select
-                  options={classOptions}
-                  value={classOptions.find((option) => option.value === filters.classAppliedFor)}
-                  onChange={handleClassChange}
-                  placeholder={filters.academic_id ? "Select class..." : "Select academic first"}
-                  isClearable
-                  isDisabled={!filters.academic_id}
-                  className="react-select-container"
-                  classNamePrefix="react-select"
+                <ClassDropdown
+                  value={filters.classAppliedFor}
+                  onChange={handleClassChange} // ✅ Correct
+                  academicId={filters.academic_id}
+                  placeholder={filters.academic_id ? 'Select class...' : 'Select academic first'}
+                  disabled={!filters.academic_id}
                 />
               </div>
 
@@ -824,7 +828,7 @@ const ApplicationManagementTable: React.FC = () => {
               </div>
 
               {/* Payment Status */}
-              <div className='mb-10'>
+              <div className="mb-10">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Payment Status
                 </label>
@@ -888,7 +892,6 @@ const ApplicationManagementTable: React.FC = () => {
 };
 
 export default ApplicationManagementTable;
-
 
 // import React, { useState, useEffect } from 'react';
 // import { MdOutlineRemoveRedEye, MdFilterList, MdSort } from 'react-icons/md';
@@ -1042,7 +1045,7 @@ export default ApplicationManagementTable;
 //       if (response.data) {
 //         setApplications(response.data.rows || []);
 //         setTotal(response.data.total || 0);
-        
+
 //         // Extract unique classes from applications for dropdown
 //         const uniqueClasses = Array.from(
 //           new Set(
@@ -1096,11 +1099,11 @@ export default ApplicationManagementTable;
 //     fetchApplications();
 //     fetchClassOptionsFromAPI();
 //   }, [
-//     filters.page, 
-//     filters.rowsPerPage, 
-//     filters.order, 
-//     filters.orderBy, 
-//     debouncedSearch, 
+//     filters.page,
+//     filters.rowsPerPage,
+//     filters.order,
+//     filters.orderBy,
+//     debouncedSearch,
 //     filters.academic_id,
 //     filters.year,
 //     filters.classAppliedFor,
@@ -1256,20 +1259,20 @@ export default ApplicationManagementTable;
 //     // Check if response is successful
 //     if (response.data.success && response.data.data) {
 //       const { filename, excel_base64 } = response.data.data;
-      
+
 //       // Base64 decode karo
 //       const binaryString = atob(excel_base64);
 //       const bytes = new Uint8Array(binaryString.length);
-      
+
 //       for (let i = 0; i < binaryString.length; i++) {
 //         bytes[i] = binaryString.charCodeAt(i);
 //       }
-      
+
 //       // Blob create karo
-//       const blob = new Blob([bytes], { 
-//         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+//       const blob = new Blob([bytes], {
+//         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 //       });
-      
+
 //       // Download link create karo
 //       const url = window.URL.createObjectURL(blob);
 //       const link = document.createElement('a');
@@ -1284,10 +1287,10 @@ export default ApplicationManagementTable;
 //     } else {
 //       throw new Error(response.data.message || 'Failed to generate Excel file');
 //     }
-    
+
 //   } catch (error: any) {
 //     console.error('Error downloading Excel:', error);
-    
+
 //     if (error.response?.status === 404) {
 //       toast.error('No data found to export', { id: 'download-excel' });
 //     } else if (error.response?.status === 500) {
@@ -1365,8 +1368,8 @@ export default ApplicationManagementTable;
 //               placeholder="Search by name or mobile..."
 //               value={filters.search}
 //               onChange={(e) => handleSearch(e.target.value)}
-//               className="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg 
-//                          bg-white focus:ring-blue-500 focus:border-blue-500 
+//               className="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg
+//                          bg-white focus:ring-blue-500 focus:border-blue-500
 //                          placeholder-gray-400 transition-all duration-200"
 //             />
 //           </div>
@@ -1592,13 +1595,13 @@ export default ApplicationManagementTable;
 //       showFilterSidebar ? 'translate-x-0' : 'translate-x-full'
 //     }`}>
 //       {/* Backdrop */}
-//       <div 
+//       <div
 //         className={`absolute inset-0 bg-transparent transition-opacity duration-300 ${
 //           showFilterSidebar ? 'bg-opacity-50' : 'bg-opacity-0'
 //         }`}
 //         onClick={() => setShowFilterSidebar(false)}
 //       />
-      
+
 //       {/* Sidebar Panel */}
 //       <div className="absolute top-0 right-0 h-full w-96 bg-white shadow-xl border-l border-gray-200 transform transition-transform duration-300 ease-in-out">
 //         {/* Header */}
@@ -1752,7 +1755,7 @@ export default ApplicationManagementTable;
 //       </div>
 //     </div>
 //   </div>
-   
+
 //   {/* Application Detail Modal */}
 //   <ApplicationDetailModal
 //     isOpen={showDetailModal}
@@ -1770,7 +1773,7 @@ export default ApplicationManagementTable;
 //       min-height: 42px;
 //       transition: all 0.2s;
 //     }
-    
+
 //     .react-select-container :global(.react-select__control--is-focused) {
 //       border-color: #3b82f6;
 //       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
@@ -1780,4 +1783,4 @@ export default ApplicationManagementTable;
 //   );
 // };
 
-// export default ApplicationManagementTable;                                                                                                                                                                                                                                                                                                                
+// export default ApplicationManagementTable;

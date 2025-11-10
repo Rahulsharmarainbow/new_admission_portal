@@ -61,7 +61,7 @@ const ClassDropdown: React.FC<ClassDropdownProps> = ({
 
   const handleChange = (selected: any) => {
     const selectedValue = selected ? selected.value : "";
-    if (onChange) onChange(selectedValue);
+    if (onChange) onChange(selected);
     if (setFormData) {
       setFormData((prev: any) => ({
         ...prev,
