@@ -86,9 +86,9 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
 
   // Payment status options
   const paymentStatusOptions = [
-    { value: 'initialized', label: 'Initialized' },
-    { value: 'captured', label: 'Captured' },
-    { value: 'all', label: 'All' },
+    { value: '2', label: 'Initialized' },
+    { value: '1', label: 'Captured' },
+    { value: '', label: 'All' },
   ];
 
   // State options

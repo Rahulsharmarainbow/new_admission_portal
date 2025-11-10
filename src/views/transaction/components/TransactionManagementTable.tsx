@@ -11,6 +11,7 @@ import { useAuth } from 'src/hook/useAuth';
 import { useDebounce } from 'src/hook/useDebounce';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
+import { set } from 'lodash';
 
 interface Transaction {
   id: number;
@@ -48,6 +49,7 @@ const TransactionManagementTable: React.FC = () => {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loading2, setLoading2] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     page: 0,
     rowsPerPage: 10,
@@ -218,7 +220,7 @@ const TransactionManagementTable: React.FC = () => {
   // Update the handleDownloadExcel function
 const handleDownloadExcel = async () => {
   try {
-    const loadingToast = toast.loading('Preparing download...');
+    setLoading2(true);
     
     const response = await axios.post(
       `${apiUrl}/${user?.role}/Transactions/export-transaction`,
@@ -239,8 +241,6 @@ const handleDownloadExcel = async () => {
         responseType: 'json',
       }
     );
-
-    toast.dismiss(loadingToast);
 
     if (response.data.success) {
       // Extract the base64 data and filename from the response
@@ -275,6 +275,8 @@ const handleDownloadExcel = async () => {
     console.error('Error downloading Excel:', Downloading);
     toast.dismiss();
     toast.error('Failed to download Excel file');
+  }finally{
+    setLoading2(false);
   }
 };
 
@@ -350,9 +352,14 @@ const handleDownloadExcel = async () => {
             <Button
               onClick={handleDownloadExcel}
               className="whitespace-nowrap bg-green-600 hover:bg-green-700 text-white"
+              disabled={loading2}
             >
-              <BsDownload className="mr-2 w-4 h-4" />
-              Excel
+              {loading2 ? 'Preparing...' : 
+                <><BsDownload className="w-4 h-4 mr-2" />
+                <span>Download Excel</span>
+              </>  
+              }
+              
             </Button>
           </div>
 
