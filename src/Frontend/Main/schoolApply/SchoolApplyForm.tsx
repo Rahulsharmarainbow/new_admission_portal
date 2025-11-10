@@ -69,71 +69,68 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
   // API URL
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  // Check validation function
-// Fix the checkValidation function first
-const checkValidation = useCallback(
-  (name: string, type: string, validation: string, validation_message: string) => {
-    if (type === 'file_button') {
-      validationErrors.current[name] = '';
-    } else {
-      if (name === 'adharCard') {
-        let aadhaarCard = '';
-        let hasError = false;
-        
-        for (let i = 0; i < 12; i++) {
-          const digit = formData[`adharCard_${i}`];
-          if (!digit) {
-            validationErrors.current[name] = 'All Aadhaar card digits are required';
-            hasError = true;
-            break;
-          }
-          aadhaarCard += digit;
-        }
-        
-        // Clear error if all digits are properly filled
-        if (!hasError && aadhaarCard.length === 12) {
-          validationErrors.current[name] = '';
-        }
-      } else if (!formData[name] && formData[name] !== 0) {
-        // Fix: Check for empty string, null, undefined but allow 0
-        validationErrors.current[name] = validation_message;
-      } else if (validation === 'email') {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData[name])) {
-          validationErrors.current[name] = 'Invalid email address';
-        } else {
-          validationErrors.current[name] = '';
-        }
-      } else if (validation === 'mobile') {
-        const phoneRegex = /^\d{10}$/; // Fix: 10 digits, not 9
-        if (!phoneRegex.test(formData[name])) {
-          validationErrors.current[name] = 'Phone number must be 10 digits';
-        } else {
-          validationErrors.current[name] = '';
-        }
-      } else {
-        validationErrors.current[name] = '';
-      }
-    }
-    setErrors((prev) => ({ ...prev, [name]: validationErrors.current[name] }));
-  },
-  [formData],
-);
 
-// Improved useEffect with better filtering
-useEffect(() => {
-  required_child.forEach((child) => {
-    // Only validate fields that have values or are required
-    if (formData[child.name] !== undefined || child.required) {
-      checkValidation(
-        child.name,
-        child.type,
-        child.validation,
-        child.validation_message
-      );
-    }
-  });
-}, [formData, required_child]);
+
+  // Check validation function
+  // Fix the checkValidation function first
+  const checkValidation = useCallback(
+    (name: string, type: string, validation: string, validation_message: string) => {
+      if (type === 'file_button') {
+        validationErrors.current[name] = '';
+      } else {
+        if (name === 'adharCard') {
+          let aadhaarCard = '';
+          let hasError = false;
+
+          for (let i = 0; i < 12; i++) {
+            const digit = formData[`adharCard_${i}`];
+            if (!digit) {
+              validationErrors.current[name] = 'All Aadhaar card digits are required';
+              hasError = true;
+              break;
+            }
+            aadhaarCard += digit;
+          }
+
+          // Clear error if all digits are properly filled
+          if (!hasError && aadhaarCard.length === 12) {
+            validationErrors.current[name] = '';
+          }
+        } else if (!formData[name] && formData[name] !== 0) {
+          // Fix: Check for empty string, null, undefined but allow 0
+          validationErrors.current[name] = validation_message;
+        } else if (validation === 'email') {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(formData[name])) {
+            validationErrors.current[name] = 'Invalid email address';
+          } else {
+            validationErrors.current[name] = '';
+          }
+        } else if (validation === 'mobile') {
+          const phoneRegex = /^\d{10}$/; // Fix: 10 digits, not 9
+          if (!phoneRegex.test(formData[name])) {
+            validationErrors.current[name] = 'Phone number must be 10 digits';
+          } else {
+            validationErrors.current[name] = '';
+          }
+        } else {
+          validationErrors.current[name] = '';
+        }
+      }
+      setErrors((prev) => ({ ...prev, [name]: validationErrors.current[name] }));
+    },
+    [formData],
+  );
+
+  // Improved useEffect with better filtering
+  useEffect(() => {
+    required_child.forEach((child) => {
+      // Only validate fields that have values or are required
+      if (formData[child.name] !== undefined || child.required) {
+        checkValidation(child.name, child.type, child.validation, child.validation_message);
+      }
+    });
+  }, [formData, required_child]);
 
   // Handle input change with API calls
   const handleInputChange = useCallback(
@@ -223,6 +220,51 @@ useEffect(() => {
           [name]: '',
         }));
       }
+      console.log(fieldConfig?.apiurl);
+      console.log(fieldConfig?.target);
+      if (fieldConfig?.apiurl && name === 'class') {
+        fetch(`${apiUrl}/frontend/get_class_by_dob?selectedValue=${valuePart}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // body: JSON.stringify({ state_id: valuePart }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.success == true) {
+              setFormData((prev) => ({
+                ...prev,
+                [name]: value,
+                [`s_${name}`]: textPart,
+              }));
+            } else {
+
+              toast.success(data.message || "Seats not available for this class");
+              setFormData((prev) => ({
+                ...prev,
+                [name]: '',
+                [`s_${name}`]: '',
+              }));
+
+              // Clear error
+              if (errors[name]) {
+                setErrors((prev) => ({
+                  ...prev,
+                  [name]: '',
+                }));
+              }
+            }
+          })
+          .catch((error) => {
+            console.error('Error fetching data from API:', error);
+          });
+      }
 
       // Handle API calls for select fields
       if (fieldConfig?.apiurl && fieldConfig?.target) {
@@ -254,68 +296,43 @@ useEffect(() => {
             console.error('Error fetching data from API:', error);
           });
       }
-
-      // Check validation
-      // if (fieldConfig?.validation) {
-      //   checkValidation(
-      //     name,
-      //     fieldConfig.type,
-      //     fieldConfig.validation,
-      //     fieldConfig.validation_message,
-      //   );
-      // }
     },
     [errors, apiUrl],
   );
 
   // Handle checkbox change
-const handleCheckboxChange = useCallback(
-  (name: string, value: boolean, fieldConfig?: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value ? 1 : 0,
-    }));
-
-    // Immediately clear error for this field
-    setErrors((prev) => ({
-      ...prev,
-      [name]: '',
-    }));
-  },
-  [], // Remove dependencies
-);
-
-  // Handle date change
-  const handleDateChange = useCallback(
-    (name: string, date: any, fieldConfig?: any) => {
-      // Directly use the selected date without adjustment
+  const handleCheckboxChange = useCallback(
+    (name: string, value: boolean, fieldConfig?: any) => {
       setFormData((prev) => ({
         ...prev,
-        [name]: date,
+        [name]: value ? 1 : 0,
       }));
 
-      // Clear error immediately when date is selected
-      if (errors[name]) {
-        setErrors((prev) => ({
-          ...prev,
-          [name]: '',
-        }));
-      }
-
-      // Check validation after a small delay to ensure state is updated
-      // setTimeout(() => {
-      //   if (fieldConfig?.required) {
-      //     checkValidation(
-      //       name,
-      //       fieldConfig.type,
-      //       fieldConfig.validation,
-      //       fieldConfig.validation_message,
-      //     );
-      //   }
-      // }, 100);
+      // Immediately clear error for this field
+      setErrors((prev) => ({
+        ...prev,
+        [name]: '',
+      }));
     },
-    [],
+    [], // Remove dependencies
   );
+
+  // Handle date change
+  const handleDateChange = useCallback((name: string, date: any, fieldConfig?: any) => {
+    // Directly use the selected date without adjustment
+    setFormData((prev) => ({
+      ...prev,
+      [name]: date,
+    }));
+
+    // Clear error immediately when date is selected
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: '',
+      }));
+    }
+  }, []);
 
   // Handle Aadhaar change
   const handleAadhaarChange = useCallback(
@@ -499,27 +516,23 @@ const handleCheckboxChange = useCallback(
 
         // Special validation for SC/ST categories
         const selectedCategory = formData.s_category;
-        const selectedhalth =
-  formData?.child_has_any_issue?.includes("$")
-    ? formData.child_has_any_issue.split("$")[1]
-    : "";
+        const selectedhalth = formData?.child_has_any_issue?.includes('$')
+          ? formData.child_has_any_issue.split('$')[1]
+          : '';
 
-        console.log(formData['specified_health_issue'] == "")
-        console.log(selectedhalth)
-        console.log(formData?.child_has_any_issue?.includes("$"))
-        console.log(formData['specified_health_issue'])
+        console.log(formData['specified_health_issue'] == '');
+        console.log(selectedhalth);
+        console.log(formData?.child_has_any_issue?.includes('$'));
+        console.log(formData['specified_health_issue']);
         if (
           (selectedCategory === 'SC' || selectedCategory === 'ST') &&
           !fileData['caste_certificate']
         ) {
           newErrors['caste_certificate'] = 'Caste certificate preview is required';
         }
-        if (
-  selectedhalth === "Yes" &&
-  !formData?.specified_health_issue
-) {
-  newErrors['specified_health_issue'] = 'Please specify health issue';
-}
+        if (selectedhalth === 'Yes' && !formData?.specified_health_issue) {
+          newErrors['specified_health_issue'] = 'Please specify health issue';
+        }
       } else if (step === 1 && !conditions.disclaimer) {
         newErrors.disclaimer = 'Please accept the disclaimer to proceed';
       } else if (step === 2 && !conditions.declaration) {
@@ -841,18 +854,20 @@ const handleCheckboxChange = useCallback(
 
           {/* Navigation Buttons */}
           <div className="flex justify-between mt-8">
-            <button
-              onClick={handleBack}
-              disabled={activeStep === 0}
-              className={`flex items-center gap-2 px-6 py-2 rounded-lg border transition-all duration-200 ${
-                activeStep === 0
-                  ? 'border-gray-300 text-gray-400 cursor-not-allowed'
-                  : 'border-blue-600 text-blue-600 hover:bg-blue-50 hover:shadow-md'
-              }`}
-            >
-              <Icon icon="solar:arrow-left-line-duotone" className="w-4 h-4" />
-              Back
-            </button>
+            {activeStep !== 5 ?(
+              <button
+                onClick={handleBack}
+                disabled={activeStep === 0}
+                className={`flex items-center gap-2 px-6 py-2 rounded-lg border transition-all duration-200 ${
+                  activeStep === 0
+                    ? 'border-gray-300 text-gray-400 cursor-not-allowed'
+                    : 'border-blue-600 text-blue-600 hover:bg-blue-50 hover:shadow-md'
+                }`}
+              >
+                <Icon icon="solar:arrow-left-line-duotone" className="w-4 h-4" />
+                Back
+              </button>
+            ): <div></div>}
 
             <div className="flex gap-3">
               {activeStep === steps.length - 1 ? (
@@ -893,12 +908,12 @@ const handleCheckboxChange = useCallback(
             </div>
           </div>
 
-          {Object.keys(errors).length > 0 && (
+          {Object.keys(errors).length > 0 && activeStep !== 5 &&  (
             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex items-center gap-2 text-red-700">
                 <Icon icon="solar:danger-triangle-line-duotone" className="w-5 h-5" />
                 <span className="font-semibold">
-                  Please fix the errors above before proceeding.
+                  Please complete all mandatory fields to proceed.
                 </span>
               </div>
             </div>

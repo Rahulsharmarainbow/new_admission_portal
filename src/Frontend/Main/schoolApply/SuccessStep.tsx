@@ -147,7 +147,7 @@ const SuccessStep: React.FC<SuccessStepProps> = ({
             className="flex items-center gap-2 px-6 py-3 border-2 border-green-600 text-green-600 rounded-lg font-semibold hover:bg-green-50 hover:shadow-md transition-all duration-200"
           >
             <Icon icon="solar:document-add-line-duotone" className="w-5 h-5" />
-            New Application
+            Go To Home
           </button>
         )}
       </div>

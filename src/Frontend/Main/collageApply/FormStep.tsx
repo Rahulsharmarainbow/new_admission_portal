@@ -142,7 +142,7 @@ const FormStep: React.FC<FormStepProps> = ({
                 }`}
               >
                 {child.content}
-                {child.required && <span className="text-red-500 ml-1">*</span>}
+                {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
               </label>
             </div>
             {errors[child.name] && (
@@ -157,7 +157,7 @@ const FormStep: React.FC<FormStepProps> = ({
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-gray-700">
               {child.label}
-              {child.required && <span className="text-red-500 ml-1">*</span>}
+              {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
             </label>
             <select
               {...commonProps}
@@ -234,7 +234,7 @@ const FormStep: React.FC<FormStepProps> = ({
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-gray-700">
               {child.label}
-              {child.required && <span className="text-red-500 ml-1">*</span>}
+              {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
             </label>
             <input
               {...commonProps}
@@ -326,7 +326,7 @@ const FormStep: React.FC<FormStepProps> = ({
           <div className="space-y-2">
             <label className="flex text-sm font-semibold text-gray-700">
               {child.label}
-              {child.required && <span className="text-red-500 ml-1">*</span>}
+              {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
             </label>
             <div className="flex gap-2 items-center">
               {Array.from({ length: 12 }, (_, index) => (
@@ -378,7 +378,7 @@ const FormStep: React.FC<FormStepProps> = ({
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-gray-700">
               {child.label}
-              {child.required && <span className="text-red-500 ml-1">*</span>}
+              {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
             </label>
             <div className="space-y-2">
               {child.options?.map((option: any) => (
@@ -406,7 +406,7 @@ const FormStep: React.FC<FormStepProps> = ({
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-gray-700">
               {child.label}
-              {child.required && <span className="text-red-500 ml-1">*</span>}
+              {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
             </label>
             <textarea
               {...commonProps}
@@ -428,7 +428,7 @@ const FormStep: React.FC<FormStepProps> = ({
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-gray-700">
               {child.label}
-              {child.required && <span className="text-red-500 ml-1">*</span>}
+              {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
             </label>
             <input
               {...commonProps}
@@ -453,7 +453,7 @@ const FormStep: React.FC<FormStepProps> = ({
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-gray-700">
               {child.label}
-              {child.required && <span className="text-red-500 ml-1">*</span>}
+              {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
             </label>
             <input
               {...commonProps}
@@ -475,7 +475,7 @@ const FormStep: React.FC<FormStepProps> = ({
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-gray-700">
               {child.label}
-              {child.required && <span className="text-red-500 ml-1">*</span>}
+              {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
             </label>
             <input
               {...commonProps}

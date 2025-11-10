@@ -772,7 +772,9 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
 
           {/* Navigation Buttons */}
           <div className="flex justify-between mt-8">
-            <button
+            {
+              activeStep !== steps.length && (
+               <button
               onClick={handleBack}
               disabled={activeStep === 0}
               className={`flex items-center gap-2 px-6 py-2 rounded-lg border transition-all duration-200 ${
@@ -784,6 +786,8 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
               <Icon icon="solar:arrow-left-line-duotone" className="w-4 h-4" />
               Back
             </button>
+              )
+            }
 
             <div className="flex gap-3">
               {activeStep === steps.length - 1 ? (
@@ -829,7 +833,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
               <div className="flex items-center gap-2 text-red-700">
                 <Icon icon="solar:danger-triangle-line-duotone" className="w-5 h-5" />
                 <span className="font-semibold">
-                  Please fix the errors above before proceeding.
+                  Please complete all mandatory fields to proceed.
                 </span>
               </div>
             </div>

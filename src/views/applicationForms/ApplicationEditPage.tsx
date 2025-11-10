@@ -60,17 +60,19 @@ const ApplicationEditPage: React.FC = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<CandidateDetails>({});
   const [formSections, setFormSections] = useState<FormSection[]>([]);
   const [lookups, setLookups] = useState<Lookups>({});
   const [application, setApplication] = useState<ApplicationData | null>(null);
-  const [dynamicOptions, setDynamicOptions] = useState<{[key: string]: Array<{value: number | string; text: string}>}>({});
-  const [filePreviews, setFilePreviews] = useState<{[key: string]: string}>({});
-  const [selectedFiles, setSelectedFiles] = useState<{[key: string]: File}>({});
-  const [visibleFields, setVisibleFields] = useState<{[key: string]: boolean}>({});
+  const [dynamicOptions, setDynamicOptions] = useState<{
+    [key: string]: Array<{ value: number | string; text: string }>;
+  }>({});
+  const [filePreviews, setFilePreviews] = useState<{ [key: string]: string }>({});
+  const [selectedFiles, setSelectedFiles] = useState<{ [key: string]: File }>({});
+  const [visibleFields, setVisibleFields] = useState<{ [key: string]: boolean }>({});
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const apiAssetsUrl = import.meta.env.VITE_ASSET_URL;
@@ -78,44 +80,48 @@ const ApplicationEditPage: React.FC = () => {
   // Fetch states data
   const fetchStates = async () => {
     try {
-      const response = await axios.get(
-        `${apiUrl}/frontend/get_states`,
-        {
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await axios.get(`${apiUrl}/frontend/get_states`, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-      let stateOptions: Array<{value: number | string; text: string}> = [];
+      let stateOptions: Array<{ value: number | string; text: string }> = [];
 
       if (response.data && response.data.states) {
         stateOptions = response.data.states.map((state: any) => ({
           value: `${state.state_id}$${state.state_title}`,
-          text: state.state_title
+          text: state.state_title,
         }));
       }
 
       if (stateOptions.length > 0) {
         // Set states for all state fields
         const stateFields = [
-          'selectBelong', 'address_state', 'class6_state', 'class7_state', 
-          'class8_state', 'class9_state', 'class10_state', 'inter1st_state', 'inter2nd_state'
+          'selectBelong',
+          'address_state',
+          'class6_state',
+          'class7_state',
+          'class8_state',
+          'class9_state',
+          'class10_state',
+          'inter1st_state',
+          'inter2nd_state',
         ];
-        
+
         const newDynamicOptions: any = {};
-        stateFields.forEach(field => {
+        stateFields.forEach((field) => {
           newDynamicOptions[field] = stateOptions;
         });
-        
-        setDynamicOptions(prev => ({
+
+        setDynamicOptions((prev) => ({
           ...prev,
-          ...newDynamicOptions
+          ...newDynamicOptions,
         }));
 
         // After states are loaded, fetch districts for pre-selected states
-        stateFields.forEach(fieldName => {
+        stateFields.forEach((fieldName) => {
           const stateValue = formData[fieldName];
           if (stateValue && stateValue !== '') {
             const stateId = stateValue.split('$')[0];
@@ -133,22 +139,26 @@ const ApplicationEditPage: React.FC = () => {
 
   // Get target field for state dropdown
   const getTargetFieldForState = (stateFieldName: string): string => {
-    const fieldMap: {[key: string]: string} = {
-      'selectBelong': 'selectDistrict',
-      'address_state': 'address_district',
-      'class6_state': 'class6_district',
-      'class7_state': 'class7_district',
-      'class8_state': 'class8_district',
-      'class9_state': 'class9_district',
-      'class10_state': 'class10_district',
-      'inter1st_state': 'inter1st_district',
-      'inter2nd_state': 'inter2nd_district'
+    const fieldMap: { [key: string]: string } = {
+      selectBelong: 'selectDistrict',
+      address_state: 'address_district',
+      class6_state: 'class6_district',
+      class7_state: 'class7_district',
+      class8_state: 'class8_district',
+      class9_state: 'class9_district',
+      class10_state: 'class10_district',
+      inter1st_state: 'inter1st_district',
+      inter2nd_state: 'inter2nd_district',
     };
     return fieldMap[stateFieldName] || '';
   };
 
   // Fetch districts by state ID
-  const fetchDistricts = async (stateId: string | number, targetField: string, stateValue?: string) => {
+  const fetchDistricts = async (
+    stateId: string | number,
+    targetField: string,
+    stateValue?: string,
+  ) => {
     try {
       const response = await axios.post(
         `${apiUrl}/frontend/get_district_by_state_id`,
@@ -158,37 +168,58 @@ const ApplicationEditPage: React.FC = () => {
             Authorization: `Bearer ${user?.token}`,
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
-      let districtOptions: Array<{value: number | string; text: string}> = [];
+      let districtOptions: Array<{ value: number | string; text: string }> = [];
 
       if (response.data && response.data.districts) {
         districtOptions = response.data.districts.map((district: any) => ({
           value: `${district.id}$${district.district_title}`,
-          text: district.district_title
+          text: district.district_title,
         }));
       }
 
-      setDynamicOptions(prev => ({
+      setDynamicOptions((prev) => ({
         ...prev,
-        [targetField]: districtOptions
+        [targetField]: districtOptions,
       }));
 
-      // Auto-select district if we have a state value and district data in formData
+      // Auto-select district if we have matching district in formData
       if (stateValue && formData[targetField]) {
-        const districtValue = formData[targetField];
-        // Check if the district value exists in the fetched options
-        const districtExists = districtOptions.some(option => 
-          option.value === districtValue || option.value.toString() === districtValue.toString()
-        );
+        const currentDistrictValue = formData[targetField];
         
-        if (!districtExists) {
-          // If district doesn't exist in options, clear it
-          setFormData(prev => ({
-            ...prev,
-            [targetField]: ''
-          }));
+        // If district value is in id$value format, check if it exists in new options
+        if (currentDistrictValue.includes('$')) {
+          const districtExists = districtOptions.some(
+            option => option.value === currentDistrictValue
+          );
+          
+          if (!districtExists) {
+            // Clear district if it doesn't exist in new options
+            setFormData(prev => ({
+              ...prev,
+              [targetField]: ''
+            }));
+          }
+        } else {
+          // If district value is just ID, find matching option
+          const matchingDistrict = districtOptions.find(
+            district => district.value.split('$')[0] === currentDistrictValue
+          );
+          
+          if (matchingDistrict) {
+            setFormData(prev => ({
+              ...prev,
+              [targetField]: matchingDistrict.value
+            }));
+          } else {
+            // Clear district if no match found
+            setFormData(prev => ({
+              ...prev,
+              [targetField]: ''
+            }));
+          }
         }
       }
     } catch (error) {
@@ -196,39 +227,72 @@ const ApplicationEditPage: React.FC = () => {
     }
   };
 
-  // Update field visibility based on h_target and v_target
+  // Update field visibility based on h_target and v_target - APPLY FORM LOGIC
   const updateFieldVisibility = (fieldName: string, value: string) => {
     const newVisibleFields = { ...visibleFields };
-    
-    // Find all fields that have this field as their h_target
-    formSections.forEach(section => {
-      section.children.forEach(field => {
+
+    formSections.forEach((section) => {
+      section.children.forEach((field) => {
         if (field.h_target === fieldName) {
-          const shouldShow = field.v_target ? value === field.v_target : !!value;
+          let shouldShow = false;
+          
+          if (field.v_target) {
+            // Handle multiple v_target values (comma separated)
+            const vTargetValues = field.v_target.split(',');
+            
+            // Extract value part for comparison (for id$value format)
+            const valuePart = value && value.includes('$') ? value.split('$')[0] : value;
+            
+            shouldShow = vTargetValues.some(vTarget => {
+              const vTargetPart = vTarget && vTarget.includes('$') ? vTarget.split('$')[0] : vTarget;
+              return valuePart === vTargetPart;
+            });
+          } else {
+            shouldShow = !!value;
+          }
+          
           newVisibleFields[field.name] = shouldShow;
         }
       });
     });
-    
+
     setVisibleFields(newVisibleFields);
   };
 
-  // Initialize field visibility
+  // Initialize field visibility - APPLY FORM LOGIC
   const initializeFieldVisibility = (data: CandidateDetails) => {
-    const initialVisibility: {[key: string]: boolean} = {};
-    
-    formSections.forEach(section => {
-      section.children.forEach(field => {
+    const initialVisibility: { [key: string]: boolean } = {};
+
+    formSections.forEach((section) => {
+      section.children.forEach((field) => {
         if (field.h_target) {
           const targetValue = data[field.h_target];
-          const shouldShow = field.v_target ? targetValue === field.v_target : !!targetValue;
+          let shouldShow = false;
+          
+          if (field.v_target) {
+            // Handle multiple v_target values (comma separated)
+            const vTargetValues = field.v_target.split(',');
+            
+            // Extract value part for comparison (for id$value format)
+            const targetValuePart = targetValue && targetValue.includes('$') 
+              ? targetValue.split('$')[0] 
+              : targetValue;
+            
+            shouldShow = vTargetValues.some(vTarget => {
+              const vTargetPart = vTarget && vTarget.includes('$') ? vTarget.split('$')[0] : vTarget;
+              return targetValuePart === vTargetPart;
+            });
+          } else {
+            shouldShow = !!targetValue;
+          }
+          
           initialVisibility[field.name] = shouldShow;
         } else {
           initialVisibility[field.name] = true;
         }
       });
     });
-    
+
     setVisibleFields(initialVisibility);
   };
 
@@ -246,7 +310,7 @@ const ApplicationEditPage: React.FC = () => {
             Authorization: `Bearer ${user?.token}`,
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       console.log('API Response:', response.data);
@@ -255,39 +319,71 @@ const ApplicationEditPage: React.FC = () => {
         setFormSections(response.data.data || []);
         setLookups(response.data.lookups || {});
         setApplication(response.data.application_data);
-        
+
         // Set form data from candidate_details
         if (response.data.candidate_details) {
           const candidateData = response.data.candidate_details;
-          
+          const lookupsData = response.data.lookups || {};
+
           // Create a clean form data object with proper values
           const cleanFormData: CandidateDetails = {};
-          
+
           // Map all fields from candidate_details to form data
-          Object.keys(candidateData).forEach(key => {
+          Object.keys(candidateData).forEach((key) => {
             // Use the actual field values (without S prefix for form data)
             if (!key.startsWith('S')) {
-              cleanFormData[key] = candidateData[key] || '';
+              const value = candidateData[key];
+              const sKey = `S${key}`;
+              const sValue = candidateData[sKey];
+
+              // For select fields that have corresponding S-prefixed text values
+              if (value && sValue) {
+                // Convert to id$value format
+                cleanFormData[key] = `${value}$${sValue}`;
+              } else {
+                cleanFormData[key] = value || '';
+              }
             }
           });
 
-          // Convert state and district values to id$name format
-          if (cleanFormData.address_state && candidateData.Saddress_state) {
-            cleanFormData.address_state = `${cleanFormData.address_state}$${candidateData.Saddress_state}`;
-          }
+          // Handle special cases where S-prefix might not exist
+          const selectFields = [
+            'blood_group', 'gender', 'relationship', 
+            'child_has_any_issue', 'school_transport_required'
+          ];
           
-          if (cleanFormData.address_district && candidateData.Saddress_district) {
-            cleanFormData.address_district = `${cleanFormData.address_district}$${candidateData.Saddress_district}`;
-          }
+          selectFields.forEach(field => {
+            if (cleanFormData[field] && !cleanFormData[field].includes('$')) {
+              // Find the text value from lookups
+              const lookupKey = Object.keys(lookupsData).find(
+                lookup => lookupsData[lookup].some(option => 
+                  option.value.toString() === cleanFormData[field] || 
+                  option.value === cleanFormData[field]
+                )
+              );
+              
+              if (lookupKey) {
+                const option = lookupsData[lookupKey].find(opt => 
+                  opt.value.toString() === cleanFormData[field] || 
+                  opt.value === cleanFormData[field]
+                );
+                if (option) {
+                  cleanFormData[field] = `${cleanFormData[field]}$${option.text}`;
+                }
+              }
+            }
+          });
 
           console.log('Clean Form Data:', cleanFormData);
           setFormData(cleanFormData);
           
-          // Initialize field visibility
-          initializeFieldVisibility(cleanFormData);
-          
+          // Initialize field visibility after a small delay to ensure formSections are set
+          setTimeout(() => {
+            initializeFieldVisibility(cleanFormData);
+          }, 100);
+
           // Set file previews for existing files
-          const previews: {[key: string]: string} = {};
+          const previews: { [key: string]: string } = {};
           if (candidateData.candidate_pic) {
             previews.candidate_pic = `${apiAssetsUrl}/${candidateData.candidate_pic}`;
           }
@@ -311,7 +407,7 @@ const ApplicationEditPage: React.FC = () => {
           // Fetch states after form data is loaded
           setTimeout(() => {
             fetchStates();
-          }, 100);
+          }, 200);
         }
       }
     } catch (error) {
@@ -326,29 +422,68 @@ const ApplicationEditPage: React.FC = () => {
     fetchApplicationData();
   }, [applicationId]);
 
+  // Handle lookups dependency for select fields
+  useEffect(() => {
+    if (Object.keys(lookups).length > 0 && Object.keys(formData).length > 0) {
+      const updatedFormData = { ...formData };
+      let needsUpdate = false;
+
+      const selectFields = [
+        'blood_group', 'gender', 'relationship', 
+        'child_has_any_issue', 'school_transport_required'
+      ];
+      
+      selectFields.forEach(field => {
+        if (updatedFormData[field] && !updatedFormData[field].includes('$')) {
+          const lookupKey = Object.keys(lookups).find(
+            lookup => lookups[lookup].some(option => 
+              option.value.toString() === updatedFormData[field] || 
+              option.value === updatedFormData[field]
+            )
+          );
+          
+          if (lookupKey) {
+            const option = lookups[lookupKey].find(opt => 
+              opt.value.toString() === updatedFormData[field] || 
+              opt.value === updatedFormData[field]
+            );
+            if (option) {
+              updatedFormData[field] = `${updatedFormData[field]}$${option.text}`;
+              needsUpdate = true;
+            }
+          }
+        }
+      });
+
+      if (needsUpdate) {
+        setFormData(updatedFormData);
+      }
+    }
+  }, [lookups]);
+
   // Handle state change - fetch districts
   const handleStateChange = (fieldName: string, value: string, targetField: string) => {
     const stateId = value.split('$')[0];
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
       [fieldName]: value,
-      [targetField]: '' // Clear district when state changes
+      [targetField]: '', // Clear district when state changes
     }));
 
     // Update field visibility
     updateFieldVisibility(fieldName, value);
 
     if (stateId && value) {
-      fetchDistricts(stateId, targetField);
+      fetchDistricts(stateId, targetField, value);
     }
   };
 
   // Handle input changes
   const handleInputChange = (fieldName: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [fieldName]: value
+      [fieldName]: value,
     }));
 
     // Update field visibility for dependent fields
@@ -359,18 +494,18 @@ const ApplicationEditPage: React.FC = () => {
   const handleFileSelect = (fieldName: string, file: File) => {
     if (file) {
       // Store the file
-      setSelectedFiles(prev => ({
+      setSelectedFiles((prev) => ({
         ...prev,
-        [fieldName]: file
+        [fieldName]: file,
       }));
 
       // Create preview for images
       if (file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          setFilePreviews(prev => ({
+          setFilePreviews((prev) => ({
             ...prev,
-            [fieldName]: e.target?.result as string
+            [fieldName]: e.target?.result as string,
           }));
         };
         reader.readAsDataURL(file);
@@ -380,7 +515,7 @@ const ApplicationEditPage: React.FC = () => {
     }
   };
 
-  // Handle form submission with file upload
+  // Handle form submission with file upload - APPLY FORM PATTERN
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -395,8 +530,28 @@ const ApplicationEditPage: React.FC = () => {
       submitFormData.append('academic_id', application?.academic_id?.toString() || '');
       submitFormData.append('s_id', user?.id?.toString() || '');
       
-      // Add text fields data as JSON
+      // Process form data - APPLY FORM PATTERN (send id$value format)
       const mainData: any = { ...formData };
+      const sData: any = {}; // For text values
+      
+      Object.keys(mainData).forEach(key => {
+        const value = mainData[key];
+        
+        // Handle id$value format for select fields
+        if (typeof value === 'string' && value.includes('$')) {
+          const [idPart, ...textParts] = value.split('$');
+          const textValue = textParts.join('$');
+          
+          // Send only ID part in maindata (like apply form)
+          mainData[key] = idPart;
+          
+          // Store text part in S-data
+          sData[`S${key}`] = textValue;
+        } else {
+          // For non-select fields
+          mainData[key] = value;
+        }
+      });
       
       // Add files to FormData
       Object.keys(selectedFiles).forEach(fieldName => {
@@ -406,6 +561,10 @@ const ApplicationEditPage: React.FC = () => {
       });
       
       submitFormData.append('maindata', JSON.stringify(mainData));
+      submitFormData.append('sdata', JSON.stringify(sData));
+
+      console.log('Submitting data - MAIN DATA:', mainData);
+      console.log('Submitting data - S DATA:', sData);
 
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Applications/Applications-update`,
@@ -432,46 +591,65 @@ const ApplicationEditPage: React.FC = () => {
     }
   };
 
-  // Get field options with proper fallback
+  // Get field options with proper fallback and id$value format
   const getFieldOptions = (field: FormField) => {
+    let options: Array<{ value: number | string; text: string }> = [];
+
     // For board fields - check lookups.boards first
     if (field.name === 'board' || field.name === 'board1') {
       if (lookups.boards && lookups.boards.length > 0) {
-        return lookups.boards;
+        options = lookups.boards;
       }
     }
 
     // For state fields with apiurl
     if (field.apiurl && field.apiurl.includes('get_district_by_state_id')) {
-      return dynamicOptions[field.name] || [];
+      options = dynamicOptions[field.name] || [];
     }
 
     // For district fields
     if (field.name.includes('district')) {
-      return dynamicOptions[field.name] || [];
+      options = dynamicOptions[field.name] || [];
     }
 
     // For regular fields - check dynamic options first
     if (dynamicOptions[field.name] && dynamicOptions[field.name].length > 0) {
-      return dynamicOptions[field.name];
+      options = dynamicOptions[field.name];
     }
-    
+
     // Then check field's own options
-    if (field.options && field.options.length > 0) {
-      return field.options;
+    if (options.length === 0 && field.options && field.options.length > 0) {
+      options = field.options;
     }
-    
+
     // Then check lookups for other fields
-    const lookupKey = Object.keys(lookups).find(key => 
-      key.toLowerCase().includes(field.name.toLowerCase()) ||
-      field.name.toLowerCase().includes(key.toLowerCase())
-    );
-    
-    if (lookupKey && lookups[lookupKey]) {
-      return lookups[lookupKey];
+    if (options.length === 0) {
+      const lookupKey = Object.keys(lookups).find(
+        (key) =>
+          key.toLowerCase().includes(field.name.toLowerCase()) ||
+          field.name.toLowerCase().includes(key.toLowerCase()),
+      );
+
+      if (lookupKey && lookups[lookupKey]) {
+        options = lookups[lookupKey];
+      }
     }
-    
-    return [];
+
+    // Convert all options to id$value format
+    const formattedOptions = options.map((option) => {
+      if (typeof option.value === 'string' && option.value.includes('$')) {
+        // Already in id$value format
+        return option;
+      } else {
+        // Convert to id$value format
+        return {
+          value: `${option.value}$${option.text}`,
+          text: option.text,
+        };
+      }
+    });
+
+    return formattedOptions;
   };
 
   // Check if field is a state field with district API
@@ -482,11 +660,6 @@ const ApplicationEditPage: React.FC = () => {
   // Check if field is a district field
   const isDistrictField = (fieldName: string) => {
     return fieldName.includes('district');
-  };
-
-  // Check if field is a board field
-  const isBoardField = (fieldName: string) => {
-    return fieldName.includes('board');
   };
 
   // Get target field for state dropdown
@@ -500,9 +673,12 @@ const ApplicationEditPage: React.FC = () => {
     if (field.label && field.label.trim() !== '') {
       return field.label;
     }
-    
+
     // Generate label from field name
-    const name = field.name.replace(/([A-Z])/g, ' $1').replace(/-/g, ' ').replace(/_/g, ' ');
+    const name = field.name
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/-/g, ' ')
+      .replace(/_/g, ' ');
     return name.charAt(0).toUpperCase() + name.slice(1);
   };
 
@@ -560,7 +736,7 @@ const ApplicationEditPage: React.FC = () => {
           );
         }
         
-        // District dropdown
+        // District dropdown - FIXED AUTO-SELECT
         if (isDistrictField(field.name)) {
           const districtOptions = dynamicOptions[field.name] || [];
           const isDisabled = districtOptions.length === 0;
@@ -585,36 +761,13 @@ const ApplicationEditPage: React.FC = () => {
                   </option>
                 ))}
               </select>
-            </div>
-          );
-        }
-
-        // Board dropdown
-        if (isBoardField(field.name)) {
-          const boardOptions = fieldOptions;
-          
-          return (
-            <div>
-              <select
-                value={value}
-                onChange={(e) => handleInputChange(field.name, e.target.value)}
-                className={baseSelectClasses}
-                required={field.required === 1}
-              >
-                <option value="">Select {getFieldLabel(field)}</option>
-                {boardOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.text}
-                  </option>
-                ))}
-              </select>
-              {boardOptions.length === 0 && (
-                <p className="text-xs text-yellow-600 mt-1">No boards available</p>
+              {isDisabled && value && (
+                <p className="text-xs text-yellow-600 mt-1">Please select state first to load districts</p>
               )}
             </div>
           );
         }
-        
+
         // Regular select dropdown
         return (
           <select
@@ -664,7 +817,7 @@ const ApplicationEditPage: React.FC = () => {
               {previewUrl ? (
                 <>
                   <p className="text-xs text-gray-600 mb-2">Preview:</p>
-                  {field.name.includes("signature") ? (
+                  {field.name.includes('signature') ? (
                     <img
                       src={previewUrl}
                       alt="Signature Preview"
@@ -747,9 +900,9 @@ const ApplicationEditPage: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <BreadcrumbHeader
-          title="Applications Edit"
-          paths={[{ name: 'Applications Edit', link: '#' }]}
-        />
+            title="Applications Edit"
+            paths={[{ name: 'Applications Edit', link: '#' }]}
+          />
         </div>
 
         {/* Form */}
@@ -760,8 +913,8 @@ const ApplicationEditPage: React.FC = () => {
               if (section.children.length === 0) return null;
 
               // Separate file fields from normal fields
-              const fileFields = section.children.filter(f => f.type === "file_button");
-              const normalFields = section.children.filter(f => f.type !== "file_button");
+              const fileFields = section.children.filter((f) => f.type === 'file_button');
+              const normalFields = section.children.filter((f) => f.type !== 'file_button');
 
               return (
                 <Card key={sectionIndex} className="p-6">
@@ -772,9 +925,7 @@ const ApplicationEditPage: React.FC = () => {
                         <div key={field.id} className="space-y-2">
                           <label className="block text-sm font-medium text-gray-700">
                             {getFieldLabel(field)}
-                            {field.required === 1 && (
-                              <span className="text-red-500 ml-1">*</span>
-                            )}
+                            {field.required === 1 && <span className="text-red-500 ml-1">*</span>}
                           </label>
                           {renderFormField(field)}
                         </div>
@@ -799,12 +950,7 @@ const ApplicationEditPage: React.FC = () => {
 
           {/* Submit Button */}
           <div className="mt-8 flex justify-end space-x-4">
-            <Button
-              type="button"
-              color="light"
-              onClick={() => navigate(-1)}
-              disabled={saving}
-            >
+            <Button type="button" color="light" onClick={() => navigate(-1)} disabled={saving}>
               Cancel
             </Button>
             <Button
