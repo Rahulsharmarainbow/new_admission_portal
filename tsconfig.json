@@ -26,7 +26,11 @@
     "noEmitOnError": false,
     "noImplicitAny": false,
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "noImplicitThis": false,
+    "strictFunctionTypes": false,
+     "allowJs": true,
+    "checkJs": false
   
   },
   "include": ["src"]

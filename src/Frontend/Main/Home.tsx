@@ -13,19 +13,27 @@ const apiUrl = import.meta.env.VITE_API_URL;
 const assetUrl = import.meta.env.VITE_ASSET_URL;
 
 const Home = () => {
-  const { institute_id } = useParams();
+  let { institute_id } = useParams();
   const [institute, setInstitute] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+   if (!institute_id || institute_id === ":institute_id") {
+    institute_id = window.location.hostname; // use domain as fallback
+  }
+
   useEffect(() => {
+    // alert("hi");
     const fetchInstituteData = async () => {
       try {
+        const payload = institute_id
+          ? { unique_code: institute_id }
+          : { domain: window.location.hostname };
         setLoading(true);
         const response = await axios.post(
           `${apiUrl}/Public/Get-home-page-data`,
           {
-            unique_code: institute_id
+            payload
           },
           {
             headers: {
@@ -73,9 +81,9 @@ const Home = () => {
     );
   };
 
-  if (loading) {
-    return <Loader />;
-  }
+  // if (loading) {
+  //   return <Loader />;
+  // }
 
   if (error || !institute) {
     return <NotFound  />;
