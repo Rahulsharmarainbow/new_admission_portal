@@ -356,7 +356,7 @@ const Router = [
       { path: '/Frontend/:institute_id/apply', element: <Apply /> },
       { path: '/Frontend/:institute_id/:page_route', element: <TypePage /> },
       { path: '/Frontend/:institute_id/rankcard', element: <Rankcard/> },
-      { path: '/Frontend/:institute_id/hallticket', element: <HallTicket/> },
+      { path: '/Frontend/:institute_id/Hall-ticket', element: <HallTicket/> },
       { path: '/Form-view', element: <FormView /> },
       { path: '/Confirmation', element: <Confirmation /> },
       { 
