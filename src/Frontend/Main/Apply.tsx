@@ -7,6 +7,8 @@ import Loader from '../Common/Loader';
 import axios from 'axios';
 import SchoolApplyForm from './schoolApply/SchoolApplyForm';
 import ApplyForm from './collageApply/ApplyForm';
+import NotFound from './NotFound';
+import { Card, Label, TextInput, Button, Spinner, Textarea, ToggleSwitch, Modal, ModalFooter, ModalBody, ModalHeader } from 'flowbite-react';
 
 interface ApplyData {
   data: any;
@@ -27,10 +29,13 @@ const Apply = () => {
   const { institute_id } = useParams();
   const navigate = useNavigate();
   const [applyData, setApplyData] = useState<ApplyData | null>(null);
+  const [modalData, setModalData] = useState<Any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
+  const assetUrl = import.meta.env.VITE_ASSET_URL;
 
   useEffect(() => {
     const fetchApplyData = async () => {
@@ -49,6 +54,11 @@ const Apply = () => {
         console.log(response.data)
         if (response.status === 200) {
           setApplyData(response.data);
+          console.log(response.data.apply_modals)
+          setModalData(response.data.apply_modals)
+          if(response.data.apply_modals.title && response.data.apply_modals.visible){
+            setPreviewOpen(true)
+          }
         } else {
           setError('Failed to load application form');
         }
@@ -74,26 +84,18 @@ const Apply = () => {
     console.log("Razorpay script loaded!");
   };
   document.body.appendChild(script);
+
+  if(modalData){
+   console.log(modalData)
+  }
 }, []);
 
-  if (loading) {
+ if (loading) {
     return <Loader />;
-  }
+  } 
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 text-xl mb-4">{error}</div>
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
-    );
+  if (error || !institute_id) {
+    return <NotFound />;
   }
 
   if (!applyData) {
@@ -146,6 +148,62 @@ console.log(applyData)
       </div>
 
       {/* <Footer /> */}
+      <Modal show={previewOpen} onClose={() => setPreviewOpen(false)} size="xl" className='overflow-hidden'>
+              <ModalHeader>
+                <div className="flex justify-between items-center w-full">
+                  <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                    {modalData?.title}
+                  </h2>
+                </div>
+              </ModalHeader>
+      
+              <ModalBody className="relative overflow-visible z-[100]">
+                <div className="space-y-6 max-h-[50vh] overflow-y-auto pr-2">
+                 
+                  {/* <div className="text-center">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                      
+                    </h3>
+                  </div> */}
+      
+                 
+                  {(modalData?.image) && (
+                    <div className="flex justify-center">
+                      <div className="w-40 max-w-sm h-40 border rounded-lg overflow-hidden">
+                        <img 
+                          src={`${assetUrl}/${modalData?.image}`} 
+                          alt="Popup" 
+                          className="w-full h-full object-center"
+                        />
+                      </div>
+                    </div>
+                  )}
+      
+              
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-gray-700 whitespace-pre-line">
+                      {modalData.description}
+                    </p>
+                  </div>
+                </div>
+              </ModalBody>
+      
+              <ModalFooter className="flex justify-end gap-3">
+                <Button color="alternative" onClick={() => setPreviewOpen(false)}>
+                  Close Preview
+                </Button>
+                {/* <Button 
+                  color="blue" 
+                  onClick={() => {
+                    setPreviewOpen(false);
+                    // Scroll to form
+                    document.querySelector('form')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  Edit Popup
+                </Button> */}
+              </ModalFooter>
+            </Modal>
     </div>
   );
 };
