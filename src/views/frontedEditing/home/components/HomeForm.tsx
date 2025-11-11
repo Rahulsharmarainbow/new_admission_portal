@@ -17,7 +17,7 @@ const HomeForm = () => {
   const { user } = useAuth();
 //   console.log(user);
   const [activeTab, setActiveTab] = useState(0);
-  const [selectedAcademic, setSelectedAcademic] = useState('');
+  const [selectedAcademic, setSelectedAcademic] = useState(user?.role === "CustomerAdmin" ? user?.academic_id || '' : '');
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const handleAcademicSelect = (selectedId: string) => {
@@ -33,7 +33,7 @@ const HomeForm = () => {
 
           {/* Academic Dropdown (Global for all tabs) */}
           <div className="w-64">
-            {user && (
+            {(user && user?.role !=="CustomerAdmin") && (
                  <AllAcademicsDropdown
                     value={selectedAcademic}
                     onChange={handleAcademicSelect}

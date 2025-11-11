@@ -18,6 +18,7 @@ const PreviewStep: React.FC<PreviewStepProps> = ({
   payableAmount = 0,
   onEdit,
   onPayment,
+  stepTransitionLoading,
 }) => {
   const formatPrice = (amount: number) => {
     return `₹ ${amount.toLocaleString('en-IN')}`;

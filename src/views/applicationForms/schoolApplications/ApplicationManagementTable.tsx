@@ -60,6 +60,7 @@ const ApplicationManagementTable: React.FC = () => {
   const navigate = useNavigate();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loading2, setLoading2] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     page: 0,
     rowsPerPage: 10,
@@ -103,7 +104,7 @@ const ApplicationManagementTable: React.FC = () => {
   // Payment status options
   const paymentStatusOptions = [
     { value: '1', label: 'captured' },
-    { value: '0', label: 'intilized ' },
+    { value: '0', label: 'Initialized' },
   ];
 
   // Calculate active filters count
@@ -313,8 +314,7 @@ const ApplicationManagementTable: React.FC = () => {
   // Handle download Excel
   const handleDownloadExcel = async () => {
     try {
-      setLoading(true);
-      toast.loading('Preparing Excel file...', { id: 'download-excel' });
+      setLoading2(true);
 
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Applications/Export-school-Applications`,
@@ -385,7 +385,7 @@ const ApplicationManagementTable: React.FC = () => {
         toast.error('Failed to download Excel file', { id: 'download-excel' });
       }
     } finally {
-      setLoading(false);
+      setLoading2(false);
     }
   };
 
@@ -420,9 +420,9 @@ const ApplicationManagementTable: React.FC = () => {
       case '1':
         return { text: 'Captured', color: 'text-green-600 bg-green-50' };
       case '0':
-        return { text: 'Intilized', color: 'text-gray-600 bg-gray-50' };
+        return { text: 'Initialized', color: 'text-gray-600 bg-gray-50' };
       default:
-        return { text: 'Intilized', color: 'text-gray-600 bg-gray-50' };
+        return { text: 'Initialized', color: 'text-gray-600 bg-gray-50' };
     }
   };
 
@@ -488,9 +488,12 @@ const ApplicationManagementTable: React.FC = () => {
               <Button
                 onClick={handleDownloadExcel}
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={loading2}
               >
-                <BsDownload className="w-4 h-4" />
-                Export
+                  {loading2 ? 'Downloading...' :
+                                  <><BsDownload className="w-4 h-4" />
+                                  <span>Download</span></>
+                                }
               </Button>
             </div>
           </div>

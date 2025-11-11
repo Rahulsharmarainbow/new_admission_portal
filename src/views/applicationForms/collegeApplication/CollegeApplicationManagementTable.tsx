@@ -74,6 +74,7 @@ const CollegeApplicationManagementTable: React.FC = () => {
   const navigate = useNavigate();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loading2, setLoading2] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     page: 0,
     rowsPerPage: 10,
@@ -301,8 +302,7 @@ const CollegeApplicationManagementTable: React.FC = () => {
   // Handle download Excel
   const handleDownloadExcel = async () => {
     try {
-      setLoading(true);
-      toast.loading('Preparing Excel file...', { id: 'download-excel' });
+      setLoading2(true);
 
       const requestBody: any = {
         academic_id: filters.academic_id || "",
@@ -382,7 +382,7 @@ const CollegeApplicationManagementTable: React.FC = () => {
         toast.error('Failed to download Excel file', { id: 'download-excel' });
       }
     } finally {
-      setLoading(false);
+      setLoading2(false);
     }
   };
 
@@ -436,9 +436,9 @@ const CollegeApplicationManagementTable: React.FC = () => {
       case '1':
         return { text: 'Captured', color: 'bg-green-100 text-green-800' };
       case '0':
-        return { text: 'Intilized', color: 'bg-yellow-100 text-yellow-800' };
+        return { text: 'Initialized', color: 'bg-yellow-100 text-yellow-800' };
       default:
-        return { text: 'Intilized ', color: 'text-yellow-600 bg-yellow-50' };
+        return { text: 'Initialized ', color: 'text-yellow-600 bg-yellow-50' };
     }
   };
 
@@ -507,9 +507,12 @@ const CollegeApplicationManagementTable: React.FC = () => {
               <Button
                 onClick={handleDownloadExcel}
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={loading2}
               >
-                <BsDownload className="w-4 h-4" />
-                Export
+                {loading2 ? 'Downloading...' :
+                  <><BsDownload className="w-4 h-4" />
+                  <span>Download</span></>
+                }
               </Button>
             </div>
           </div>

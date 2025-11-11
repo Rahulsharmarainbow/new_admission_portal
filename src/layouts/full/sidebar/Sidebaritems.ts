@@ -611,6 +611,21 @@ const SidebarContent: Record<number, MenuItem[]> = {
             },
           ],
         },
+           {
+          name: 'Fronted Management',
+          id: uniqueId(),
+          icon: 'solar:monitor-line-duotone',
+          children: [
+            {
+              name: 'Home Page',
+              id: uniqueId(),
+              url: '/CustomerAdmin/frontend-editing/home',
+              isPro: false,
+            },
+            
+          ],
+        },
+
          {
           name: 'Transaction',
           url: '/CustomerAdmin/transaction',

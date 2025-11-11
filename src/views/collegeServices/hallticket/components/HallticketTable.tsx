@@ -247,11 +247,82 @@ const HallticketTable: React.FC = () => {
   };
 
   // Handle export
-  const handleExport = (id: number) => {
-    // Implement export functionality
-    toast.success(`Exporting hallticket ${id}`);
+ // Handle export hallticket
+const handleExport = async (id: number) => {
+  try {
+    setLoading(true);
+    const response = await axios.post(
+      `${apiUrl}/${user?.role}/CollegeManagement/Hallticket/Export`,
+      {
+        id: id,
+        s_id: user?.id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          accept: '/',
+          'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
+          'Content-Type': 'application/json',
+          origin: window.location.origin,
+          referer: window.location.href,
+          'sec-fetch-dest': 'empty',
+          'sec-fetch-mode': 'cors',
+          'sec-fetch-site': 'cross-site',
+          'user-agent': navigator.userAgent,
+        },
+        responseType: 'blob', // Important for file downloads
+      }
+    );
+
+    // Create a blob from the response data
+    const blob = new Blob([response.data], { 
+      type: response.headers['content-type'] || 'application/octet-stream' 
+    });
+    
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    
+    // Get filename from response headers or use default
+    const contentDisposition = response.headers['content-disposition'];
+    let filename = `hallticket_${id}.xlsx`;
+    
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+      if (filenameMatch && filenameMatch[1]) {
+        filename = filenameMatch[1];
+      }
+    }
+    
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+    
+    toast.success('Hallticket exported successfully!');
+    
+  } catch (error: any) {
+    console.error('Error exporting hallticket:', error);
+    
+    if (error.response?.data instanceof Blob) {
+      // Try to read error message from blob response
+      const errorText = await error.response.data.text();
+      try {
+        const errorJson = JSON.parse(errorText);
+        toast.error(errorJson.message || 'Failed to export hallticket');
+      } catch {
+        toast.error('Failed to export hallticket');
+      }
+    } else {
+      toast.error(error.response?.data?.message || 'Failed to export hallticket');
+    }
+  } finally {
+    setLoading(false);
     setActiveDropdown(null);
-  };
+  }
+};
 
   // Navigate to edit
   const handleEdit = (id: number) => {
