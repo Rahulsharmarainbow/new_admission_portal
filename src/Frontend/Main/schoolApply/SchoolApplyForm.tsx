@@ -1245,7 +1245,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
               }));
             } else {
 
-              toast.success(data.message || "Seats not available for this class");
+              toast.error(data.message || "Seats not available for this class");
               setFormData((prev) => ({
                 ...prev,
                 [name]: '',

@@ -17,7 +17,11 @@ const HallTicket = (props) => {
   const [downloading, setDownloading] = useState(null);
   const [loading, setLoading] = useState(false);
   const [institute, setInstitute] = useState(null);
-  const { institute_id } = useParams();
+  let { institute_id } = useParams();
+
+  if (!institute_id || institute_id === ':institute_id') {
+    institute_id = window.location.hostname; // use domain as fallback
+  }
 
   useEffect(() => {
     fetchInstituteData();
@@ -25,7 +29,7 @@ const HallTicket = (props) => {
 
   const fetchInstituteData = async () => {
     try {
-      const response = await fetch('https://rainbowsolutionandtechnology.com/NewAdmissionPortal/public/api/Public/Get-header-footer', {
+      const response = await fetch(`${apiUrl}/Public/Get-header-footer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -167,6 +171,7 @@ const HallTicket = (props) => {
       <div className="">
         {/* Header Component */}
         <Header 
+        baseUrl = {institute.baseUrl}
           institute_id={props.institute_id} 
           instituteName={institute.header?.name} 
           logo={institute.header?.logo} 
@@ -348,7 +353,7 @@ const HallTicket = (props) => {
           )}
 
           {/* Footer Component */}
-          <Footer footerData={institute.footer} />
+          <Footer footerData={institute.footer} baseUrl = {institute.baseUrl}/>
         </div>
       </div>
     </div>

@@ -991,7 +991,7 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
                                 : 'bg-yellow-100 text-yellow-800'
                             }`}
                           >
-                            {app.payment_status === 1 ? 'Paid' : 'Pending'}
+                            {app.payment_status === 1 ? 'Captured' : 'Intilized'}
                           </span>
                         </td>
                       </tr>

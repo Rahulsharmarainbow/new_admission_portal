@@ -385,7 +385,7 @@ export const CustomDomainRoutes = [
   },
 ];
 
-const MAIN_DOMAINS = ["localhost4", "admissionportalrevamp.testingscrew.com"];
+const MAIN_DOMAINS = ["localhost", "admissionportalrevamp.testingscrew.com"];
 
 // Get current hostname
 const currentDomain = window.location.hostname;

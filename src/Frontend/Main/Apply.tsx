@@ -8,7 +8,19 @@ import axios from 'axios';
 import SchoolApplyForm from './schoolApply/SchoolApplyForm';
 import ApplyForm from './collageApply/ApplyForm';
 import NotFound from './NotFound';
-import { Card, Label, TextInput, Button, Spinner, Textarea, ToggleSwitch, Modal, ModalFooter, ModalBody, ModalHeader } from 'flowbite-react';
+import {
+  Card,
+  Label,
+  TextInput,
+  Button,
+  Spinner,
+  Textarea,
+  ToggleSwitch,
+  Modal,
+  ModalFooter,
+  ModalBody,
+  ModalHeader,
+} from 'flowbite-react';
 
 interface ApplyData {
   data: any;
@@ -23,6 +35,7 @@ interface ApplyData {
   transportation_setting?: any;
   apply_modal?: any;
   OtherData?: any;
+  academic_id?: any; // Added property to fix error
 }
 
 const Apply = () => {
@@ -54,16 +67,22 @@ const Apply = () => {
             },
           },
         );
-        console.log(response.data)
+        console.log(response.data);
         if (response.status === 200) {
           setApplyData(response.data);
-          console.log(response.data.apply_modals)
+          console.log(response.data.apply_modals);
 
-          setModalData(response.data.apply_modals)
-          if (response?.data?.apply_modals?.title && response?.data?.apply_modals?.visible) {
+          setModalData(response.data.apply_modals);
+          const popupKey = `${response.data.academic_id}_popup`;
+          const popupAlreadyShown = localStorage.getItem(popupKey);
+
+          if (
+            response?.data?.apply_modals?.title &&
+            response?.data?.apply_modals?.visible &&
+            !popupAlreadyShown
+          ) {
             setPreviewOpen(true);
           }
-
         } else {
           setError('Failed to load application form');
         }
@@ -80,24 +99,23 @@ const Apply = () => {
     }
   }, [institute_id]);
 
-
   useEffect(() => {
-  const script = document.createElement("script");
-  script.src = "https://checkout.razorpay.com/v1/checkout.js";
-  script.async = true;
-  script.onload = () => {
-    console.log("Razorpay script loaded!");
-  };
-  document.body.appendChild(script);
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => {
+      console.log('Razorpay script loaded!');
+    };
+    document.body.appendChild(script);
 
-  if(modalData){
-   console.log(modalData)
-  }
-}, []);
+    if (modalData) {
+      console.log(modalData);
+    }
+  }, []);
 
- if (loading) {
+  if (loading) {
     return <Loader />;
-  } 
+  }
 
   if (error) {
     return <NotFound />;
@@ -118,10 +136,16 @@ const Apply = () => {
       </div>
     );
   }
-console.log(applyData)
+  console.log(applyData);
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Header baseUrl={applyData.baseUrl} institute_id={applyData.unique_code} instituteName={applyData.header?.name} logo={applyData.header?.logo} address={applyData.header?.address} />
+      <Header
+        baseUrl={applyData.baseUrl}
+        institute_id={applyData.unique_code}
+        instituteName={applyData.header?.name}
+        logo={applyData.header?.logo}
+        address={applyData.header?.address}
+      />
 
       <div className="py-2 px-10">
         {applyData.academic_type === 1 ? (
@@ -153,52 +177,60 @@ console.log(applyData)
       </div>
 
       {/* <Footer /> */}
-      <Modal show={previewOpen} onClose={() => setPreviewOpen(false)} size="xl" className='overflow-hidden'>
-              <ModalHeader>
-                <div className="flex justify-between items-center w-full">
-                  <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-                    {modalData?.title}
-                  </h2>
-                </div>
-              </ModalHeader>
-      
-              <ModalBody className="relative overflow-visible z-[100]">
-                <div className="space-y-6 max-h-[50vh] overflow-y-auto pr-2">
-                 
-                  {/* <div className="text-center">
+      <Modal
+        show={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        size="xl"
+        className="overflow-hidden"
+      >
+        <ModalHeader>
+          <div className="flex justify-between items-center w-full">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+              {modalData?.title}
+            </h2>
+          </div>
+        </ModalHeader>
+
+        <ModalBody className="relative overflow-visible z-[100]">
+          <div className="space-y-6 overflow-visible pr-2">
+            {/* <div className="text-center">
                     <h3 className="text-2xl font-bold text-gray-800 mb-4">
                       
                     </h3>
                   </div> */}
-      
-                 
-                  {(modalData?.image) && (
-                    <div className="flex justify-center">
-                      <div className="w-40 max-w-sm h-40 border rounded-lg overflow-hidden">
-                        <img 
-                          src={`${assetUrl}/${modalData?.image}`} 
-                          alt="Popup" 
-                          className="w-full h-full object-center"
-                        />
-                      </div>
-                    </div>
-                  )}
-      
-              
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-gray-700 whitespace-pre-line">
-                          {modalData?.description}
 
-                    </p>
-                  </div>
+            {modalData?.image && (
+              <div className="flex justify-center">
+                <div className="w-40 max-w-sm h-40  rounded-lg overflow-hidden">
+                  <img
+                    src={`${assetUrl}/${modalData?.image}`}
+                    alt="Popup"
+                    className="w-full h-full object-center"
+                  />
                 </div>
-              </ModalBody>
-      
-              <ModalFooter className="flex justify-end gap-3">
-                <Button color="alternative" onClick={() => setPreviewOpen(false)}>
-                  Close Preview
-                </Button>
-                {/* <Button 
+              </div>
+            )}
+
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-gray-700 whitespace-pre-line">{modalData?.description}</p>
+            </div>
+          </div>
+        </ModalBody>
+
+        <ModalFooter className="flex justify-end gap-3">
+          <Button
+            color="alternative"
+            onClick={() => {
+              if (applyData?.academic_id) {
+                localStorage.setItem(`${applyData.academic_id}_popup`, 'shown');
+              }
+              setPreviewOpen(false);
+            }}
+          >
+            Close Preview
+          </Button>
+
+          {/* <Button 
                   color="blue" 
                   onClick={() => {
                     setPreviewOpen(false);
@@ -208,8 +240,8 @@ console.log(applyData)
                 >
                   Edit Popup
                 </Button> */}
-              </ModalFooter>
-            </Modal>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 };

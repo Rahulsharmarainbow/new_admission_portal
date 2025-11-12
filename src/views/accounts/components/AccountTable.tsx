@@ -972,11 +972,37 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
   //   setActiveDropdown(null);
   // };
 
-  const handleWebsiteClick = (code: number) => {
-  const url = `/Frontend/${code}`;
-  window.open(url, '_blank'); // ✅ opens in a new tab
+//   const handleWebsiteClick = (account: any) => {
+//     if(account.configured ==1 && account.configured_domain != null){
+//       const url = `${account.configured_domain}/Frontend/${account.unique_code}`;
+//    window.open(url, '_blank');
+//     }else{
+//   const url = `/Frontend/${account.unique_code}`;
+//   window.open(url, '_blank');} 
+//   setActiveDropdown(null);
+// };
+
+
+const handleWebsiteClick = (account: any) => {
+  const { configured, configured_domain, unique_code } = account;
+
+  // Check if configured is 1 and configured_domain exists
+  if (configured === 1 && configured_domain && configured_domain.trim() !== "") {
+    // Ensure the domain doesn't accidentally miss protocol
+    const domain = configured_domain.startsWith("http")
+      ? configured_domain
+      : `https://${configured_domain}`;
+    const url = `${domain}/Frontend/${unique_code}`;
+    window.open(url, "_blank");
+  } else {
+    // Default redirect
+    const url = `/Frontend/${unique_code}`;
+    window.open(url, "_blank");
+  }
+
   setActiveDropdown(null);
 };
+
 
 
   // Navigate to make live
@@ -1234,7 +1260,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ type }) => {
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-sm">
                       <button
-                        onClick={() => handleWebsiteClick(account?.unique_code)}
+                        onClick={() => handleWebsiteClick(account)}
                         className="text-blue-600 hover:text-blue-800 flex items-center space-x-1 font-medium transition-colors"
                       >
                         <span>Visit Site</span>

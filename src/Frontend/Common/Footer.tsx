@@ -140,7 +140,7 @@ const Footer = ({ footerData,baseUrl }) => {
                     to={`${baseUrl}/${link.page_route}`}
                     className="text-gray-600 hover:text-gray-900 transition duration-200 font-medium px-2 py-1 rounded"
                   >
-                    {link.page_name}
+                    {(link?.page_name || '').toUpperCase()}
                   </Link>
                 </React.Fragment>
               ))}
