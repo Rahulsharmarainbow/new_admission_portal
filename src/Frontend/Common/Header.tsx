@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 
   const assetUrl = import.meta.env.VITE_ASSET_URL;
 
-const Header = ({ institute_id,instituteName, logo, address }) => {
+const Header = ({ baseUrl,institute_id,instituteName, logo, address }) => {
   const headerData = {
     logo: {
       src: assetUrl +"/" + logo || "https://admissionportalbackend.testingscrew.com/public/company_logos/1752817396_academic.jpg",
@@ -26,7 +26,7 @@ const Header = ({ institute_id,instituteName, logo, address }) => {
         <div className="bg-white shadow-md  container mx-auto px-4 py-1 rounded-b-2xl">
           <div className="flex flex-col md:flex-row items-center justify-center text-center md:text-left">
             {headerData?.logo && (
-              <Link to={`/Frontend/${headerData.unique_code}`} reloadDocument>
+              <Link to={`${baseUrl}`} reloadDocument>
                 <img 
                   src={`${headerData.logo.src}`} 
                   alt="Institute Logo" 

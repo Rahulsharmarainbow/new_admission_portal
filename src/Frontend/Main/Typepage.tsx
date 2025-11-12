@@ -11,13 +11,16 @@ const apiUrl = import.meta.env.VITE_API_URL;
 const assetUrl = import.meta.env.VITE_ASSET_URL;
 
 const TypePage = () => {
-  const { institute_id, page_route } = useParams();
+  let { institute_id, page_route } = useParams();
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // ✅ Fetch page data
   useEffect(() => {
-    if (!institute_id || !page_route) return;
+    // if (!institute_id || !page_route) return;
+    if (!institute_id || institute_id === ':institute_id') {
+    institute_id = window.location.hostname; // use domain as fallback
+  }
 
     const fetchPageData = async () => {
       setLoading(true); // show loader while fetching
@@ -84,6 +87,7 @@ const TypePage = () => {
       </Helmet>
 
       <Header
+        baseUrl={pageData.baseUrl}
         institute_id={pageData.unique_code}
         instituteName={pageData.header?.name}
         logo={pageData.header?.logo}
@@ -99,7 +103,7 @@ const TypePage = () => {
         </div>
       </main>
 
-      <Footer footerData={pageData.footer} />
+      <Footer footerData={pageData.footer} baseUrl={pageData.baseUrl} />
     </div>
   );
 };

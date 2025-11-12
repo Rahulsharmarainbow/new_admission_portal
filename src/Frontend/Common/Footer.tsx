@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router';
 import { IconMail, IconPhone } from '@tabler/icons-react';
 import NewBadge from './NewBadge'; // Assuming you have this component
 
-const Footer = ({ footerData }) => {
+const Footer = ({ footerData,baseUrl }) => {
   const { institute_id } = useParams();
 
   // Default sections
@@ -137,7 +137,7 @@ const Footer = ({ footerData }) => {
                 <React.Fragment key={index}>
                   {index > 0 && <span className="text-gray-400 hidden sm:inline">|</span>}
                   <Link
-                    to={`/Frontend/${institute_id}/${link.page_route}`}
+                    to={`${baseUrl}/${link.page_route}`}
                     className="text-gray-600 hover:text-gray-900 transition duration-200 font-medium px-2 py-1 rounded"
                   >
                     {link.page_name}

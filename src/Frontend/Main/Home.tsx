@@ -136,7 +136,7 @@ const Home = () => {
             text: data.buttons?.[0]?.text || 'Apply Online',
             url:
               data.buttons?.[0]?.href ||
-              (data.institute_id ? `/Frontend/${data.institute_id}/apply` : '#'),
+              (data.institute_id ? `${institute.baseUrl}/apply` : '#'),
           },
           showNewBadge: data.buttons?.some((b) => b.new === 1) || false,
         },
@@ -195,6 +195,7 @@ const Home = () => {
         </div>
       </header> */}
       <Header
+        baseUrl = {institute.baseUrl}
         institute_id={institute.unique_code}
         instituteName={institute.header?.name}
         logo={institute.header?.logo}
@@ -353,7 +354,7 @@ const Home = () => {
                     institute.buttons.map((btn, index) => {
                       const targetUrl = btn.url?.startsWith('http')
                         ? btn.url
-                        : `/Frontend/${institute_id}/${btn.url}`;
+                        : `${institute.baseUrl}/${btn.url}`;
 
                       // For external links
                       if (btn.url?.startsWith('http')) {
@@ -448,7 +449,7 @@ const Home = () => {
         </div>
       </div>
 
-      <Footer footerData={institute.footer} />
+      <Footer footerData={institute.footer} baseUrl = {institute.baseUrl} />
     </div>
   );
 };

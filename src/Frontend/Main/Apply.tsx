@@ -26,7 +26,7 @@ interface ApplyData {
 }
 
 const Apply = () => {
-  const { institute_id } = useParams();
+  let { institute_id } = useParams();
   const navigate = useNavigate();
   const [applyData, setApplyData] = useState<ApplyData | null>(null);
   const [modalData, setModalData] = useState<Any | null>(null);
@@ -36,6 +36,9 @@ const Apply = () => {
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const assetUrl = import.meta.env.VITE_ASSET_URL;
+  if (!institute_id || institute_id === ':institute_id') {
+    institute_id = window.location.hostname; // use domain as fallback
+  }
 
   useEffect(() => {
     const fetchApplyData = async () => {
@@ -55,10 +58,12 @@ const Apply = () => {
         if (response.status === 200) {
           setApplyData(response.data);
           console.log(response.data.apply_modals)
+
           setModalData(response.data.apply_modals)
-          if(response.data.apply_modals.title && response.data.apply_modals.visible){
-            setPreviewOpen(true)
+          if (response?.data?.apply_modals?.title && response?.data?.apply_modals?.visible) {
+            setPreviewOpen(true);
           }
+
         } else {
           setError('Failed to load application form');
         }
@@ -94,7 +99,7 @@ const Apply = () => {
     return <Loader />;
   } 
 
-  if (error || !institute_id) {
+  if (error) {
     return <NotFound />;
   }
 
@@ -116,7 +121,7 @@ const Apply = () => {
 console.log(applyData)
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Header institute_id={applyData.unique_code} instituteName={applyData.header?.name} logo={applyData.header?.logo} address={applyData.header?.address} />
+      <Header baseUrl={applyData.baseUrl} institute_id={applyData.unique_code} instituteName={applyData.header?.name} logo={applyData.header?.logo} address={applyData.header?.address} />
 
       <div className="py-2 px-10">
         {applyData.academic_type === 1 ? (
@@ -182,7 +187,8 @@ console.log(applyData)
               
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <p className="text-gray-700 whitespace-pre-line">
-                      {modalData.description}
+                          {modalData?.description}
+
                     </p>
                   </div>
                 </div>
