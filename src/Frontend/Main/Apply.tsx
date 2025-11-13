@@ -227,7 +227,7 @@ const Apply = () => {
               setPreviewOpen(false);
             }}
           >
-            Close Preview
+            Close
           </Button>
 
           {/* <Button 

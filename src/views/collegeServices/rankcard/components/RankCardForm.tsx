@@ -442,57 +442,123 @@ const RankCardForm: React.FC<RankCardFormProps> = ({ isOpen, onClose, onSuccess 
     setFormData(prev => ({ ...prev, file }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
     
-    if (!formData.academic_id && user?.role != "CustomerAdmin") {
-      toast.error('Please selecte academic');
-      return;
-    }
-    if (!formData.degree_id || !formData.file) {
-      toast.error('Please fill all required fields');
-      return;
-    }
+  //   if (!formData.academic_id && user?.role != "CustomerAdmin") {
+  //     toast.error('Please selecte academic');
+  //     return;
+  //   }
+  //   if (!formData.degree_id || !formData.file) {
+  //     toast.error('Please fill all required fields');
+  //     return;
+  //   }
 
-    setSubmitting(true);
+  //   setSubmitting(true);
 
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('academic_id', formData.academic_id);
-      formDataToSend.append('degree_id', formData.degree_id);
-      formDataToSend.append('s_id', user?.id?.toString() || '');
-      formDataToSend.append('file', formData.file);
+  //   try {
+  //     const formDataToSend = new FormData();
+  //     formDataToSend.append('academic_id', formData.academic_id);
+  //     formDataToSend.append('degree_id', formData.degree_id);
+  //     formDataToSend.append('s_id', user?.id?.toString() || '');
+  //     formDataToSend.append('file', formData.file);
 
-      const response = await axios.post(
-        `${apiUrl}/${user?.role}/CollegeManagement/Rankcard/add`,
-        formDataToSend,
-        {
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-            'Content-Type': 'multipart/form-data',
-          },
+  //     const response = await axios.post(
+  //       `${apiUrl}/${user?.role}/CollegeManagement/Rankcard/add`,
+  //       formDataToSend,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${user?.token}`,
+  //           'Content-Type': 'multipart/form-data',
+  //         },
+  //       },
+  //     );
+
+  //     if (response.data.status === true) {
+  //       toast.success(response.data.message || 'Rank card added successfully!');
+  //       onSuccess();
+  //       onClose();
+  //     } else {
+  //       toast.error(response.data.message || 'Failed to add rank card');
+  //     }
+  //   } catch (error: any) {
+  //     console.error('Error submitting form:', error);
+  //     if (error.response?.data?.error) {
+  //       toast.error(error.response.data.error);
+  //     } else {
+  //       toast.error('Failed to add rank card');
+  //     }
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  if (!formData.academic_id && user?.role !== "CustomerAdmin") {
+    toast.error('Please select academic');
+    return;
+  }
+  if (!formData.degree_id || !formData.file) {
+    toast.error('Please fill all required fields');
+    return;
+  }
+
+  setSubmitting(true);
+
+  try {
+    const formDataToSend = new FormData();
+    formDataToSend.append('academic_id', formData.academic_id);
+    formDataToSend.append('degree_id', formData.degree_id);
+    formDataToSend.append('s_id', user?.id?.toString() || '');
+    formDataToSend.append('file', formData.file);
+
+    const response = await axios.post(
+      `${apiUrl}/${user?.role}/CollegeManagement/Rankcard/add`,
+      formDataToSend,
+      {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'multipart/form-data',
         },
-      );
+      },
+    );
 
-      if (response.data.status === true) {
-        toast.success(response.data.message || 'Rank card added successfully!');
-        onSuccess();
-        onClose();
-      } else {
-        toast.error(response.data.message || 'Failed to add rank card');
-      }
-    } catch (error: any) {
-      console.error('Error submitting form:', error);
-      if (error.response?.data?.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error('Failed to add rank card');
-      }
-    } finally {
-      setSubmitting(false);
+    // Check for success based on the actual API response structure
+    if (response.data.message && response.data.message.toLowerCase().includes('processed successfully')) {
+      
+      // Green success toast
+      toast.success(response.data.message || 'Rank cards processed successfully!');
+      
+      // Call onSuccess to refresh the table
+      onSuccess();
+      
+      // Close the modal
+      onClose();
+      
+      // Reset form
+      setFormData({
+        academic_id: user?.role === 'CustomerAdmin' ? user?.academic_id?.toString() || '' : '',
+        degree_id: '',
+        file: null,
+      });
+    } else {
+      // If message doesn't contain success text, show error
+      toast.error(response.data.message || 'Failed to process rank cards');
     }
-  };
-
+  } catch (error: any) {
+    console.error('Error submitting form:', error);
+    if (error.response?.data?.error) {
+      toast.error(error.response.data.error);
+    } else if (error.response?.data?.message) {
+      toast.error(error.response.data.message);
+    } else {
+      toast.error('Failed to add rank card');
+    }
+  } finally {
+    setSubmitting(false);
+  }
+};
   return (
     <Modal show={isOpen} onClose={onClose} size="md">
       {/* Header */}
@@ -605,3 +671,12 @@ const RankCardForm: React.FC<RankCardFormProps> = ({ isOpen, onClose, onSuccess 
 };
 
 export default RankCardForm;
+
+
+
+
+
+
+
+
+
