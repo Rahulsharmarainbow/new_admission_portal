@@ -67,6 +67,8 @@ import ApplicationDetailsPage from 'src/views/applicationForms/schoolApplication
 import HomeEditing from 'src/views/frontedEditing/home/Home';
 import Rankcard from 'src/Frontend/rankcard/Rankcard';
 import HallTicket from 'src/Frontend/hallticket/Hallticket';
+import EditingLayout from 'src/layouts/full/EditingLayout';
+import ApplyEditing from 'src/views/Editing/ApplyEditing';
 
 
 /* ***Layouts**** */
@@ -97,6 +99,17 @@ const RoleBasedRedirect: React.FC = () => {
 };
 
 const MainRoutes = [
+  {
+    path: '/ApplyEditing',
+    element: (
+      <ProtectedRoute requiredRole="SUPERADMIN">
+        <EditingLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { path: '/ApplyEditing/get', element: <ApplyEditing /> },
+    ]
+  },
   {
     path: '/SuperAdmin',
     element: (
@@ -149,6 +162,7 @@ const MainRoutes = [
       { path: '/SuperAdmin/demo-accounts/add', element: <Add /> },
       { path: '/SuperAdmin/activity', element: <ActivitiesTable/>},
       { path: '/SuperAdmin/frontend-editing/home', element: <HomeEditing/>},
+      { path: '/SuperAdmin/frontend-editing/Apply', element: <ApplyEditing/>},
       { path: '/SuperAdmin/frontend-editing/footer', element: <FooterEditing/>},
       { path: '/SuperAdmin/frontend-editing/popups', element: <PopupEditing />},
       { path: 'notifications', element: <NotificationsPage/> },

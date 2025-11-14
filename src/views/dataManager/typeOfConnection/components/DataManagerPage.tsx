@@ -245,6 +245,7 @@ import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown'; // यह l
 import BreadcrumbHeader from 'src/Frontend/Common/BreadcrumbHeader';
 import { useAuth } from 'src/hook/useAuth';
 import DataModal from './AddDataModal';
+import AllAcademicsDropdown from 'src/Frontend/Common/AllAcademicsDropdown';
 
 const DataManagerPage: React.FC = () => {
   const { user } = useAuth();
@@ -295,7 +296,7 @@ const DataManagerPage: React.FC = () => {
             user?.role !== 'CustomerAdmin' && (
               <div className="flex-1 min-w-[200px]">
             <div className="relative">
-              <AcademicDropdown // यह line change करें
+              <AllAcademicsDropdown // यह line change करें
                 value={selectedAcademic}
                 onChange={handleAcademicChange}
                 label="Select Academic"

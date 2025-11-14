@@ -11,6 +11,7 @@
     "postinstall": "flowbite-react patch"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
     "@svgr/rollup": "8.1.0",
     "@tabler/icons-react": "^2.39.0",
     "@tensorflow/tfjs": "^4.22.0",
