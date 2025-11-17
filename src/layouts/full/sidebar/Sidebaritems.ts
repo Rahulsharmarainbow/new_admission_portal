@@ -139,7 +139,6 @@ const SidebarContent: Record<number, MenuItem[]> = {
             },
           ],
         },
-
         {
           name: 'Fronted Management',
           id: uniqueId(),
@@ -151,7 +150,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               url: '/SuperAdmin/frontend-editing/home',
               isPro: false,
             },
-            
+            {
+              name: 'Apply Page',
+              id: uniqueId(),
+              url: '/ApplyEditing/get',
+              isPro: false,
+            },            
           ],
         },
 
@@ -389,7 +393,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               url: '/SupportAdmin/frontend-editing/home',
               isPro: false,
             },
-            
+            {
+              name: 'Apply Page',
+              id: uniqueId(),
+              url: '/ApplyEditing/get',
+              isPro: false,
+            }, 
           ],
         },
         {
@@ -622,7 +631,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               url: '/CustomerAdmin/frontend-editing/home',
               isPro: false,
             },
-            
+            {
+              name: 'Apply Page',
+              id: uniqueId(),
+              url: '/ApplyEditing/get',
+              isPro: false,
+            }, 
           ],
         },
 
