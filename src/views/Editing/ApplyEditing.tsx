@@ -49,11 +49,12 @@ const ApplyEditing: React.FC = () => {
   const { user } = useAuth();
   const [applyCards, setApplyCards] = useState<CardType[]>([]);
   const [loading, setLoading] = useState(false);
+  const [publishing, setPublishing] = useState(false); // New state for publish loader
   const [selectedCardId, setSelectedCardId] = useState(0);
   const [selectedField, setSelectedField] = useState<FieldType | null>(null);
-  const [selectedAcademicId, setSelectedAcademicId] = useState<string>('6');
+  const [selectedAcademicId, setSelectedAcademicId] = useState<string>('');
   const [filters, setFilters] = useState({
-    academic: '6',
+    academic: '',
   });
   const [tableOptions, setTableOptions] = useState<TableOption[]>([]);
   const [deletedFieldIds, setDeletedFieldIds] = useState<number[]>([]);
@@ -66,8 +67,8 @@ const ApplyEditing: React.FC = () => {
   ];
 
   const [availableFields] = useState<FieldType[]>([
-    { id: 1, label: 'Text Field', type: 'text', width: 33 },
-    { id: 2, label: 'Email Field', type: 'email', width: 33 },
+    { id: 1, label: 'Text Field', type: 'text', width: 25 },
+    { id: 2, label: 'Email Field', type: 'email', width: 25 },
     { id: 3, label: 'Select Dropdown', type: 'select', width: 50 },
     { id: 4, label: 'Date Picker', type: 'date', width: 50 },
     { id: 5, label: 'File Upload', type: 'file_button', width: 100 },
@@ -82,7 +83,7 @@ const ApplyEditing: React.FC = () => {
       const academic_id =
         user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin'
           ? academicId
-          : user?.academic_id || '6';
+          : user?.academic_id || '';
 
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Type/dropdown-type`,
@@ -170,26 +171,24 @@ const ApplyEditing: React.FC = () => {
     );
   };
 
-  // Delete section
+  // Delete section - Alert removed
   const deleteSection = (sectionId: number) => {
-    if (window.confirm('Are you sure you want to delete this section?')) {
-      // Add to deleted card IDs if it's an existing card (not new)
-      if (sectionId < 1000) {
-        setDeletedCardIds((prev) => [...prev, sectionId]);
-      }
-
-      // Also add all fields in this section to deleted field IDs
-      const cardToDelete = applyCards.find((card) => card.id === sectionId);
-      if (cardToDelete) {
-        const existingFieldIds = cardToDelete.children
-          .filter((field) => field.id < 1000)
-          .map((field) => field.id);
-        setDeletedFieldIds((prev) => [...prev, ...existingFieldIds]);
-      }
-
-      setApplyCards((prev) => prev.filter((card) => card.id !== sectionId));
-      toast.success('Section deleted successfully');
+    // Add to deleted card IDs if it's an existing card (not new)
+    if (sectionId < 1000) {
+      setDeletedCardIds((prev) => [...prev, sectionId]);
     }
+
+    // Also add all fields in this section to deleted field IDs
+    const cardToDelete = applyCards.find((card) => card.id === sectionId);
+    if (cardToDelete) {
+      const existingFieldIds = cardToDelete.children
+        .filter((field) => field.id < 1000)
+        .map((field) => field.id);
+      setDeletedFieldIds((prev) => [...prev, ...existingFieldIds]);
+    }
+
+    setApplyCards((prev) => prev.filter((card) => card.id !== sectionId));
+    toast.success('Section deleted successfully');
   };
 
   // Fetch apply page data based on academic ID
@@ -243,6 +242,7 @@ const ApplyEditing: React.FC = () => {
 
   // Handle publish button click
   const handlePublish = async () => {
+    setPublishing(true); // Start loader
     try {
       const academic_id =
         user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin'
@@ -282,12 +282,15 @@ const ApplyEditing: React.FC = () => {
         setDeletedFieldIds([]);
         setDeletedCardIds([]);
         toast.success('Apply page published successfully!');
+        fetchApplyPage(selectedAcademicId);
       } else {
         toast.error(response.data?.message || 'Failed to publish apply page');
       }
     } catch (error) {
       console.error('Error publishing apply page:', error);
       toast.error('Error publishing apply page');
+    } finally {
+      setPublishing(false); // Stop loader
     }
   };
 
@@ -489,9 +492,17 @@ const ApplyEditing: React.FC = () => {
               </div>
               <Button
                 onClick={handlePublish}
-                className="bg-blue-600 hover:bg-blue-700 focus:ring-blue-300 px-6"
+                disabled={publishing} // Disable button when publishing
+                className="bg-blue-600 hover:bg-blue-700 focus:ring-blue-300 px-6 flex items-center gap-2"
               >
-                Publish
+                {publishing ? (
+                  <>
+                    <Spinner size="sm" />
+                    Publishing...
+                  </>
+                ) : (
+                  'Publish'
+                )}
               </Button>
             </div>
           </div>
@@ -647,14 +658,6 @@ const ApplyEditing: React.FC = () => {
 
                                         // Calculate column span based on width percentage
                                         const getColumnSpan = () => {
-                                          // Full width elements for headings
-                                          if (
-                                            child.type === 'heading' ||
-                                            child.type === 'heading2'
-                                          ) {
-                                            return 'full';
-                                          }
-
                                           // Width-based spans
                                           if (childWidthValue >= 80) return 'full';
                                           if (childWidthValue >= 60) return 'span-2';

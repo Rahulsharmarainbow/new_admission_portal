@@ -84,15 +84,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleSave = () => {
     if (!editingField) return;
     updateField(editingField);
-    toast.success('Field updated successfully');
     setSelectedField(null);
   };
 
   const handleDelete = () => {
     if (!editingField) return;
-    if (window.confirm('Are you sure you want to delete this field?')) {
       deleteField(editingField.id);
-    }
   };
 
   // 🔥 Width Dropdown Options
@@ -107,7 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     return (
       <div>
-        <Label htmlFor="width" value="Width (%) *" />
+        <Label htmlFor="width">Width (%) *</Label>
         <Select
           id="width"
           value={widthValue}
@@ -126,13 +123,15 @@ const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
-  const renderFieldEditor = (field: FieldType) => {
+ const renderFieldEditor = (field: FieldType) => {
     switch (field.type) {
       case 'text':
         return (
           <>
             <div>
-              <Label htmlFor="label" value="Field Label *" />
+              <Label htmlFor="label">
+                Field Label *
+              </Label>
               <TextInput
                 id="label"
                 type="text"
@@ -143,7 +142,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="placeholder" value="Placeholder" />
+              <Label htmlFor="placeholder">
+                Placeholder
+              </Label>
               <TextInput
                 id="placeholder"
                 type="text"
@@ -156,7 +157,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             {renderWidthDropdown(field)}
 
             <div>
-              <Label htmlFor="required" value="Required?" />
+              <Label htmlFor="required">
+                Required?
+              </Label>
               <Select
                 id="required"
                 value={field.required?.toString() || '0'}
@@ -169,7 +172,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             {field.required === 1 && (
               <div>
-                <Label htmlFor="validation_message" value="Validation Message *" />
+                <Label htmlFor="validation_message">
+                  Validation Message *
+                </Label>
                 <TextInput
                   id="validation_message"
                   type="text"
@@ -186,7 +191,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         return (
           <>
             <div>
-              <Label htmlFor="name" value="Field Name *" />
+              <Label htmlFor="name">
+                Field Name *
+              </Label>
               <TextInput
                 id="name"
                 type="text"
@@ -197,7 +204,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="label" value="Field Label *" />
+              <Label htmlFor="label">
+                Field Label *
+              </Label>
               <TextInput
                 id="label"
                 type="text"
@@ -210,7 +219,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             {renderWidthDropdown(field)}
 
             <div>
-              <Label htmlFor="required" value="Required?" />
+              <Label htmlFor="required">
+                Required?
+              </Label>
               <Select
                 id="required"
                 value={field.required?.toString() || '0'}
@@ -223,7 +234,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             {field.required === 1 && (
               <div>
-                <Label htmlFor="validation_message" value="Validation Message *" />
+                <Label htmlFor="validation_message">
+                  Validation Message *
+                </Label>
                 <TextInput
                   id="validation_message"
                   type="text"
@@ -235,7 +248,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             )}
 
             <div>
-              <Label htmlFor="table" value="Data Source Table" />
+              <Label htmlFor="table">
+                Data Source Table
+              </Label>
               <Select
                 id="table"
                 value={field.table || ''}
@@ -256,7 +271,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         return (
           <>
             <div>
-              <Label htmlFor="name" value="Field Name *" />
+              <Label htmlFor="name">
+                Field Name *
+              </Label>
               <TextInput
                 id="name"
                 type="text"
@@ -267,7 +284,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="label" value="Field Label *" />
+              <Label htmlFor="label">
+                Field Label *
+              </Label>
               <TextInput
                 id="label"
                 type="text"
@@ -278,7 +297,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="placeholder" value="Placeholder" />
+              <Label htmlFor="placeholder">
+                Placeholder
+              </Label>
               <TextInput
                 id="placeholder"
                 type="text"
@@ -291,7 +312,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             {renderWidthDropdown(field)}
 
             <div>
-              <Label htmlFor="required" value="Required" />
+              <Label htmlFor="required">
+                Required
+              </Label>
               <Select
                 id="required"
                 value={field.required?.toString() || '0'}
@@ -304,7 +327,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             {field.required === 1 && (
               <div>
-                <Label htmlFor="validation_message" value="Validation Message *" />
+                <Label htmlFor="validation_message">
+                  Validation Message *
+                </Label>
                 <TextInput
                   id="validation_message"
                   value={field.validation_message || ''}
@@ -315,7 +340,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             )}
 
             <div>
-              <Label htmlFor="max_date" value="Max Date" />
+              <Label htmlFor="max_date">
+                Max Date
+              </Label>
               <TextInput
                 id="max_date"
                 value={field.max_date || ''}
@@ -331,7 +358,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         return (
           <>
             <div>
-              <Label htmlFor="content" value="Heading Content *" />
+              <Label htmlFor="content">
+                Heading Content *
+              </Label>
               <Textarea
                 id="content"
                 value={field.content || ''}
@@ -349,7 +378,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         return (
           <>
             <div>
-              <Label htmlFor="name" value="Field Name *" />
+              <Label htmlFor="name">
+                Field Name *
+              </Label>
               <TextInput
                 id="name"
                 value={field.name || ''}
@@ -359,7 +390,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="label" value="Field Label *" />
+              <Label htmlFor="label">
+                Field Label *
+              </Label>
               <TextInput
                 id="label"
                 value={field.label || ''}
@@ -369,7 +402,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="resolution" value="Resolution" />
+              <Label htmlFor="resolution">
+                Resolution
+              </Label>
               <TextInput
                 id="resolution"
                 value={field.resolution || ''}
@@ -381,7 +416,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             {renderWidthDropdown(field)}
 
             <div>
-              <Label htmlFor="content" value="Button Text" />
+              <Label htmlFor="content">
+                Button Text
+              </Label>
               <TextInput
                 id="content"
                 value={field.content || ''}
@@ -391,7 +428,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="required" value="Required" />
+              <Label htmlFor="required">
+                Required
+              </Label>
               <Select
                 id="required"
                 value={field.required?.toString() || '0'}
@@ -404,7 +443,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             {field.required === 1 && (
               <div>
-                <Label htmlFor="validation_message" value="Validation Message *" />
+                <Label htmlFor="validation_message">
+                  Validation Message *
+                </Label>
                 <TextInput
                   id="validation_message"
                   value={field.validation_message || ''}
@@ -420,7 +461,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         return (
           <>
             <div>
-              <Label htmlFor="label" value="Field Label *" />
+              <Label htmlFor="label">
+                Field Label *
+              </Label>
               <TextInput
                 id="label"
                 value={field.label || ''}
@@ -430,7 +473,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="content" value="Checkbox Text *" />
+              <Label htmlFor="content">
+                Checkbox Text *
+              </Label>
               <Textarea
                 id="content"
                 value={field.content || ''}
@@ -443,7 +488,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             {renderWidthDropdown(field)}
 
             <div>
-              <Label htmlFor="required" value="Required" />
+              <Label htmlFor="required">
+                Required
+              </Label>
               <Select
                 id="required"
                 value={field.required?.toString() || '0'}
@@ -456,7 +503,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             {field.required === 1 && (
               <div>
-                <Label htmlFor="validation_message" value="Validation Message *" />
+                <Label htmlFor="validation_message">
+                  Validation Message *
+                </Label>
                 <TextInput
                   id="validation_message"
                   value={field.validation_message || ''}
@@ -472,7 +521,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         return (
           <>
             <div>
-              <Label htmlFor="label" value="Field Label *" />
+              <Label htmlFor="label">
+                Field Label *
+              </Label>
               <TextInput
                 id="label"
                 value={field.label || ''}
