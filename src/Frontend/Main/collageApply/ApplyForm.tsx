@@ -1536,15 +1536,6 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   };
 
   const renderStep = (step: number) => {
-    // Show loader during step transition
-    // if (stepTransitionLoading && step === 1) {
-    //   return (
-    //     <div>
-    //       <Loader />
-    //     </div>
-    //   );
-    // }
-
     switch (step) {
       case 0:
         return (
@@ -1588,29 +1579,29 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
     }
   };
 
-  return (
+return (
     <div className="group relative mb-8">
       <div className="absolute -inset-1 bg-gradient-to-r from-[#1e40af] to-[#dc2626] rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
       <div className="relative bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#1e40af] to-[#dc2626]"></div>
+        <div className="absolute top-0 left-0 w-full h-1 sm:h-2 bg-gradient-to-r from-[#1e40af] to-[#dc2626]"></div>
 
         {/* Form Header */}
-        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
-          <p className="text-center text-gray-600 mt-2">
+        <div className="p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
+          <p className="text-center text-gray-600 text-sm sm:text-base mt-1 sm:mt-2">
             {home_other_lines?.[1]?.title || 'Online Application Form'}
           </p>
         </div>
 
-        <div className="p-6">
-          {/* Stepper */}
-          <div className="flex items-center justify-center mb-8">
-            <div className="flex items-center w-full max-w-2xl">
+        <div className="p-4 sm:p-6">
+          {/* Stepper - Mobile Responsive */}
+          <div className="flex items-center justify-center mb-6 sm:mb-8">
+            <div className="flex items-center w-full max-w-2xl overflow-x-auto">
               {steps?.map((step, index) => (
                 <React.Fragment key={step}>
                   {/* Step Circle */}
-                  <div className="flex flex-col items-center">
+                  <div className="flex flex-col items-center min-w-[60px] sm:min-w-0">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center border-2 font-semibold text-sm transition-all duration-300 ${
+                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 font-semibold text-xs sm:text-sm transition-all duration-300 ${
                         index === activeStep
                           ? 'bg-blue-600 border-blue-600 text-white shadow-lg transform scale-110'
                           : index < activeStep
@@ -1619,24 +1610,24 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
                       }`}
                     >
                       {index < activeStep ? (
-                        <Icon icon="solar:check-circle-line-duotone" className="w-5 h-5" />
+                        <Icon icon="solar:check-circle-line-duotone" className="w-4 h-4 sm:w-5 sm:h-5" />
                       ) : (
                         index + 1
                       )}
                     </div>
                     <span
-                      className={`text-xs mt-2 font-medium ${
+                      className={`text-xs mt-1 sm:mt-2 font-medium text-center px-1 ${
                         index === activeStep ? 'text-blue-600' : 'text-gray-500'
                       }`}
                     >
-                      {step}
+                      {step.length > 10 ? `${step.substring(0, 10)}...` : step}
                     </span>
                   </div>
 
                   {/* Connector Line */}
                   {index < steps.length - 1 && (
                     <div
-                      className={`flex-1 h-1 mx-2 transition-all duration-300 ${
+                      className={`flex-1 h-1 mx-1 sm:mx-2 transition-all duration-300 min-w-[20px] ${
                         index < activeStep ? 'bg-green-500' : 'bg-gray-300'
                       }`}
                     />
@@ -1647,17 +1638,17 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
           </div>
 
           {/* Step Content */}
-          <div className="min-h-[400px]">
+          <div className="min-h-[300px] sm:min-h-[400px]">
             {renderStep(activeStep)}
           </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between mt-8">
+          {/* Navigation Buttons - Mobile Responsive */}
+          <div className="flex flex-col sm:flex-row justify-between gap-4 mt-6 sm:mt-8">
             {activeStep !== 2 ? (
               <button
                 onClick={handleBack}
                 disabled={activeStep === 0 || stepTransitionLoading}
-                className={`flex items-center gap-2 px-6 py-2 rounded-lg border transition-all duration-200 ${
+                className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg border transition-all duration-200 order-2 sm:order-1 ${
                   activeStep === 0 || stepTransitionLoading
                     ? 'border-gray-300 text-gray-400 cursor-not-allowed'
                     : 'border-blue-600 text-blue-600 hover:bg-blue-50 hover:shadow-md'
@@ -1667,14 +1658,14 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
                 Back
               </button>
             ) : (
-              <div></div>
+              <div className="order-2 sm:order-1"></div>
             )}
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 order-1 sm:order-2">
               {activeStep === steps.length - 1 ? (
                 <button
                   onClick={handleReset}
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg transform hover:scale-105"
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg transform hover:scale-105 w-full sm:w-auto"
                 >
                   Submit Another Application
                 </button>
@@ -1682,7 +1673,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
                 <button
                   onClick={handleNext}
                   disabled={loading || stepTransitionLoading}
-                  className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold text-white transition-all duration-200 ${
+                  className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg font-semibold text-white transition-all duration-200 w-full sm:w-auto ${
                     loading || stepTransitionLoading
                       ? 'bg-gray-400 cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg transform hover:scale-105'
@@ -1710,9 +1701,9 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
           </div>
 
           {Object.keys(errors).length > 0 && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-center gap-2 text-red-700">
-                <Icon icon="solar:danger-triangle-line-duotone" className="w-5 h-5" />
+            <div className="mt-4 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center gap-2 text-red-700 text-sm sm:text-base">
+                <Icon icon="solar:danger-triangle-line-duotone" className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                 <span className="font-semibold">
                   Please complete all mandatory fields to proceed.
                 </span>
@@ -1722,45 +1713,45 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
         </div>
       </div>
 
-      {/* Payment Confirmation Dialog */}
+      {/* Payment Confirmation Dialog - Mobile Responsive */}
       {showPaymentDialog && (
-        <div className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 scale-100">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full mx-2 transform transition-all duration-300 scale-100 max-h-[90vh] overflow-y-auto">
             {/* Dialog Header */}
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-center text-xl font-bold text-green-600">Confirm Payment</h3>
+            <div className="p-4 sm:p-6 border-b border-gray-200">
+              <h3 className="text-center text-lg sm:text-xl font-bold text-green-600">Confirm Payment</h3>
             </div>
 
             {/* Dialog Content */}
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <div className="text-center mb-4">
-                <div className="text-2xl font-bold text-gray-800 mb-2">
+                <div className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
                   ₹ {paymentData?.total_payable_fee?.toLocaleString('en-IN')}
                 </div>
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-600 text-xs sm:text-sm">
                   You will be redirected to secure payment gateway
                 </p>
               </div>
 
               {/* Payment Details */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                <div className="flex justify-between items-center text-sm">
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4">
+                <div className="flex justify-between items-center text-xs sm:text-sm">
                   <span className="text-gray-600">Application ID:</span>
-                  <span className="font-semibold">{formData.application_id}</span>
+                  <span className="font-semibold text-xs sm:text-sm">{formData.application_id}</span>
                 </div>
-                <div className="flex justify-between items-center text-sm mt-2">
+                <div className="flex justify-between items-center text-xs sm:text-sm mt-2">
                   <span className="text-gray-600">Payment For:</span>
-                  <span className="font-semibold">College Application Fee</span>
+                  <span className="font-semibold text-xs sm:text-sm">College Application Fee</span>
                 </div>
               </div>
             </div>
 
             {/* Dialog Actions */}
-            <div className="flex justify-center gap-4 p-6 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 p-4 sm:p-6 border-t border-gray-200">
               <button
                 onClick={() => setShowPaymentDialog(false)}
                 disabled={paymentLoading}
-                className={`flex-1 px-4 py-2 border border-gray-400 text-gray-700 rounded-lg font-semibold transition-colors duration-200 ${
+                className={`px-4 py-2 border border-gray-400 text-gray-700 rounded-lg font-semibold transition-colors duration-200 ${
                   paymentLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'
                 }`}
               >
@@ -1769,7 +1760,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
               <button
                 onClick={handlePayment}
                 disabled={paymentLoading}
-                className={`flex-1 px-4 py-2 rounded-lg font-semibold text-white transition-all duration-200 ${
+                className={`px-4 py-2 rounded-lg font-semibold text-white transition-all duration-200 ${
                   paymentLoading
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-green-600 hover:bg-green-700 hover:shadow-lg'
@@ -1788,18 +1779,6 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
           </div>
         </div>
       )}
-
-      {/* Global Loader for step transitions */}
-      {/* {stepTransitionLoading && (
-        <div className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-transparent">
-            <Loader />
-            {/* <p className="text-center mt-4 text-gray-600 font-semibold">
-              Processing your payment...
-            </p> 
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };

@@ -330,130 +330,155 @@ const ApplyEditing: React.FC = () => {
     }
   }, [user]);
 
-  const handleDragEnd = (result: DropResult) => {
-    const { destination, source, draggableId } = result;
+const handleDragEnd = (result: DropResult) => {
+  const { destination, source, draggableId } = result;
 
-    if (!destination) return;
+  if (!destination) return;
 
-    console.log('Drag result:', { source, destination, draggableId });
+  console.log('Drag result:', { source, destination, draggableId });
 
-    // If dragging from sidebar to card
-    if (source.droppableId === 'sidebar') {
-      // Extract the field ID from the draggableId (format: "sidebar-1")
-      const fieldId = parseInt(draggableId.replace('sidebar-', ''));
-      const draggedField = availableFields.find((f) => f.id === fieldId);
+  // If dragging from sidebar to card
+  if (source.droppableId === 'sidebar') {
+    // Extract the field ID from the draggableId (format: "sidebar-1")
+    const fieldId = parseInt(draggableId.replace('sidebar-', ''));
+    const draggedField = availableFields.find((f) => f.id === fieldId);
 
-      console.log('Dragging from sidebar:', { fieldId, draggedField });
+    console.log('Dragging from sidebar:', { fieldId, draggedField });
 
-      if (!draggedField) {
-        console.error('Field not found:', fieldId);
-        return;
+    if (!draggedField) {
+      console.error('Field not found:', fieldId);
+      return;
+    }
+
+    setApplyCards((prev) =>
+      prev.map((card) => {
+        if (destination.droppableId === `card-${card.id}`) {
+          console.log('Adding field to card:', card.id);
+          // Create a new field with proper type information for backend
+          const newField = {
+            ...draggedField,
+            id: Date.now(), // High ID for new fields
+            type: draggedField.type,
+            label: draggedField.label,
+            width: draggedField.width, // Auto-fill width from availableFields
+            type_new: 1, // Mark as new field
+            sequence: destination.index + 1, // Set sequence based on position
+          };
+
+          const newChildren = Array.from(card.children);
+          newChildren.splice(destination.index, 0, newField);
+          
+          // Update sequences for all fields in this card
+          const updatedChildren = newChildren.map((child, index) => ({
+            ...child,
+            sequence: index + 1,
+          }));
+
+          return { 
+            ...card, 
+            children: updatedChildren,
+            type_new: card.type_new === 1 ? 1 : 2 // Mark section as updated
+          };
+        }
+        return card;
+      }),
+    );
+  }
+
+  // If reordering fields within the same card
+  if (source.droppableId === destination.droppableId && source.droppableId.startsWith('card-')) {
+    const cardId = parseInt(source.droppableId.replace('card-', ''));
+
+    setApplyCards((prev) =>
+      prev.map((card) => {
+        if (card.id === cardId) {
+          const newChildren = Array.from(card.children);
+          const [movedField] = newChildren.splice(source.index, 1);
+          newChildren.splice(destination.index, 0, {
+            ...movedField,
+            type_new: movedField.type_new === 1 ? 1 : 2, // Keep as new or mark as updated
+          });
+
+          // Update sequences for all fields in this card
+          const updatedChildren = newChildren.map((child, index) => ({
+            ...child,
+            sequence: index + 1,
+          }));
+
+          return { 
+            ...card, 
+            children: updatedChildren,
+            type_new: card.type_new === 1 ? 1 : 2 // Mark section as updated
+          };
+        }
+        return card;
+      }),
+    );
+  }
+
+  // If moving field between different cards
+  if (
+    source.droppableId !== destination.droppableId &&
+    source.droppableId.startsWith('card-') &&
+    destination.droppableId.startsWith('card-')
+  ) {
+    const sourceCardId = parseInt(source.droppableId.replace('card-', ''));
+    const destCardId = parseInt(destination.droppableId.replace('card-', ''));
+
+    setApplyCards((prev) => {
+      const newCards = [...prev];
+      const sourceCard = newCards.find((card) => card.id === sourceCardId);
+      const destCard = newCards.find((card) => card.id === destCardId);
+
+      if (sourceCard && destCard) {
+        const [movedField] = sourceCard.children.splice(source.index, 1);
+        destCard.children.splice(destination.index, 0, {
+          ...movedField,
+          type_new: movedField.type_new === 1 ? 1 : 2,
+        });
+        
+        // Update sequences for both source and destination cards
+        sourceCard.children = sourceCard.children.map((child, index) => ({
+          ...child,
+          sequence: index + 1,
+        }));
+
+        destCard.children = destCard.children.map((child, index) => ({
+          ...child,
+          sequence: index + 1,
+        }));
+        
+        // Mark both source and destination cards as updated
+        sourceCard.type_new = sourceCard.type_new === 1 ? 1 : 2;
+        destCard.type_new = destCard.type_new === 1 ? 1 : 2;
       }
 
-      setApplyCards((prev) =>
-        prev.map((card) => {
-          if (destination.droppableId === `card-${card.id}`) {
-            console.log('Adding field to card:', card.id);
-            // Create a new field with proper type information for backend
-            const newField = {
-              ...draggedField,
-              id: Date.now(), // High ID for new fields
-              type: draggedField.type,
-              label: draggedField.label,
-              width: draggedField.width, // Auto-fill width from availableFields
-              type_new: 1, // Mark as new field
-            };
+      return newCards;
+    });
+  }
 
-            const newChildren = Array.from(card.children);
-            newChildren.splice(destination.index, 0, newField);
-            return { 
-              ...card, 
-              children: newChildren,
-              type_new: card.type_new === 1 ? 1 : 2 // Mark section as updated
-            };
-          }
-          return card;
-        }),
-      );
-    }
+  // If reordering sections
+  if (source.droppableId === 'sections' && destination.droppableId === 'sections') {
+    // Create a new array to avoid mutating state directly
+    const reorderedCards = Array.from(applyCards);
 
-    // If reordering fields within the same card
-    if (source.droppableId === destination.droppableId && source.droppableId.startsWith('card-')) {
-      const cardId = parseInt(source.droppableId.replace('card-', ''));
+    // Remove the card from its original position
+    const [movedCard] = reorderedCards.splice(source.index, 1);
 
-      setApplyCards((prev) =>
-        prev.map((card) => {
-          if (card.id === cardId) {
-            const newChildren = Array.from(card.children);
-            const [movedField] = newChildren.splice(source.index, 1);
-            newChildren.splice(destination.index, 0, {
-              ...movedField,
-              type_new: movedField.type_new === 1 ? 1 : 2, // Keep as new or mark as updated
-            });
+    // Insert it at the new position
+    reorderedCards.splice(destination.index, 0, movedCard);
 
-            return { 
-              ...card, 
-              children: newChildren,
-              type_new: card.type_new === 1 ? 1 : 2 // Mark section as updated
-            };
-          }
-          return card;
-        }),
-      );
-    }
+    // Update sequence numbers based on new order and mark as updated
+    const updatedCards = reorderedCards.map((card, index) => ({
+      ...card,
+      sequence: index + 1,
+      type_new: card.type_new === 1 ? 1 : 2, // Mark as updated
+    }));
 
-    // If moving field between different cards
-    if (
-      source.droppableId !== destination.droppableId &&
-      source.droppableId.startsWith('card-') &&
-      destination.droppableId.startsWith('card-')
-    ) {
-      const sourceCardId = parseInt(source.droppableId.replace('card-', ''));
-      const destCardId = parseInt(destination.droppableId.replace('card-', ''));
-
-      setApplyCards((prev) => {
-        const newCards = [...prev];
-        const sourceCard = newCards.find((card) => card.id === sourceCardId);
-        const destCard = newCards.find((card) => card.id === destCardId);
-
-        if (sourceCard && destCard) {
-          const [movedField] = sourceCard.children.splice(source.index, 1);
-          destCard.children.splice(destination.index, 0, {
-            ...movedField,
-            type_new: movedField.type_new === 1 ? 1 : 2,
-          });
-          
-          // Mark both source and destination cards as updated
-          sourceCard.type_new = sourceCard.type_new === 1 ? 1 : 2;
-          destCard.type_new = destCard.type_new === 1 ? 1 : 2;
-        }
-
-        return newCards;
-      });
-    }
-
-    // If reordering sections
-    if (source.droppableId === 'sections' && destination.droppableId === 'sections') {
-      // Create a new array to avoid mutating state directly
-      const reorderedCards = Array.from(applyCards);
-
-      // Remove the card from its original position
-      const [movedCard] = reorderedCards.splice(source.index, 1);
-
-      // Insert it at the new position
-      reorderedCards.splice(destination.index, 0, movedCard);
-
-      // Update sequence numbers based on new order and mark as updated
-      const updatedCards = reorderedCards.map((card, index) => ({
-        ...card,
-        sequence: index + 1,
-        type_new: card.type_new === 1 ? 1 : 2, // Mark as updated
-      }));
-
-      // Update state with the reordered cards
-      setApplyCards(updatedCards);
-    }
-  };
+    // Update state with the reordered cards
+    setApplyCards(updatedCards);
+  }
+};
 
   // Show loader in center when loading
   if (loading) {

@@ -557,11 +557,6 @@ const FormStep: React.FC<FormStepProps> = ({
 
                   // Calculate column span based on width percentage
                   const getColumnSpan = () => {
-                    // Full width elements
-                    // if (child.type === 'heading' || child.type === 'heading2' || child.type === 'para') {
-                    //   return 'full';
-                    // }
-
                     // Width-based spans
                     if (childWidthValue >= 80) return 'full';
                     if (childWidthValue >= 60) return 'span-2';
