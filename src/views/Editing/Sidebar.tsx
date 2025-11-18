@@ -18,7 +18,7 @@ interface FieldType {
   max_date?: string;
   content?: string;
   resolution?: string;
-  table?: string;
+  tbl?: string;
   type_new?: number;
 }
 
@@ -83,6 +83,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleSave = () => {
     if (!editingField) return;
+    
+    // Validation for required field with empty validation message
+    if (editingField.required === 1 && (!editingField.validation_message || editingField.validation_message.trim() === '')) {
+      toast.error('Validation Message is required when field is marked as required');
+      return;
+    }
+    
     updateField(editingField);
     setSelectedField(null);
   };
@@ -181,6 +188,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   value={field.validation_message || ''}
                   onChange={(e) => handleChange('validation_message', e.target.value)}
                   placeholder="Enter validation message"
+                  required
                 />
               </div>
             )}
@@ -243,18 +251,19 @@ const Sidebar: React.FC<SidebarProps> = ({
                   value={field.validation_message || ''}
                   onChange={(e) => handleChange('validation_message', e.target.value)}
                   placeholder="Enter validation message"
+                  required
                 />
               </div>
             )}
 
             <div>
-              <Label htmlFor="table">
+              <Label htmlFor="tbl">
                 Data Source Table
               </Label>
               <Select
-                id="table"
-                value={field.table || ''}
-                onChange={(e) => handleChange('table', e.target.value)}
+                id="tbl"
+                value={field.tbl || ''}
+                onChange={(e) => handleChange('tbl', e.target.value)}
               >
                 <option value="">Select Table</option>
                 {tableOptions.map((option) => (
@@ -335,6 +344,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   value={field.validation_message || ''}
                   onChange={(e) => handleChange('validation_message', e.target.value)}
                   placeholder="Enter validation message"
+                  required
                 />
               </div>
             )}
@@ -451,6 +461,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   value={field.validation_message || ''}
                   onChange={(e) => handleChange('validation_message', e.target.value)}
                   placeholder="Enter validation message"
+                  required
                 />
               </div>
             )}
@@ -511,6 +522,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   value={field.validation_message || ''}
                   onChange={(e) => handleChange('validation_message', e.target.value)}
                   placeholder="Enter validation message"
+                  required
                 />
               </div>
             )}

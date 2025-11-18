@@ -24,7 +24,7 @@ interface FieldType {
   max_date?: string;
   content?: string;
   resolution?: string;
-  table?: string;
+  tbl?: string;
   sequence?: number;
 }
 
@@ -37,6 +37,7 @@ interface CardType {
   justify?: string;
   sequence?: number;
   children: FieldType[];
+  type_new?: number; // New field for section tracking
 }
 
 interface TableOption {
@@ -79,6 +80,7 @@ const ApplyEditing: React.FC = () => {
 
   // Fetch table options for select dropdown
   const fetchTableOptions = async (academicId: string) => {
+    if(!academicId) return
     try {
       const academic_id =
         user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin'
@@ -159,6 +161,7 @@ const ApplyEditing: React.FC = () => {
       justify: 'start',
       sequence: applyCards.length + 1,
       children: [],
+      type_new: 1, // Mark as new section
     };
     setApplyCards((prev) => [...prev, newSection]);
     toast.success('New section added successfully');
@@ -167,7 +170,13 @@ const ApplyEditing: React.FC = () => {
   // Update section settings
   const updateSectionSettings = (sectionId: number, updates: Partial<CardType>) => {
     setApplyCards((prevCards) =>
-      prevCards.map((card) => (card.id === sectionId ? { ...card, ...updates } : card)),
+      prevCards.map((card) => 
+        card.id === sectionId ? { 
+          ...card, 
+          ...updates,
+          type_new: card.type_new === 1 ? 1 : 2 // Mark as updated if not new
+        } : card
+      ),
     );
   };
 
@@ -193,6 +202,7 @@ const ApplyEditing: React.FC = () => {
 
   // Fetch apply page data based on academic ID
   const fetchApplyPage = async (academicId: string) => {
+    if(!academicId) return
     setLoading(true);
     try {
       const academic_id =
@@ -214,10 +224,11 @@ const ApplyEditing: React.FC = () => {
       );
 
       if (response.data?.data) {
-        // Add sequence to cards if not present
+        // Add sequence to cards if not present and set type_new to 0 for existing cards
         const cardsWithSequence = response.data.data.map((card: CardType, index: number) => ({
           ...card,
           sequence: card.sequence || index + 1,
+          type_new: 0, // Mark existing cards as unchanged
         }));
         setApplyCards(cardsWithSequence);
       } else {
@@ -242,12 +253,12 @@ const ApplyEditing: React.FC = () => {
 
   // Handle publish button click
   const handlePublish = async () => {
-    setPublishing(true); // Start loader
+    setPublishing(true); 
     try {
       const academic_id =
         user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin'
           ? selectedAcademicId
-          : user?.academic_id || '6';
+          : user?.academic_id || '';
 
       console.log('Publishing with academic_id:', academic_id);
 
@@ -259,6 +270,7 @@ const ApplyEditing: React.FC = () => {
             ...child,
             type_new: child.type_new || 0,
           })),
+          type_new: card.type_new || 0, // Send section type_new
         })),
         delete_ids: deletedFieldIds,
         delete_card_ids: deletedCardIds, // Send deleted card IDs
@@ -309,7 +321,7 @@ const ApplyEditing: React.FC = () => {
       const defaultAcademicId =
         user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin'
           ? filters.academic || ''
-          : user?.academic_id || '6';
+          : user?.academic_id || '';
 
       setSelectedAcademicId(defaultAcademicId);
       setFilters((prev) => ({ ...prev, academic: defaultAcademicId }));
@@ -354,7 +366,11 @@ const ApplyEditing: React.FC = () => {
 
             const newChildren = Array.from(card.children);
             newChildren.splice(destination.index, 0, newField);
-            return { ...card, children: newChildren };
+            return { 
+              ...card, 
+              children: newChildren,
+              type_new: card.type_new === 1 ? 1 : 2 // Mark section as updated
+            };
           }
           return card;
         }),
@@ -375,7 +391,11 @@ const ApplyEditing: React.FC = () => {
               type_new: movedField.type_new === 1 ? 1 : 2, // Keep as new or mark as updated
             });
 
-            return { ...card, children: newChildren };
+            return { 
+              ...card, 
+              children: newChildren,
+              type_new: card.type_new === 1 ? 1 : 2 // Mark section as updated
+            };
           }
           return card;
         }),
@@ -402,6 +422,10 @@ const ApplyEditing: React.FC = () => {
             ...movedField,
             type_new: movedField.type_new === 1 ? 1 : 2,
           });
+          
+          // Mark both source and destination cards as updated
+          sourceCard.type_new = sourceCard.type_new === 1 ? 1 : 2;
+          destCard.type_new = destCard.type_new === 1 ? 1 : 2;
         }
 
         return newCards;
@@ -419,10 +443,11 @@ const ApplyEditing: React.FC = () => {
       // Insert it at the new position
       reorderedCards.splice(destination.index, 0, movedCard);
 
-      // Update sequence numbers based on new order
+      // Update sequence numbers based on new order and mark as updated
       const updatedCards = reorderedCards.map((card, index) => ({
         ...card,
         sequence: index + 1,
+        type_new: card.type_new === 1 ? 1 : 2, // Mark as updated
       }));
 
       // Update state with the reordered cards
@@ -435,6 +460,41 @@ const ApplyEditing: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen min-w-screen">
         <Loader />
+      </div>
+    );
+  }
+
+  // Show message when no academic is selected
+  if (!selectedAcademicId && (user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin')) {
+    return (
+      <div className="flex w-full min-h-screen bg-gray-50">
+        <div className="flex-1 p-6">
+          <div className="flex justify-between items-center mb-6 bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-300 shadow-md hover:shadow-lg cursor-pointer">
+            <div className="flex items-center gap-4 flex-1">
+              <div className="relative w-full sm:w-auto">
+                <AllAcademicsDropdown
+                  name="academic"
+                  formData={filters}
+                  setFormData={setFilters}
+                  includeAllOption
+                  label=""
+                  className="min-w-[250px] text-sm"
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-gray-600 mb-4">
+                Please Select an Academic First
+              </h2>
+              <p className="text-gray-500">
+                Choose an academic from the dropdown above to start editing the apply page.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -561,6 +621,16 @@ const ApplyEditing: React.FC = () => {
                                   <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
                                     Sequence: {card.sequence || index + 1}
                                   </span>
+                                  {card.type_new === 1 && (
+                                    <span className="text-xs text-green-600 font-semibold bg-green-100 px-2 py-1 rounded-full">
+                                      New Section
+                                    </span>
+                                  )}
+                                  {card.type_new === 2 && (
+                                    <span className="text-xs text-blue-600 font-semibold bg-blue-100 px-2 py-1 rounded-full">
+                                      Updated
+                                    </span>
+                                  )}
                                 </div>
                                 <div className="flex gap-2">
                                   <Button
