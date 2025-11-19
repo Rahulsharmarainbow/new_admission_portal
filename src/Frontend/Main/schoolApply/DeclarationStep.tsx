@@ -41,29 +41,30 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
 //   return formattedContent;
 // };
 
-const formatContent = (htmlContent: string | null | undefined) => {
+const formatContent = (htmlContent: string | null | undefined, formData: any) => {
   if (!htmlContent) return "";
 
-  let formattedContent: string = htmlContent ?? "";
+  let formattedContent: string = htmlContent;
   const data = formData ?? {};
 
   Object.keys(data).forEach((key) => {
     const placeholder = `{${key}}`;
     let value = data[key] ? String(data[key]) : "";
 
-    // ✅ Special condition for "class"
+    // Special condition for "class"
     if (key === "class" && value.includes("$")) {
-      value = value.split("$")[1] ?? ""; // "$" ke baad ki value
+      value = value.split("$")[1] ?? "";
     }
 
-    formattedContent = formattedContent?.replace?.(
+    formattedContent = formattedContent.replace(
       new RegExp(placeholder, "g"),
       `<strong>${value}</strong>`
-    ) ?? formattedContent;
+    );
   });
 
   return formattedContent;
 };
+
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -86,7 +87,7 @@ const formatContent = (htmlContent: string | null | undefined) => {
       
       <div 
         dangerouslySetInnerHTML={{ 
-          __html: formatContent(content) 
+          __html: formatContent(content, formData) 
         }} 
         className="prose max-w-none mb-6 text-gray-700 leading-relaxed text-sm"
       />

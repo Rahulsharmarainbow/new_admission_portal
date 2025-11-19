@@ -26,6 +26,7 @@ interface FieldType {
   resolution?: string;
   tbl?: string;
   sequence?: number;
+  validation?: string;
 }
 
 interface CardType {
@@ -69,13 +70,14 @@ const ApplyEditing: React.FC = () => {
 
   const [availableFields] = useState<FieldType[]>([
     { id: 1, label: 'Text Field', type: 'text', width: 25 },
-    { id: 2, label: 'Email Field', type: 'email', width: 25 },
+    // { id: 2, label: 'Email Field', type: 'email', width: 25 },
     { id: 3, label: 'Select Dropdown', type: 'select', width: 50 },
     { id: 4, label: 'Date Picker', type: 'date', width: 50 },
     { id: 5, label: 'File Upload', type: 'file_button', width: 100 },
     { id: 6, label: 'Heading', type: 'heading', width: 100 },
     { id: 7, label: 'Small Heading', type: 'heading2', width: 100 },
     { id: 8, label: 'Checkbox', type: 'checkbox', width: 100 },
+    { id: 9, label: 'Aadhaar Card', type: 'adhar', width: 80 },
   ]);
 
   // Fetch table options for select dropdown
@@ -354,8 +356,16 @@ const handleDragEnd = (result: DropResult) => {
       prev.map((card) => {
         if (destination.droppableId === `card-${card.id}`) {
           console.log('Adding field to card:', card.id);
+          
+          // Generate a unique field name based on type and timestamp
+          const generateFieldName = (type: string) => {
+            const baseName = type.toLowerCase();
+            const timestamp = Date.now();
+            return `${baseName}_${timestamp}`;
+          };
+
           // Create a new field with proper type information for backend
-          const newField = {
+          const newField: FieldType = {
             ...draggedField,
             id: Date.now(), // High ID for new fields
             type: draggedField.type,
@@ -363,6 +373,11 @@ const handleDragEnd = (result: DropResult) => {
             width: draggedField.width, // Auto-fill width from availableFields
             type_new: 1, // Mark as new field
             sequence: destination.index + 1, // Set sequence based on position
+            name: generateFieldName(draggedField.type || 'field'), // Generate unique name
+            required: 0, // Default to not required
+            validation: draggedField.type === 'text' ? '' : undefined, 
+            validation_message: '', // Empty validation message by default
+            placeholder: '', // Empty placeholder by default
           };
 
           const newChildren = Array.from(card.children);
@@ -534,6 +549,7 @@ const handleDragEnd = (result: DropResult) => {
           updateField={updateFieldInCard}
           deleteField={deleteFieldFromCard}
           tableOptions={tableOptions}
+          applyCards={applyCards} 
         />
         <div className="flex-1 p-6 ml-[320px]">
           {/* Header Section */}

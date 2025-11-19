@@ -71,6 +71,20 @@ const FormStep: React.FC<FormStepProps> = ({
     });
   };
 
+  // Resolution parse & dynamic styles
+const getResolutionStyle = (resolution?: string) => {
+  if (!resolution) return { width: "80px", height: "80px" }; // Default square
+
+  const [w, h] = resolution.split("x").map(Number);
+  if (!w || !h) return { width: "80px", height: "80px" };
+
+  return {
+    width: `${w}px`,
+    height: `${h}px`,
+  };
+};
+
+
   const renderField = (child: any, boxIndex: number, childIndex: number) => {
     const commonProps = {
       key: `${boxIndex}-${childIndex}`,
@@ -270,38 +284,52 @@ const FormStep: React.FC<FormStepProps> = ({
         );
 
       case 'file_button':
-        return (
-          <div className="text-center space-y-3">
-            <input
-              type="file"
-              id={child.name}
-              className="hidden"
-              onChange={(e) => handleFileUpload(e, child.name, fieldConfig)}
-              accept="image/*"
-            />
-            <label htmlFor={child.name} className="cursor-pointer">
-              <div className="bg-gray-50 p-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors duration-200">
-                <div className="mx-auto w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
-                  {fileData[child.name] ? (
-                    <img
-                      src={fileData[child.name]}
-                      alt={child.label}
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                  ) : (
-                    <Icon icon="solar:upload-line-duotone" className="w-8 h-8 text-gray-400" />
-                  )}
-                </div>
-                <p className="text-xs text-gray-600 mb-2">{child.content}</p>
-                {child?.resolution && <p className="text-xs text-gray-600 mb-2">{child.resolution}</p> }
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200">
-                  Upload {child.label}
-                </div>
-              </div>
-            </label>
-            {errors[child.name] && <p className="text-red-500 text-xs">{errors[child.name]}</p>}
+  const style = getResolutionStyle(child.resolution);
+
+  return (
+    <div className="text-center space-y-3">
+      <input
+        type="file"
+        id={child.name}
+        className="hidden"
+        onChange={(e) => handleFileUpload(e, child.name, fieldConfig)}
+        accept="image/*"
+      />
+      <label htmlFor={child.name} className="cursor-pointer">
+        <div className="bg-gray-50 p-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors duration-200">
+          
+          <div
+            className="mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2 overflow-hidden"
+            style={style}
+          >
+            {fileData[child.name] ? (
+              <img
+                src={fileData[child.name]}
+                alt={child.label}
+                style={style}
+                className="object-contain rounded-lg"
+              />
+            ) : (
+              <Icon icon="solar:upload-line-duotone" className="w-8 h-8 text-gray-400" />
+            )}
           </div>
-        );
+
+          <p className="text-xs text-gray-600 mb-2">{child.content}</p>
+          {child?.resolution && (
+            <p className="text-xs text-gray-600 mb-2">{child.resolution}</p>
+          )}
+
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200">
+            Upload {child.label}
+          </div>
+        </div>
+      </label>
+
+      {errors[child.name] && (
+        <p className="text-red-500 text-xs">{errors[child.name]}</p>
+      )}
+    </div>
+  );
 
       case 'image':
         return (
