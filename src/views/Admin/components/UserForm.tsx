@@ -26,6 +26,7 @@ import BreadcrumbHeader from 'src/Frontend/Common/BreadcrumbHeader';
 import toast from 'react-hot-toast';
 import { TextInput } from 'flowbite-react';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
+import AllAcademicsDropdown from 'src/Frontend/Common/AllAcademicsDropdown';
 
 interface FormData {
   name: string;
@@ -725,7 +726,7 @@ const UserForm: React.FC = () => {
             {/* Academic Dropdown - Only for Customer Admin */}
             {type === '3' && (
               <div className="mb-6">
-                <AcademicDropdown
+                <AllAcademicsDropdown
                   name="academic_id"
                   label="Academic Institution *"
                   formData={formData}

@@ -131,7 +131,7 @@ const NavItems: React.FC<NavItemsProps> = ({ item }) => {
   return (
     <Link to={item.url} target={item.isPro ? "_blank" : "_self"}>
       <SidebarItem
-        className={`relative py-3 px-4  transition-all duration-200 rounded-lg
+        className={`relative py-3 px-4 mb-1.5 transition-all duration-200 rounded-lg
           ${
             isActive
               ? "bg-pink-50 text-[#0084DA] font-semibold"

@@ -519,8 +519,9 @@ const ClassForm: React.FC<ClassFormProps> = ({
         );
       }
 
-      if (response.data.status === true) {
+      if (response.data.status) {
         toast.success(
+           response.data.message || 
           editingClass
             ? "Class updated successfully!"
             : "Class added successfully!"
@@ -528,15 +529,11 @@ const ClassForm: React.FC<ClassFormProps> = ({
         onSuccess();
       } else {
         toast.error(
-          response.data.message ||
-            `Failed to ${editingClass ? "update" : "add"} class`
+          response.data.message
         );
       }
     } catch (error: any) {
       console.error("Error saving class:", error);
-      toast.error(
-        `Failed to ${editingClass ? "update" : "add"} class`
-      );
     } finally {
       setLoading(false);
     }

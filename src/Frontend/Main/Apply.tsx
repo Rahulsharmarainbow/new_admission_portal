@@ -45,7 +45,7 @@ const Apply = () => {
   const [modalData, setModalData] = useState<Any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(true);
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const assetUrl = import.meta.env.VITE_ASSET_URL;
@@ -70,19 +70,7 @@ const Apply = () => {
         console.log(response.data);
         if (response.status === 200) {
           setApplyData(response.data);
-          console.log(response.data.apply_modals);
-
           setModalData(response.data.apply_modals);
-          const popupKey = `${response.data.academic_id}_popup`;
-          const popupAlreadyShown = localStorage.getItem(popupKey);
-
-          if (
-            response?.data?.apply_modals?.title &&
-            response?.data?.apply_modals?.visible &&
-            !popupAlreadyShown
-          ) {
-            setPreviewOpen(true);
-          }
         } else {
           setError('Failed to load application form');
         }
@@ -193,11 +181,6 @@ const Apply = () => {
 
         <ModalBody className="relative overflow-visible z-[100]">
           <div className="space-y-6 overflow-visible pr-2">
-            {/* <div className="text-center">
-                    <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                      
-                    </h3>
-                  </div> */}
 
             {modalData?.image && (
               <div className="flex justify-center">
@@ -216,37 +199,26 @@ const Apply = () => {
             </div>
           </div>
         </ModalBody>
-
-        <ModalFooter className="flex justify-end gap-3">
-          <Button
-            color="alternative"
-            onClick={() => {
-              if (applyData?.academic_id) {
-                localStorage.setItem(`${applyData.academic_id}_popup`, 'shown');
-              }
-              setPreviewOpen(false);
-            }}
-          >
-            Close
-          </Button>
-
-          {/* <Button 
-                  color="blue" 
-                  onClick={() => {
-                    setPreviewOpen(false);
-                    // Scroll to form
-                    document.querySelector('form')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  Edit Popup
-                </Button> */}
-        </ModalFooter>
       </Modal>
     </div>
   );
 };
 
 export default Apply;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // import React, { useState } from 'react';
 // import { Link, useParams } from 'react-router';

@@ -168,14 +168,13 @@ const ClassForm: React.FC<ClassFormProps> = ({ isOpen, onClose, onSuccess, class
       }
 
       if (response.data.status) {
-        toast.success(classData ? 'Class updated successfully!' : 'Class added successfully!');
+        toast.success(response.data.message || classData ? 'Class updated successfully!' : 'Class added successfully!');
         onSuccess();
       } else {
         toast.error(response.data.message || 'Operation failed');
       }
     } catch (error: any) {
       console.error('Error saving class:', error);
-      toast.error(error.response?.data?.message || 'Failed to save class');
     } finally {
       setLoading(false);
     }
