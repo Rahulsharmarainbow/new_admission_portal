@@ -124,8 +124,8 @@ const FormStep: React.FC<FormStepProps> = ({
 
       case 'checkbox':
         return (
-          <div className="flex flex-col space-y-2">
-            <div className="flex items-start space-x-3">
+          <div className="flex flex-col space-y-2 w-full">
+            <div className="flex items-start space-x-3 w-full">
               <input
                 type="checkbox"
                 id={child.name}
@@ -137,7 +137,7 @@ const FormStep: React.FC<FormStepProps> = ({
               />
               <label
                 htmlFor={child.name}
-                className={`text-sm leading-tight ${
+                className={`text-sm leading-5 break-words whitespace-normal flex-1 w-full ${
                   errors[child.name] ? 'text-red-600' : 'text-gray-700'
                 }`}
               >
