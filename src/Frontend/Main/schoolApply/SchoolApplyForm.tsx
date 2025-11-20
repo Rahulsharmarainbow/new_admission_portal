@@ -1149,7 +1149,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
   if (activeStep === 1 && Object.keys(errors).length > 0) {
     const hasValidationErrors = Object.values(errors).some(error => error !== '');
     if (hasValidationErrors && activeStep === 1) {
-      toast.error('Please fill in all required fields.');
+      toast.error('please check the checkbox.');
     }
   }
 }, [errors, activeStep]);

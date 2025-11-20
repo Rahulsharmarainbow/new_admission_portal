@@ -59,11 +59,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.location.href = "/login";
   };
 
-  const hasRole = (roles: string | string[]): boolean => {
-    if (!user) return false;
-    const roleArray = Array.isArray(roles) ? roles : [roles];
-    return roleArray.includes(user.role);
-  };
+const hasRole = (roles: string | string[]): boolean => {
+  if (!user?.role) return false;
+
+  const roleArray = Array.isArray(roles) ? roles : [roles];
+
+  return roleArray.map(r => r.toUpperCase()).includes(user.role.toUpperCase());
+};
+
 
   const value: AuthContextType = {
     user,

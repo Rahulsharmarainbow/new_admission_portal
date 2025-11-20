@@ -90,13 +90,14 @@ const Register = Loadable(lazy(() => import('../views/auth/register/Register')))
 // Role Based Redirect Component
 const RoleBasedRedirect: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  return <Navigate to={`${user?.role}/dashboard`} replace />;
+  return <Navigate to={`/${user?.role.toUpperCase()}/dashboard`} replace />;
 };
+
 
 const MainRoutes = [
   {
@@ -348,44 +349,106 @@ const MainRoutes = [
       { path: 'frontend-editing/home', element: <HomeEditing/>},
       { path: 'frontend-editing/footer', element: <FooterEditing/>},
       { path: 'frontend-editing/popups', element: <PopupEditing />},
-       { path: 'notifications', element: <NotificationsPage/> },
-        
+      { path: 'notifications', element: <NotificationsPage/> }, 
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
-  {
-    path: '/',
-    element: <BlankLayout />,
-    children: [
-      { path: '/login', element: <LoginPage /> },
-      { path: '/two-step-verification', element: <TwoStepVerification /> },
-      { path: '/verify-otp', element: <VerifyOtp /> },
-      { path: '/forgot-password', element: <ForgotPassword /> },
-      { path: '/auth/forget-password/:token', element: <ChangePassword /> },
-      { path: '/auth/register', element: <Register /> },
-      { path: '404', element: <Error /> },
-      { path: '/auth/404', element: <Error /> },
-      { path: '/Frontend/:institute_id', element: <Home /> },
-      // { path: '/page/:pageType', element: <TypePage /> },
-      { path: '/Frontend/:institute_id/apply', element: <Apply /> },
-      { path: '/Frontend/:institute_id/:page_route', element: <TypePage /> },
-      { path: '/Frontend/:institute_id/rankcard', element: <Rankcard/> },
-      { path: '/Frontend/:institute_id/Hall-ticket', element: <HallTicket/> },
-      { path: '/Form-view', element: <FormView /> },
-      { path: '/Confirmation', element: <Confirmation /> },
-      { 
-        path: '/', 
-        element: <RoleBasedRedirect /> 
-      },
-      { path: '*', element: <Navigate to="/auth/404" /> },
-    ],
-  },
+{
+  path: '/',
+  element: <BlankLayout />,
+  children: [
+    // 🔓 Auth Pages → Public
+    { path: '/login', element: <LoginPage /> },
+    { path: '/two-step-verification', element: <TwoStepVerification /> },
+    { path: '/verify-otp', element: <VerifyOtp /> },
+    { path: '/forgot-password', element: <ForgotPassword /> },
+    { path: '/auth/forget-password/:token', element: <ChangePassword /> },
+    { path: '/auth/register', element: <Register /> },
+    { path: '404', element: <Error /> },
+    { path: '/auth/404', element: <Error /> },
+
+    // 🔒 All Below → Protected
+    {
+      path: '/Frontend/:institute_id',
+      element: (
+        <ProtectedRoute>
+          <Home />
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: '/Frontend/:institute_id/apply',
+      element: (
+        <ProtectedRoute>
+          <Apply />
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: '/Frontend/:institute_id/:page_route',
+      element: (
+        <ProtectedRoute>
+          <TypePage />
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: '/Frontend/:institute_id/rankcard',
+      element: (
+        <ProtectedRoute>
+          <Rankcard />
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: '/Frontend/:institute_id/Hall-ticket',
+      element: (
+        <ProtectedRoute>
+          <HallTicket />
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: '/Form-view',
+      element: (
+        <ProtectedRoute>
+          <FormView />
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: '/Confirmation',
+      element: (
+        <ProtectedRoute>
+          <Confirmation />
+        </ProtectedRoute>
+      )
+    },
+
+    // 🔒 Home Redirect Also Protected
+    {
+      path: '/',
+      element: (
+        <ProtectedRoute>
+          <RoleBasedRedirect />
+        </ProtectedRoute>
+      ),
+    },
+
+    { path: '*', element: <Navigate to="/auth/404" /> },
+  ],
+}
+
 ];
 
 export const CustomDomainRoutes = [
   {
     path: "/",
-    element: <BlankLayout />,
+    element: (
+      <ProtectedRoute>
+        <BlankLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { path: "/", element: <Home /> },
       { path: "/apply", element: <Apply /> },
@@ -398,6 +461,7 @@ export const CustomDomainRoutes = [
     ],
   },
 ];
+
 
 const MAIN_DOMAINS = ["localhost", "admissionportalrevamp.testingscrew.com"];
 
