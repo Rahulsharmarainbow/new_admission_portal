@@ -47,6 +47,7 @@ const formatContent = (htmlContent: string | null | undefined, formData: any) =>
   let formattedContent: string = htmlContent;
   const data = formData ?? {};
 
+  // Replace placeholders with formData values
   Object.keys(data).forEach((key) => {
     const placeholder = `{${key}}`;
     let value = data[key] ? String(data[key]) : "";
@@ -62,8 +63,12 @@ const formatContent = (htmlContent: string | null | undefined, formData: any) =>
     );
   });
 
+  // Remove all placeholders not found in formData
+  formattedContent = formattedContent.replace(/\{[^}]+\}/g, "");
+
   return formattedContent;
 };
+
 
 
   const getCurrentDate = () => {

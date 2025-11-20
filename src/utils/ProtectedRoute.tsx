@@ -17,9 +17,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { isAuthenticated, hasRole, user } = useAuth();
   const location = useLocation();
 console.log(user?.login_type, "isAuthenticated");
-//   if (!isAuthenticated) {
-//     return <Navigate to={redirectTo} state={{ from: location }} replace />;
-//   }
+  // if (!isAuthenticated) {
+  //   return <Navigate to={redirectTo} state={{ from: location }} replace />;
+  // }
 
 //   if (requiredRole && !hasRole(requiredRole)) {
 //     // Redirect to unauthorized or dashboard based on role
@@ -53,5 +53,5 @@ export const getRequiredRole = (path: string): string[] => {
   if (path.startsWith('/SupportAdmin')) return ['SUPPORTADMIN'];
   if (path.startsWith('/CustomerAdmin')) return ['CUSTOMERADMIN'];
   if (path.startsWith('/SalesAdmin')) return ['SALESADMIN'];
-  return []; // Public routes
+  return []; 
 };

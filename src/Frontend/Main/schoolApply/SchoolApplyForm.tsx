@@ -1022,6 +1022,7 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import FormStep from '../collageApply/FormStep';
 import { isImageBlurred } from './Blurred';
+import Loader from 'src/Frontend/Common/Loader';
 
 interface SchoolApplyFormProps {
   academic_id: string;
@@ -1142,6 +1143,16 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
       }
     });
   }, [formData, required_child]);
+
+  useEffect(() => {
+  // Only show errors when user tries to proceed to next step but validation fails
+  if (activeStep === 1 && Object.keys(errors).length > 0) {
+    const hasValidationErrors = Object.values(errors).some(error => error !== '');
+    if (hasValidationErrors && activeStep === 1) {
+      toast.error('Please fill in all required fields.');
+    }
+  }
+}, [errors, activeStep]);
 
   // Handle input change with API calls
   const handleInputChange = useCallback(
@@ -1465,77 +1476,99 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
     }));
   }, []);
 
-  const validateStep = useCallback(
-    (step: number) => {
-      const newErrors: { [key: string]: string } = {};
+const validateStep = useCallback(
+  (step: number) => {
+    const newErrors: { [key: string]: string } = {};
 
-      if (step === 0) {
-        required_child.forEach((child) => {
-          if (child.type === 'file_button') {
-            if (!fileData[child.name]) {
-              newErrors[child.name] = child.validation_message || `${child.label} is required`;
+    if (step === 0) {
+      required_child.forEach((child) => {
+        if (child.type === 'file_button') {
+          if (!fileData[child.name]) {
+            newErrors[child.name] = child.validation_message || `${child.label} is required`;
+          }
+        } else {
+          if (child.name === 'adharCard') {
+            let aadhaarCard = '';
+            let hasError = false;
+            for (let i = 0; i < 12; i++) {
+              const digit = formData[`adharCard_${i}`];
+              if (!digit) {
+                newErrors[child.name] = 'All Aadhaar card digits are required';
+                hasError = true;
+                break;
+              }
+              aadhaarCard += digit;
             }
-          } else {
-            if (child.name === 'adharCard') {
-              let aadhaarCard = '';
-              for (let i = 0; i < 12; i++) {
-                const digit = formData[`adharCard_${i}`];
-                if (!digit) {
-                  newErrors[child.name] = 'All Aadhaar card digits are required';
-                  break;
-                }
-                aadhaarCard += digit;
-              }
-            } else if (!formData[child.name]) {
-              newErrors[child.name] = child.validation_message || `${child.label} is required`;
-            } else if (child.validation === 'email') {
-              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-              if (!emailRegex.test(formData[child.name])) {
-                newErrors[child.name] = 'Invalid email address';
-              }
-            } else if (child.validation === 'mobile') {
-              const phoneRegex = /^\d{10}$/;
-              if (!phoneRegex.test(formData[child.name])) {
-                newErrors[child.name] = 'Phone number must be 10 digits';
+            if (!hasError && aadhaarCard.length === 12) {
+              delete newErrors[child.name];
+            }
+          } else if (!formData[child.name] && formData[child.name] !== 0) {
+            newErrors[child.name] = child.validation_message || `${child.label} is required`;
+          } else if (child.validation === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(formData[child.name])) {
+              newErrors[child.name] = 'Invalid email address';
+            }
+          } else if (child.validation === 'mobile') {
+            const phoneRegex = /^\d{10}$/;
+            if (!phoneRegex.test(formData[child.name])) {
+              newErrors[child.name] = 'Phone number must be 10 digits';
+            }
+          } else if (child.type === 'date' && formData[child.name]) {
+            const inputDate = new Date(formData[child.name]);
+            const today = new Date();
+
+            if (isNaN(inputDate.getTime())) {
+              newErrors[child.name] = 'Invalid date format';
+            } else if (child.max_date) {
+              const maxAllowedDate = new Date(
+                today.getFullYear() - child.max_date,
+                today.getMonth(),
+                today.getDate(),
+              );
+              if (inputDate > maxAllowedDate) {
+                newErrors[child.name] = `Age must be at most ${child.max_date} years`;
               }
             }
           }
-        });
-
-        // Special validation for SC/ST categories
-        const selectedCategory = formData.s_category;
-        const selectedhalth = formData?.child_has_any_issue?.includes('$')
-          ? formData.child_has_any_issue.split('$')[1]
-          : '';
-
-        console.log(formData['specified_health_issue'] == '');
-        console.log(selectedhalth);
-        console.log(formData?.child_has_any_issue?.includes('$'));
-        console.log(formData['specified_health_issue']);
-        if (
-          (selectedCategory === 'SC' || selectedCategory === 'ST') &&
-          !fileData['caste_certificate']
-        ) {
-          newErrors['caste_certificate'] = 'Caste certificate preview is required';
         }
-        if (selectedhalth === 'Yes' && !formData?.specified_health_issue) {
-          newErrors['specified_health_issue'] = 'Please specify health issue';
-        }
-      } else if (step === 1 && !conditions.disclaimer) {
-        newErrors.disclaimer = 'Please accept the disclaimer to proceed';
-      } else if (step === 2 && !conditions.declaration) {
-        newErrors.declaration = 'Please accept the declaration to proceed';
-      } else if (step === 3 && !conditions.fee) {
-        newErrors.fee = 'Please accept the fee agreement to proceed';
+      });
+
+      // Special validation for SC/ST categories
+      const selectedCategory = formData.s_category;
+      const selectedhalth = formData?.child_has_any_issue?.includes('$')
+        ? formData.child_has_any_issue.split('$')[1]
+        : '';
+
+      if (
+        (selectedCategory === 'SC' || selectedCategory === 'ST') &&
+        !fileData['caste_certificate']
+      ) {
+        newErrors['caste_certificate'] = 'Caste certificate preview is required';
       }
+      if (selectedhalth === 'Yes' && !formData?.specified_health_issue) {
+        newErrors['specified_health_issue'] = 'Please specify health issue';
+      }
+    } else if (step === 1 && !conditions.disclaimer) {
+      newErrors.disclaimer = 'Please accept the disclaimer to proceed';
+    } else if (step === 2 && !conditions.declaration) {
+      newErrors.declaration = 'Please accept the declaration to proceed';
+    } else if (step === 3 && !conditions.fee) {
+      newErrors.fee = 'Please accept the fee agreement to proceed';
+    }
 
-      console.log('Validation errors:', newErrors);
-      setErrors(newErrors);
-      validationErrors.current = newErrors;
-      return Object.keys(newErrors).length === 0;
-    },
-    [formData, fileData, required_child, conditions],
-  );
+    // Filter out empty error messages
+    const filteredErrors = Object.fromEntries(
+      Object.entries(newErrors).filter(([_, value]) => value !== '')
+    );
+
+    console.log('Validation errors:', filteredErrors);
+    setErrors(filteredErrors);
+    validationErrors.current = filteredErrors;
+    return Object.keys(filteredErrors).length === 0;
+  },
+  [formData, fileData, required_child, conditions],
+);
 
   const handleBack = useCallback(() => {
     setActiveStep((prev) => prev - 1);
@@ -1621,57 +1654,64 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
     }
   }, [paymentData, formData, cdata, header, apiUrl, academic_id]);
 
-  const handleNext = useCallback(async () => {
-    if (!validateStep(activeStep)) {
-      return;
-    }
+const handleNext = useCallback(async () => {
+  // Clear previous errors first
+  setErrors({});
+  
+  // Validate current step
+  if (!validateStep(activeStep)) {
+    // Errors will be displayed automatically through the setErrors in validateStep
+    console.log('Validation failed, showing errors');
+    return;
+  }
 
-    if (activeStep === 0) {
-      setLoading(true);
-      try {
-        // For school, calculate payable amount based on class and other factors
-        const payableResponse = await axios.post(`${apiUrl}/Public/Get-payable-amount`, {
-          class_id: formData.class,
+  // If validation passes, proceed
+  if (activeStep === 0) {
+    setLoading(true);
+    try {
+      // For school, calculate payable amount based on class and other factors
+      const payableResponse = await axios.post(`${apiUrl}/Public/Get-payable-amount`, {
+        class_id: formData.class,
+        academic_id: academic_id,
+        transportation_required: formData.transportation_required,
+      });
+
+      if (payableResponse.data?.total_payable_fee) {
+        setPaymentData(payableResponse.data);
+
+        const response = await axios.post(`${apiUrl}/frontend/school-save-first-step-data`, {
+          c_id: cdata.c_id,
+          cookieData: formData,
+          files: fileData,
+          amount: payableResponse.data.total_payable_fee,
           academic_id: academic_id,
-          transportation_required: formData.transportation_required,
         });
 
-        if (payableResponse.data?.total_payable_fee) {
-          setPaymentData(payableResponse.data);
-
-          const response = await axios.post(`${apiUrl}/frontend/school-save-first-step-data`, {
-            c_id: cdata.c_id,
-            cookieData: formData,
-            files: fileData,
+        if (response.data.success) {
+          setFormData((prev) => ({
+            ...prev,
+            application_id: response.data.application_id,
+            transaction_id: response.data.transaction_id,
             amount: payableResponse.data.total_payable_fee,
-            academic_id: academic_id,
-          });
-
-          if (response.data.success) {
-            setFormData((prev) => ({
-              ...prev,
-              application_id: response.data.application_id,
-              transaction_id: response.data.transaction_id,
-              amount: payableResponse.data.total_payable_fee,
-            }));
-            setActiveStep((prev) => prev + 1);
-          }
-        } else {
-          toast.error('Total payable fee not found. Please try again.');
-          return;
+          }));
+          setActiveStep((prev) => prev + 1);
         }
-      } catch (error) {
-        console.error('Error saving form data:', error);
-        toast.error('Error saving application data. Please try again.');
-      } finally {
-        setLoading(false);
+      } else {
+        toast.error('Total payable fee not found. Please try again.');
+        return;
       }
-    } else if (activeStep === 4) {
-      setShowPaymentDialog(true);
-    } else {
-      setActiveStep((prev) => prev + 1);
+    } catch (error) {
+      console.error('Error saving form data:', error);
+      toast.error('Error saving application data. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  }, [activeStep, formData, fileData, validateStep, academic_id, cdata, apiUrl]);
+  } else if (activeStep === 4) {
+    setShowPaymentDialog(true);
+  } else {
+    setActiveStep((prev) => prev + 1);
+  }
+}, [activeStep, formData, fileData, validateStep, academic_id, cdata, apiUrl]);
 
   const handleDownloadReceipt = async (application_id: string) => {
     try {
@@ -1783,201 +1823,230 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
     }
   };
 
-  return (
-    <div className="group relative mb-8">
-      <div className="absolute -inset-1 bg-gradient-to-r from-[#1e40af] to-[#dc2626] rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
-      <div className="relative bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#1e40af] to-[#dc2626]"></div>
-
-        {/* Form Header */}
-        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
-          <p className="text-center text-gray-600 mt-2">
-            {home_other_lines?.[1]?.title || 'Online Application Form'}
+return (
+  <div className="group relative mb-8">
+    {/* Global Loading Overlay for Payment Processing */}
+    {paymentProcessing && (
+      <div className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4">
+          <Loader /> {/* Your Loader component */}
+          <p className="text-gray-700 font-semibold">Processing your payment...</p>
+          <p className="text-gray-500 text-sm text-center">
+            Please wait while we verify your payment details
           </p>
         </div>
+      </div>
+    )}
 
-        <div className="p-6">
-          {/* Stepper */}
-          <div className="flex items-center justify-center mb-8">
-            <div className="flex items-center w-full max-w-4xl">
-              {steps.map((step, index) => (
-                <React.Fragment key={step}>
-                  {/* Step Circle */}
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center border-2 font-semibold text-sm transition-all duration-300 ${
-                        index === activeStep
-                          ? 'bg-blue-600 border-blue-600 text-white shadow-lg transform scale-110'
-                          : index < activeStep
-                          ? 'bg-green-500 border-green-500 text-white'
-                          : 'bg-white border-gray-300 text-gray-500'
-                      }`}
-                    >
-                      {index < activeStep ? (
-                        <Icon icon="solar:check-circle-line-duotone" className="w-5 h-5" />
-                      ) : (
-                        index + 1
-                      )}
-                    </div>
-                    <span
-                      className={`text-xs mt-2 font-medium text-center ${
-                        index === activeStep ? 'text-blue-600' : 'text-gray-500'
-                      }`}
-                    >
-                      {step}
-                    </span>
-                  </div>
+    <div className="absolute -inset-1 bg-gradient-to-r from-[#1e40af] to-[#dc2626] rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+    <div className="relative bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#1e40af] to-[#dc2626]"></div>
 
-                  {/* Connector Line */}
-                  {index < steps.length - 1 && (
-                    <div
-                      className={`flex-1 h-1 mx-2 transition-all duration-300 ${
-                        index < activeStep ? 'bg-green-500' : 'bg-gray-300'
-                      }`}
-                    />
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-
-          {/* Step Content */}
-          <div className="min-h-[400px]">{renderStep(activeStep)}</div>
-
-          {/* Navigation Buttons */}
-          <div className="flex justify-between mt-8">
-            {activeStep !== 5 ?(
-              <button
-                onClick={handleBack}
-                disabled={activeStep === 0}
-                className={`flex items-center gap-2 px-6 py-2 rounded-lg border transition-all duration-200 ${
-                  activeStep === 0
-                    ? 'border-gray-300 text-gray-400 cursor-not-allowed'
-                    : 'border-blue-600 text-blue-600 hover:bg-blue-50 hover:shadow-md'
-                }`}
-              >
-                <Icon icon="solar:arrow-left-line-duotone" className="w-4 h-4" />
-                Back
-              </button>
-            ): <div></div>}
-
-            <div className="flex gap-3">
-              {activeStep === steps.length - 1 ? (
-                <button
-                  onClick={handleReset}
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg transform hover:scale-105"
-                >
-                  Submit Another Application
-                </button>
-              ) : (
-                <button
-                  onClick={handleNext}
-                  disabled={loading || paymentProcessing}
-                  className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold text-white transition-all duration-200 ${
-                    loading || paymentProcessing
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg transform hover:scale-105'
-                  }`}
-                >
-                  {loading || paymentProcessing ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Processing...
-                    </>
-                  ) : activeStep === steps.length - 2 ? (
-                    <>
-                      <Icon icon="solar:card-line-duotone" className="w-4 h-4" />
-                      Pay Now
-                    </>
-                  ) : (
-                    <>
-                      <Icon icon="solar:arrow-right-line-duotone" className="w-4 h-4" />
-                      Next
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {Object.keys(errors).length > 0 && activeStep !== 5 &&  (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-center gap-2 text-red-700">
-                <Icon icon="solar:danger-triangle-line-duotone" className="w-5 h-5" />
-                <span className="font-semibold">
-                  Please complete all mandatory fields to proceed.
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
+      {/* Form Header */}
+      <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
+        <p className="text-center text-gray-600 mt-2">
+          {home_other_lines?.[1]?.title || 'Online Application Form'}
+        </p>
       </div>
 
-      {/* Payment Confirmation Dialog */}
-      {showPaymentDialog && (
-        <div className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 scale-100">
-            {/* Dialog Header */}
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-center text-xl font-bold text-green-600">Confirm Payment</h3>
-            </div>
-
-            {/* Dialog Content */}
-            <div className="p-6">
-              <div className="text-center mb-4">
-                <div className="text-2xl font-bold text-gray-800 mb-2">
-                  ₹ {paymentData?.total_payable_fee?.toLocaleString('en-IN')}
-                </div>
-                <p className="text-gray-600 text-sm">
-                  You will be redirected to secure payment gateway
-                </p>
-              </div>
-
-              {/* Payment Details */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">Application ID:</span>
-                  <span className="font-semibold">{formData.application_id}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm mt-2">
-                  <span className="text-gray-600">Payment For:</span>
-                  <span className="font-semibold">School Application Fee</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Dialog Actions */}
-            <div className="flex justify-center gap-4 p-6 border-t border-gray-200">
-              <button
-                onClick={() => setShowPaymentDialog(false)}
-                className="flex-1 px-4 py-2 border border-gray-400 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handlePayment}
-                disabled={loading2 || paymentProcessing}
-                className={`flex-1 px-4 py-2 rounded-lg font-semibold text-white transition-all duration-200 ${
-                  loading2 || paymentProcessing
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-green-600 hover:bg-green-700 hover:shadow-lg'
-                }`}
-              >
-                {loading2 || paymentProcessing ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Processing...
+      <div className="p-6">
+        {/* Stepper */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center w-full max-w-4xl">
+            {steps.map((step, index) => (
+              <React.Fragment key={step}>
+                {/* Step Circle */}
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 font-semibold text-sm transition-all duration-300 ${
+                      index === activeStep
+                        ? 'bg-blue-600 border-blue-600 text-white shadow-lg transform scale-110'
+                        : index < activeStep
+                        ? 'bg-green-500 border-green-500 text-white'
+                        : 'bg-white border-gray-300 text-gray-500'
+                    }`}
+                  >
+                    {index < activeStep ? (
+                      <Icon icon="solar:check-circle-line-duotone" className="w-5 h-5" />
+                    ) : (
+                      index + 1
+                    )}
                   </div>
-                ) : (
-                  'Proceed to Pay'
+                  <span
+                    className={`text-xs mt-2 font-medium text-center ${
+                      index === activeStep ? 'text-blue-600' : 'text-gray-500'
+                    }`}
+                  >
+                    {step}
+                  </span>
+                </div>
+
+                {/* Connector Line */}
+                {index < steps.length - 1 && (
+                  <div
+                    className={`flex-1 h-1 mx-2 transition-all duration-300 ${
+                      index < activeStep ? 'bg-green-500' : 'bg-gray-300'
+                    }`}
+                  />
                 )}
-              </button>
-            </div>
+              </React.Fragment>
+            ))}
           </div>
         </div>
-      )}
+
+        {/* Step Content with loading state */}
+        <div className="min-h-[400px] relative">
+          {paymentProcessing ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 z-10">
+              <div className="flex flex-col items-center gap-3">
+                <Loader /> {/* Your Loader component */}
+                <p className="text-gray-600 font-medium">Processing Payment...</p>
+              </div>
+            </div>
+          ) : null}
+          {renderStep(activeStep)}
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between mt-8">
+          {activeStep !== 5 ? (
+            <button
+              onClick={handleBack}
+              disabled={activeStep === 0 || paymentProcessing}
+              className={`flex items-center gap-2 px-6 py-2 rounded-lg border transition-all duration-200 ${
+                activeStep === 0 || paymentProcessing
+                  ? 'border-gray-300 text-gray-400 cursor-not-allowed'
+                  : 'border-blue-600 text-blue-600 hover:bg-blue-50 hover:shadow-md'
+              }`}
+            >
+              <Icon icon="solar:arrow-left-line-duotone" className="w-4 h-4" />
+              Back
+            </button>
+          ) : (
+            <div></div>
+          )}
+
+          <div className="flex gap-3">
+            {activeStep === steps.length - 1 ? (
+              <button
+                onClick={handleReset}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg transform hover:scale-105"
+              >
+                Submit Another Application
+              </button>
+            ) : (
+              <button
+                onClick={handleNext}
+                disabled={loading || paymentProcessing}
+                className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold text-white transition-all duration-200 ${
+                  loading || paymentProcessing
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg transform hover:scale-105'
+                }`}
+              >
+                {loading || paymentProcessing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Processing...
+                  </>
+                ) : activeStep === steps.length - 2 ? (
+                  <>
+                    <Icon icon="solar:card-line-duotone" className="w-4 h-4" />
+                    Pay Now
+                  </>
+                ) : (
+                  <>
+                    <Icon icon="solar:arrow-right-line-duotone" className="w-4 h-4" />
+                    Next
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Error Display - Only show when there are actual errors and we're on step 0-3 */}
+        {activeStep < 4 && Object.keys(errors).length > 0 && activeStep !== 1 && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center gap-2 text-red-700">
+              <Icon icon="solar:danger-triangle-line-duotone" className="w-5 h-5" />
+              <span className="font-semibold">
+                Please complete all mandatory fields to proceed.
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
-  );
+
+    {/* Payment Confirmation Dialog */}
+    {showPaymentDialog && (
+      <div className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 scale-100">
+          {/* Dialog Header */}
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-center text-xl font-bold text-green-600">Confirm Payment</h3>
+          </div>
+
+          {/* Dialog Content */}
+          <div className="p-6">
+            <div className="text-center mb-4">
+              <div className="text-2xl font-bold text-gray-800 mb-2">
+                ₹ {paymentData?.total_payable_fee?.toLocaleString('en-IN')}
+              </div>
+              <p className="text-gray-600 text-sm">
+                You will be redirected to secure payment gateway
+              </p>
+            </div>
+
+            {/* Payment Details */}
+            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-600">Application ID:</span>
+                <span className="font-semibold">{formData.application_id}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm mt-2">
+                <span className="text-gray-600">Payment For:</span>
+                <span className="font-semibold">School Application Fee</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Dialog Actions */}
+          <div className="flex justify-center gap-4 p-6 border-t border-gray-200">
+            <button
+              onClick={() => setShowPaymentDialog(false)}
+              disabled={paymentProcessing}
+              className={`flex-1 px-4 py-2 border border-gray-400 text-gray-700 rounded-lg font-semibold transition-colors duration-200 ${
+                paymentProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'
+              }`}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handlePayment}
+              disabled={loading2 || paymentProcessing}
+              className={`flex-1 px-4 py-2 rounded-lg font-semibold text-white transition-all duration-200 ${
+                loading2 || paymentProcessing
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700 hover:shadow-lg'
+              }`}
+            >
+              {loading2 || paymentProcessing ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Processing...
+                </div>
+              ) : (
+                'Proceed to Pay'
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+);
 };
 
 export default SchoolApplyForm;

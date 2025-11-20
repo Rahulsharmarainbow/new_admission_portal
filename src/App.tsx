@@ -149,7 +149,6 @@ function App() {
       <CookiesProvider>
         <React.StrictMode>
           <AuthProvider>
-            {/* ✅ Wrap with NotificationProvider */}
             <NotificationProvider>
               <SidebarProvider>
                 <ThemeModeScript />
