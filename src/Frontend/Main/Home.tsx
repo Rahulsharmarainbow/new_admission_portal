@@ -229,48 +229,70 @@ const Home = () => {
             </div>
           </div>
 
-          {institute.marquee && institute.marquee.length > 0 && (
-            <div className="bg-gradient-to-r from-[#d97706]/20 to-[#ea580c]/20 border border-[#d97706] rounded-xl p-4 mb-2 overflow-hidden shadow-inner">
-              <marquee behavior="scroll" direction="left" scrollamount="5">
-                {institute.marquee.map((message, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center bg-white text-[#dc2626] text-base font-semibold px-6 py-2 rounded-full shadow-md mx-4 border border-[#dc2626] whitespace-nowrap"
-                  >
-                    <svg
-                      className="w-5 h-5 mr-3 text-[#ea580c]"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+        {institute.marquee && institute.marquee.length > 0 && (
+  <div className="bg-gradient-to-r from-[#d97706]/20 to-[#ea580c]/20 border border-[#d97706] rounded-xl p-4 mb-2 overflow-hidden shadow-inner">
+    <div 
+      className="overflow-hidden"
+      onMouseEnter={(e) => {
+        const marquee = e.currentTarget.querySelector('marquee');
+        if (marquee) marquee.stop();
+      }}
+      onMouseLeave={(e) => {
+        const marquee = e.currentTarget.querySelector('marquee');
+        if (marquee) marquee.start();
+      }}
+    >
+      <marquee behavior="scroll" direction="left" scrollamount="5">
+        {institute.marquee
+          .filter((message) => message.status !== 0)
+          .map((message, index) => (
+            <span
+              key={index}
+              className={`inline-flex items-center bg-white text-[#dc2626] text-base font-semibold px-6 py-2 rounded-full shadow-md mx-4 border border-[#dc2626] whitespace-nowrap cursor-pointer hover:bg-gray-50 transition-colors duration-200 ${
+                message.url ? 'hover:shadow-lg' : ''
+              }`}
+              onClick={() => {
+                if (message.url) {
+                  // Open in new tab for external URLs, same tab for internal links
+                  if (message.url.startsWith('http')) {
+                    window.open(message.url, '_blank', 'noopener,noreferrer');
+                  } else {
+                    // For internal links, you might want to use react-router navigation
+                    // or window.location for simplicity
+                    window.location.href = message.url;
+                  }
+                }
+              }}
+            >
+              <svg
+                className="w-5 h-5 mr-3 text-[#ea580c]"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16z"
+                  clipRule="evenodd"
+                />
+              </svg>
 
-                    {/* ✅ Show marquee text */}
-                    {message.text}
+              {/* Marquee text - now clickable if URL exists */}
+              {message.url ? (
+                <span className="hover:underline">
+                  {message.text || message.title || 'Notification'}
+                </span>
+              ) : (
+                <span>{message.text || message.title || 'Notification'}</span>
+              )}
 
-                    {/* ✅ Show “new” badge if needed */}
-                    {message.new === 1 && <NewBadge size="small" className="ml-2" />}
-
-                    {/* ✅ Clickable if URL is provided */}
-                    {message.url && (
-                      <a
-                        href={message.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ml-4 text-[#1e40af] underline hover:text-[#dc2626]"
-                      >
-                        Visit
-                      </a>
-                    )}
-                  </span>
-                ))}
-              </marquee>
-            </div>
-          )}
+              {/* Show "new" badge if needed */}
+              {message.new === 1 && <NewBadge size="small" className="ml-2" />}
+            </span>
+          ))}
+      </marquee>
+    </div>
+  </div>
+)}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">

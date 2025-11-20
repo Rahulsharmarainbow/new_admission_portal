@@ -71,12 +71,12 @@ const SuccessStep: React.FC<SuccessStepProps> = ({
           </h3>
           
           <div className="space-y-4 text-left">
-            <div className="flex justify-between items-center">
+            {/* <div className="flex justify-between items-center">
               <span className="text-gray-600 font-medium">Application ID:</span>
               <span className="font-semibold text-blue-600">
                 {applicationId || 'N/A'}
               </span>
-            </div>
+            </div> */}
             
             {transactionId && (
               <div className="flex justify-between items-center">

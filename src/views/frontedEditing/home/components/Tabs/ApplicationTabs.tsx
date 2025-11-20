@@ -835,7 +835,7 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
       ...prev,
       [tabKey]: {
         title: item.text || "",
-        isNew: item.new === 1,
+        isNew: item.new === "1",
         type: item.url ? "url" : "document",
         redirectUrl: item.url || "",
         document: null,

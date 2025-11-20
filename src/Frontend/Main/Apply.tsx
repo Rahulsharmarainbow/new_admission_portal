@@ -45,7 +45,7 @@ const Apply = () => {
   const [modalData, setModalData] = useState<Any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(true);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const assetUrl = import.meta.env.VITE_ASSET_URL;
@@ -71,6 +71,9 @@ const Apply = () => {
         if (response.status === 200) {
           setApplyData(response.data);
           setModalData(response.data.apply_modals);
+          if(response.data?.apply_modals?.visible == 1){
+            setPreviewOpen(true);
+          }
         } else {
           setError('Failed to load application form');
         }

@@ -22,7 +22,7 @@ const Header = ({ baseUrl,institute_id,instituteName, logo, address }) => {
   const { logo: logoData, university } = headerData;
 
   return (
-    <header className="bg-white shadow-lg border-b border-gray-200">
+    <header className="bg-white border-b border-gray-200">
         <div className="bg-white shadow-md  container mx-auto px-4 py-1 rounded-b-2xl">
           <div className="flex flex-col md:flex-row items-center justify-center text-center md:text-left">
             {headerData?.logo && (

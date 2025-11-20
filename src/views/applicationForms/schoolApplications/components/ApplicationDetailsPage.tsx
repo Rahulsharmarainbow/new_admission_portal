@@ -199,7 +199,7 @@ const ApplicationDetailsPage: React.FC = () => {
   };
 
   // Get display value from candidate details
-  const getDisplayValue = (fieldName: string, fallback: string = 'N/A') => {
+  const getDisplayValue = (fieldName: string, fallback: string = '') => {
     if (!candidateDetails) return fallback;
     
     // Try to get the value with "S" prefix first (display value)
