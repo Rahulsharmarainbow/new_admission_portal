@@ -32,10 +32,10 @@ const FormStep: React.FC<FormStepProps> = ({
   onFileChange,
   formRefs,
 }) => {
-  console.log('Form data:', formData);
-  console.log('File data:', fileData);
+  // console.log('Form data:', formData);
+  // console.log('File data:', fileData);
 
-  console.log('erorrr', errors);
+  // console.log('erorrr', errors);
   const handleFileUpload = (
     event: React.ChangeEvent<HTMLInputElement>,
     fieldName: string,
@@ -119,7 +119,7 @@ const getPreviewBoxStyle = (resolution?: string) => {
       max_date: child.max_date,
     };
 
-    if (child.type === 'file_button') console.log(fieldConfig);
+    // if (child.type === 'file_button') console.log(fieldConfig);
 
     switch (child.type) {
       case 'heading':

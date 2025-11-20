@@ -1080,6 +1080,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
 
   const formRefs = useRef<{ [key: string]: any }>({});
   const validationErrors = useRef<{ [key: string]: string }>({});
+  const [showErrors, setShowErrors] = useState(false);
 
   // API URL
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -1144,15 +1145,18 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
     });
   }, [formData, required_child]);
 
-  useEffect(() => {
-  // Only show errors when user tries to proceed to next step but validation fails
-  if (activeStep === 1 && Object.keys(errors).length > 0) {
-    const hasValidationErrors = Object.values(errors).some(error => error !== '');
-    if (hasValidationErrors && activeStep === 1) {
-      toast.error('please check the checkbox.');
-    }
-  }
-}, [errors, activeStep]);
+//   useEffect(() => {
+//     console.log("ooooooooooooo", Object.keys(errors).length)
+//     console.log("ooooooooooooo", errors)
+//     console.log("ooooooooooooo", showErrors)
+//   // Only show errors when user tries to proceed to next step but validation fails
+//   if (Object.keys(errors).length > 0) {
+//     const hasValidationErrors = Object.values(errors).some(error => error !== '');
+//     if (hasValidationErrors && activeStep === 1) {
+
+//     }
+//   }
+// }, [errors, activeStep]);
 
   // Handle input change with API calls
   const handleInputChange = useCallback(
@@ -1660,11 +1664,11 @@ const handleNext = useCallback(async () => {
   
   // Validate current step
   if (!validateStep(activeStep)) {
-    // Errors will be displayed automatically through the setErrors in validateStep
+    setShowErrors(true);
     console.log('Validation failed, showing errors');
     return;
   }
-
+setShowErrors(false);
   // If validation passes, proceed
   if (activeStep === 0) {
     setLoading(true);
@@ -1966,7 +1970,7 @@ return (
         </div>
 
         {/* Error Display - Only show when there are actual errors and we're on step 0-3 */}
-        {activeStep < 4 && Object.keys(errors).length > 0 && activeStep !== 1 && (
+        {activeStep < 4 && showErrors && (
           <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
             <div className="flex items-center gap-2 text-red-700">
               <Icon icon="solar:danger-triangle-line-duotone" className="w-5 h-5" />
