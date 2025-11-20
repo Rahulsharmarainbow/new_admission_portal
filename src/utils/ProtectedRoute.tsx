@@ -1,32 +1,37 @@
-// components/ProtectedRoute.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router';
 import { useAuth } from 'src/hook/useAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: string | string[];
-  redirectTo?: string;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
   requiredRole,
-  redirectTo = '/login'
 }) => {
   const { isAuthenticated, hasRole, user } = useAuth();
   const location = useLocation();
-console.log(user?.login_type, "isAuthenticated");
-//   if (!isAuthenticated) {
-//     return <Navigate to={redirectTo} state={{ from: location }} replace />;
-//   }
+  const [loading, setLoading] = useState(true);
 
-//   if (requiredRole && !hasRole(requiredRole)) {
-//     // Redirect to unauthorized or dashboard based on role
-//     const userDashboard = getUserDashboard(user!.login_type);
-//     console.log(userDashboard);
-//     return <Navigate to={userDashboard} replace />;
-//   }
+  useEffect(() => {
+    // wait until cookies/user syncs into state
+    const timer = setTimeout(() => setLoading(false), 100);
+    return () => clearTimeout(timer);
+  }, [user]);
+
+  if (loading) {
+    return <></>; // can show loader if needed
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  if (requiredRole && !hasRole(requiredRole)) {
+    return <Navigate to="/auth/404" replace />;
+  }
 
   return <>{children}</>;
 };
@@ -53,5 +58,5 @@ export const getRequiredRole = (path: string): string[] => {
   if (path.startsWith('/SupportAdmin')) return ['SUPPORTADMIN'];
   if (path.startsWith('/CustomerAdmin')) return ['CUSTOMERADMIN'];
   if (path.startsWith('/SalesAdmin')) return ['SALESADMIN'];
-  return []; // Public routes
+  return []; 
 };

@@ -32,10 +32,10 @@ const FormStep: React.FC<FormStepProps> = ({
   onFileChange,
   formRefs,
 }) => {
-  console.log('Form data:', formData);
-  console.log('File data:', fileData);
+  // console.log('Form data:', formData);
+  // console.log('File data:', fileData);
 
-  console.log('erorrr', errors);
+  // console.log('erorrr', errors);
   const handleFileUpload = (
     event: React.ChangeEvent<HTMLInputElement>,
     fieldName: string,
@@ -72,16 +72,21 @@ const FormStep: React.FC<FormStepProps> = ({
   };
 
   // Resolution parse & dynamic styles
-const getResolutionStyle = (resolution?: string) => {
-  if (!resolution) return { width: "80px", height: "80px" }; // Default square
+const getPreviewBoxStyle = (resolution?: string) => {
+  if (!resolution) return null;
 
   const [w, h] = resolution.split("x").map(Number);
-  if (!w || !h) return { width: "80px", height: "80px" };
+  if (!w || !h) return null;
 
-  return {
-    width: `${w}px`,
-    height: `${h}px`,
-  };
+  // Apply only if width is much greater than height (signature like)
+  if (w > h * 2) {
+    return {
+      width: `${w}px`,
+      height: `${h}px`,
+    };
+  }
+
+  return null;
 };
 
 
@@ -114,7 +119,7 @@ const getResolutionStyle = (resolution?: string) => {
       max_date: child.max_date,
     };
 
-    if (child.type === 'file_button') console.log(fieldConfig);
+    // if (child.type === 'file_button') console.log(fieldConfig);
 
     switch (child.type) {
       case 'heading':
@@ -138,8 +143,8 @@ const getResolutionStyle = (resolution?: string) => {
 
       case 'checkbox':
         return (
-          <div className="flex flex-col space-y-2 w-full">
-            <div className="flex items-start space-x-3 w-full">
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-start space-x-3">
               <input
                 type="checkbox"
                 id={child.name}
@@ -151,7 +156,7 @@ const getResolutionStyle = (resolution?: string) => {
               />
               <label
                 htmlFor={child.name}
-                className={`text-sm leading-5 break-words whitespace-normal flex-1 w-full ${
+                className={`text-sm leading-tight ${
                   errors[child.name] ? 'text-red-600' : 'text-gray-700'
                 }`}
               >
@@ -283,8 +288,8 @@ const getResolutionStyle = (resolution?: string) => {
           </button>
         );
 
-      case 'file_button':
-  const style = getResolutionStyle(child.resolution);
+     case 'file_button':
+  const previewStyle = getPreviewBoxStyle(child.resolution);
 
   return (
     <div className="text-center space-y-3">
@@ -295,19 +300,21 @@ const getResolutionStyle = (resolution?: string) => {
         onChange={(e) => handleFileUpload(e, child.name, fieldConfig)}
         accept="image/*"
       />
+
       <label htmlFor={child.name} className="cursor-pointer">
         <div className="bg-gray-50 p-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors duration-200">
           
           <div
-            className="mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2 overflow-hidden"
-            style={style}
+            className={`mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2 overflow-hidden ${
+              previewStyle ? "" : "w-20 h-20"
+            }`}
+            style={previewStyle || {}}
           >
             {fileData[child.name] ? (
               <img
                 src={fileData[child.name]}
                 alt={child.label}
-                style={style}
-                className="object-contain rounded-lg"
+                className="object-contain w-full h-full rounded-lg"
               />
             ) : (
               <Icon icon="solar:upload-line-duotone" className="w-8 h-8 text-gray-400" />
@@ -315,7 +322,7 @@ const getResolutionStyle = (resolution?: string) => {
           </div>
 
           <p className="text-xs text-gray-600 mb-2">{child.content}</p>
-          {child?.resolution && (
+          {child.resolution && (
             <p className="text-xs text-gray-600 mb-2">{child.resolution}</p>
           )}
 
@@ -330,6 +337,7 @@ const getResolutionStyle = (resolution?: string) => {
       )}
     </div>
   );
+
 
       case 'image':
         return (

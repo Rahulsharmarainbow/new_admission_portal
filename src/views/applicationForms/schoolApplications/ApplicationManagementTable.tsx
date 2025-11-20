@@ -173,7 +173,6 @@ const ApplicationManagementTable: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
-      toast.error('Failed to fetch applications');
     } finally {
       setLoading(false);
     }
@@ -624,13 +623,11 @@ const ApplicationManagementTable: React.FC = () => {
                                 <span className="text-xs text-gray-500">No Signature</span>
                               </div>
                             </td>
-                           
                             <td className="py-4 px-4 text-sm text-gray-600 min-w-[100px]">
-  <div className="whitespace-nowrap">
-    {application.roll_no || 'N/A'}
-  </div>
-</td>
-
+                              <div className="truncate max-w-[90px]" title={application.roll_no}>
+                                {application.roll_no || 'N/A'}
+                              </div>
+                            </td>
                             <td className="py-4 px-4 text-sm text-gray-600 min-w-[150px]">
                               <Tooltip
                                 content={application.academic_name}

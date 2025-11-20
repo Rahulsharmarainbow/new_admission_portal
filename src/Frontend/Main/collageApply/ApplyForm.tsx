@@ -906,21 +906,6 @@
 
 // export default ApplyForm;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import axios from 'axios';
@@ -1023,15 +1008,20 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
     required_child.forEach((child) => {
       // Only validate fields that have values or are required
       if (formData[child.name] !== undefined || child.required) {
-        checkValidation(
-          child.name,
-          child.type,
-          child.validation,
-          child.validation_message
-        );
+        checkValidation(child.name, child.type, child.validation, child.validation_message);
       }
     });
   }, [formData, required_child]);
+
+  useEffect(() => {
+    // Only show errors when user tries to proceed to next step but validation fails
+    if (activeStep === 1 && Object.keys(errors).length > 0) {
+      const hasValidationErrors = Object.values(errors).some((error) => error !== '');
+      if (hasValidationErrors ) {
+        toast.error('Please fill in all required fields.');
+      }
+    }
+  }, [errors, activeStep]);
 
   // Handle input change with API calls
   const handleInputChange = useCallback(
@@ -1148,15 +1138,12 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   );
 
   // Handle checkbox change
-  const handleCheckboxChange = useCallback(
-    (name: string, value: boolean, fieldConfig?: any) => {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value ? 1 : 0,
-      }));
-    },
-    [],
-  );
+  const handleCheckboxChange = useCallback((name: string, value: boolean, fieldConfig?: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value ? 1 : 0,
+    }));
+  }, []);
 
   // Handle date change
   const handleDateChange = useCallback((name: string, date: any, fieldConfig?: any) => {
@@ -1298,6 +1285,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
     [errors],
   );
 
+
   const validateStep = useCallback(
     (step: number) => {
       const newErrors: { [key: string]: string } = {};
@@ -1321,12 +1309,10 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
                 }
                 aadhaarCard += digit;
               }
-              // Clear error if all digits are filled
               if (!hasError && aadhaarCard.length === 12) {
                 delete newErrors[child.name];
               }
             } else if (!formData[child.name] && formData[child.name] !== 0) {
-              // Fix: Check for undefined, null, empty string, but allow 0
               newErrors[child.name] = child.validation_message || `${child.label} is required`;
             } else if (child.validation === 'email') {
               const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -1339,7 +1325,6 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
                 newErrors[child.name] = 'Phone number must be 10 digits';
               }
             } else if (child.type === 'date' && formData[child.name]) {
-              // Validate date format and range
               const inputDate = new Date(formData[child.name]);
               const today = new Date();
 
@@ -1369,10 +1354,15 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
         }
       }
 
-      console.log('Validation errors:', newErrors);
-      setErrors(newErrors);
-      validationErrors.current = newErrors;
-      return Object.keys(newErrors).length === 0;
+      // Filter out empty error messages
+      const filteredErrors = Object.fromEntries(
+        Object.entries(newErrors).filter(([_, value]) => value !== ''),
+      );
+
+      console.log('Validation errors:', filteredErrors);
+      setErrors(filteredErrors);
+      validationErrors.current = filteredErrors;
+      return Object.keys(filteredErrors).length === 0;
     },
     [formData, fileData, required_child],
   );
@@ -1579,8 +1569,20 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
     }
   };
 
-return (
+  return (
     <div className="group relative mb-8">
+       {stepTransitionLoading && (
+      <div className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4">
+          <Loader /> {/* Your Loader component */}
+          <p className="text-gray-700 font-semibold">Processing your payment...</p>
+          <p className="text-gray-500 text-sm text-center">
+            Please wait while we verify your payment details
+          </p>
+        </div>
+      </div>
+    )}
+
       <div className="absolute -inset-1 bg-gradient-to-r from-[#1e40af] to-[#dc2626] rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
       <div className="relative bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 sm:h-2 bg-gradient-to-r from-[#1e40af] to-[#dc2626]"></div>
@@ -1610,7 +1612,10 @@ return (
                       }`}
                     >
                       {index < activeStep ? (
-                        <Icon icon="solar:check-circle-line-duotone" className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <Icon
+                          icon="solar:check-circle-line-duotone"
+                          className="w-4 h-4 sm:w-5 sm:h-5"
+                        />
                       ) : (
                         index + 1
                       )}
@@ -1638,9 +1643,7 @@ return (
           </div>
 
           {/* Step Content */}
-          <div className="min-h-[300px] sm:min-h-[400px]">
-            {renderStep(activeStep)}
-          </div>
+          <div className="min-h-[300px] sm:min-h-[400px]">{renderStep(activeStep)}</div>
 
           {/* Navigation Buttons - Mobile Responsive */}
           <div className="flex flex-col sm:flex-row justify-between gap-4 mt-6 sm:mt-8">
@@ -1703,7 +1706,10 @@ return (
           {Object.keys(errors).length > 0 && (
             <div className="mt-4 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex items-center gap-2 text-red-700 text-sm sm:text-base">
-                <Icon icon="solar:danger-triangle-line-duotone" className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <Icon
+                  icon="solar:danger-triangle-line-duotone"
+                  className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
+                />
                 <span className="font-semibold">
                   Please complete all mandatory fields to proceed.
                 </span>
@@ -1719,7 +1725,9 @@ return (
           <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full mx-2 transform transition-all duration-300 scale-100 max-h-[90vh] overflow-y-auto">
             {/* Dialog Header */}
             <div className="p-4 sm:p-6 border-b border-gray-200">
-              <h3 className="text-center text-lg sm:text-xl font-bold text-green-600">Confirm Payment</h3>
+              <h3 className="text-center text-lg sm:text-xl font-bold text-green-600">
+                Confirm Payment
+              </h3>
             </div>
 
             {/* Dialog Content */}
@@ -1737,7 +1745,9 @@ return (
               <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4">
                 <div className="flex justify-between items-center text-xs sm:text-sm">
                   <span className="text-gray-600">Application ID:</span>
-                  <span className="font-semibold text-xs sm:text-sm">{formData.application_id}</span>
+                  <span className="font-semibold text-xs sm:text-sm">
+                    {formData.application_id}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center text-xs sm:text-sm mt-2">
                   <span className="text-gray-600">Payment For:</span>

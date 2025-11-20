@@ -29,15 +29,11 @@ const Home = () => {
           ? { unique_code: institute_id }
           : { domain: window.location.hostname };
         setLoading(true);
-        const response = await axios.post(
-          `${apiUrl}/Public/Get-home-page-data`,
-            payload,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
+        const response = await axios.post(`${apiUrl}/Public/Get-home-page-data`, payload, {
+          headers: {
+            'Content-Type': 'application/json',
           },
-        );
+        });
 
         if (response.data) {
           setInstitute(response.data);
@@ -80,9 +76,9 @@ const Home = () => {
     );
   };
 
-   if (loading) {
-      return <Loader />;
-    } 
+  if (loading) {
+    return <Loader />;
+  }
 
   if (error || !institute) {
     return <NotFound />;
@@ -103,6 +99,8 @@ const Home = () => {
       {};
     const descriptionLine =
       homeLines.find((line) => line.title && line.title.length > 50) || homeLines[2] || {};
+    const descriptionLine2 =
+      homeLines.find((line) => line.title && line.title.length > 50) || homeLines[3] || {};
 
     return {
       name: data.header?.name || 'Institute',
@@ -135,8 +133,7 @@ const Home = () => {
           link: {
             text: data.buttons?.[0]?.text || 'Apply Online',
             url:
-              data.buttons?.[0]?.href ||
-              (data.institute_id ? `${institute.baseUrl}/apply` : '#'),
+              data.buttons?.[0]?.href || (data.institute_id ? `${institute.baseUrl}/apply` : '#'),
           },
           showNewBadge: data.buttons?.some((b) => b.new === 1) || false,
         },
@@ -195,7 +192,7 @@ const Home = () => {
         </div>
       </header> */}
       <Header
-        baseUrl = {institute.baseUrl}
+        baseUrl={institute.baseUrl}
         institute_id={institute.unique_code}
         instituteName={institute.header?.name}
         logo={institute.header?.logo}
@@ -227,72 +224,75 @@ const Home = () => {
             <div className="text-gray-700 leading-relaxed text-base max-w-7xl mx-auto bg-gray-50 p-6 rounded-xl border border-gray-200">
               {examInfo.description}
             </div>
+            {/* <div className="text-gray-700 leading-relaxed text-base max-w-7xl mx-auto bg-gray-50 p-6 rounded-xl border border-gray-200">
+              {examInfo.description2}
+            </div> */}
           </div>
 
-        {institute.marquee && institute.marquee.length > 0 && (
-  <div className="bg-gradient-to-r from-[#d97706]/20 to-[#ea580c]/20 border border-[#d97706] rounded-xl p-4 mb-2 overflow-hidden shadow-inner">
-    <div 
-      className="overflow-hidden"
-      onMouseEnter={(e) => {
-        const marquee = e.currentTarget.querySelector('marquee');
-        if (marquee) marquee.stop();
-      }}
-      onMouseLeave={(e) => {
-        const marquee = e.currentTarget.querySelector('marquee');
-        if (marquee) marquee.start();
-      }}
-    >
-      <marquee behavior="scroll" direction="left" scrollamount="5">
-        {institute.marquee
-          .filter((message) => message.status !== 0)
-          .map((message, index) => (
-            <span
-              key={index}
-              className={`inline-flex items-center bg-white text-[#dc2626] text-base font-semibold px-6 py-2 rounded-full shadow-md mx-4 border border-[#dc2626] whitespace-nowrap cursor-pointer hover:bg-gray-50 transition-colors duration-200 ${
-                message.url ? 'hover:shadow-lg' : ''
-              }`}
-              onClick={() => {
-                if (message.url) {
-                  // Open in new tab for external URLs, same tab for internal links
-                  if (message.url.startsWith('http')) {
-                    window.open(message.url, '_blank', 'noopener,noreferrer');
-                  } else {
-                    // For internal links, you might want to use react-router navigation
-                    // or window.location for simplicity
-                    window.location.href = message.url;
-                  }
-                }
-              }}
-            >
-              <svg
-                className="w-5 h-5 mr-3 text-[#ea580c]"
-                fill="currentColor"
-                viewBox="0 0 20 20"
+          {institute.marquee && institute.marquee.length > 0 && (
+            <div className="bg-gradient-to-r from-[#d97706]/20 to-[#ea580c]/20 border border-[#d97706] rounded-xl p-4 mb-2 overflow-hidden shadow-inner">
+              <div
+                className="overflow-hidden"
+                onMouseEnter={(e) => {
+                  const marquee = e.currentTarget.querySelector('marquee');
+                  if (marquee) marquee.stop();
+                }}
+                onMouseLeave={(e) => {
+                  const marquee = e.currentTarget.querySelector('marquee');
+                  if (marquee) marquee.start();
+                }}
               >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16z"
-                  clipRule="evenodd"
-                />
-              </svg>
+                <marquee behavior="scroll" direction="left" scrollamount="5">
+                  {institute.marquee
+                    .filter((message) => message.status !== 0)
+                    .map((message, index) => (
+                      <span
+                        key={index}
+                        className={`inline-flex items-center bg-white text-[#dc2626] text-base font-semibold px-6 py-2 rounded-full shadow-md mx-4 border border-[#dc2626] whitespace-nowrap cursor-pointer hover:bg-gray-50 transition-colors duration-200 ${
+                          message.url ? 'hover:shadow-lg' : ''
+                        }`}
+                        onClick={() => {
+                          if (message.url) {
+                            // Open in new tab for external URLs, same tab for internal links
+                            if (message.url.startsWith('http')) {
+                              window.open(message.url, '_blank', 'noopener,noreferrer');
+                            } else {
+                              // For internal links, you might want to use react-router navigation
+                              // or window.location for simplicity
+                              window.location.href = message.url;
+                            }
+                          }
+                        }}
+                      >
+                        <svg
+                          className="w-5 h-5 mr-3 text-[#ea580c]"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
 
-              {/* Marquee text - now clickable if URL exists */}
-              {message.url ? (
-                <span className="hover:underline">
-                  {message.text || message.title || 'Notification'}
-                </span>
-              ) : (
-                <span>{message.text || message.title || 'Notification'}</span>
-              )}
+                        {/* Marquee text - now clickable if URL exists */}
+                        {message.url ? (
+                          <span className="hover:underline">
+                            {message.text || message.title || 'Notification'}
+                          </span>
+                        ) : (
+                          <span>{message.text || message.title || 'Notification'}</span>
+                        )}
 
-              {/* Show "new" badge if needed */}
-              {message.new === 1 && <NewBadge size="small" className="ml-2" />}
-            </span>
-          ))}
-      </marquee>
-    </div>
-  </div>
-)}
+                        {/* Show "new" badge if needed */}
+                        {message.new === 1 && <NewBadge size="small" className="ml-2" />}
+                      </span>
+                    ))}
+                </marquee>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
@@ -471,7 +471,7 @@ const Home = () => {
         </div>
       </div>
 
-      <Footer footerData={institute.footer} baseUrl = {institute.baseUrl} />
+      <Footer footerData={institute.footer} baseUrl={institute.baseUrl} />
     </div>
   );
 };
