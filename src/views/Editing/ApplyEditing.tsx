@@ -78,6 +78,7 @@ const ApplyEditing: React.FC = () => {
     { id: 7, label: 'Small Heading', type: 'heading2', width: 100 },
     { id: 8, label: 'Checkbox', type: 'checkbox', width: 100 },
     { id: 9, label: 'Aadhaar Card', type: 'adhar', width: 80 },
+    { id: 10, label: 'Textarea', type: 'textarea', width: 100 }, 
   ]);
 
   // Fetch table options for select dropdown

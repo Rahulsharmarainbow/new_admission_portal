@@ -5,7 +5,9 @@ import Select from 'react-select';
 import axios from 'axios';
 import { useAuth } from 'src/hook/useAuth';
 import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
+import ClassDropdown from 'src/Frontend/Common/ClassDropdown';
 import { useStates } from 'src/hook/useStates';
+import SchoolDropdown from 'src/Frontend/Common/SchoolDropdown';
 
 interface Filters {
   page: number;
@@ -15,12 +17,12 @@ interface Filters {
   search: string;
   academic_id: string;
   year: string;
-  degree: string;
+  classAppliedFor: string;
+  gender: string;
   paymentStatus: string;
   applicationNumber: string;
   transactions_id: string;
   amounts: string;
-  gender: string;
   special: string;
   annual: string;
   state: string;
@@ -37,7 +39,7 @@ interface CdFilters {
   [key: string]: string[];
 }
 
-interface CollegeFilterSidebarProps {
+interface SchoolFilterSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   filters: Filters;
@@ -50,7 +52,7 @@ interface FilterOptions {
   filters: {
     [key: string]: Array<{ id: number; name: string }>;
   };
-  degreeList: Array<{ id: number; name: string }>;
+  classList: Array<{ id: number; name: string }>;
 }
 
 interface DynamicFilter {
@@ -60,7 +62,7 @@ interface DynamicFilter {
   isMulti: boolean;
 }
 
-const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
+const SchoolFilterSidebar: React.FC<SchoolFilterSidebarProps> = ({
   isOpen,
   onClose,
   filters,
@@ -89,6 +91,12 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
     { value: '2', label: 'Initialized' },
     { value: '1', label: 'Captured' },
     { value: '', label: 'All' },
+  ];
+
+  // Gender options
+  const genderOptions = [
+    { value: '1', label: 'Male' },
+    { value: '2', label: 'Female' },
   ];
 
   // State options
@@ -123,7 +131,7 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
         `${apiUrl}/${user?.role}/Applications/college-filter`,
         {
           academic_id: parseInt(filters.academic_id),
-          type : 1
+          type : 2
         },
         {
           headers: {
@@ -150,7 +158,7 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
                   value: item.id?.toString(),
                   label: item.name,
                 })),
-                isMulti: false, // Changed to single select
+                isMulti: false, // Single select
               });
             }
           });
@@ -180,6 +188,9 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
       yesno: 'Yes/No',
       board: 'Board',
       type_of_plot: 'Type of Plot',
+      medium: 'Medium',
+      category: 'Category',
+      religion: 'Religion',
     };
     
     return labelMap[key] || key.split('_').map(word => 
@@ -244,7 +255,7 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
       <div className="absolute top-0 right-0 h-full w-96 bg-white shadow-xl border-l border-gray-200 transform transition-transform duration-300 ease-in-out overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b bg-white sticky top-0 z-10">
-          <h3 className="text-lg font-semibold text-gray-900">College Filters</h3>
+          <h3 className="text-lg font-semibold text-gray-900">School Filters</h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
@@ -261,7 +272,7 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
               <Label htmlFor="academic" className="block mb-2 text-sm font-medium text-gray-700">
                 Academic
               </Label>
-              <AcademicDropdown
+              <SchoolDropdown
                 value={filters.academic_id}
                 onChange={(value) => handleInputChange('academic_id', value)}
                 placeholder="Select academic..."
@@ -287,28 +298,19 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
             />
           </div>
 
-          {/* Degree Dropdown from filter options */}
-          {filterOptions?.degreeList && filterOptions.degreeList.length > 0 && (
-            <div>
-              <Label htmlFor="degree" className="block mb-2 text-sm font-medium text-gray-700">
-                Degree/Stream
-              </Label>
-              <Select
-                options={filterOptions.degreeList.map(degree => ({
-                  value: degree.id?.toString(),
-                  label: degree.name,
-                }))}
-                value={filterOptions.degreeList
-                  .map(degree => ({ value: degree.id?.toString(), label: degree.name }))
-                  .find(option => option.value === filters.degree)}
-                onChange={(option) => handleSelectChange('degree', option)}
-                placeholder="Select stream..."
-                isClearable
-                className="react-select-container"
-                classNamePrefix="react-select"
-              />
-            </div>
-          )}
+          {/* Class Dropdown */}
+          <div>
+            <Label htmlFor="classAppliedFor" className="block mb-2 text-sm font-medium text-gray-700">
+              Class
+            </Label>
+            <ClassDropdown
+              value={filters.classAppliedFor}
+              onChange={(value) => handleInputChange('classAppliedFor', value)}
+              academicId={filters.academic_id}
+              placeholder={filters.academic_id ? "Select class..." : "Select academic first"}
+              disabled={!filters.academic_id}
+            />
+          </div>
 
           {/* Date Range */}
           <div className="grid grid-cols-2 gap-4">
@@ -383,6 +385,22 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
             />
           </div>
 
+          {/* Gender */}
+          {/* <div>
+            <Label htmlFor="gender" className="block mb-2 text-sm font-medium text-gray-700">
+              Gender
+            </Label>
+            <Select
+              options={genderOptions}
+              value={genderOptions.find(option => option.value === filters.gender)}
+              onChange={(option) => handleSelectChange('gender', option)}
+              placeholder="Select gender..."
+              isClearable
+              className="react-select-container"
+              classNamePrefix="react-select"
+            />
+          </div> */}
+
           {/* Payment Status */}
           <div>
             <Label htmlFor="paymentStatus" className="block mb-2 text-sm font-medium text-gray-700">
@@ -399,7 +417,7 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
             />
           </div>
 
-          {/* State Dropdown - Changed to single select */}
+          {/* State Dropdown */}
           <div>
             <Label htmlFor="state" className="block mb-2 text-sm font-medium text-gray-700">
               State
@@ -421,7 +439,7 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
             />
           </div>
 
-          {/* Dynamic Filters from API - All single select now */}
+          {/* Dynamic Filters from API */}
           {dynamicFilters.map((filter) => (
             <div key={filter.key}>
               <Label htmlFor={filter.key} className="block mb-2 text-sm font-medium text-gray-700">
@@ -478,4 +496,4 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
   );
 };
 
-export default CollegeFilterSidebar;
+export default SchoolFilterSidebar;

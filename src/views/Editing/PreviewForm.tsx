@@ -1,5 +1,6 @@
 import React from "react";
 import { Icon } from "@iconify/react";
+import { Label, Textarea } from "flowbite-react";
 
 const PreviewForm = ({ cards }) => {
   return (
@@ -92,6 +93,27 @@ const renderPreviewField = (field) => {
       return (
         <p className="text-gray-600 text-sm leading-relaxed">{field.content}</p>
       );
+
+     case "textarea":
+  return (
+    <div
+      className="w-full"
+      style={{ width: `${field.width || 100}%` }}
+    >
+      <label className="block text-sm font-semibold mb-1">
+        {field.label}
+        {field.required === 1 && <span className="text-red-500 ml-1">*</span>}
+      </label>
+
+      <textarea
+        readOnly
+        rows={field.rows || 4}
+        placeholder={field.placeholder || ""}
+        className="w-full px-3 py-2 border bg-gray-100 rounded-md text-sm cursor-not-allowed"
+      />
+    </div>
+  );
+
 
     case "text":
     case "email":
