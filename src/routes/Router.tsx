@@ -95,7 +95,7 @@ const RoleBasedRedirect: React.FC = () => {
     return <Navigate to="/login" replace />;
   }
 
-  return <Navigate to={`/${user?.role.toUpperCase()}/dashboard`} replace />;
+  return <Navigate to={`/${user?.role}/dashboard`} replace />;
 };
 
 

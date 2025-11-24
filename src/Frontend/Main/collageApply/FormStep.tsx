@@ -393,7 +393,7 @@ case 'adhar':
       {/* Aadhaar Input Container */}
       <div className="flex flex-col space-y-3">
         {/* Aadhaar Digits Grid */}
-        <div className="flex flex-wrap justify-center gap-1 sm:gap-2 md:gap-2">
+        <div className="flex flex-wrap gap-1 sm:gap-2 md:gap-2">
           {Array.from({ length: 12 }, (_, index) => (
             <input
               key={index}

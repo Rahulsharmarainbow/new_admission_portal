@@ -21,27 +21,6 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
   directorSignature,
   errors
 }) => {
-//  const formatContent = (htmlContent: string | null | undefined) => {
-//   if (!htmlContent) return "";
-
-//   let formattedContent: string = htmlContent ?? "";
-
-//   const data = formData ?? {};
-
-//   Object.keys(data).forEach((key) => {
-//     const placeholder = `{${key}}`;
-//     const value = data[key] ? String(data[key]) : ""; // always string ✅
-
-//     formattedContent = formattedContent?.replace?.(
-//       new RegExp(placeholder, "g"),
-//       `<strong>${value}</strong>`
-//     ) ?? formattedContent;
-//   });
-
-//   formattedContent = formattedContent?.replace?.(/{[^}]*}/g, "") ?? formattedContent;
-
-//   return formattedContent;
-// };
 
 const formatContent = (htmlContent: string | null | undefined, formData: any) => {
   if (!htmlContent) return "";
@@ -93,11 +72,16 @@ const formatContent = (htmlContent: string | null | undefined, formData: any) =>
       </h6>
       
       <div 
-        dangerouslySetInnerHTML={{ 
-          __html: formatContent(content, formData) 
-        }} 
-        className="prose max-w-none mb-6 text-gray-700 leading-relaxed text-sm"
-      />
+  dangerouslySetInnerHTML={{ 
+    __html: formatContent(content, formData) 
+  }} 
+  className="max-w-none mb-6 text-gray-700 leading-relaxed text-[15px] font-sans"
+  style={{
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    lineHeight: '1.6',
+    fontWeight: '400'
+  }}
+/>
       
       <div className="declaration_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
         <div>
@@ -128,25 +112,6 @@ const formatContent = (htmlContent: string | null | undefined, formData: any) =>
           </p>
         </div>
       </div>
-
-      {/* <div className="flex items-start space-x-3 mt-6 p-4 bg-gray-50 rounded-lg">
-        <input
-          type="checkbox"
-          id="declaration-checkbox"
-          checked={accepted}
-          onChange={(e) => onConditionChange('declaration', e.target.checked)}
-          className={`w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1 ${
-                  errors["declaration-checkbox"] ? 'border-red-500' : 'border-gray-300'
-                }`}
-        />
-        <label htmlFor="declaration-checkbox" className="text-sm text-gray-700">
-          I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
-        </label>
-        {errors["declaration-checkbox"] && (
-              <p className="text-red-500 text-xs mt-1 ml-7">{"Please accept the terms and conditions."}</p>
-            )}
-      </div> */}
-
 
        <div className="flex items-start gap-3 mt-6 p-4 bg-gray-50 rounded-lg relative">
         <input

@@ -532,7 +532,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
         handler: async (paymentResponse: any) => {
           try {
             const verifyResponse = await axios.post(
-              `${apiUrl}/frontend/school-save-final-step-data`,
+              `${apiUrl}/frontend/college-save-final-step-data`,
               {
                 razorpay_payment_id: paymentResponse.razorpay_payment_id,
                 razorpay_order_id: paymentResponse.razorpay_order_id,
@@ -861,7 +861,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
 
       {/* Payment Confirmation Dialog - Mobile Responsive */}
       {showPaymentDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full mx-2 transform transition-all duration-300 scale-100 max-h-[90vh] overflow-y-auto">
             {/* Dialog Header */}
             <div className="p-4 sm:p-6 border-b border-gray-200">
@@ -883,12 +883,6 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
 
               {/* Payment Details */}
               <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4">
-                <div className="flex justify-between items-center text-xs sm:text-sm">
-                  <span className="text-gray-600">Application ID:</span>
-                  <span className="font-semibold text-xs sm:text-sm">
-                    {formData.application_id}
-                  </span>
-                </div>
                 <div className="flex justify-between items-center text-xs sm:text-sm mt-2">
                   <span className="text-gray-600">Payment For:</span>
                   <span className="font-semibold text-xs sm:text-sm">College Application Fee</span>
