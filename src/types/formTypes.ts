@@ -13,9 +13,10 @@ export interface FormData {
   academicDescription: string;
   academicLogo: File | null;
   previewImage: string | null;
-  director_signature?: File | null;  
-  previewSignature?: string; 
-
+  director_signature?: File | null;
+  previewSignature?: string;
+  academic_new_logo: File | null;
+  previewNewLogo?: string | null;
   // Contact Information
   technicalName: string;
   technicalEmail: string;
@@ -46,12 +47,12 @@ export interface FormData {
   smsSecretkey: string;
   razorpayApikey: string;
   razorpaySecretkey: string;
-  
+
   // Templates
   whatsappTemplate: string;
   smsTemplate: string;
   emailTemplate: string;
-  
+
   // Toggles
   isDropdownEnabled: boolean;
   isTemplatesVisible: boolean;
@@ -59,7 +60,7 @@ export interface FormData {
   switchState: boolean;
   nominalState: boolean;
   rankCardState: boolean;
-  
+
   // Domain Configuration
   domainName: string;
   domainNameError: boolean;
@@ -84,10 +85,3 @@ export interface District {
   id: string;
   district_title: string;
 }
-
-
-
-
-
-
-

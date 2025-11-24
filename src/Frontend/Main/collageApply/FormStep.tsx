@@ -72,23 +72,22 @@ const FormStep: React.FC<FormStepProps> = ({
   };
 
   // Resolution parse & dynamic styles
-const getPreviewBoxStyle = (resolution?: string) => {
-  if (!resolution) return null;
+  const getPreviewBoxStyle = (resolution?: string) => {
+    if (!resolution) return null;
 
-  const [w, h] = resolution.split("x").map(Number);
-  if (!w || !h) return null;
+    const [w, h] = resolution.split('x').map(Number);
+    if (!w || !h) return null;
 
-  // Apply only if width is much greater than height (signature like)
-  if (w > h * 2) {
-    return {
-      width: `${w}px`,
-      height: `${h}px`,
-    };
-  }
+    // Apply only if width is much greater than height (signature like)
+    if (w > h * 2) {
+      return {
+        width: `${w}px`,
+        height: `${h}px`,
+      };
+    }
 
-  return null;
-};
-
+    return null;
+  };
 
   const renderField = (child: any, boxIndex: number, childIndex: number) => {
     const commonProps = {
@@ -288,56 +287,83 @@ const getPreviewBoxStyle = (resolution?: string) => {
           </button>
         );
 
-     case 'file_button':
-  const previewStyle = getPreviewBoxStyle(child.resolution);
+      case 'file_button':
+        const previewStyle = getPreviewBoxStyle(child.resolution);
 
-  return (
-    <div className="text-center space-y-3">
-      <input
-        type="file"
-        id={child.name}
-        className="hidden"
-        onChange={(e) => handleFileUpload(e, child.name, fieldConfig)}
-        accept="image/*"
-      />
+        const handleCameraCapture = async (fieldName: string, fieldConfig: any) => {
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'image/*';
+          input.capture = 'environment'; // back camera
+          input.onchange = (e: any) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
 
-      <label htmlFor={child.name} className="cursor-pointer">
-        <div className="bg-gray-50 p-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors duration-200">
-          
-          <div
-            className={`mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2 overflow-hidden ${
-              previewStyle ? "" : "w-20 h-20"
-            }`}
-            style={previewStyle || {}}
-          >
-            {fileData[child.name] ? (
-              <img
-                src={fileData[child.name]}
-                alt={child.label}
-                className="object-contain w-full h-full rounded-lg"
-              />
-            ) : (
-              <Icon icon="solar:upload-line-duotone" className="w-8 h-8 text-gray-400" />
-            )}
+            const previewUrl = URL.createObjectURL(file);
+            // 👇 Camera photo ke liye resolution check SKIP
+            onFileChange(fieldName, file, previewUrl, { ...fieldConfig, skipResolution: true });
+          };
+          input.click();
+        };
+
+        return (
+          <div className="text-center space-y-3">
+            <input
+              type="file"
+              id={child.name}
+              className="hidden"
+              onChange={(e) => handleFileUpload(e, child.name, fieldConfig)}
+              accept="image/*;capture=camera"
+              capture="environment"
+            />
+
+            <div className="bg-gray-50 p-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors duration-200">
+              <div
+                className={`mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2 overflow-hidden ${
+                  previewStyle ? '' : 'w-20 h-20'
+                }`}
+                style={previewStyle || {}}
+              >
+                {fileData[child.name] ? (
+                  <img
+                    src={fileData[child.name]}
+                    alt={child.label}
+                    className="object-contain w-full h-full rounded-lg"
+                  />
+                ) : (
+                  <Icon icon="solar:upload-line-duotone" className="w-8 h-8 text-gray-400" />
+                )}
+              </div>
+
+              <p className="text-xs text-gray-600 mb-2">{child.content}</p>
+              {child.resolution && <p className="text-xs text-gray-600 mb-2">{child.resolution}</p>}
+
+              {/* Buttons */}
+              <div className="flex justify-center gap-2">
+                {/* CAMERA BUTTON */}
+                <button
+                  type="button"
+                  onClick={() => handleCameraCapture(child.name, fieldConfig)}
+                  className="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200"
+                >
+                  <Icon icon="solar:camera-line-duotone" className="w-4 h-4" />
+                  Camera
+                </button>
+
+                {/* FILE UPLOAD BUTTON */}
+                <label
+                  htmlFor={child.name}
+                  className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200 cursor-pointer"
+                >
+                  <Icon icon="solar:upload-line-duotone" className="w-4 h-4" />
+                  Upload
+                </label>
+              </div>
+            </div>
+
+            {errors[child.name] && <p className="text-red-500 text-xs">{errors[child.name]}</p>}
           </div>
-
-          <p className="text-xs text-gray-600 mb-2">{child.content}</p>
-          {child.resolution && (
-            <p className="text-xs text-gray-600 mb-2">{child.resolution}</p>
-          )}
-
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200">
-            Upload {child.label}
-          </div>
-        </div>
-      </label>
-
-      {errors[child.name] && (
-        <p className="text-red-500 text-xs">{errors[child.name]}</p>
-      )}
-    </div>
-  );
-
+        );
 
       case 'image':
         return (

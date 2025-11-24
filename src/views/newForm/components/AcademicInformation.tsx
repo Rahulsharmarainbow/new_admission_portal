@@ -64,6 +64,47 @@ const AcademicInformation: React.FC<AcademicInformationProps> = ({
     }
   };
 
+  // Add this handler function in the AcademicInformation component
+const handleNewLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const files = e.target.files;
+  if (files && files.length > 0) {
+    const file = files[0];
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      updateFormData({ 
+        academic_new_logo: file, // Store file object
+        previewNewLogo: reader.result as string // Store preview URL
+      });
+    };
+    reader.readAsDataURL(file);
+  } else {
+    // Clear new logo if file input is cleared
+    updateFormData({ 
+      academic_new_logo: null,
+      previewNewLogo: formData.academicData?.academic_new_logo 
+        ? `${assetUrl}/${formData.academicData.academic_new_logo}`
+        : null
+    });
+  }
+};
+
+// Add this function to get the new logo URL
+const getNewLogoUrl = () => {
+  // Priority 1: New uploaded preview
+  if (formData.previewNewLogo) {
+    return formData.previewNewLogo;
+  }
+  // Priority 2: Existing new logo from API
+  if (formData.academicData?.academic_new_logo) {
+    return `${assetUrl}/${formData.academicData.academic_new_logo}`;
+  }
+  return null;
+};
+
+const displayNewLogoUrl = getNewLogoUrl();
+
   // Signature upload handler
   const handleSignatureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -356,9 +397,6 @@ const AcademicInformation: React.FC<AcademicInformationProps> = ({
                     onChange={handleLogoUpload}
                     className="w-full"
                   />
-                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 break-words">
-                    Recommended size: 180x180 pixels. Supports JPG, PNG, SVG formats.
-                  </p>
                   {errors.academicLogo && (
                     <p className="mt-1 text-sm text-red-600">{errors.academicLogo}</p>
                   )}
@@ -386,11 +424,35 @@ const AcademicInformation: React.FC<AcademicInformationProps> = ({
                     onChange={handleSignatureUpload}
                     className="w-full"
                   />
-                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 break-words">
-                    Recommended size: 180x80 pixels. Supports JPG, PNG, SVG formats. White background preferred.
-                  </p>
                 </div>
               </div>
+             {/* Other Logo Upload - Optional */}
+<div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+  {displayNewLogoUrl && (
+    <div className="flex-shrink-0">
+      <img
+        src={displayNewLogoUrl}
+        alt="Other Organization Logo"
+        className="w-32 h-32 object-contain rounded-lg border border-gray-300 dark:border-gray-600 bg-white p-1"
+      />
+    </div>
+  )}
+  <div className="flex-1 min-w-0">
+    <Label htmlFor="academic_new_logo" className="mb-2 block">
+      Upload Other Logo Here (Optional)
+    </Label>
+    <FileInput
+      id="academic_new_logo"
+      accept="image/*"
+      onChange={handleNewLogoUpload}
+      className="w-full"
+    />
+    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      This is an optional additional logo
+    </p>
+  </div>
+</div>
+
             </div>
           </div>
         </div>

@@ -135,6 +135,7 @@ const Apply = () => {
         institute_id={applyData.unique_code}
         instituteName={applyData.header?.name}
         logo={applyData.header?.logo}
+        otherLogo={applyData.header?.academic_new_logo}
         address={applyData.header?.address}
       />
 

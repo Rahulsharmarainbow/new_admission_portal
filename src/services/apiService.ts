@@ -141,6 +141,9 @@ export const updateAcademicData = async (formData: FormData, id: string, userId:
     if (formData.director_signature) {
       formDataToSend.append('director_signature', formData.director_signature);
     }
+    if (formData.academic_new_logo) {
+      formDataToSend.append('academic_new_logo', formData.academic_new_logo);
+    }
 
     const response = await fetch(`${apiUrl}/${role}/Accounts/live-Account-Update`, {
       method: 'POST',

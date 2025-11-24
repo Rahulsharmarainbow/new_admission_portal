@@ -15,6 +15,7 @@ import SchoolDropdown from 'src/Frontend/Common/SchoolDropdown';
 import ClassForm from './ClassForm';
 
 interface Class {
+  remaining_seat: ReactNode;
   id: number;
   class_name: string;
   class_number: string | null;
@@ -346,6 +347,9 @@ const ClassTable: React.FC = () => {
                   Available Seats
                 </th>
                 <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Remaining Seats
+                </th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Tuition Fee 1
                 </th>
                 <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -388,6 +392,9 @@ const ClassTable: React.FC = () => {
                       >
                         {classItem.available_seat} Seats
                       </Badge>
+                    </td>
+                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                      {classItem.remaining_seat}
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600 font-medium">
                       ₹{classItem.tution_fee_1}

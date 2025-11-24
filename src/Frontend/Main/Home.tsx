@@ -110,6 +110,8 @@ const Home = () => {
         description:
           descriptionLine.title ||
           'Institute entrance examination for various programs for the Academic Year 2024-25',
+        description2:
+          descriptionLine2.title,
       },
       alert: {
         messages: data.marquee?.filter((m) => m.status !== 0).map((m) => m.title) || [
@@ -196,6 +198,7 @@ const Home = () => {
         institute_id={institute.unique_code}
         instituteName={institute.header?.name}
         logo={institute.header?.logo}
+        otherLogo={institute.header?.academic_new_logo}
         address={institute.header?.address}
       />
 
@@ -203,31 +206,40 @@ const Home = () => {
       <div className="bg-transparent mx-2 md:mx-8 py-8">
         {/* Exam Information Section */}
         <div className="relative p-8 mb-8 text-center bg-white rounded-2xl shadow-xl border border-gray-200">
-          {/* <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-            <div className="bg-gradient-to-r from-[#1e40af] to-[#0369a1] text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
-              ENTRANCE EXAM 2024
-            </div>
-          </div> */}
-
           <div className="text-center mb-6 mt-4">
             <h4 className="text-xl md:text-3xl font-bold text-[#1e40af] mb-2">{examInfo.title}</h4>
             <div className="w-24 h-1 bg-gradient-to-r from-[#1e40af] to-[#0369a1] mx-auto rounded-full"></div>
           </div>
-
-          <div className="mb-6">
-            <div className="mb-4">
-              <h2 className="text-xl font-bold text-white bg-gradient-to-r from-[#dc2626] to-[#ea580c] px-6 py-3 rounded-xl shadow-lg inline-flex items-center transform hover:scale-105 transition-transform duration-200">
-                {examInfo.subtitle}
-                {/* {alert.showNewBadge && <NewBadge className="ml-2" />} */}
-              </h2>
-            </div>
-            <div className="text-gray-700 leading-relaxed text-base max-w-7xl mx-auto bg-gray-50 p-6 rounded-xl border border-gray-200">
-              {examInfo.description}
-            </div>
-            {/* <div className="text-gray-700 leading-relaxed text-base max-w-7xl mx-auto bg-gray-50 p-6 rounded-xl border border-gray-200">
-              {examInfo.description2}
-            </div> */}
-          </div>
+<div className="mb-6">
+  <div className="mb-4">
+    <h2 className="text-xl font-bold text-white bg-gradient-to-r from-[#dc2626] to-[#ea580c] px-6 py-3 rounded-xl shadow-lg inline-flex items-center transform hover:scale-105 transition-transform duration-200">
+      {examInfo.subtitle}
+    </h2>
+  </div>
+  
+  {/* Main Description */}
+  <div className="text-gray-700 leading-relaxed text-base max-w-7xl mx-auto bg-gray-50 p-6 rounded-xl border border-gray-200">
+    {examInfo.description}
+  </div>
+  
+  {/* Divider */}
+  <div className="max-w-7xl mx-auto mt-4 flex items-center">
+    <div className="flex-1 border-t border-gray-300"></div>
+    <div className="mx-4 text-gray-500 text-sm">Additional Details</div>
+    <div className="flex-1 border-t border-gray-300"></div>
+  </div>
+  
+  {/* Description 2 */}
+  {
+    examInfo.description2 && (
+      <div className="mt-4 max-w-7xl mx-auto bg-blue-50 p-6 rounded-xl border border-blue-200">
+    <p className="text-gray-700 leading-relaxed text-base">
+      {examInfo.description2}
+    </p>
+  </div>
+    )
+  }
+</div>
 
           {institute.marquee && institute.marquee.length > 0 && (
             <div className="bg-gradient-to-r from-[#d97706]/20 to-[#ea580c]/20 border border-[#d97706] rounded-xl p-4 mb-2 overflow-hidden shadow-inner">

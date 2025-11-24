@@ -91,6 +91,8 @@ const MakeItLive: React.FC = () => {
     academicAddress: '',
     academicDescription: '',
     academicLogo: null,
+    academic_new_logo: null,
+    previewNewLogo: null,
     previewImage: null,
     director_signature: null,
 
@@ -354,6 +356,10 @@ const MakeItLive: React.FC = () => {
         ? `${import.meta.env.VITE_ASSET_URL}/${academic.academic_logo}`
         : null,
       // Contact Information
+       academic_new_logo: null, 
+       previewNewLogo: academic.academic_new_logo
+      ? `${import.meta.env.VITE_ASSET_URL}/${academic.academic_new_logo}`
+      : null,
       technicalName: technicalContact.name || '',
       technicalEmail: technicalContact.email || '',
       technicalPhone: technicalContact.phone || '',

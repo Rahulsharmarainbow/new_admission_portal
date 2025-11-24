@@ -3,10 +3,16 @@ import { Link } from 'react-router';
 
   const assetUrl = import.meta.env.VITE_ASSET_URL;
 
-const Header = ({ baseUrl,institute_id,instituteName, logo, address }) => {
+const Header = ({ baseUrl,institute_id,instituteName, logo, otherLogo, address }) => {
   const headerData = {
     logo: {
       src: assetUrl +"/" + logo || "https://admissionportalbackend.testingscrew.com/public/company_logos/1752817396_academic.jpg",
+      alt: "University Logo",
+      width: "100",
+      height: "100"
+    },
+    otherLogo: {
+      src: assetUrl +"/" + otherLogo || "https://admissionportalbackend.testingscrew.com/public/company_logos/1752817396_academic.jpg",
       alt: "University Logo",
       width: "100",
       height: "100"
@@ -43,9 +49,19 @@ const Header = ({ baseUrl,institute_id,instituteName, logo, address }) => {
                 <p className="text-sm text-gray-600 mt-1">
                   {headerData.university.address}
                 </p>
-              )}
+              )}           
+
               
             </div>
+            {otherLogo && (
+              <Link to={`${baseUrl}`} reloadDocument>
+                <img 
+                  src={`${headerData.otherLogo.src}`} 
+                  alt="Institute Logo" 
+                  className="h-20 w-48 md:w-20 object-contain ml-4 cursor-pointer"
+                />
+              </Link>
+            )}
           </div>
 
         </div>

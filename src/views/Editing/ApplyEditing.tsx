@@ -137,9 +137,7 @@ const ApplyEditing: React.FC = () => {
               ...card,
               children: card.children.filter((child) => {
                 if (child.id === fieldId) {
-                  // Add to deleted IDs array if it's an existing field (not new)
-                  if (fieldId < 1000) {
-                    // Existing fields have IDs < 1000
+                  if (fieldId) {
                     setDeletedFieldIds((prev) => [...prev, fieldId]);
                   }
                   return false;

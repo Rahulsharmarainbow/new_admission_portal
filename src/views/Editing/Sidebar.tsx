@@ -217,6 +217,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleDelete = () => {
     if (!editingField) return;
+      console.log("editingField", editingField)
+      console.log("editingField.id", editingField.id)
       deleteField(editingField.id);
   };
 
