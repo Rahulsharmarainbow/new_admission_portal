@@ -7,6 +7,7 @@ interface DeclarationStepProps {
   accepted: boolean;
   onConditionChange: (condition: string, value: boolean) => void;
   directorSignature: string
+  errors: { [key: string]: string }
 }
 
   const assetUrl = import.meta.env.VITE_ASSET_URL;
@@ -17,7 +18,8 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
   fileData,
   accepted,
   onConditionChange,
-  directorSignature
+  directorSignature,
+  errors
 }) => {
 //  const formatContent = (htmlContent: string | null | undefined) => {
 //   if (!htmlContent) return "";
@@ -127,18 +129,48 @@ const formatContent = (htmlContent: string | null | undefined, formData: any) =>
         </div>
       </div>
 
-      <div className="flex items-start space-x-3 mt-6 p-4 bg-gray-50 rounded-lg">
+      {/* <div className="flex items-start space-x-3 mt-6 p-4 bg-gray-50 rounded-lg">
         <input
           type="checkbox"
           id="declaration-checkbox"
           checked={accepted}
           onChange={(e) => onConditionChange('declaration', e.target.checked)}
-          className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1"
+          className={`w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1 ${
+                  errors["declaration-checkbox"] ? 'border-red-500' : 'border-gray-300'
+                }`}
         />
         <label htmlFor="declaration-checkbox" className="text-sm text-gray-700">
           I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
         </label>
+        {errors["declaration-checkbox"] && (
+              <p className="text-red-500 text-xs mt-1 ml-7">{"Please accept the terms and conditions."}</p>
+            )}
+      </div> */}
+
+
+       <div className="flex items-start gap-3 mt-6 p-4 bg-gray-50 rounded-lg relative">
+        <input
+          type="checkbox"
+          id="declaration-checkbox"
+          checked={accepted}
+          onChange={(e) => onConditionChange('declaration', e.target.checked)}
+          className={`w-4 h-4 mt-1 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
+            errors['declaration-checkbox'] ? 'border-red-500' : 'border-gray-300'
+          }`}
+        />
+
+        <label
+          htmlFor="disclaimer-checkbox"
+          className={`text-sm leading-5 
+      ${errors['declaration'] ? 'text-red-500' : 'text-gray-700'}`}
+        >
+          I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
+        </label>
       </div>
+
+      {errors['declaration'] && (
+        <p className="text-red-500 text-xs mt-1 ml-8">Please accept the terms and conditions.</p>
+      )}
     </div>
   );
 };

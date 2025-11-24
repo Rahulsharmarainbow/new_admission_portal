@@ -249,7 +249,7 @@ const FormStep: React.FC<FormStepProps> = ({
         };
 
         return (
-          <div className="space-y-2">
+          <div className="space-y-2 field-container">
             <label className="block text-sm font-semibold text-gray-700">
               {child.label}
               {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
@@ -307,7 +307,7 @@ const FormStep: React.FC<FormStepProps> = ({
         };
 
         return (
-          <div className="text-center space-y-3">
+          <div className="text-center space-y-3 field-container">
             <input
               type="file"
               id={child.name}
@@ -339,12 +339,12 @@ const FormStep: React.FC<FormStepProps> = ({
               {child.resolution && <p className="text-xs text-gray-600 mb-2">{child.resolution}</p>}
 
               {/* Buttons */}
-              <div className="flex justify-center gap-2">
+              <div className="flex justify-center gap-2 file-upload-buttons">
                 {/* CAMERA BUTTON */}
                 <button
                   type="button"
                   onClick={() => handleCameraCapture(child.name, fieldConfig)}
-                  className="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200"
+                  className="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200 file-upload-button mobile-full"
                 >
                   <Icon icon="solar:camera-line-duotone" className="w-4 h-4" />
                   Camera
@@ -353,7 +353,7 @@ const FormStep: React.FC<FormStepProps> = ({
                 {/* FILE UPLOAD BUTTON */}
                 <label
                   htmlFor={child.name}
-                  className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200 cursor-pointer"
+                  className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200 cursor-pointer file-upload-button mobile-full"
                 >
                   <Icon icon="solar:upload-line-duotone" className="w-4 h-4" />
                   Upload
@@ -385,12 +385,12 @@ const FormStep: React.FC<FormStepProps> = ({
 
       case 'adhar':
         return (
-          <div className="space-y-2">
-            <label className="flex text-sm font-semibold text-gray-700">
+          <div className="space-y-2 field-container">
+            <label className="flex text-sm font-semibold text-gray-700 mobile-full">
               {child.label}
               {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
             </label>
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center justify-center aadhaar-container mobile-stack">
               {Array.from({ length: 12 }, (_, index) => (
                 <input
                   key={index}
@@ -411,7 +411,7 @@ const FormStep: React.FC<FormStepProps> = ({
                   }}
                   name={`${child.name}_${index}`}
                   placeholder="X"
-                  className="w-10 h-10 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-semibold"
+                  className="aadhaar-digit text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-semibold responsive-input"
                 />
               ))}
               <button
@@ -582,17 +582,17 @@ const FormStep: React.FC<FormStepProps> = ({
         return (
           <div
             key={boxIndex}
-            className={`col-span-12 ${getGridCols()} bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 transition-all duration-300 hover:shadow-lg hover:border-blue-300 group`}
+            className={`col-span-12 ${getGridCols()} bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 transition-all duration-300 hover:shadow-lg hover:border-blue-300 group mobile-padding`}
           >
             {/* Box Header */}
             {box.title && (
-              <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100 mobile-stack">
                 {box.icon && (
                   <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
                     <Icon icon={box.icon} className="w-5 h-5" />
                   </div>
                 )}
-                <div>
+                <div className="mobile-full mobile-text-center">
                   <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
                     {box.title}
                   </h3>
@@ -603,9 +603,9 @@ const FormStep: React.FC<FormStepProps> = ({
               </div>
             )}
 
-            {/* Box Content with dynamic grid columns */}
+            {/* Box Content with improved responsive grid */}
             <div className="w-full">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+              <div className="form-grid">
                 {box?.children?.map((child: any, childIndex: number) => {
                   if (child.v_target) {
                     const targetValue = formData[`s_${child.h_target}`];
@@ -617,27 +617,22 @@ const FormStep: React.FC<FormStepProps> = ({
                   const childWidth = child.width || '100%';
                   const childWidthValue = parseInt(childWidth);
 
-                  // Calculate column span based on width percentage
+                  // Improved responsive column span
                   const getColumnSpan = () => {
-                    // Width-based spans
-                    if (childWidthValue >= 80) return 'full';
-                    if (childWidthValue >= 60) return 'span-2';
-                    if (childWidthValue >= 40) return 'span-2';
-                    if (childWidthValue >= 30) return 'span-1';
-                    if (childWidthValue >= 20) return 'span-1';
-                    return 'span-1';
+                    if (childWidthValue >= 80) return 'col-span-full';
+                    if (childWidthValue >= 60) return 'sm:col-span-2 lg:col-span-2';
+                    if (childWidthValue >= 40) return 'sm:col-span-2 lg:col-span-2';
+                    if (childWidthValue >= 30) return 'sm:col-span-1 lg:col-span-1';
+                    if (childWidthValue >= 20) return 'sm:col-span-1 lg:col-span-1';
+                    return 'sm:col-span-1 lg:col-span-1';
                   };
 
-                  const spanClass = {
-                    full: 'col-span-full',
-                    'span-2': 'col-span-2',
-                    'span-1': 'col-span-1',
-                  }[getColumnSpan()];
+                  const spanClass = getColumnSpan();
 
                   return (
                     <div
                       key={childIndex}
-                      className={`${spanClass} transition-all duration-200`}
+                      className={`${spanClass} field-container transition-all duration-200`}
                       style={{
                         minWidth: '150px',
                         ...(child.type === 'file_button'

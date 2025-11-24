@@ -8,6 +8,7 @@ interface FeeDetailsStepProps {
   fileData: { [key: string]: any };
   accepted: boolean;
   onConditionChange: (condition: string, value: boolean) => void;
+  errors: { [key: string]: string };
 }
 
   const assetUrl = import.meta.env.VITE_ASSET_URL;
@@ -19,7 +20,8 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
   formData,
   fileData,
   accepted,
-  onConditionChange
+  onConditionChange,
+  errors
 }) => {
   const formatPrice = (amount: string | number) => {
     if (!amount || isNaN(Number(amount))) return amount;
@@ -159,25 +161,54 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
       </div>
 
       {/* Agreement Checkbox */}
-      <div className="flex items-start space-x-3 mt-6 p-4 bg-gray-50 rounded-lg">
+      {/* <div className="flex items-start space-x-3 mt-6 p-4 bg-gray-50 rounded-lg">
         <input
           type="checkbox"
           id="fee-checkbox"
           checked={accepted}
           onChange={(e) => onConditionChange('fee', e.target.checked)}
-          className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1"
+          className={`w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1 ${
+                  errors["fee-checkbox"] ? 'border-red-500' : 'border-gray-300'
+                }`}
         />
         <label htmlFor="fee-checkbox" className="text-sm text-gray-700">
           I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
         </label>
+        {errors["fee-checkbox"] && (
+              <p className="text-red-500 text-xs mt-1 ml-7">{"Please accept the terms and conditions."}</p>
+            )}
+      </div> */}
+
+       <div className="flex items-start gap-3 mt-6 p-4 bg-gray-50 rounded-lg relative">
+        <input
+          type="checkbox"
+          id="fee-checkbox"
+          checked={accepted}
+          onChange={(e) => onConditionChange('fee', e.target.checked)}
+          className={`w-4 h-4 mt-1 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
+            errors['fee'] ? 'border-red-500' : 'border-gray-300'
+          }`}
+        />
+
+        <label
+          htmlFor="fee-checkbox"
+          className={`text-sm leading-5 
+      ${errors['fee'] ? 'text-red-500' : 'text-gray-700'}`}
+        >
+           I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
+        </label>
       </div>
 
+      {errors['fee'] && (
+        <p className="text-red-500 text-xs mt-1 ml-8">Please accept the terms and conditions.</p>
+      )}
+
       {/* Important Note */}
-      <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+      {/* <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
         <p className="text-sm text-red-700 font-semibold text-center">
           Tuition fee and Transport Fee once paid will not be refunded in any case
         </p>
-      </div>
+      </div> */}
     </div>
   );
 };

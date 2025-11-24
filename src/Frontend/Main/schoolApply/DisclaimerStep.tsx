@@ -8,9 +8,10 @@ interface DisclaimerStepProps {
   accepted: boolean;
   onConditionChange: (condition: string, value: boolean) => void;
   directorSignature: string;
+  errors: { [key: string]: string };
 }
 
-  const assetUrl = import.meta.env.VITE_ASSET_URL;
+const assetUrl = import.meta.env.VITE_ASSET_URL;
 
 const DisclaimerStep: React.FC<DisclaimerStepProps> = ({
   content,
@@ -19,68 +20,67 @@ const DisclaimerStep: React.FC<DisclaimerStepProps> = ({
   accepted,
   onConditionChange,
   directorSignature,
+  errors,
 }) => {
-// const formatContent = (htmlContent: string | null | undefined) => {
-//   if (!htmlContent) return "";
+  // const formatContent = (htmlContent: string | null | undefined) => {
+  //   if (!htmlContent) return "";
 
-//   let formattedContent: string = htmlContent ?? "";
+  //   let formattedContent: string = htmlContent ?? "";
 
-//   const data = formData ?? {};
+  //   const data = formData ?? {};
 
-//   Object.keys(data).forEach((key) => {
-//     const placeholder = `{${key}}`;
-//     const value = data[key] ? String(data[key]) : ""; 
+  //   Object.keys(data).forEach((key) => {
+  //     const placeholder = `{${key}}`;
+  //     const value = data[key] ? String(data[key]) : "";
 
-//     formattedContent = formattedContent?.replace?.(
-//       new RegExp(placeholder, "g"),
-//       `<strong>${value}</strong>`
-//     ) ?? formattedContent;
-//   });
+  //     formattedContent = formattedContent?.replace?.(
+  //       new RegExp(placeholder, "g"),
+  //       `<strong>${value}</strong>`
+  //     ) ?? formattedContent;
+  //   });
 
-//   formattedContent = formattedContent?.replace?.(/{[^}]*}/g, "") ?? formattedContent;
+  //   formattedContent = formattedContent?.replace?.(/{[^}]*}/g, "") ?? formattedContent;
 
-//   return formattedContent;
-// };
+  //   return formattedContent;
+  // };
 
-const formatContent = (htmlContent: string | null | undefined, formData: any) => {
-  if (!htmlContent) return "";
+  const formatContent = (htmlContent: string | null | undefined, formData: any) => {
+    if (!htmlContent) return '';
 
-  let formattedContent: string = htmlContent;
-  const data = formData ?? {};
+    let formattedContent: string = htmlContent;
+    const data = formData ?? {};
 
-  // Replace placeholders with formData values
-  Object.keys(data).forEach((key) => {
-    const placeholder = `{${key}}`;
-    let value = data[key] ? String(data[key]) : "";
+    // Replace placeholders with formData values
+    Object.keys(data).forEach((key) => {
+      const placeholder = `{${key}}`;
+      let value = data[key] ? String(data[key]) : '';
 
-    // Special condition for "class"
-    if (key === "class" && value.includes("$")) {
-      value = value.split("$")[1] ?? "";
-    }
+      // Special condition for "class"
+      if (key === 'class' && value.includes('$')) {
+        value = value.split('$')[1] ?? '';
+      }
 
-    formattedContent = formattedContent.replace(
-      new RegExp(placeholder, "g"),
-      `<strong>${value}</strong>`
-    );
-  });
+      formattedContent = formattedContent.replace(
+        new RegExp(placeholder, 'g'),
+        `<strong>${value}</strong>`,
+      );
+    });
 
-  // Remove all placeholders not found in formData
-  formattedContent = formattedContent.replace(/\{[^}]+\}/g, "");
+    // Remove all placeholders not found in formData
+    formattedContent = formattedContent.replace(/\{[^}]+\}/g, '');
 
-  return formattedContent;
-};
-
-
+    return formattedContent;
+  };
 
   return (
     <div className="school_paragraph">
-      <div 
-        dangerouslySetInnerHTML={{ 
-          __html: formatContent(content, formData) 
-        }} 
+      <div
+        dangerouslySetInnerHTML={{
+          __html: formatContent(content, formData),
+        }}
         className="prose max-w-none mb-6 text-gray-700 leading-relaxed text-sm"
       />
-      
+
       <div className="disclaimer_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
         <div>
           {directorSignature && (
@@ -90,15 +90,13 @@ const formatContent = (htmlContent: string | null | undefined, formData: any) =>
               className="w-48 h-20 object-contain block mx-auto mb-2 border border-gray-300 rounded"
             />
           )}
-          <p className="text-sm font-semibold text-gray-800">
-            Signature & Seal of School
-          </p>
+          <p className="text-sm font-semibold text-gray-800">Signature & Seal of School</p>
         </div>
-        
+
         <div className="text-center">
-          {fileData["candidate_signature"] && (
+          {fileData['candidate_signature'] && (
             <img
-              src={fileData["candidate_signature"]}
+              src={fileData['candidate_signature']}
               alt="Signature Preview"
               className="w-48 h-20 object-contain block mx-auto mb-2 border border-gray-300 rounded"
             />
@@ -112,18 +110,30 @@ const formatContent = (htmlContent: string | null | undefined, formData: any) =>
         </div>
       </div>
 
-      <div className="flex items-start space-x-3 mt-6 p-4 bg-gray-50 rounded-lg">
+      <div className="flex items-start gap-3 mt-6 p-4 bg-gray-50 rounded-lg relative">
         <input
           type="checkbox"
           id="disclaimer-checkbox"
           checked={accepted}
           onChange={(e) => onConditionChange('disclaimer', e.target.checked)}
-          className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1"
+          className={`w-4 h-4 mt-1 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
+            errors['disclaimer'] ? 'border-red-500' : 'border-gray-300'
+          }`}
         />
-        <label htmlFor="disclaimer-checkbox" className="text-sm text-gray-700">
-          I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
+
+        <label
+          htmlFor="disclaimer-checkbox"
+          className={`text-sm leading-5 
+      ${errors['disclaimer'] ? 'text-red-500' : 'text-gray-700'}`}
+        >
+          I have carefully gone through the instructions and I am conversant and shall abide by the
+          eligibility conditions and other regulations.
         </label>
       </div>
+
+      {errors['disclaimer'] && (
+        <p className="text-red-500 text-xs mt-1 ml-8">Please accept the terms and conditions.</p>
+      )}
     </div>
   );
 };

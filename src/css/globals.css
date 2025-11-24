@@ -104,6 +104,86 @@
 }
 
 
+/* Add these CSS styles to your global stylesheet or component */
+
+/* Mobile-first responsive grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .form-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* Responsive field containers */
+.field-container {
+  width: 100%;
+  min-width: 0; /* Prevents overflow */
+}
+
+/* Responsive input fields */
+.responsive-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .mobile-stack {
+    flex-direction: column;
+  }
+  
+  .mobile-full {
+    width: 100%;
+  }
+  
+  .mobile-padding {
+    padding: 1rem;
+  }
+  
+  .mobile-text-center {
+    text-align: center;
+  }
+}
+
+/* Aadhaar input responsive */
+@media (max-width: 640px) {
+  .aadhaar-container {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .aadhaar-digit {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* File upload responsive */
+@media (max-width: 640px) {
+  .file-upload-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .file-upload-button {
+    width: 100%;
+  }
+}
+
 
 
 
