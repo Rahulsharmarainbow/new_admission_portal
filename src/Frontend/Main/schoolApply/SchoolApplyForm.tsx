@@ -841,79 +841,77 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
         <div className="p-6">
           {/* Stepper */}
           <div className="flex items-center justify-center mb-6 md:mb-8">
-  <div className="flex items-center w-full max-w-4xl px-2">
-    {steps.map((step, index) => (
-      <React.Fragment key={step}>
-        {/* Step Circle */}
-        <div className="flex flex-col items-center flex-shrink-0">
-          <div
-            className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 font-semibold text-xs md:text-sm transition-all duration-300 ${
-              index === activeStep
-                ? 'bg-blue-600 border-blue-600 text-white shadow-lg transform scale-110'
-                : index < activeStep
-                ? 'bg-green-500 border-green-500 text-white'
-                : 'bg-white border-gray-300 text-gray-500'
-            }`}
-          >
-            {index < activeStep ? (
-              <Icon 
-                icon="solar:check-circle-line-duotone" 
-                className="w-4 h-4 md:w-5 md:h-5" 
-              />
-            ) : (
-              index + 1
-            )}
-          </div>
-          
-          {/* Step Label - Hidden on small mobile, visible on larger screens */}
-          <span
-            className={`hidden xs:block text-xs mt-1 md:mt-2 font-medium text-center max-w-16 md:max-w-20 truncate ${
-              index === activeStep ? 'text-blue-600 font-semibold' : 'text-gray-500'
-            }`}
-          >
-            {step}
-          </span>
-          
-          {/* Mobile Tooltip for active step */}
-          {index === activeStep && (
-            <div className="xs:hidden absolute top-full mt-1 px-2 py-1 bg-gray-800 text-white text-xs rounded-md whitespace-nowrap z-10">
-              {step}
+            <div className="flex items-center w-full max-w-4xl px-2">
+              {steps.map((step, index) => (
+                <React.Fragment key={step}>
+                  {/* Step Circle */}
+                  <div className="flex flex-col items-center flex-shrink-0">
+                    <div
+                      className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 font-semibold text-xs md:text-sm transition-all duration-300 ${
+                        index === activeStep
+                          ? 'bg-blue-600 border-blue-600 text-white shadow-lg transform scale-110'
+                          : index < activeStep
+                          ? 'bg-green-500 border-green-500 text-white'
+                          : 'bg-white border-gray-300 text-gray-500'
+                      }`}
+                    >
+                      {index < activeStep ? (
+                        <Icon
+                          icon="solar:check-circle-line-duotone"
+                          className="w-4 h-4 md:w-5 md:h-5"
+                        />
+                      ) : (
+                        index + 1
+                      )}
+                    </div>
+
+                    {/* Step Label - Hidden on small mobile, visible on larger screens */}
+                    <span
+                      className={`hidden xs:block text-xs mt-1 md:mt-2 font-medium text-center max-w-16 md:max-w-20 truncate ${
+                        index === activeStep ? 'text-blue-600 font-semibold' : 'text-gray-500'
+                      }`}
+                    >
+                      {step}
+                    </span>
+
+                    {/* Mobile Tooltip for active step */}
+                    {index === activeStep && (
+                      <div className="xs:hidden absolute top-full mt-1 px-2 py-1 bg-gray-800 text-white text-xs rounded-md whitespace-nowrap z-10">
+                        {step}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Connector Line - Hidden on very small screens, visible from sm upwards */}
+                  {index < steps.length - 1 && (
+                    <div
+                      className={`hidden sm:flex flex-1 h-1 mx-1 md:mx-2 transition-all duration-300 ${
+                        index < activeStep ? 'bg-green-500' : 'bg-gray-300'
+                      }`}
+                    />
+                  )}
+                </React.Fragment>
+              ))}
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Connector Line - Hidden on very small screens, visible from sm upwards */}
-        {index < steps.length - 1 && (
-          <div
-            className={`hidden sm:flex flex-1 h-1 mx-1 md:mx-2 transition-all duration-300 ${
-              index < activeStep ? 'bg-green-500' : 'bg-gray-300'
-            }`}
-          />
-        )}
-      </React.Fragment>
-    ))}
-  </div>
-</div>
+          {/* Alternative Mobile Stepper - Shows only current step with progress */}
+          <div className="sm:hidden mb-4">
+            <div className="flex items-center justify-between px-4">
+              <span className="text-sm text-gray-600">
+                Step {activeStep + 1} of {steps.length}
+              </span>
+              <span className="text-sm font-semibold text-blue-600">{steps[activeStep]}</span>
+            </div>
 
-{/* Alternative Mobile Stepper - Shows only current step with progress */}
-<div className="sm:hidden mb-4">
-  <div className="flex items-center justify-between px-4">
-    <span className="text-sm text-gray-600">
-      Step {activeStep + 1} of {steps.length}
-    </span>
-    <span className="text-sm font-semibold text-blue-600">
-      {steps[activeStep]}
-    </span>
-  </div>
-  
-  {/* Progress Bar for Mobile */}
-  <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
-    <div 
-      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-      style={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
-    ></div>
-  </div>
-</div>
+            {/* Progress Bar for Mobile */}
+            <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
+              ></div>
+            </div>
+          </div>
 
           {/* Step Content with loading state */}
           <div className="min-h-[400px] relative">

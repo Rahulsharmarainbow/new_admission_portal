@@ -382,59 +382,87 @@ const FormStep: React.FC<FormStepProps> = ({
             /> */}
           </div>
         );
-
-      case 'adhar':
-        return (
-          <div className="space-y-2 field-container">
-            <label className="flex text-sm font-semibold text-gray-700 mobile-full">
-              {child.label}
-              {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            <div className="flex gap-2 items-center justify-center aadhaar-container mobile-stack">
-              {Array.from({ length: 12 }, (_, index) => (
-                <input
-                  key={index}
-                  type={formData[`${child.name}_visible`] ? 'text' : 'password'}
-                  maxLength={1}
-                  value={formData[`${child.name}_${index}`] || ''}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, '');
-                    onAadhaarChange(index, value, child.name, fieldConfig);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Backspace' && !formData[`${child.name}_${index}`] && index > 0) {
-                      const prevInput = document.querySelector(
-                        `input[name="${child.name}_${index - 1}"]`,
-                      ) as HTMLInputElement;
-                      prevInput?.focus();
-                    }
-                  }}
-                  name={`${child.name}_${index}`}
-                  placeholder="X"
-                  className="aadhaar-digit text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-semibold responsive-input"
-                />
-              ))}
-              <button
-                type="button"
-                onClick={() => handleAadhaarVisibility(child.name)}
-                className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-              >
-                <Icon
-                  icon={
-                    formData[`${child.name}_visible`]
-                      ? 'solar:eye-line-duotone'
-                      : 'solar:eye-closed-line-duotone'
-                  }
-                  className="w-5 h-5"
-                />
-              </button>
-            </div>
-            {errors[child.name] && (
-              <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
-            )}
-          </div>
-        );
-
+case 'adhar':
+  return (
+    <div className="space-y-3 field-container">
+      <label className="flex text-sm font-semibold text-gray-700">
+        {child.label}
+        {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
+      </label>
+      
+      {/* Aadhaar Input Container */}
+      <div className="flex flex-col space-y-3">
+        {/* Aadhaar Digits Grid */}
+        <div className="flex flex-wrap justify-center gap-1 sm:gap-2 md:gap-2">
+          {Array.from({ length: 12 }, (_, index) => (
+            <input
+              key={index}
+              type={formData[`${child.name}_visible`] ? 'text' : 'password'}
+              maxLength={1}
+              value={formData[`${child.name}_${index}`] || ''}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '');
+                onAadhaarChange(index, value, child.name, fieldConfig);
+                
+                // Auto-focus next input
+                if (value && index < 11) {
+                  const nextInput = document.querySelector(
+                    `input[name="${child.name}_${index + 1}"]`,
+                  ) as HTMLInputElement;
+                  nextInput?.focus();
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Backspace' && !formData[`${child.name}_${index}`] && index > 0) {
+                  const prevInput = document.querySelector(
+                    `input[name="${child.name}_${index - 1}"]`,
+                  ) as HTMLInputElement;
+                  prevInput?.focus();
+                }
+              }}
+              onFocus={(e) => e.target.select()}
+              name={`${child.name}_${index}`}
+              placeholder="X"
+              className="aadhaar-digit w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-lg font-semibold transition-all duration-200 bg-white shadow-sm"
+            />
+          ))}
+           <button
+            type="button"
+            onClick={() => handleAadhaarVisibility(child.name)}
+            className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors rounded-lg hover:border-blue-300 bg-white shadow-sm"
+          >
+            <Icon
+              icon={
+                formData[`${child.name}_visible`]
+                  ? 'solar:eye-line-duotone'
+                  : 'solar:eye-closed-line-duotone'
+              }
+              className="w-4 h-4 sm:w-5 sm:h-5"
+            />
+          </button>
+        </div>
+        
+        {/* Visibility Toggle and Spacing */}
+        <div className="flex justify-center items-center gap-4">
+          {/* Visual Separators for better readability */}
+          {/* <div className="hidden sm:flex items-center space-x-1 text-gray-400 text-sm">
+            <span>XXXX</span>
+            <span>-</span>
+            <span>XXXX</span>
+            <span>-</span>
+            <span>XXXX</span>
+          </div> */}
+          
+          {/* Visibility Toggle Button */}
+         
+        </div>
+      </div>
+      
+      {errors[child.name] && (
+        <p className="text-red-500 text-xs mt-2 text-center sm:text-left">{errors[child.name]}</p>
+      )}
+    </div>
+  );
       case 'radio':
         return (
           <div className="space-y-2">

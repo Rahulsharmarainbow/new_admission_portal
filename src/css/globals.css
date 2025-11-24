@@ -187,7 +187,35 @@
 
 
 
+/* Custom breakpoints for better mobile experience */
+@media (max-width: 475px) {
+  .xs\\:block {
+    display: block;
+  }
+  .xs\\:hidden {
+    display: none;
+  }
+}
 
+/* Very small mobile devices */
+@media (max-width: 320px) {
+  .stepper-container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/* Smooth transitions for all stepper elements */
+.stepper-step {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Mobile-first responsive design */
+@media (min-width: 640px) {
+  .stepper-connector {
+    display: flex;
+  }
+}
 
 
 
