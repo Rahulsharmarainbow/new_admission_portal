@@ -481,46 +481,6 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
       });
 
       const order = response.data;
-      // const options = {
-      //   key: cdata.razorpay_api_key,
-      //   amount: order.amount,
-      //   currency: order.currency,
-      //   name: header.name,
-      //   description: 'Application Fee',
-      //   order_id: order.id,
-      //   handler: async (paymentResponse: any) => {
-      //     try {
-      //       setStepTransitionLoading(true); // Start step transition loading
-      //       const verifyResponse = await axios.post(
-      //         `${apiUrl}/frontend/college-save-final-step-data`,
-      //         {
-      //           razorpay_payment_id: paymentResponse.razorpay_payment_id,
-      //           razorpay_order_id: paymentResponse.razorpay_order_id,
-      //           razorpay_signature: paymentResponse.razorpay_signature,
-      //           academic_id: academic_id,
-      //           application_id: formData.application_id,
-      //           transaction_id: formData.transaction_id,
-      //         },
-      //       );
-
-      //       if (verifyResponse.data.success) {
-      //         setFormData((prev) => ({
-      //           ...prev,
-      //           payment_done: 1,
-      //           transaction_id: verifyResponse.data.transaction_id,
-      //         }));
-      //         setActiveStep(2);
-      //       }
-      //     } catch (error) {
-      //       console.error('Payment verification failed:', error);
-      //     } finally {
-      //       setStepTransitionLoading(false); // Stop step transition loading
-      //     }
-      //   },
-      //   theme: {
-      //     color: '#1e40af',
-      //   },
-      // };
 
       const options = {
         key: cdata.razorpay_api_key,

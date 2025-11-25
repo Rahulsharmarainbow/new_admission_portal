@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Button, Card } from 'flowbite-react';
-import { FaArrowLeft } from 'react-icons/fa';
+import { Icon } from '@iconify/react';
 import Loader from 'src/Frontend/Common/Loader';
 import { useAuth } from 'src/hook/useAuth';
 import BreadcrumbHeader from 'src/Frontend/Common/BreadcrumbHeader';
@@ -63,255 +63,481 @@ const ApplicationEditPage: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState<CandidateDetails>({});
-  const [formSections, setFormSections] = useState<FormSection[]>([]);
-  const [lookups, setLookups] = useState<Lookups>({});
-  const [application, setApplication] = useState<ApplicationData | null>(null);
+  const [formData, setFormData] = useState<{ [key: string]: any }>({});
+  const [fileData, setFileData] = useState<{ [key: string]: any }>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [formOptions, setFormOptions] = useState<{ [key: string]: any[] }>({});
   const [dynamicOptions, setDynamicOptions] = useState<{
     [key: string]: Array<{ value: number | string; text: string }>;
   }>({});
-  const [filePreviews, setFilePreviews] = useState<{ [key: string]: string }>({});
+  const [formSections, setFormSections] = useState<FormSection[]>([]);
+  const [lookups, setLookups] = useState<Lookups>({});
+  const [application, setApplication] = useState<ApplicationData | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<{ [key: string]: File }>({});
   const [visibleFields, setVisibleFields] = useState<{ [key: string]: boolean }>({});
+
+  const formRefs = useRef<{ [key: string]: any }>({});
+  const validationErrors = useRef<{ [key: string]: string }>({});
+  const [showErrors, setShowErrors] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const apiAssetsUrl = import.meta.env.VITE_ASSET_URL;
 
-  // Handle district auto-selection when dynamic options are updated
-  useEffect(() => {
-    if (Object.keys(dynamicOptions).length > 0 && Object.keys(formData).length > 0) {
-      // Find all state→district mappings dynamically
-      const stateDistrictMappings = getStateDistrictMappings();
-      
-      Object.keys(stateDistrictMappings).forEach(stateField => {
-        const targetField = stateDistrictMappings[stateField];
-        const stateValue = formData[stateField];
-        const districtValue = formData[targetField];
-        
-        if (stateValue && districtValue && dynamicOptions[targetField]) {
-          const districtOptions = dynamicOptions[targetField];
-          
-          // Extract just the ID part for comparison
-          const districtId = districtValue.includes('$') 
-            ? districtValue.split('$')[0] 
-            : districtValue;
-          
-          const matchingDistrict = districtOptions.find(
-            (option) => {
-              const optionId = option.value.includes('$') 
-                ? option.value.split('$')[0] 
-                : option.value;
-              return optionId === districtId;
-            }
-          );
-          
-          if (!matchingDistrict) {
-            console.log(`Clearing district for ${targetField} as value doesn't match options`);
-            setFormData((prev) => ({
-              ...prev,
-              [targetField]: '',
-            }));
-          } else {
-            // Ensure the district value is in the correct format
-            if (districtValue !== matchingDistrict.value) {
-              setFormData((prev) => ({
-                ...prev,
-                [targetField]: matchingDistrict.value,
-              }));
-            }
+  // Process candidate details to create proper form data with id$value format
+  const processCandidateDetails = (candidateDetails: CandidateDetails) => {
+    const processedData: { [key: string]: any } = {};
+
+    Object.keys(candidateDetails).forEach((key) => {
+      if (!key.startsWith('S')) {
+        const value = candidateDetails[key];
+        const sKey = `S${key}`;
+        const sValue = candidateDetails[sKey];
+
+        // For select fields, create id$value format
+        if (value && sValue && !value.includes('$')) {
+          processedData[key] = `${value}$${sValue}`;
+        } else {
+          processedData[key] = value || '';
+        }
+
+        // Handle Aadhaar fields
+        if (key === 'adharCard' && value && value.length === 12) {
+          for (let i = 0; i < 12; i++) {
+            processedData[`adharCard_${i}`] = value[i];
           }
         }
-      });
-    }
-  }, [dynamicOptions]);
-
-  // Get all state→district mappings dynamically from form sections
-  const getStateDistrictMappings = () => {
-    const mappings: { [key: string]: string } = {};
-    
-    formSections.forEach(section => {
-      section.children.forEach(field => {
-        if (field.apiurl && field.apiurl.includes('get_district_by_state_id') && field.target) {
-          mappings[field.name] = field.target;
-        }
-      });
+      }
     });
-    
-    return mappings;
+
+    return processedData;
   };
 
-  // Fetch districts by state ID
-  const fetchDistricts = async (stateId: string | number, targetField: string) => {
-    try {
-      console.log(`Fetching districts for state ID: ${stateId}, target field: ${targetField}`);
-      
-      const response = await axios.post(
-        `${apiUrl}/frontend/get_district_by_state_id`,
-        { state_id: stateId },
-        {
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-            'Content-Type': 'application/json',
-          },
-        },
+  // Get field options with proper lookup handling
+  const getFieldOptions = (field: FormField) => {
+    let options: Array<{ value: number | string; text: string }> = [];
+
+    // 1. Check dynamic options first (for state/district)
+    if (dynamicOptions[field.name] && dynamicOptions[field.name].length > 0) {
+      options = dynamicOptions[field.name];
+    }
+    // 2. Check form options (for API loaded data)
+    else if (formOptions[field.name] && formOptions[field.name].length > 0) {
+      options = formOptions[field.name];
+    }
+    // 3. Check field's own options
+    else if (field.options && field.options.length > 0) {
+      options = field.options;
+    }
+    // 4. Check lookups
+    else {
+      const lookupKey = Object.keys(lookups).find(
+        (key) =>
+          key.toLowerCase().includes(field.name.toLowerCase()) ||
+          field.name.toLowerCase().includes(key.toLowerCase()),
       );
 
-      let districtOptions: Array<{ value: number | string; text: string }> = [];
+      if (lookupKey && lookups[lookupKey]) {
+        options = lookups[lookupKey];
+      }
+    }
 
-      if (response.data && response.data.districts) {
-        districtOptions = response.data.districts.map((district: any) => ({
-          value: `${district.id}$${district.district_title}`,
-          text: district.district_title,
+    // Convert all options to id$value format
+    const formattedOptions = options.map((option) => {
+      if (typeof option.value === 'string' && option.value.includes('$')) {
+        return option;
+      } else {
+        return {
+          value: `${option.value}$${option.text}`,
+          text: option.text,
+        };
+      }
+    });
+
+    return formattedOptions;
+  };
+
+  // Handle input change with API calls
+  const handleInputChange = useCallback(
+    (name: string, value: any, fieldConfig?: any) => {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+
+      if (errors[name]) {
+        setErrors((prev) => ({
+          ...prev,
+          [name]: '',
         }));
       }
 
-      console.log(`Districts loaded for ${targetField}:`, districtOptions);
+      // Handle state to district API calls
+      if (
+        fieldConfig?.apiurl &&
+        fieldConfig.apiurl.includes('get_district_by_state_id') &&
+        fieldConfig?.target
+      ) {
+        const stateId =
+          typeof value === 'string' && value.includes('$') ? value.split('$')[0] : value;
 
-      setDynamicOptions((prev) => ({
-        ...prev,
-        [targetField]: districtOptions,
-      }));
+        if (stateId) {
+          fetch(`${apiUrl}/frontend/get_district_by_state_id`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${user?.token}`,
+            },
+            body: JSON.stringify({ state_id: stateId }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              return response.json();
+            })
+            .then((data) => {
+              if (data.districts) {
+                const districts = data.districts.map((item: any) => ({
+                  value: `${item.id}$${item.district_title}`,
+                  text: item.district_title.trim(),
+                }));
 
-      // Auto-select district if we have existing district value
-      const existingDistrictValue = formData[targetField];
-      console.log(`Existing district value for ${targetField}:`, existingDistrictValue);
-      
-      if (existingDistrictValue && districtOptions.length > 0) {
-        // Extract ID part for comparison
-        const existingDistrictId = existingDistrictValue.includes('$') 
-          ? existingDistrictValue.split('$')[0] 
-          : existingDistrictValue;
-        
-        // Check if existing district value matches any option
-        const matchingDistrict = districtOptions.find(
-          (option) => {
-            const optionId = option.value.includes('$') 
-              ? option.value.split('$')[0] 
-              : option.value;
-            return optionId === existingDistrictId;
-          }
-        );
-        
-        if (matchingDistrict) {
-          console.log(`District value ${existingDistrictValue} found in options, keeping it`);
-          // Ensure the value is in the correct format
-          if (existingDistrictValue !== matchingDistrict.value) {
-            setFormData((prev) => ({
-              ...prev,
-              [targetField]: matchingDistrict.value,
-            }));
-          }
-        } else {
-          console.log(`District value ${existingDistrictValue} not found in options, clearing it`);
-          // If district doesn't exist in new options, clear it
-          setFormData((prev) => ({
-            ...prev,
-            [targetField]: '',
-          }));
+                setFormOptions((prev) => ({
+                  ...prev,
+                  [fieldConfig.target]: districts,
+                }));
+
+                setDynamicOptions((prev) => ({
+                  ...prev,
+                  [fieldConfig.target]: districts,
+                }));
+
+                // Auto-select district if we have existing district value
+                const existingDistrictValue = formData[fieldConfig.target];
+                if (existingDistrictValue && districts.length > 0) {
+                  const existingDistrictId =
+                    typeof existingDistrictValue === 'string' && existingDistrictValue.includes('$')
+                      ? existingDistrictValue.split('$')[0]
+                      : existingDistrictValue;
+
+                  const matchingDistrict = districts.find((option) => {
+                    const optionId =
+                      typeof option.value === 'string' && option.value.includes('$')
+                        ? option.value.split('$')[0]
+                        : option.value;
+                    return optionId === existingDistrictId;
+                  });
+
+                  if (matchingDistrict && formData[fieldConfig.target] !== matchingDistrict.value) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      [fieldConfig.target]: matchingDistrict.value,
+                    }));
+                  }
+                }
+              }
+            })
+            .catch((error) => {
+              console.error('Error fetching districts:', error);
+            });
         }
       }
-    } catch (error) {
-      console.error('Error fetching districts:', error);
-      toast.error('Failed to load districts');
+    },
+    [errors, apiUrl, user, formData],
+  );
+
+  // Handle select change
+  const handleSelectChange = useCallback(
+    (name: string, value: any, fieldConfig?: any) => {
+      const [valuePart, textPart] = typeof value === 'string' ? value.split('$') : [value, ''];
+
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        [`s_${name}`]: textPart,
+      }));
+
+      if (errors[name]) {
+        setErrors((prev) => ({
+          ...prev,
+          [name]: '',
+        }));
+      }
+
+      // Handle state to district API calls
+      if (
+        fieldConfig?.apiurl &&
+        fieldConfig.apiurl.includes('get_district_by_state_id') &&
+        fieldConfig?.target
+      ) {
+        const stateId = valuePart;
+
+        if (stateId) {
+          fetch(`${apiUrl}/frontend/get_district_by_state_id`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${user?.token}`,
+            },
+            body: JSON.stringify({ state_id: stateId }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              return response.json();
+            })
+            .then((data) => {
+              if (data.districts) {
+                const districts = data.districts.map((item: any) => ({
+                  value: `${item.id}$${item.district_title}`,
+                  text: item.district_title.trim(),
+                }));
+
+                setFormOptions((prev) => ({
+                  ...prev,
+                  [fieldConfig.target]: districts,
+                }));
+
+                setDynamicOptions((prev) => ({
+                  ...prev,
+                  [fieldConfig.target]: districts,
+                }));
+
+                // Auto-select district if we have existing district value
+                const existingDistrictValue = formData[fieldConfig.target];
+                if (existingDistrictValue && districts.length > 0) {
+                  const existingDistrictId =
+                    typeof existingDistrictValue === 'string' && existingDistrictValue.includes('$')
+                      ? existingDistrictValue.split('$')[0]
+                      : existingDistrictValue;
+
+                  const matchingDistrict = districts.find((option) => {
+                    const optionId =
+                      typeof option.value === 'string' && option.value.includes('$')
+                        ? option.value.split('$')[0]
+                        : option.value;
+                    return optionId === existingDistrictId;
+                  });
+
+                  if (matchingDistrict && formData[fieldConfig.target] !== matchingDistrict.value) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      [fieldConfig.target]: matchingDistrict.value,
+                    }));
+                  }
+                }
+              }
+            })
+            .catch((error) => {
+              console.error('Error fetching districts:', error);
+            });
+        }
+      }
+    },
+    [errors, apiUrl, user, formData],
+  );
+
+  // Handle checkbox change
+  const handleCheckboxChange = useCallback((name: string, value: boolean, fieldConfig?: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value ? 1 : 0,
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: '',
+    }));
+  }, []);
+
+  // Handle date change
+  const handleDateChange = useCallback(
+    (name: string, date: any, fieldConfig?: any) => {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: date,
+      }));
+
+      if (errors[name]) {
+        setErrors((prev) => ({
+          ...prev,
+          [name]: '',
+        }));
+      }
+    },
+    [errors],
+  );
+
+  // Handle Aadhaar change
+  const handleAadhaarChange = useCallback(
+    (index: number, value: string, name: string, fieldConfig?: any) => {
+      console.log('Aadhaar value:', value, 'index:', index, 'name:', name);
+
+      // Ensure value is a string and clean it
+      const stringValue = String(value || '');
+      const cleanValue = stringValue.replace(/\D/g, ''); // Remove non-digits
+
+      if (cleanValue && cleanValue.length === 1) {
+        // Only allow single digits
+        setFormData((prev) => ({
+          ...prev,
+          [`${name}_${index}`]: cleanValue,
+        }));
+
+        // Auto-focus next input
+        if (cleanValue && index < 11) {
+          setTimeout(() => {
+            const nextInput = document.querySelector(
+              `input[name="${name}_${index + 1}"]`,
+            ) as HTMLInputElement;
+            if (nextInput) {
+              nextInput.focus();
+              nextInput.select();
+            }
+          }, 10);
+        }
+      } else if (stringValue === '') {
+        // Handle backspace/delete
+        setFormData((prev) => ({
+          ...prev,
+          [`${name}_${index}`]: '',
+        }));
+
+        // Auto-focus previous input on backspace
+        if (index > 0) {
+          setTimeout(() => {
+            const prevInput = document.querySelector(
+              `input[name="${name}_${index - 1}"]`,
+            ) as HTMLInputElement;
+            if (prevInput) {
+              prevInput.focus();
+              prevInput.select();
+            }
+          }, 10);
+        }
+      }
+    },
+    [],
+  );
+
+  // Handle file change
+  const handleFileChange = useCallback(
+    (name: string, file: File, fieldConfig?: any) => {
+      if (!file) return;
+
+      if (!file.type.match(/image\/(jpeg|png)/)) {
+        toast.error('Please upload a valid JPEG or PNG image.');
+        return;
+      }
+
+      if (file.size > 1048576) {
+        toast.error('File size should be less than 1 MB.');
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+
+        setSelectedFiles((prev) => ({
+          ...prev,
+          [name]: file,
+        }));
+
+        setFileData((prev) => ({
+          ...prev,
+          [name]: base64,
+        }));
+
+        if (errors[name]) {
+          setErrors((prev) => ({
+            ...prev,
+            [name]: '',
+          }));
+        }
+      };
+
+      reader.readAsDataURL(file);
+    },
+    [errors],
+  );
+
+  const handleFileUpload = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    fieldName: string,
+    fieldConfig: any,
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleFileChange(fieldName, file, fieldConfig);
     }
   };
 
-  // Fetch states data
-  const fetchStates = async () => {
-    try {
-      console.log('Fetching states...');
-      
-      const response = await axios.get(`${apiUrl}/frontend/get_states`, {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+  const handleAadhaarVisibility = (name: string) => {
+    const isVisible = !formData[`${name}_visible`];
+    setFormData((prev) => ({
+      ...prev,
+      [`${name}_visible`]: isVisible,
+    }));
 
-      let stateOptions: Array<{ value: number | string; text: string }> = [];
-
-      if (response.data && response.data.states) {
-        stateOptions = response.data.states.map((state: any) => ({
-          value: `${state.state_id}$${state.state_title}`,
-          text: state.state_title,
-        }));
+    // Toggle input types
+    const inputs = document.querySelectorAll(`input[name^="${name}_"]`);
+    inputs.forEach((input: any) => {
+      if (input.type === 'password' || input.type === 'text') {
+        input.type = isVisible ? 'text' : 'password';
       }
+    });
+  };
 
-      console.log('States loaded:', stateOptions);
+  // Get preview box style
+  const getPreviewBoxStyle = (resolution?: string) => {
+    if (!resolution) return null;
 
-      if (stateOptions.length > 0) {
-        // Find all state fields dynamically from form sections
-        const stateFields = new Set<string>();
-        
-        formSections.forEach(section => {
-          section.children.forEach(field => {
-            // Include fields that have state API or contain 'state' in name
-            if (field.apiurl && field.apiurl.includes('get_district_by_state_id') || 
-                field.name.toLowerCase().includes('state')) {
-              stateFields.add(field.name);
-            }
-          });
-        });
+    const [w, h] = resolution.split('x').map(Number);
+    if (!w || !h) return null;
 
-        console.log('Dynamic state fields found:', Array.from(stateFields));
-
-        const newDynamicOptions: any = {};
-        Array.from(stateFields).forEach((field) => {
-          newDynamicOptions[field] = stateOptions;
-        });
-
-        setDynamicOptions((prev) => ({
-          ...prev,
-          ...newDynamicOptions,
-        }));
-
-        console.log('Dynamic options after states:', newDynamicOptions);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error fetching states:', error);
-      toast.error('Failed to load states');
-      return false;
+    if (w > h * 2) {
+      return {
+        width: `${w}px`,
+        height: `${h}px`,
+      };
     }
+
+    return null;
   };
 
   // Update field visibility based on h_target and v_target
-  const updateFieldVisibility = (fieldName: string, value: string) => {
+  const updateFieldVisibility = (fieldName: string, value: any) => {
     const newVisibleFields = { ...visibleFields };
 
-    // Extract just the value part for comparison (remove text part)
-    const valuePart = value && value.includes('$') ? value.split('$')[0] : value;
-    const valueText = value && value.includes('$') ? value.split('$')[1] : value;
+    const valueString = typeof value === 'string' ? value : String(value);
+    const valuePart =
+      valueString && valueString.includes('$') ? valueString.split('$')[0] : valueString;
+    const valueText =
+      valueString && valueString.includes('$') ? valueString.split('$')[1] : valueString;
 
-    // Find all fields that have this field as their h_target
     formSections.forEach((section) => {
       section.children.forEach((field) => {
         if (field.h_target === fieldName) {
           let shouldShow = false;
-          
+
           if (field.v_target) {
-            // Handle comma-separated values in v_target (like "SC,ST")
             const vTargetValues = field.v_target.split(',');
-            
-            // Check both ID and text values
-            shouldShow = vTargetValues.some(vTarget => {
-              const vTargetPart = vTarget && vTarget.includes('$') 
-                ? vTarget.split('$')[0] 
-                : vTarget;
-              const vTargetText = vTarget && vTarget.includes('$') 
-                ? vTarget.split('$')[1] 
-                : vTarget;
-              
-              // Match by ID or by text
+            shouldShow = vTargetValues.some((vTarget) => {
+              const vTargetPart =
+                vTarget && vTarget.includes('$') ? vTarget.split('$')[0] : vTarget;
+              const vTargetText =
+                vTarget && vTarget.includes('$') ? vTarget.split('$')[1] : vTarget;
+
               return valuePart === vTargetPart || valueText === vTargetText;
             });
           } else {
             shouldShow = !!value;
           }
-          
+
           newVisibleFields[field.name] = shouldShow;
-          console.log(`Field ${field.name} visibility: ${shouldShow} (based on ${fieldName} = ${value})`);
         }
       });
     });
@@ -319,44 +545,42 @@ const ApplicationEditPage: React.FC = () => {
     setVisibleFields(newVisibleFields);
   };
 
-  // Initialize field visibility with enhanced logic
-  const initializeFieldVisibility = (data: CandidateDetails) => {
+  // Initialize field visibility
+  const initializeFieldVisibility = (data: { [key: string]: any }) => {
     const initialVisibility: { [key: string]: boolean } = {};
 
     formSections.forEach((section) => {
       section.children.forEach((field) => {
         if (field.h_target) {
           const targetValue = data[field.h_target];
-          // Extract both ID and text parts
-          const targetValuePart = targetValue && targetValue.includes('$') 
-            ? targetValue.split('$')[0] 
-            : targetValue;
-          const targetValueText = targetValue && targetValue.includes('$') 
-            ? targetValue.split('$')[1] 
-            : targetValue;
-          
+          const targetValueString =
+            typeof targetValue === 'string' ? targetValue : String(targetValue);
+          const targetValuePart =
+            targetValueString && targetValueString.includes('$')
+              ? targetValueString.split('$')[0]
+              : targetValueString;
+          const targetValueText =
+            targetValueString && targetValueString.includes('$')
+              ? targetValueString.split('$')[1]
+              : targetValueString;
+
           let shouldShow = false;
-          
+
           if (field.v_target) {
-            // Handle comma-separated values in v_target (like "SC,ST")
             const vTargetValues = field.v_target.split(',');
-            shouldShow = vTargetValues.some(vTarget => {
-              const vTargetPart = vTarget && vTarget.includes('$') 
-                ? vTarget.split('$')[0] 
-                : vTarget;
-              const vTargetText = vTarget && vTarget.includes('$') 
-                ? vTarget.split('$')[1] 
-                : vTarget;
-              
-              // Match by ID or by text
+            shouldShow = vTargetValues.some((vTarget) => {
+              const vTargetPart =
+                vTarget && vTarget.includes('$') ? vTarget.split('$')[0] : vTarget;
+              const vTargetText =
+                vTarget && vTarget.includes('$') ? vTarget.split('$')[1] : vTarget;
+
               return targetValuePart === vTargetPart || targetValueText === vTargetText;
             });
           } else {
             shouldShow = !!targetValue;
           }
-          
+
           initialVisibility[field.name] = shouldShow;
-          console.log(`Initial visibility for ${field.name}: ${shouldShow}`);
         } else {
           initialVisibility[field.name] = true;
         }
@@ -366,24 +590,7 @@ const ApplicationEditPage: React.FC = () => {
     setVisibleFields(initialVisibility);
   };
 
-  // 🔹 Find all dynamic state fields that have apiurl + target
-  const getDynamicStateFields = (sections: FormSection[]) => {
-    const stateFieldMap: { [key: string]: string } = {};
-    sections.forEach((section) => {
-      section.children.forEach((field) => {
-        if (
-          field.apiurl &&
-          field.apiurl.includes('get_district_by_state_id') &&
-          field.target
-        ) {
-          stateFieldMap[field.name] = field.target;
-        }
-      });
-    });
-    return stateFieldMap;
-  };
-
-  // Fetch application form data
+  // Fetch application data
   const fetchApplicationData = async () => {
     if (!applicationId) return;
     setLoading(true);
@@ -405,43 +612,29 @@ const ApplicationEditPage: React.FC = () => {
         setLookups(response.data.lookups || {});
         setApplication(response.data.application_data);
 
-        // 👇 Get all dynamic state→district mappings
-        const dynamicStateMap = getDynamicStateFields(formSectionsData);
-        console.log("Dynamic state→district mapping:", dynamicStateMap);
-
         if (response.data.candidate_details) {
           const candidateData = response.data.candidate_details;
-          const cleanFormData: CandidateDetails = {};
 
-          Object.keys(candidateData).forEach((key) => {
-            if (!key.startsWith('S')) {
-              const value = candidateData[key];
-              const sKey = `S${key}`;
-              const sValue = candidateData[sKey];
-              if (value && sValue) {
-                cleanFormData[key] = `${value}$${sValue}`;
-              } else {
-                cleanFormData[key] = value || '';
+          // Process candidate details to create proper form data
+          const processedFormData = processCandidateDetails(candidateData);
+          setFormData(processedFormData);
+
+          // Load existing file previews
+          const filePreviews: { [key: string]: string } = {};
+          formSectionsData.forEach((section) => {
+            section.children.forEach((field) => {
+              if (field.type === 'file_button' && candidateData[field.name]) {
+                filePreviews[field.name] = `${apiAssetsUrl}/${candidateData[field.name]}`;
               }
-            }
+            });
           });
+          setFileData(filePreviews);
 
-          setFormData(cleanFormData);
+          // Initialize field visibility
+          initializeFieldVisibility(processedFormData);
 
-          // 👇 Fetch all States only once
-          await fetchStates();
-
-          // 👇 Now loop dynamically (instead of static stateFields)
-          for (const [stateField, targetField] of Object.entries(dynamicStateMap)) {
-            const stateValue = cleanFormData[stateField];
-            if (stateValue) {
-              const stateId = stateValue.includes('$') ? stateValue.split('$')[0] : stateValue;
-              await fetchDistricts(stateId, targetField);
-            }
-          }
-
-          // Initialize visibility
-          initializeFieldVisibility(cleanFormData);
+          // Load states and districts for dynamic fields
+          await loadDynamicOptions(formSectionsData, processedFormData);
         }
       }
     } catch (error) {
@@ -452,155 +645,217 @@ const ApplicationEditPage: React.FC = () => {
     }
   };
 
+  // Load dynamic options (states and districts)
+  const loadDynamicOptions = async (sections: FormSection[], formData: { [key: string]: any }) => {
+    // Load states
+    try {
+      const statesResponse = await axios.get(`${apiUrl}/frontend/get_states`, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+        },
+      });
+
+      if (statesResponse.data?.states) {
+        const stateOptions = statesResponse.data.states.map((state: any) => ({
+          value: `${state.state_id}$${state.state_title}`,
+          text: state.state_title,
+        }));
+
+        const newDynamicOptions: any = {};
+
+        // Find all state fields
+        sections.forEach((section) => {
+          section.children.forEach((field) => {
+            if (field.apiurl && field.apiurl.includes('get_district_by_state_id')) {
+              newDynamicOptions[field.name] = stateOptions;
+            }
+          });
+        });
+
+        setDynamicOptions((prev) => ({ ...prev, ...newDynamicOptions }));
+
+        // Load districts for existing state values
+        for (const section of sections) {
+          for (const field of section.children) {
+            if (field.apiurl && field.apiurl.includes('get_district_by_state_id') && field.target) {
+              const stateValue = formData[field.name];
+              if (stateValue) {
+                const stateId =
+                  typeof stateValue === 'string' && stateValue.includes('$')
+                    ? stateValue.split('$')[0]
+                    : stateValue;
+
+                const districtsResponse = await axios.post(
+                  `${apiUrl}/frontend/get_district_by_state_id`,
+                  { state_id: stateId },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${user?.token}`,
+                    },
+                  },
+                );
+
+                if (districtsResponse.data?.districts) {
+                  const districtOptions = districtsResponse.data.districts.map((district: any) => ({
+                    value: `${district.id}$${district.district_title}`,
+                    text: district.district_title,
+                  }));
+
+                  setDynamicOptions((prev) => ({
+                    ...prev,
+                    [field.target]: districtOptions,
+                  }));
+
+                  // Auto-select district if we have existing district value
+                  const existingDistrictValue = formData[field.target];
+                  if (existingDistrictValue && districtOptions.length > 0) {
+                    const existingDistrictId =
+                      typeof existingDistrictValue === 'string' &&
+                      existingDistrictValue.includes('$')
+                        ? existingDistrictValue.split('$')[0]
+                        : existingDistrictValue;
+
+                    const matchingDistrict = districtOptions.find((option) => {
+                      const optionId =
+                        typeof option.value === 'string' && option.value.includes('$')
+                          ? option.value.split('$')[0]
+                          : option.value;
+                      return optionId === existingDistrictId;
+                    });
+
+                    if (matchingDistrict && formData[field.target] !== matchingDistrict.value) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        [field.target]: matchingDistrict.value,
+                      }));
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error loading dynamic options:', error);
+    }
+  };
+
   useEffect(() => {
     fetchApplicationData();
   }, [applicationId]);
 
-  // Handle lookups dependency for form data updates
+  // Update visibility when form data changes
   useEffect(() => {
-    if (Object.keys(lookups).length > 0 && Object.keys(formData).length > 0) {
-      // Re-process form data when lookups are available
-      const updatedFormData = { ...formData };
-      let needsUpdate = false;
+    if (Object.keys(formData).length > 0) {
+      Object.keys(formData).forEach((key) => {
+        updateFieldVisibility(key, formData[key]);
+      });
+    }
+  }, [formData]);
 
-      const selectFields = [
-        'blood_group', 'gender', 'relationship', 'child_has_any_issue', 
-        'school_transport_required', 'category', 'local-area', 'special-category',
-        'annual-income', 'board', 'board1', 'year', 'year1'
-      ];
-      
-      selectFields.forEach(field => {
-        if (updatedFormData[field] && !updatedFormData[field].includes('$')) {
-          // Find the text value from lookups
-          const lookupKey = Object.keys(lookups).find(
-            lookup => lookups[lookup].some(option => 
-              option.value.toString() === updatedFormData[field] || 
-              option.value === updatedFormData[field]
-            )
-          );
-          
-          if (lookupKey) {
-            const option = lookups[lookupKey].find(opt => 
-              opt.value.toString() === updatedFormData[field] || 
-              opt.value === updatedFormData[field]
-            );
-            if (option) {
-              updatedFormData[field] = `${updatedFormData[field]}$${option.text}`;
-              needsUpdate = true;
+  // Validate form
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    formSections.forEach((section) => {
+      section.children.forEach((field) => {
+        if (field.required === 1 && visibleFields[field.name] !== false) {
+          if (field.type === 'file_button') {
+            if (!fileData[field.name] && !formData[field.name]) {
+              newErrors[field.name] = `${field.label} is required`;
+            }
+          } else if (field.name === 'adharCard') {
+            let aadhaarCard = '';
+            let hasError = false;
+            for (let i = 0; i < 12; i++) {
+              const digit = formData[`adharCard_${i}`];
+              if (!digit) {
+                newErrors[field.name] = 'All Aadhaar card digits are required';
+                hasError = true;
+                break;
+              }
+              aadhaarCard += digit;
+            }
+            if (!hasError && aadhaarCard.length === 12) {
+              delete newErrors[field.name];
+            }
+          } else if (!formData[field.name] && formData[field.name] !== 0) {
+            newErrors[field.name] = `${field.label} is required`;
+          } else if (field.validation === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(formData[field.name])) {
+              newErrors[field.name] = 'Invalid email address';
+            }
+          } else if (field.validation === 'mobile') {
+            const phoneRegex = /^\d{10}$/;
+            if (!phoneRegex.test(formData[field.name])) {
+              newErrors[field.name] = 'Phone number must be 10 digits';
             }
           }
         }
       });
+    });
 
-      if (needsUpdate) {
-        setFormData(updatedFormData);
-      }
-    }
-  }, [lookups]);
+    const filteredErrors = Object.fromEntries(
+      Object.entries(newErrors).filter(([_, value]) => value !== ''),
+    );
 
-  // Handle state change - fetch districts
-  const handleStateChange = (fieldName: string, value: string, targetField: string) => {
-    const stateId = value.includes('$') ? value.split('$')[0] : value;
-
-    setFormData((prev) => ({
-      ...prev,
-      [fieldName]: value,
-      [targetField]: '', // Reset district
-    }));
-
-    updateFieldVisibility(fieldName, value);
-
-    if (stateId) {
-      fetchDistricts(stateId, targetField);
-    }
+    setErrors(filteredErrors);
+    validationErrors.current = filteredErrors;
+    return Object.keys(filteredErrors).length === 0;
   };
 
-  // Handle input changes
-  const handleInputChange = (fieldName: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [fieldName]: value,
-    }));
-
-    // Update field visibility for dependent fields
-    updateFieldVisibility(fieldName, value);
-  };
-
-  // Handle file selection with preview
-  const handleFileSelect = (fieldName: string, file: File) => {
-    if (file) {
-      // Store the file
-      setSelectedFiles((prev) => ({
-        ...prev,
-        [fieldName]: file,
-      }));
-
-      // Create preview for images
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setFilePreviews((prev) => ({
-            ...prev,
-            [fieldName]: e.target?.result as string,
-          }));
-        };
-        reader.readAsDataURL(file);
-      }
-
-      toast.success(`${file.name} selected for upload`);
-    }
-  };
-
-  // Handle form submission with file upload
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
+    if (!validateForm()) {
+      setShowErrors(true);
+      setSaving(false);
+      return;
+    }
+
     try {
-      // Create FormData for file upload
       const submitFormData = new FormData();
-      
-      // Add basic data
+
       submitFormData.append('application_id', applicationId || '');
       submitFormData.append('customer_id', user?.id?.toString() || '');
       submitFormData.append('academic_id', application?.academic_id?.toString() || '');
       submitFormData.append('s_id', user?.id?.toString() || '');
-      
-      // Process form data - DON'T split id$value, send as it is
+
       const mainData: any = { ...formData };
-      const sData: any = {}; // For text values
-      
-      Object.keys(mainData).forEach(key => {
+      const sData: any = {};
+
+      if (mainData.adharCard_0 !== undefined) {
+        let combinedAadhaar = '';
+        for (let i = 0; i < 12; i++) {
+          combinedAadhaar += mainData[`adharCard_${i}`] || '';
+        }
+        mainData.adharCard = combinedAadhaar;
+        console.log('Combined Aadhaar:', combinedAadhaar);
+      }
+
+      Object.keys(mainData).forEach((key) => {
         const value = mainData[key];
-        
-        // Handle id$value format for select fields - SEND AS IT IS
+
         if (typeof value === 'string' && value.includes('$')) {
           const [idPart, ...textParts] = value.split('$');
-          const textValue = textParts.join('$'); // In case text contains $
-          
-          // Send both ID and text in maindata (id$value format)
-          mainData[key] = value; // Keep the original id$value format
-          
-          // Also store text part in S-data for backward compatibility
-          sData[`S${key}`] = textValue;
-        } else {
-          // For non-select fields
+          const textValue = textParts.join('$');
+
           mainData[key] = value;
+          sData[`S${key}`] = textValue;
         }
       });
-      
-      // Add files to FormData
-      Object.keys(selectedFiles).forEach(fieldName => {
+
+      Object.keys(selectedFiles).forEach((fieldName) => {
         submitFormData.append(fieldName, selectedFiles[fieldName]);
-        // Remove file fields from mainData since they'll be sent as files
         delete mainData[fieldName];
       });
-      
+
       submitFormData.append('maindata', JSON.stringify(mainData));
       submitFormData.append('sdata', JSON.stringify(sData));
-
-      console.log('Submitting data - MAIN DATA:', mainData);
-      console.log('Submitting data - S DATA:', sData);
 
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Applications/Applications-update`,
@@ -610,7 +865,7 @@ const ApplicationEditPage: React.FC = () => {
             Authorization: `Bearer ${user?.token}`,
             'Content-Type': 'multipart/form-data',
           },
-        }
+        },
       );
 
       if (response.data.success) {
@@ -627,146 +882,31 @@ const ApplicationEditPage: React.FC = () => {
     }
   };
 
-  // Get field options with proper fallback and id$value format - DYNAMIC VERSION
-  const getFieldOptions = (field: FormField) => {
-    let options: Array<{ value: number | string; text: string }> = [];
+  // Render form field
+  const renderField = (child: FormField, boxIndex: number, childIndex: number) => {
+    const commonProps = {
+      key: `${boxIndex}-${childIndex}`,
+      value: formData[child.name] || '',
+      ref: (el: any) => {
+        if (el) formRefs.current[child.name] = el;
+      },
+    };
 
-    console.log(`Getting options for field: ${field.name}, type: ${field.type}`);
-
-    // 1. First check for state fields with apiurl
-    if (field.apiurl && field.apiurl.includes('get_district_by_state_id')) {
-      options = dynamicOptions[field.name] || [];
-      console.log(`State field ${field.name} options from dynamic:`, options);
-    }
-
-    // 2. Check for district fields
-    if (field.name.includes('district')) {
-      options = dynamicOptions[field.name] || [];
-      console.log(`District field ${field.name} options from dynamic:`, options);
-    }
-
-    // 3. For state fields (without apiurl but state in name)
-    if (field.name.toLowerCase().includes('state')) {
-      options = dynamicOptions[field.name] || [];
-      console.log(`State field ${field.name} options from dynamic:`, options);
-    }
-
-    // 4. For board fields - check lookups.boards first
-    if (field.name === 'board' || field.name === 'board1') {
-      if (lookups.boards && lookups.boards.length > 0) {
-        options = lookups.boards;
-        console.log(`Board field ${field.name} options from lookups:`, options);
-      }
-    }
-
-    // 5. Check dynamic options for other fields
-    if (options.length === 0 && dynamicOptions[field.name] && dynamicOptions[field.name].length > 0) {
-      options = dynamicOptions[field.name];
-      console.log(`Field ${field.name} options from dynamic:`, options);
-    }
-
-    // 6. Then check field's own options
-    if (options.length === 0 && field.options && field.options.length > 0) {
-      options = field.options;
-      console.log(`Field ${field.name} options from field:`, options);
-    }
-
-    // 7. Then check lookups for other fields
-    if (options.length === 0) {
-      const lookupKey = Object.keys(lookups).find(
-        (key) =>
-          key.toLowerCase().includes(field.name.toLowerCase()) ||
-          field.name.toLowerCase().includes(key.toLowerCase()),
-      );
-
-      if (lookupKey && lookups[lookupKey]) {
-        options = lookups[lookupKey];
-        console.log(`Field ${field.name} options from lookups:`, options);
-      }
-    }
-
-    // Convert all options to id$value format
-    const formattedOptions = options.map((option) => {
-      if (typeof option.value === 'string' && option.value.includes('$')) {
-        // Already in id$value format
-        return option;
-      } else {
-        // Convert to id$value format
-        return {
-          value: `${option.value}$${option.text}`,
-          text: option.text,
-        };
-      }
-    });
-
-    console.log(`Final options for ${field.name}:`, formattedOptions);
-    return formattedOptions;
-  };
-
-  // Check if field is a state field with district API
-  const isStateFieldWithAPI = (field: FormField) => {
-    return field.apiurl && field.apiurl.includes('get_district_by_state_id');
-  };
-
-  // Check if field is a district field
-  const isDistrictField = (fieldName: string) => {
-    return fieldName.includes('district');
-  };
-
-  // Check if field is a state field
-  const isStateField = (fieldName: string) => {
-    return fieldName.toLowerCase().includes('state');
-  };
-
-  // Get target field for state dropdown
-  const getTargetField = (field: FormField) => {
-    if (field.target) return field.target;
-    return '';
-  };
-
-  // Get field label
-  const getFieldLabel = (field: FormField) => {
-    if (field.label && field.label.trim() !== '') {
-      return field.label;
-    }
-
-    // Generate label from field name
-    const name = field.name
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/-/g, ' ')
-      .replace(/_/g, ' ');
-    return name.charAt(0).toUpperCase() + name.slice(1);
-  };
-
-  // Render form field based on type
-  const renderFormField = (field: FormField) => {
-    const value = formData[field.name] || '';
-    const fieldOptions = getFieldOptions(field);
-    const isVisible = visibleFields[field.name] !== false;
+    const fieldConfig = {
+      type: child.type,
+      validation: child.validation,
+      validation_message: child.validation_message,
+      required: child.required,
+      apiurl: child.apiurl,
+      target: child.target,
+      h_target: child.h_target,
+      resolution: child.resolution,
+      max_date: child.max_date,
+    };
 
     // Skip rendering if field is not visible
-    if (!isVisible) {
-      console.log(`Skipping ${field.name} - not visible`);
+    if (visibleFields[child.name] === false) {
       return null;
-    }
-
-    // Special handling for caste_certificate based on category
-    if (field.name === 'caste_certificate') {
-      const categoryValue = formData['category'];
-      const categoryId = categoryValue && categoryValue.includes('$') 
-        ? categoryValue.split('$')[0] 
-        : categoryValue;
-      const categoryText = categoryValue && categoryValue.includes('$') 
-        ? categoryValue.split('$')[1] 
-        : categoryValue;
-      
-      const isSCOrST = categoryId === '590' || categoryId === '591' || 
-                      categoryText === 'SC' || categoryText === 'ST';
-      
-      if (!isSCOrST) {
-        console.log(`Skipping caste_certificate - category is not SC/ST:`, categoryValue);
-        return null;
-      }
     }
 
     const baseInputClasses =
@@ -774,230 +914,321 @@ const ApplicationEditPage: React.FC = () => {
     const baseSelectClasses =
       'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors outline-none';
 
-    switch (field.type) {
-      case 'text':
-      case 'adhar':
+    switch (child.type) {
+      case 'heading':
         return (
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            placeholder={field.placeholder}
-            className={baseInputClasses}
-            required={field.required === 1}
-          />
+          <div className={`text-start mb-6 w-full ${getColumnSpan(child.width)}`}>
+            <h4 className="text-lg font-bold text-[#dc2626] inline-flex items-center">
+              <Icon icon={child.icon || 'solar:document-line-duotone'} className="w-4 h-4 mr-2" />
+              {child.content}
+            </h4>
+          </div>
+        );
+
+      case 'text':
+        return (
+          <div className={`space-y-2 ${getColumnSpan(child.width)}`}>
+            <label className="block text-sm font-medium text-gray-700">
+              {child.label}
+              {child.required === 1 && <span className="text-red-500 ml-1">*</span>}
+            </label>
+            <input
+              {...commonProps}
+              type="text"
+              placeholder={child.placeholder}
+              onChange={(e) => handleInputChange(child.name, e.target.value, fieldConfig)}
+              className={`${baseInputClasses} ${
+                errors[child.name] ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            {errors[child.name] && (
+              <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
+            )}
+          </div>
         );
 
       case 'select':
-        // State dropdown with district API
-        if (isStateFieldWithAPI(field)) {
-          const targetField = getTargetField(field);
-          const stateOptions = getFieldOptions(field);
-          
-          return (
-            <div>
-              <select
-                value={value}
-                onChange={(e) => handleStateChange(field.name, e.target.value, targetField)}
-                className={baseSelectClasses}
-                required={field.required === 1}
-              >
-                <option value="">Select {getFieldLabel(field)}</option>
-                {stateOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.text}
-                  </option>
-                ))}
-              </select>
-              {stateOptions.length === 0 && (
-                <p className="text-xs text-gray-500 mt-1">Loading states...</p>
-              )}
-            </div>
-          );
-        }
-        
-        // Regular state fields (without API but state in name)
-        if (isStateField(field.name)) {
-          const stateOptions = getFieldOptions(field);
-          
-          return (
-            <div>
-              <select
-                value={value}
-                onChange={(e) => handleInputChange(field.name, e.target.value)}
-                className={baseSelectClasses}
-                required={field.required === 1}
-              >
-                <option value="">Select {getFieldLabel(field)}</option>
-                {stateOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.text}
-                  </option>
-                ))}
-              </select>
-              {stateOptions.length === 0 && (
-                <p className="text-xs text-gray-500 mt-1">Loading states...</p>
-              )}
-            </div>
-          );
-        }
-        
-        // District dropdown
-        if (isDistrictField(field.name)) {
-          const districtOptions = getFieldOptions(field);
-          const isDisabled = districtOptions.length === 0;
-          
-          return (
-            <div>
-              <select
-                value={value}
-                onChange={(e) => handleInputChange(field.name, e.target.value)}
-                className={`${baseSelectClasses} ${
-                  isDisabled ? 'bg-gray-100 text-gray-500 border-gray-200' : ''
-                }`}
-                required={field.required === 1}
-                disabled={isDisabled}
-              >
-                <option value="">
-                  {isDisabled ? 'Select State First' : `Select ${getFieldLabel(field)}`}
-                </option>
-                {districtOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.text}
-                  </option>
-                ))}
-              </select>
-              {isDisabled && value && (
-                <p className="text-xs text-yellow-600 mt-1">Please select state first to load districts</p>
-              )}
-            </div>
-          );
-        }
+        const selectOptions = getFieldOptions(child);
 
-        // Regular select dropdown (including board fields)
-        const fieldOptions = getFieldOptions(field);
-        
         return (
-          <select
-            value={value}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            className={baseSelectClasses}
-            required={field.required === 1}
-          >
-            <option value="">Select {getFieldLabel(field)}</option>
-            {fieldOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.text}
-              </option>
-            ))}
-          </select>
+          <div className={`space-y-2 ${getColumnSpan(child.width)}`}>
+            <label className="block text-sm font-medium text-gray-700">
+              {child.label}
+              {child.required === 1 && <span className="text-red-500 ml-1">*</span>}
+            </label>
+            <select
+              {...commonProps}
+              onChange={(e) => handleSelectChange(child.name, e.target.value, fieldConfig)}
+              className={`${baseSelectClasses} ${
+                errors[child.name] ? 'border-red-500' : 'border-gray-300'
+              }`}
+            >
+              <option value="">Select {child.label}</option>
+              {selectOptions.map((option: any) => (
+                <option key={option.value} value={option.value}>
+                  {option.text}
+                </option>
+              ))}
+            </select>
+            {errors[child.name] && (
+              <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
+            )}
+          </div>
         );
 
       case 'date':
+        const getMaxDate = () => {
+          if (child.max_date) {
+            const today = new Date();
+            const maxDate = new Date(
+              today.getFullYear() - child.max_date,
+              today.getMonth(),
+              today.getDate(),
+            );
+            return maxDate.toISOString().split('T')[0];
+          }
+          return undefined;
+        };
+
         return (
-          <input
-            type="date"
-            value={value}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            className={baseInputClasses}
-            required={field.required === 1}
-          />
+          <div className={`space-y-2 ${getColumnSpan(child.width)}`}>
+            <label className="block text-sm font-medium text-gray-700">
+              {child.label}
+              {child.required === 1 && <span className="text-red-500 ml-1">*</span>}
+            </label>
+            <input
+              {...commonProps}
+              type="date"
+              onChange={(e) => handleDateChange(child.name, e.target.value, fieldConfig)}
+              max={getMaxDate()}
+              className={`${baseInputClasses} ${
+                errors[child.name] ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            {errors[child.name] && (
+              <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
+            )}
+          </div>
+        );
+
+      case 'checkbox':
+        return (
+          <div className={`flex flex-col space-y-2 ${getColumnSpan(child.width)}`}>
+            <div className="flex items-start space-x-3">
+              <input
+                type="checkbox"
+                id={child.name}
+                checked={formData[child.name] === 1}
+                onChange={(e) => handleCheckboxChange(child.name, e.target.checked, fieldConfig)}
+                className={`w-4 h-4 mt-1 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
+                  errors[child.name] ? 'border-red-500' : 'border-gray-300'
+                }`}
+              />
+              <label
+                htmlFor={child.name}
+                className={`text-sm leading-tight ${
+                  errors[child.name] ? 'text-red-600' : 'text-gray-700'
+                }`}
+              >
+                {child.content}
+                {child.required === 1 && <span className="text-red-500 ml-1">*</span>}
+              </label>
+            </div>
+            {errors[child.name] && (
+              <p className="text-red-500 text-xs mt-1 ml-7">{errors[child.name]}</p>
+            )}
+          </div>
         );
 
       case 'file_button':
-        const selectedFile = selectedFiles[field.name];
-        const existingFileUrl = formData[field.name]
-          ? `${apiAssetsUrl}/${formData[field.name]}`
-          : '';
-        const previewUrl = filePreviews[field.name] || existingFileUrl;
+        const previewStyle = getPreviewBoxStyle(child.resolution);
+        const previewUrl = fileData[child.name];
 
         return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col justify-between transition hover:shadow-md h-full">
-            <div className="mb-3">
-              <p className="text-sm font-semibold text-gray-800 mb-1">
-                {getFieldLabel(field)}
-                {field.required === 1 && <span className="text-red-500 ml-1">*</span>}
-              </p>
-              {field.resolution && (
-                <p className="text-xs text-gray-500">Recommended: {field.resolution}</p>
-              )}
-            </div>
+          <div className={`text-center space-y-3 ${getColumnSpan(child.width)}`}>
+            <input
+              type="file"
+              id={child.name}
+              className="hidden"
+              onChange={(e) => handleFileUpload(e, child.name, fieldConfig)}
+              accept="image/*"
+            />
 
-            <div className="flex flex-col items-center justify-center text-center bg-gray-50 border border-gray-100 rounded-lg p-3 mb-3">
-              {previewUrl ? (
-                <>
-                  <p className="text-xs text-gray-600 mb-2">Preview:</p>
-                  {field.name.includes('signature') ? (
-                    <img
-                      src={previewUrl}
-                      alt="Signature Preview"
-                      className="w-36 h-20 object-contain border border-blue-300 rounded"
-                    />
-                  ) : (
-                    <img
-                      src={previewUrl}
-                      alt="Image Preview"
-                      className="w-32 h-32 object-cover border border-blue-300 rounded-lg"
-                    />
-                  )}
-                </>
-              ) : (
-                <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-xs">
-                  No file selected
-                </div>
-              )}
-            </div>
-
-            <div>
-              <input
-                type="file"
-                id={field.name}
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    handleFileSelect(field.name, e.target.files[0]);
-                  }
-                }}
-                className="hidden"
-              />
-              <label
-                htmlFor={field.name}
-                className="cursor-pointer bg-[#0084DA] text-white px-4 py-2 rounded-lg hover:bg-[#0070B8] transition-colors w-full text-center text-sm font-medium"
+            <div className="bg-gray-50 p-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors duration-200">
+              <div
+                className={`mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2 overflow-hidden ${
+                  previewStyle ? '' : 'w-20 h-20'
+                }`}
+                style={previewStyle || {}}
               >
-                {field.content || `📁 Upload ${getFieldLabel(field)}`}
-              </label>
+                {previewUrl ? (
+                  <img
+                    src={previewUrl}
+                    alt={child.label}
+                    className="object-contain w-full h-full rounded-lg"
+                  />
+                ) : (
+                  <Icon icon="solar:upload-line-duotone" className="w-8 h-8 text-gray-400" />
+                )}
+              </div>
+
+              <p className="text-xs text-gray-600 mb-2">{child.content}</p>
+              {child.resolution && <p className="text-xs text-gray-600 mb-2">{child.resolution}</p>}
+
+              <div className="flex justify-center gap-2">
+                <label
+                  htmlFor={child.name}
+                  className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200 cursor-pointer"
+                >
+                  <Icon icon="solar:upload-line-duotone" className="w-4 h-4" />
+                  Upload
+                </label>
+              </div>
             </div>
+
+            {errors[child.name] && <p className="text-red-500 text-xs">{errors[child.name]}</p>}
+          </div>
+        );
+
+      case 'adhar':
+        return (
+          <div className={`space-y-3 ${getColumnSpan(child.width)}`}>
+            <label className="flex text-sm font-medium text-gray-700">
+              {child.label}
+              {child.required === 1 && <span className="text-red-500 ml-1">*</span>}
+            </label>
+
+            <div className="flex flex-col space-y-3">
+              <div className="flex flex-wrap gap-1 sm:gap-2 items-center">
+                {Array.from({ length: 12 }, (_, index) => (
+                  <input
+                    key={index}
+                    type={formData[`${child.name}_visible`] ? 'text' : 'password'}
+                    maxLength={1}
+                    value={formData[`${child.name}_${index}`] || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      console.log('Input change:', value, 'at index:', index);
+                      handleAadhaarChange(index, value, child.name, fieldConfig);
+                    }}
+                    onKeyDown={(e) => {
+                      // Handle backspace specifically
+                      if (
+                        e.key === 'Backspace' &&
+                        !formData[`${child.name}_${index}`] &&
+                        index > 0
+                      ) {
+                        e.preventDefault();
+                        const prevInput = document.querySelector(
+                          `input[name="${child.name}_${index - 1}"]`,
+                        ) as HTMLInputElement;
+                        if (prevInput) {
+                          prevInput.focus();
+                          prevInput.select();
+                        }
+                      }
+                    }}
+                    onFocus={(e) => e.target.select()}
+                    name={`${child.name}_${index}`}
+                    placeholder="●"
+                    className="w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-lg font-semibold transition-all duration-200 bg-white shadow-sm"
+                  />
+                ))}
+                <button
+                  type="button"
+                  onClick={() => handleAadhaarVisibility(child.name)}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors rounded-lg hover:border-blue-300 bg-white shadow-sm"
+                >
+                  <Icon
+                    icon={
+                      formData[`${child.name}_visible`]
+                        ? 'solar:eye-line-duotone'
+                        : 'solar:eye-closed-line-duotone'
+                    }
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                  />
+                </button>
+              </div>
+            </div>
+
+            {errors[child.name] && (
+              <p className="text-red-500 text-xs mt-2">{errors[child.name]}</p>
+            )}
+          </div>
+        );
+
+      case 'email':
+        return (
+          <div className={`space-y-2 ${getColumnSpan(child.width)}`}>
+            <label className="block text-sm font-medium text-gray-700">
+              {child.label}
+              {child.required === 1 && <span className="text-red-500 ml-1">*</span>}
+            </label>
+            <input
+              {...commonProps}
+              type="email"
+              placeholder={child.placeholder}
+              onChange={(e) => handleInputChange(child.name, e.target.value, fieldConfig)}
+              className={`${baseInputClasses} ${
+                errors[child.name] ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            {errors[child.name] && (
+              <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
+            )}
+          </div>
+        );
+
+      case 'tel':
+        return (
+          <div className={`space-y-2 ${getColumnSpan(child.width)}`}>
+            <label className="block text-sm font-medium text-gray-700">
+              {child.label}
+              {child.required === 1 && <span className="text-red-500 ml-1">*</span>}
+            </label>
+            <input
+              {...commonProps}
+              type="tel"
+              placeholder={child.placeholder}
+              pattern="[0-9]{10}"
+              maxLength={10}
+              onInput={(e) => {
+                e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '');
+                handleInputChange(child.name, e.currentTarget.value, fieldConfig);
+              }}
+              className={`${baseInputClasses} ${
+                errors[child.name] ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            {errors[child.name] && (
+              <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
+            )}
           </div>
         );
 
       default:
-        return (
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            placeholder={field.placeholder}
-            className={baseInputClasses}
-          />
-        );
+        return null;
     }
+  };
+
+  // Get column span based on width
+  const getColumnSpan = (width: string) => {
+    const widthValue = parseInt(width);
+    if (widthValue >= 80) return 'col-span-full';
+    if (widthValue >= 60) return 'sm:col-span-2 lg:col-span-2';
+    if (widthValue >= 40) return 'sm:col-span-2 lg:col-span-2';
+    if (widthValue >= 30) return 'sm:col-span-1 lg:col-span-1';
+    if (widthValue >= 20) return 'sm:col-span-1 lg:col-span-1';
+    return 'sm:col-span-1 lg:col-span-1';
   };
 
   // Calculate grid columns based on section width
   const getGridColumns = (section: FormSection) => {
-    if (section.width === '100%') {
-      return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
-    }
-    if (section.width === '80%') {
-      return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
-    }
-    if (section.width === '50%') {
-      return 'grid-cols-1 md:grid-cols-2';
-    }
-    if (section.width === '20%') {
-      return 'grid-cols-1';
-    }
-    return 'grid-cols-1 md:grid-cols-2';
+    const width = parseInt(section.width);
+    if (width >= 70 && width <= 80) return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+    if (width >= 45 && width <= 55) return 'grid-cols-1 md:grid-cols-2';
+    if (width >= 20 && width <= 30) return 'grid-cols-1';
+    return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
   };
 
   if (loading) {
@@ -1010,8 +1241,11 @@ const ApplicationEditPage: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <BreadcrumbHeader
-            title="Applications Edit"
-            paths={[{ name: 'Applications Edit', link: '#' }]}
+            title="Edit Application"
+            paths={[
+              { name: 'Applications', link: '/applications' },
+              { name: 'Edit Application', link: '#' },
+            ]}
           />
         </div>
 
@@ -1019,7 +1253,6 @@ const ApplicationEditPage: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <div className="space-y-6">
             {formSections.map((section, sectionIndex) => {
-              // Skip empty sections
               if (section.children.length === 0) return null;
 
               // Separate file fields from normal fields
@@ -1028,17 +1261,11 @@ const ApplicationEditPage: React.FC = () => {
 
               return (
                 <Card key={sectionIndex} className="p-6">
-                  {/* Normal fields (text, select, etc.) */}
+                  {/* Normal fields */}
                   {normalFields.length > 0 && (
                     <div className={`grid ${getGridColumns(section)} gap-6`}>
-                      {normalFields.map((field) => (
-                        <div key={field.id} className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-700">
-                            {getFieldLabel(field)}
-                            {field.required === 1 && <span className="text-red-500 ml-1">*</span>}
-                          </label>
-                          {renderFormField(field)}
-                        </div>
+                      {normalFields.map((field, fieldIndex) => (
+                        <div key={field.id}>{renderField(field, sectionIndex, fieldIndex)}</div>
                       ))}
                     </div>
                   )}
@@ -1046,9 +1273,9 @@ const ApplicationEditPage: React.FC = () => {
                   {/* File Upload Cards */}
                   {fileFields.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                      {fileFields.map((field) => (
+                      {fileFields.map((field, fieldIndex) => (
                         <div key={field.id} className="w-full">
-                          {renderFormField(field)}
+                          {renderField(field, sectionIndex, fieldIndex)}
                         </div>
                       ))}
                     </div>
@@ -1057,6 +1284,18 @@ const ApplicationEditPage: React.FC = () => {
               );
             })}
           </div>
+
+          {/* Error Display */}
+          {showErrors && Object.keys(errors).length > 0 && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center gap-2 text-red-700">
+                <Icon icon="solar:danger-triangle-line-duotone" className="w-5 h-5" />
+                <span className="font-semibold">
+                  Please complete all mandatory fields to proceed.
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Submit Button */}
           <div className="mt-8 flex justify-end space-x-4">
