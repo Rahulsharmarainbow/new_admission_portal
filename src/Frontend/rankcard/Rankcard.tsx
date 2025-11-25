@@ -174,7 +174,8 @@ const Rankcard = (props) => {
           institute_id={props.institute_id} 
           instituteName={institute.header?.name} 
           logo={institute.header?.logo} 
-          address={institute.header?.address} 
+          address={institute.header?.address}
+          otherLogo={institute.header?.academic_new_logo} 
         />
         
         <div className="flex flex-col justify-center items-center min-h-screen bg-clr">

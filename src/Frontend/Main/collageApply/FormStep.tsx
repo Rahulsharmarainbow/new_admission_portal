@@ -50,10 +50,10 @@ const FormStep: React.FC<FormStepProps> = ({
       }
 
       // Validate file size (1MB limit)
-      if (file.size > 1048576) {
-        toast.error('File size should be less than 1 MB.');
-        return;
-      }
+      // if (file.size > 1048576) {
+      //   toast.error('File size should be less than 1 MB.');
+      //   return;
+      // }
 
       const previewUrl = URL.createObjectURL(file);
       onFileChange(fieldName, file, fieldConfig);
@@ -294,7 +294,7 @@ const FormStep: React.FC<FormStepProps> = ({
           const input = document.createElement('input');
           input.type = 'file';
           input.accept = 'image/*';
-          input.capture = 'environment'; // back camera
+          input.capture = 'environment'; 
           input.onchange = (e: any) => {
             const file = e.target.files?.[0];
             if (!file) return;

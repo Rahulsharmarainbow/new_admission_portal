@@ -915,15 +915,15 @@ const ApplicationEditPage: React.FC = () => {
       'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors outline-none';
 
     switch (child.type) {
-      case 'heading':
-        return (
-          <div className={`text-start mb-6 w-full ${getColumnSpan(child.width)}`}>
-            <h4 className="text-lg font-bold text-[#dc2626] inline-flex items-center">
-              <Icon icon={child.icon || 'solar:document-line-duotone'} className="w-4 h-4 mr-2" />
-              {child.content}
-            </h4>
-          </div>
-        );
+      // case 'heading':
+      //   return (
+      //     <div className={`text-start mb-6 w-full col-span-full`}>
+      //       <h4 className="text-lg font-bold text-[#dc2626] inline-flex items-center">
+      //         <Icon icon={child.icon || 'solar:document-line-duotone'} className="w-4 h-4 mr-2" />
+      //         {child.content}
+      //       </h4>
+      //     </div>
+      //   );
 
       case 'text':
         return (
@@ -1224,6 +1224,7 @@ const ApplicationEditPage: React.FC = () => {
 
   // Calculate grid columns based on section width
   const getGridColumns = (section: FormSection) => {
+    console.log('section', section);
     const width = parseInt(section.width);
     if (width >= 70 && width <= 80) return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
     if (width >= 45 && width <= 55) return 'grid-cols-1 md:grid-cols-2';
@@ -1255,13 +1256,28 @@ const ApplicationEditPage: React.FC = () => {
             {formSections.map((section, sectionIndex) => {
               if (section.children.length === 0) return null;
 
-              // Separate file fields from normal fields
+              const headingFields = section.children.filter((f) => f.type === 'heading');
+              const normalFields = section.children.filter(
+                (f) => f.type !== 'heading' && f.type !== 'file_button',
+              );
               const fileFields = section.children.filter((f) => f.type === 'file_button');
-              const normalFields = section.children.filter((f) => f.type !== 'file_button');
 
               return (
                 <Card key={sectionIndex} className="p-6">
-                  {/* Normal fields */}
+                  {/* ---- HEADING ALWAYS ON TOP ---- */}
+                  {headingFields.map((field) => (
+                    <div key={field.id} className="mb-6 w-full">
+                      <h4 className="text-lg font-bold text-[#dc2626] inline-flex items-center">
+                        <Icon
+                          icon={field.icon || 'solar:document-line-duotone'}
+                          className="w-4 h-4 mr-2"
+                        />
+                        {field.content}
+                      </h4>
+                    </div>
+                  ))}
+
+                  {/* ---- NORMAL FIELDS IN GRID ---- */}
                   {normalFields.length > 0 && (
                     <div className={`grid ${getGridColumns(section)} gap-6`}>
                       {normalFields.map((field, fieldIndex) => (
@@ -1270,12 +1286,12 @@ const ApplicationEditPage: React.FC = () => {
                     </div>
                   )}
 
-                  {/* File Upload Cards */}
+                  {/* ---- FILE UPLOAD FIELDS ---- */}
                   {fileFields.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                      {fileFields.map((field, fieldIndex) => (
+                      {fileFields.map((field, fileIndex) => (
                         <div key={field.id} className="w-full">
-                          {renderField(field, sectionIndex, fieldIndex)}
+                          {renderField(field, sectionIndex, fileIndex)}
                         </div>
                       ))}
                     </div>

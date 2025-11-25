@@ -105,18 +105,15 @@ const Home = () => {
     return {
       name: data.header?.name || 'Institute',
       examInfo: {
-        title: titleLine.title || 'ENTRANCE EXAMINATION - 2024',
-        subtitle: subtitleLine.title || 'GENERAL ENTRANCE EXAMINATION - 2024',
+        title: titleLine.title || '',
+        subtitle: subtitleLine.title || '',
         description:
           descriptionLine.title ||
-          'Institute entrance examination for various programs for the Academic Year 2024-25',
-        description2:
-          descriptionLine2.title,
+          '',
+        description2: descriptionLine2.title,
       },
       alert: {
-        messages: data.marquee?.filter((m) => m.status !== 0).map((m) => m.title) || [
-          'Registration open for 2024 admissions',
-        ],
+        messages: data.marquee?.filter((m) => m.status !== 0).map((m) => m.title) || [],
         icon: 'M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z',
         showNewBadge: data.marquee?.some((m) => m.status !== 0) || false,
       },
@@ -164,35 +161,6 @@ const Home = () => {
           content={`Welcome to ${institute?.header?.name || 'Institute'} admission portal`}
         />
       </Helmet>
-      {/* Custom Header with logo on left and name in center */}
-      {/* <header className="bg-white shadow-lg border-b border-gray-200">
-        <div className="bg-white shadow-md  container mx-auto px-4 py-1 rounded-b-2xl">
-          <div className="flex flex-col md:flex-row items-center justify-center text-center md:text-left">
-            {institute.header?.logo && (
-              <Link to={`/Frontend/${institute_id}/home`} reloadDocument>
-                <img 
-                  src={`${assetUrl}/${institute.header.logo}`} 
-                  alt="Institute Logo" 
-                  className="h-20 w-48 md:w-20 object-contain mr-3 cursor-pointer"
-                />
-              </Link>
-            )}
-
-            <div className="text-center">
-              <h1 className="md:text-3xl xl:text-4xl font-bold text-gray-900 underline underline-offset-4 decoration-red-800 inline-block pb-1 uppercase">
-                {institute.header?.name || 'Institute Name'}
-              </h1>
-              {institute.header?.address && (
-                <p className="text-sm text-gray-600 mt-1">
-                  {institute.header.address}
-                </p>
-              )}
-              
-            </div>
-          </div>
-
-        </div>
-      </header> */}
       <Header
         baseUrl={institute.baseUrl}
         institute_id={institute.unique_code}
@@ -206,40 +174,48 @@ const Home = () => {
       <div className="bg-transparent mx-2 md:mx-8 py-8">
         {/* Exam Information Section */}
         <div className="relative p-8 mb-8 text-center bg-white rounded-2xl shadow-xl border border-gray-200">
-          <div className="text-center mb-6 mt-4">
+          {
+            examInfo.title && (
+              <div className="text-center mb-6 mt-4">
             <h4 className="text-xl md:text-3xl font-bold text-[#1e40af] mb-2">{examInfo.title}</h4>
             <div className="w-24 h-1 bg-gradient-to-r from-[#1e40af] to-[#0369a1] mx-auto rounded-full"></div>
           </div>
-<div className="mb-6">
-  <div className="mb-4">
-    <h2 className="text-xl font-bold text-white bg-gradient-to-r from-[#dc2626] to-[#ea580c] px-6 py-3 rounded-xl shadow-lg inline-flex items-center transform hover:scale-105 transition-transform duration-200">
-      {examInfo.subtitle}
-    </h2>
-  </div>
-  
-  {/* Main Description */}
-  <div className="text-gray-700 leading-relaxed text-base max-w-7xl mx-auto bg-gray-50 p-6 rounded-xl border border-gray-200">
-    {examInfo.description}
-  </div>
-  
-  {/* Divider */}
-  <div className="max-w-7xl mx-auto mt-4 flex items-center">
-    <div className="flex-1 border-t border-gray-300"></div>
-    <div className="mx-4 text-gray-500 text-sm">Additional Details</div>
-    <div className="flex-1 border-t border-gray-300"></div>
-  </div>
-  
-  {/* Description 2 */}
-  {
-    examInfo.description2 && (
-      <div className="mt-4 max-w-7xl mx-auto bg-blue-50 p-6 rounded-xl border border-blue-200">
-    <p className="text-gray-700 leading-relaxed text-base">
-      {examInfo.description2}
-    </p>
-  </div>
-    )
-  }
-</div>
+            )
+          }
+          <div className="mb-6">
+            {
+              examInfo.subtitle && (
+                <div className="mb-4">
+              <h2 className="text-xl font-bold text-white bg-gradient-to-r from-[#dc2626] to-[#ea580c] px-6 py-3 rounded-xl shadow-lg inline-flex items-center transform hover:scale-105 transition-transform duration-200">
+                {examInfo.subtitle}
+              </h2>
+            </div>
+              )
+            }
+
+            {/* Main Description */}
+            {
+              examInfo.description && (
+                <div className="text-gray-700 leading-relaxed text-base max-w-7xl mx-auto bg-gray-50 p-6 rounded-xl border border-gray-200">
+              {examInfo.description}
+            </div>
+              )
+            }
+
+            {/* Divider */}
+            <div className="max-w-7xl mx-auto mt-4 flex items-center">
+              <div className="flex-1 border-t border-gray-300"></div>
+              <div className="mx-4 text-gray-500 text-sm">Additional Details</div>
+              <div className="flex-1 border-t border-gray-300"></div>
+            </div>
+
+            {/* Description 2 */}
+            {examInfo.description2 && (
+              <div className="mt-4 max-w-7xl mx-auto bg-blue-50 p-6 rounded-xl border border-blue-200">
+                <p className="text-gray-700 leading-relaxed text-base">{examInfo.description2}</p>
+              </div>
+            )}
+          </div>
 
           {institute.marquee && institute.marquee.length > 0 && (
             <div className="bg-gradient-to-r from-[#d97706]/20 to-[#ea580c]/20 border border-[#d97706] rounded-xl p-4 mb-2 overflow-hidden shadow-inner">

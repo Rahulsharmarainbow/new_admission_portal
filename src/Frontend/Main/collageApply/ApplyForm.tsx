@@ -289,92 +289,204 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
     [],
   );
 
-  const handleFileChange = useCallback(
-    (name: string, file: File, fieldConfig?: any) => {
-      if (!file) return;
+  // const handleFileChange = useCallback(
+  //   (name: string, file: File, fieldConfig?: any) => {
+  //     if (!file) return;
 
-      const { resolution, target, type, validation, validation_message, required } =
-        fieldConfig || {};
+  //     const { resolution, target, type, validation, validation_message, required } =
+  //       fieldConfig || {};
 
-      // ✅ Validate Type
-      if (!file.type.match(/image\/(jpeg|png)/)) {
-        toast.error('Please upload a valid JPEG or PNG image.');
-        return;
-      }
+  //     // ✅ Validate Type
+  //     if (!file.type.match(/image\/(jpeg|png)/)) {
+  //       toast.error('Please upload a valid JPEG or PNG image.');
+  //       return;
+  //     }
 
-      // ✅ Validate Size (< 1 MB)
-      if (file.size > 1048576) {
-        toast.error('File size should be less than 1 MB.');
-        return;
-      }
+  //     // ✅ Validate Size (< 1 MB)
+  //     if (file.size > 1048576) {
+  //       toast.error('File size should be less than 1 MB.');
+  //       return;
+  //     }
 
-      const reader = new FileReader();
+  //     const reader = new FileReader();
 
-      reader.onloadend = async () => {
-        const base64 = reader.result as string;
+  //     reader.onloadend = async () => {
+  //       const base64 = reader.result as string;
 
-        const img = new window.Image();
-        img.src = base64;
+  //       const img = new window.Image();
+  //       img.src = base64;
 
-        img.onload = async () => {
-          const imgWidth = img.width;
-          const imgHeight = img.height;
+  //       img.onload = async () => {
+  //         const imgWidth = img.width;
+  //         const imgHeight = img.height;
 
-          let targetWidth = imgWidth;
-          let targetHeight = imgHeight;
+  //         let targetWidth = imgWidth;
+  //         let targetHeight = imgHeight;
 
-          // ✅ Resolution check (if required)
-          if (resolution) {
-            const [w, h] = resolution.split('x');
-            targetWidth = parseInt(w, 10);
-            targetHeight = parseInt(h, 10);
+  //         // ✅ Resolution check (if required)
+  //         if (resolution) {
+  //           const [w, h] = resolution.split('x');
+  //           targetWidth = parseInt(w, 10);
+  //           targetHeight = parseInt(h, 10);
 
-            if (imgWidth !== targetWidth || imgHeight !== targetHeight) {
-              toast.error(`The uploaded image must be ${targetWidth}x${targetHeight} pixels.`);
-              return;
-            }
-          }
+  //           if (imgWidth !== targetWidth || imgHeight !== targetHeight) {
+  //             toast.error(`The uploaded image must be ${targetWidth}x${targetHeight} pixels.`);
+  //             return;
+  //           }
+  //         }
 
-          // ✅ Blur Detection
-          try {
-            const blurry = await isImageBlurred(img.src, targetWidth, targetHeight);
-            if (blurry) {
-              toast.error('The uploaded image is too blurry. Please upload a clearer image.');
-              return;
-            }
-          } catch (err) {
-            console.error('Blur check failed:', err);
-            toast.error('There was an issue processing the image.');
-            return;
-          }
+  //         // ✅ Blur Detection
+  //         try {
+  //           const blurry = await isImageBlurred(img.src, targetWidth, targetHeight);
+  //           if (blurry) {
+  //             toast.error('The uploaded image is too blurry. Please upload a clearer image.');
+  //             return;
+  //           }
+  //         } catch (err) {
+  //           console.error('Blur check failed:', err);
+  //           toast.error('There was an issue processing the image.');
+  //           return;
+  //         }
 
-          // ✅ Save base64 for backend submission
-          setFileData((prev) => ({
-            ...prev,
-            [name]: base64,
-          }));
+  //         // ✅ Save base64 for backend submission
+  //         setFileData((prev) => ({
+  //           ...prev,
+  //           [name]: base64,
+  //         }));
 
-          // ✅ Preview target if defined
-          if (target) {
-            setFileData((prev) => ({
-              ...prev,
-              [target]: base64,
-            }));
-          }
+  //         // ✅ Preview target if defined
+  //         if (target) {
+  //           setFileData((prev) => ({
+  //             ...prev,
+  //             [target]: base64,
+  //           }));
+  //         }
 
-          // ✅ Remove error if previously set
-          if (errors[name]) {
-            setErrors((prev) => ({
-              ...prev,
-              [name]: '',
-            }));
-          }
-        };
+  //         // ✅ Remove error if previously set
+  //         if (errors[name]) {
+  //           setErrors((prev) => ({
+  //             ...prev,
+  //             [name]: '',
+  //           }));
+  //         }
+  //       };
+  //     };
+
+  //     reader.readAsDataURL(file);
+  //   },
+  //   [errors],
+  // );
+
+    const resizeCanvasImage = (file, width, height) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+  
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+  
+        const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+  
+        ctx.drawImage(img, 0, 0, width, height);
+  
+        canvas.toBlob((blob) => resolve(URL.createObjectURL(blob)), "image/jpeg");
       };
-
-      reader.readAsDataURL(file);
+    });
+  };
+  
+  
+  const handleFileChange = useCallback(
+    async (name: string, file: File, fieldConfig?: any) => {
+      if (!file) return;
+  
+      const { resolution, target } = fieldConfig || {};
+  
+      // Validate Type
+      if (!file.type.match(/image\/(jpeg|png)/)) {
+        toast.error("Please upload a valid JPEG or PNG image.");
+        return;
+      }
+  
+      // Validate Size (<1MB)
+      if (file.size > 1048576) {
+        toast.error("File size should be less than 1 MB.");
+        return;
+      }
+  
+      let targetWidth: number;
+      let targetHeight: number;
+  
+      // If resolution provided → enforce resize
+      if (resolution) {
+        const [w, h] = resolution.split("x");
+        targetWidth = parseInt(w, 10);
+        targetHeight = parseInt(h, 10);
+      } else {
+        // Else use natural image size
+        const tempImg = new Image();
+        tempImg.src = URL.createObjectURL(file);
+  
+        await new Promise((res) => (tempImg.onload = res));
+  
+        targetWidth = tempImg.width;
+        targetHeight = tempImg.height;
+      }
+  
+      // ---- AUTO RESIZE USING CANVAS ----
+      const resizedUrl: string = await resizeCanvasImage(file, targetWidth, targetHeight);
+  
+      // Convert resized blob URL → Base64
+      const base64 = await fetch(resizedUrl)
+        .then((res) => res.blob())
+        .then(
+          (blob) =>
+            new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            })
+        );
+  
+      // ---- BLUR DETECTION ----
+      try {
+        const blurry = await isImageBlurred(base64, targetWidth, targetHeight);
+        if (blurry) {
+          toast.error("The uploaded image is too blurry. Please upload a clearer image.");
+          return;
+        }
+      } catch (err) {
+        console.error("Blur check failed:", err);
+        toast.error("There was an issue processing the image.");
+        return;
+      }
+  
+      // ---- SAVE BASE64 ----
+      setFileData((prev) => ({
+        ...prev,
+        [name]: base64,
+      }));
+  
+      // If preview target exists → update that also
+      if (target) {
+        setFileData((prev) => ({
+          ...prev,
+          [target]: base64,
+        }));
+      }
+  
+      // Clear previous errors
+      if (errors[name]) {
+        setErrors((prev) => ({
+          ...prev,
+          [name]: "",
+        }));
+      }
     },
-    [errors],
+    [errors]
   );
 
   const validateStep = useCallback(
@@ -472,6 +584,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   }, []);
 
   const handlePayment = useCallback(async () => {
+    setStepTransitionLoading(true);
     setPaymentLoading(true); // Start payment loading
     try {
       const response = await axios.post(`${apiUrl}/frontend/razorpay-order`, {
@@ -509,7 +622,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
                 payment_done: 1,
                 transaction_id: verifyResponse.data.transaction_id,
               }));
-              setActiveStep(5);
+              setActiveStep(2);
             }
           } catch (error) {
             toast.error('Payment verification failed. Please try again.');
@@ -803,7 +916,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
             </div>
           </div>
 
-          {Object.keys(errors).length > 0 && (
+          {Object.keys(errors).length > 0 && activeStep === 0 && (
             <div className="mt-4 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex items-center gap-2 text-red-700 text-sm sm:text-base">
                 <Icon

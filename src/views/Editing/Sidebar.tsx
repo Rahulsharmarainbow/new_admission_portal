@@ -99,19 +99,19 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [selectedField]);
 
   // Function to format field name (convert to snake_case)
-  const formatFieldName = (input: string): string => {
-    if (!input) return '';
-    
-    let formatted = input
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, '_')
-      .replace(/[^a-z0-9_]/g, '')
-      .replace(/_+/g, '_')
-      .replace(/^_+|_+$/g, '');
-    
-    return formatted;
-  };
+const formatFieldName = (input: string): string => {
+  if (!input) return '';
+
+  let formatted = input
+    .trim()
+    .replace(/\s+/g, '_')           // space → underscore
+    .replace(/[^a-zA-Z0-9_]/g, '')  // ALL letters allowed (A-Z + a-z)
+    .replace(/_+/g, '_')            // multiple _ → single _
+    .replace(/^_+|_+$/g, '');       // remove starting/ending underscores
+
+  return formatted;
+};
+
 
   // Get all dropdown field names from current section
   const getDropdownFieldNames = (): { value: string; label: string }[] => {
@@ -295,7 +295,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         )}
         {formattedName && (
           <p className="text-xs text-gray-500 mt-1">
-            Format: lowercase with underscores (snake_case)
+            Format: Camel case with underscores (snake_case)
           </p>
         )}
       </div>

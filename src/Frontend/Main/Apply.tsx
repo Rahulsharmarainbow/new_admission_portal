@@ -138,7 +138,7 @@ const Apply = () => {
         address={applyData.header?.address}
       />
 
-      <div className="py-2 px-10">
+      <div className="py-2 px-1 md:px-10">
         {applyData.academic_type === 1 ? (
           <SchoolApplyForm
             academic_id={applyData.academic_id}

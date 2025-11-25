@@ -92,6 +92,7 @@ const TypePage = () => {
         instituteName={pageData.header?.name}
         logo={pageData.header?.logo}
         address={pageData.header?.address}
+        otherLogo={pageData.header?.academic_new_logo}
       />
 
       <main className="flex-grow bg-transparent mx-3 md:mx-8 py-10 flex justify-center">
