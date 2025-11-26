@@ -416,68 +416,136 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
 //     [errors],
 //   );
 
-const getPdfFirstPageImage = async (file: File): Promise<string> => {
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  const page = await pdf.getPage(1);
+// const handleFileChange = useCallback(
+//   async (name: string, file: File, fieldConfig?: any) => {
+//     if (!file) return;
 
-  const viewport = page.getViewport({ scale: 1.5 });
+//     const extension = file.name.split(".").pop()?.toLowerCase();
+//     let finalBase64 = "";
 
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d")!;
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
+//     const isPDF = extension === "pdf";
+//     const isImage = file.type.startsWith("image/");
 
-  await page.render({ canvasContext: context, viewport }).promise;
+//     if (!isImage) {
+//       toast.error("Only Image files allowed.");
+//       return;
+//     }
 
-  return canvas.toDataURL("image/jpeg");
-};
+//     // PDF → first page preview
+//     if (isPDF) {
+//       // finalBase64 = await getPdfFirstPageImage(file);
+//       return
+//     }
 
+//     // Image → base64 convert
+//     if (isImage) {
+//       finalBase64 = await new Promise<string>((resolve) => {
+//         const reader = new FileReader();
+//         reader.onloadend = () => resolve(reader.result as string);
+//         reader.readAsDataURL(file);
+//       });
+//     }
 
-const handleFileChange = useCallback(
-  async (name: string, file: File, fieldConfig?: any) => {
-    if (!file) return;
+//     // Preview + file save
+//     setFileData((prev) => ({
+//       ...prev,
+//       [name]: finalBase64,
+//       [name + "_file"]: file
+//     }));
 
-    const extension = file.name.split(".").pop()?.toLowerCase();
-    let finalBase64 = "";
+//     if (errors[name]) {
+//       setErrors((prev) => ({ ...prev, [name]: "" }));
+//     }
+//   },
+//   [errors]
+// );
+  const handleFileChange = useCallback(
+    (name: string, file: File, fieldConfig?: any) => {
+      if (!file) return;
 
-    const isPDF = extension === "pdf";
-    const isImage = file.type.startsWith("image/");
+      const { resolution, target, type, validation, validation_message, required } =
+        fieldConfig || {};
 
-    if (!isImage) {
-      toast.error("Only Image files allowed.");
-      return;
-    }
+      // ✅ Validate Type
+      if (!file.type.match(/image\/(jpeg|png)/)) {
+        toast.error('Please upload a valid JPEG or PNG image.');
+        return;
+      }
 
-    // PDF → first page preview
-    if (isPDF) {
-      // finalBase64 = await getPdfFirstPageImage(file);
-      return
-    }
+      // ✅ Validate Size (< 1 MB)
+      if (file.size > 1048576) {
+        toast.error('File size should be less than 1 MB.');
+        return;
+      }
 
-    // Image → base64 convert
-    if (isImage) {
-      finalBase64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(file);
-      });
-    }
+      const reader = new FileReader();
 
-    // Preview + file save
-    setFileData((prev) => ({
-      ...prev,
-      [name]: finalBase64,
-      [name + "_file"]: file
-    }));
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
 
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  },
-  [errors]
-);
+        const img = new window.Image();
+        img.src = base64;
 
+        img.onload = async () => {
+          const imgWidth = img.width;
+          const imgHeight = img.height;
+
+          let targetWidth = imgWidth;
+          let targetHeight = imgHeight;
+
+          // ✅ Resolution check (if required)
+          if (resolution) {
+            const [w, h] = resolution.split('x');
+            targetWidth = parseInt(w, 10);
+            targetHeight = parseInt(h, 10);
+
+            if (imgWidth !== targetWidth || imgHeight !== targetHeight) {
+              toast.error(`The uploaded image must be ${targetWidth}x${targetHeight} pixels.`);
+              return;
+            }
+          }
+
+          // ✅ Blur Detection
+          try {
+            const blurry = await isImageBlurred(img.src, targetWidth, targetHeight);
+            if (blurry) {
+              toast.error('The uploaded image is too blurry. Please upload a clearer image.');
+              return;
+            }
+          } catch (err) {
+            console.error('Blur check failed:', err);
+            toast.error('There was an issue processing the image.');
+            return;
+          }
+
+          // ✅ Save base64 for backend submission
+          setFileData((prev) => ({
+            ...prev,
+            [name]: base64,
+          }));
+
+          // ✅ Preview target if defined
+          if (target) {
+            setFileData((prev) => ({
+              ...prev,
+              [target]: base64,
+            }));
+          }
+
+          // ✅ Remove error if previously set
+          if (errors[name]) {
+            setErrors((prev) => ({
+              ...prev,
+              [name]: '',
+            }));
+          }
+        };
+      };
+
+      reader.readAsDataURL(file);
+    },
+    [errors],
+  );
 
   const validateStep = useCallback(
     (step: number) => {

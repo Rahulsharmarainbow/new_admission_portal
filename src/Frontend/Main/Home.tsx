@@ -87,20 +87,10 @@ const Home = () => {
   // Transform API data to match component structure
   const transformApiData = (data) => {
     const homeLines = data.home_other_lines || [];
-    const titleLine =
-      homeLines.find((line) => line.title && line.title.includes('ENTRANCE EXAMINATION')) ||
-      homeLines[0] ||
-      {};
-    const subtitleLine =
-      homeLines.find(
-        (line) => line.title && line.title.includes('ENTRANCE EXAMINATION') && line !== titleLine,
-      ) ||
-      homeLines[1] ||
-      {};
-    const descriptionLine =
-      homeLines.find((line) => line.title && line.title.length > 50) || homeLines[2] || {};
-    const descriptionLine2 =
-      homeLines.find((line) => line.title && line.title.length > 50) || homeLines[3] || {};
+    const titleLine =  homeLines[0] ||  {};
+    const subtitleLine =  homeLines[1] || {};
+    const descriptionLine = homeLines[2] || {};
+    const descriptionLine2 =  homeLines[3] || {};
 
     return {
       name: data.header?.name || 'Institute',
@@ -201,13 +191,6 @@ const Home = () => {
             </div>
               )
             }
-
-            {/* Divider */}
-            <div className="max-w-7xl mx-auto mt-4 flex items-center">
-              <div className="flex-1 border-t border-gray-300"></div>
-              <div className="mx-4 text-gray-500 text-sm">Additional Details</div>
-              <div className="flex-1 border-t border-gray-300"></div>
-            </div>
 
             {/* Description 2 */}
             {examInfo.description2 && (

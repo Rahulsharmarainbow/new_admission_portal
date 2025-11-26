@@ -324,16 +324,33 @@ const FormStep: React.FC<FormStepProps> = ({
               captureBtn.style.background = '#0d6efd';
               captureBtn.style.color = '#fff';
               captureBtn.style.borderRadius = '6px';
-              captureBtn.style.marginTop = '10px';
+
+              const cancelBtn = document.createElement('button');
+              cancelBtn.innerText = 'Cancel';
+              cancelBtn.style.padding = '12px 20px';
+              cancelBtn.style.background = '#dc2626';
+              cancelBtn.style.color = '#fff';
+              cancelBtn.style.borderRadius = '6px';
 
               const wrapper = document.createElement('div');
               wrapper.style.textAlign = 'center';
+
+              const btnContainer = document.createElement('div');
+              btnContainer.style.marginTop = '10px';
+              btnContainer.style.display = 'flex';
+              btnContainer.style.justifyContent = 'center';
+              btnContainer.style.gap = '10px';
+
+              btnContainer.appendChild(captureBtn);
+              btnContainer.appendChild(cancelBtn);
+
               wrapper.appendChild(video);
-              wrapper.appendChild(captureBtn);
+              wrapper.appendChild(btnContainer);
 
               modal.appendChild(wrapper);
               document.body.appendChild(modal);
 
+              // Capture
               captureBtn.onclick = () => {
                 const canvas = document.createElement('canvas');
                 canvas.width = video.videoWidth;
@@ -346,6 +363,13 @@ const FormStep: React.FC<FormStepProps> = ({
                   document.body.removeChild(modal);
                   resolve(new File([blob!], 'camera_photo.jpg', { type: 'image/jpeg' }));
                 });
+              };
+
+              // Cancel
+              cancelBtn.onclick = () => {
+                stream.getTracks().forEach((t) => t.stop());
+                document.body.removeChild(modal);
+                reject('Camera cancelled');
               };
             } catch (e) {
               reject(e);
@@ -407,22 +431,23 @@ const FormStep: React.FC<FormStepProps> = ({
               </div>
 
               <p className="text-xs text-gray-600 mb-2">{child.content}</p>
-              {child.resolution && <p className="text-xs text-gray-600 mb-2">{child.resolution}</p>}
+              {child.resolution && type === 'collage' && (
+                <p className="text-xs text-gray-600 mb-2">{child.resolution}</p>
+              )}
 
               {/* Buttons */}
               <div className="flex justify-center gap-2 file-upload-buttons">
                 {/* CAMERA BUTTON */}
-               {
-                (type === "school") &&
-                ( <button
-                  type="button"
-                  onClick={() => handleCameraCapture(child.name, fieldConfig)}
-                  className="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200 file-upload-button mobile-full"
-                >
-                  <Icon icon="solar:camera-line-duotone" className="w-4 h-4" />
-                  Camera
-                </button>)
-               }
+                {type === 'school' && (
+                  <button
+                    type="button"
+                    onClick={() => handleCameraCapture(child.name, fieldConfig)}
+                    className="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200 file-upload-button mobile-full"
+                  >
+                    <Icon icon="solar:camera-line-duotone" className="w-4 h-4" />
+                    Camera
+                  </button>
+                )}
                 {/* FILE UPLOAD BUTTON */}
                 <label
                   htmlFor={child.name}
