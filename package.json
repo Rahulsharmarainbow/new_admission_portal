@@ -25,6 +25,7 @@
     "jodit-react": "^5.2.26",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
+    "pdfjs-dist": "^5.4.394",
     "prop-types": "^15.7.2",
     "react": "^19.0.0",
     "react-apexcharts": "^1.7.0",

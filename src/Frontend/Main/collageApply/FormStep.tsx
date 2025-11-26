@@ -1,7 +1,8 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 import toast from 'react-hot-toast';
-import { max } from 'lodash';
+import * as pdfjsLib from 'pdfjs-dist';
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.js`;
 
 interface FormStepProps {
   dynamicBoxes: any[];
@@ -16,6 +17,7 @@ interface FormStepProps {
   onAadhaarChange: (index: number, value: string, name: string, fieldConfig?: any) => void;
   onFileChange: (name: string, file: File, previewUrl: string, fieldConfig?: any) => void;
   formRefs: React.MutableRefObject<{ [key: string]: any }>;
+  type: string;
 }
 
 const FormStep: React.FC<FormStepProps> = ({
@@ -31,6 +33,7 @@ const FormStep: React.FC<FormStepProps> = ({
   onAadhaarChange,
   onFileChange,
   formRefs,
+  type,
 }) => {
   // console.log('Form data:', formData);
   // console.log('File data:', fileData);
@@ -42,22 +45,26 @@ const FormStep: React.FC<FormStepProps> = ({
     fieldConfig: any,
   ) => {
     const file = event.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.match(/image\/(jpeg|png)/)) {
-        toast.error('Please upload a valid JPEG or PNG image.');
+    if (!file) return;
+
+    const isImage = file.type.startsWith('image/');
+
+    if (type === 'school') {
+      const isPDF = file.type === 'application/pdf';
+      if (!isPDF && !isImage) {
+        toast.error('Only PDF or Image files allowed.');
         return;
       }
-
-      // Validate file size (1MB limit)
-      // if (file.size > 1048576) {
-      //   toast.error('File size should be less than 1 MB.');
-      //   return;
-      // }
-
-      const previewUrl = URL.createObjectURL(file);
-      onFileChange(fieldName, file, fieldConfig);
     }
+
+    if (type === 'collage') {
+      if (!isImage) {
+        toast.error('Only Image files allowed.');
+        return;
+      }
+    }
+
+    onFileChange(fieldName, file, fieldConfig);
   };
 
   const handleAadhaarVisibility = (name: string) => {
@@ -290,20 +297,84 @@ const FormStep: React.FC<FormStepProps> = ({
       case 'file_button':
         const previewStyle = getPreviewBoxStyle(child.resolution);
 
-        const handleCameraCapture = async (fieldName: string, fieldConfig: any) => {
-          const input = document.createElement('input');
-          input.type = 'file';
-          input.accept = 'image/*';
-          input.capture = 'environment'; 
-          input.onchange = (e: any) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
+        const openDesktopCamera = (): Promise<File> => {
+          return new Promise(async (resolve, reject) => {
+            try {
+              const stream = await navigator.mediaDevices.getUserMedia({ video: true });
 
-            const previewUrl = URL.createObjectURL(file);
-            // 👇 Camera photo ke liye resolution check SKIP
-            onFileChange(fieldName, file, previewUrl, { ...fieldConfig, skipResolution: true });
-          };
-          input.click();
+              const video = document.createElement('video');
+              video.srcObject = stream;
+              video.autoplay = true;
+
+              const modal = document.createElement('div');
+              modal.style.position = 'fixed';
+              modal.style.top = '0';
+              modal.style.left = '0';
+              modal.style.width = '100%';
+              modal.style.height = '100%';
+              modal.style.background = 'rgba(0,0,0,0.7)';
+              modal.style.display = 'flex';
+              modal.style.justifyContent = 'center';
+              modal.style.alignItems = 'center';
+              modal.style.zIndex = '99999';
+
+              const captureBtn = document.createElement('button');
+              captureBtn.innerText = 'Capture Photo';
+              captureBtn.style.padding = '12px 20px';
+              captureBtn.style.background = '#0d6efd';
+              captureBtn.style.color = '#fff';
+              captureBtn.style.borderRadius = '6px';
+              captureBtn.style.marginTop = '10px';
+
+              const wrapper = document.createElement('div');
+              wrapper.style.textAlign = 'center';
+              wrapper.appendChild(video);
+              wrapper.appendChild(captureBtn);
+
+              modal.appendChild(wrapper);
+              document.body.appendChild(modal);
+
+              captureBtn.onclick = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d')!;
+                ctx.drawImage(video, 0, 0);
+
+                canvas.toBlob((blob) => {
+                  stream.getTracks().forEach((t) => t.stop());
+                  document.body.removeChild(modal);
+                  resolve(new File([blob!], 'camera_photo.jpg', { type: 'image/jpeg' }));
+                });
+              };
+            } catch (e) {
+              reject(e);
+            }
+          });
+        };
+
+        const handleCameraCapture = async (fieldName: string, fieldConfig: any) => {
+          let file: File | null = null;
+
+          // Mobile capture
+          if (/Mobi|Android/i.test(navigator.userAgent)) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.capture = 'environment';
+
+            input.onchange = (e: any) => {
+              file = e.target.files?.[0];
+              if (file) onFileChange(fieldName, file, fieldConfig);
+            };
+
+            input.click();
+            return;
+          }
+
+          // Desktop fallback
+          file = await openDesktopCamera();
+          onFileChange(fieldName, file, fieldConfig);
         };
 
         return (
@@ -341,15 +412,17 @@ const FormStep: React.FC<FormStepProps> = ({
               {/* Buttons */}
               <div className="flex justify-center gap-2 file-upload-buttons">
                 {/* CAMERA BUTTON */}
-                <button
+               {
+                (type === "school") &&
+                ( <button
                   type="button"
                   onClick={() => handleCameraCapture(child.name, fieldConfig)}
                   className="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200 file-upload-button mobile-full"
                 >
                   <Icon icon="solar:camera-line-duotone" className="w-4 h-4" />
                   Camera
-                </button>
-
+                </button>)
+               }
                 {/* FILE UPLOAD BUTTON */}
                 <label
                   htmlFor={child.name}
@@ -382,87 +455,83 @@ const FormStep: React.FC<FormStepProps> = ({
             /> */}
           </div>
         );
-case 'adhar':
-  return (
-    <div className="space-y-3 field-container">
-      <label className="flex text-sm font-semibold text-gray-700">
-        {child.label}
-        {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      
-      {/* Aadhaar Input Container */}
-      <div className="flex flex-col space-y-3">
-        {/* Aadhaar Digits Grid */}
-        <div className="flex flex-wrap gap-1 sm:gap-2 md:gap-2">
-          {Array.from({ length: 12 }, (_, index) => (
-            <input
-              key={index}
-              type={formData[`${child.name}_visible`] ? 'text' : 'password'}
-              maxLength={1}
-              value={formData[`${child.name}_${index}`] || ''}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, '');
-                onAadhaarChange(index, value, child.name, fieldConfig);
-                
-                // Auto-focus next input
-                if (value && index < 11) {
-                  const nextInput = document.querySelector(
-                    `input[name="${child.name}_${index + 1}"]`,
-                  ) as HTMLInputElement;
-                  nextInput?.focus();
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Backspace' && !formData[`${child.name}_${index}`] && index > 0) {
-                  const prevInput = document.querySelector(
-                    `input[name="${child.name}_${index - 1}"]`,
-                  ) as HTMLInputElement;
-                  prevInput?.focus();
-                }
-              }}
-              onFocus={(e) => e.target.select()}
-              name={`${child.name}_${index}`}
-              placeholder="X"
-              className="aadhaar-digit w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-lg font-semibold transition-all duration-200 bg-white shadow-sm"
-            />
-          ))}
-           <button
-            type="button"
-            onClick={() => handleAadhaarVisibility(child.name)}
-            className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors rounded-lg hover:border-blue-300 bg-white shadow-sm"
-          >
-            <Icon
-              icon={
-                formData[`${child.name}_visible`]
-                  ? 'solar:eye-line-duotone'
-                  : 'solar:eye-closed-line-duotone'
-              }
-              className="w-4 h-4 sm:w-5 sm:h-5"
-            />
-          </button>
-        </div>
-        
-        {/* Visibility Toggle and Spacing */}
-        <div className="flex justify-center items-center gap-4">
-          {/* Visual Separators for better readability */}
-          {/* <div className="hidden sm:flex items-center space-x-1 text-gray-400 text-sm">
-            <span>XXXX</span>
-            <span>-</span>
-            <span>XXXX</span>
-            <span>-</span>
-            <span>XXXX</span>
-          </div> */}
-          
-          {/* Visibility Toggle Button */}
-         
-        </div>
-      </div>
-      
-      {errors[child.name] && (
-        <p className="text-red-500 text-xs mt-2 text-center sm:text-left">{errors[child.name]}</p>
-      )}
-    </div>
-  );
+
+      case 'adhar':
+        return (
+          <div className="space-y-3 field-container">
+            <label className="flex text-sm font-semibold text-gray-700">
+              {child.label}
+              {child.required == 1 && <span className="text-red-500 ml-1">*</span>}
+            </label>
+
+            {/* Aadhaar Input Container */}
+            <div className="flex flex-col space-y-3">
+              {/* Aadhaar Digits Grid */}
+              <div className="flex flex-wrap gap-1 sm:gap-2 md:gap-2">
+                {Array.from({ length: 12 }, (_, index) => (
+                  <input
+                    key={index}
+                    type={'text'}
+                    maxLength={1}
+                    value={formData[`${child.name}_${index}`] || ''}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      onAadhaarChange(index, value, child.name, fieldConfig);
+
+                      // Auto-focus next input
+                      if (value && index < 11) {
+                        const nextInput = document.querySelector(
+                          `input[name="${child.name}_${index + 1}"]`,
+                        ) as HTMLInputElement;
+                        nextInput?.focus();
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === 'Backspace' &&
+                        !formData[`${child.name}_${index}`] &&
+                        index > 0
+                      ) {
+                        const prevInput = document.querySelector(
+                          `input[name="${child.name}_${index - 1}"]`,
+                        ) as HTMLInputElement;
+                        prevInput?.focus();
+                      }
+                    }}
+                    onFocus={(e) => e.target.select()}
+                    name={`${child.name}_${index}`}
+                    placeholder="X"
+                    className="aadhaar-digit w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-lg font-semibold transition-all duration-200 bg-white shadow-sm"
+                  />
+                ))}
+                {/* <button
+                  type="button"
+                  onClick={() => handleAadhaarVisibility(child.name)}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors rounded-lg hover:border-blue-300 bg-white shadow-sm"
+                >
+                  <Icon
+                    icon={
+                      formData[`${child.name}_visible`]
+                        ? 'solar:eye-line-duotone'
+                        : 'solar:eye-closed-line-duotone'
+                    }
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                  />
+                </button> */}
+              </div>
+
+              {/* Visibility Toggle and Spacing */}
+              <div className="flex justify-center items-center gap-4"></div>
+            </div>
+
+            {errors[child.name] && (
+              <p className="text-red-500 text-xs mt-2 text-center sm:text-left">
+                {errors[child.name]}
+              </p>
+            )}
+          </div>
+        );
+
       case 'radio':
         return (
           <div className="space-y-2">

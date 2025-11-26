@@ -153,6 +153,7 @@ const Apply = () => {
             transportation_setting={applyData.transportation_setting}
             apply_modal={applyData.apply_modal}
             OtherData={applyData.OtherData}
+            type="school"
           />
         ) : (
           <ApplyForm
@@ -163,6 +164,7 @@ const Apply = () => {
             header={applyData.header}
             cdata={applyData.cdata}
             apply_modal={applyData.apply_modal}
+            type="collage"
           />
         )}
       </div>

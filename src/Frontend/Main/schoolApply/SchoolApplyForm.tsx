@@ -10,6 +10,11 @@ import axios from 'axios';
 import FormStep from '../collageApply/FormStep';
 import { isImageBlurred } from './Blurred';
 import Loader from 'src/Frontend/Common/Loader';
+import * as pdfjsLib from "pdfjs-dist";
+import { GlobalWorkerOptions } from "pdfjs-dist/build/pdf";
+import pdfWorker from "pdfjs-dist/build/pdf.worker?url";
+
+GlobalWorkerOptions.workerSrc = pdfWorker;
 
 interface SchoolApplyFormProps {
   academic_id: string;
@@ -24,6 +29,7 @@ interface SchoolApplyFormProps {
   transportation_setting: any;
   apply_modal?: any;
   OtherData?: any;
+  type:string;
 }
 
 const steps = [
@@ -48,6 +54,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
   transportation_setting,
   apply_modal,
   OtherData,
+  type
 }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
@@ -358,25 +365,138 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
     [],
   );
 
-  const resizeCanvasImage = (file, width, height) => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.src = URL.createObjectURL(file);
+// const handleFileChange = useCallback(
+//   (name: string, file: File, fieldConfig?: any) => {
+//     if (!file) return;
 
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
+//     const { resolution, target, skipResolution } = fieldConfig || {};
 
-      const ctx = canvas.getContext("2d");
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "high";
+//     // ✅ Validate Type (Allow JPEG, PNG, PDF)
+//     const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+//     if (!allowedTypes.includes(file.type)) {
+//       toast.error('Please upload a valid JPEG, PNG image or PDF document.');
+//       return;
+//     }
 
-      ctx.drawImage(img, 0, 0, width, height);
+//     // ✅ Validate Size (< 2 MB for PDF, < 1 MB for images)
+//     const maxSize = file.type === 'application/pdf' ? 2097152 : 1048576; // 2MB for PDF, 1MB for images
+//     if (file.size > maxSize) {
+//       const maxSizeMB = maxSize / 1048576;
+//       toast.error(`File size should be less than ${maxSizeMB} MB.`);
+//       return;
+//     }
 
-      canvas.toBlob((blob) => resolve(URL.createObjectURL(blob)), "image/jpeg");
-    };
-  });
+//     const reader = new FileReader();
+
+//     reader.onloadend = async () => {
+//       const result = reader.result as string;
+
+//       // For PDF files, we'll store the file directly and show PDF icon
+//       if (file.type === 'application/pdf') {
+//         // Store file for submission
+//         setSelectedFiles((prev) => ({
+//           ...prev,
+//           [name]: file,
+//         }));
+
+//         // Store preview URL (we'll use a PDF icon in the UI)
+//         setFileData((prev) => ({
+//           ...prev,
+//           [name]: result, // Store base64 for PDF as well
+//         }));
+
+//         // Preview target if defined
+//         if (target) {
+//           setFileData((prev) => ({
+//             ...prev,
+//             [target]: result,
+//           }));
+//         }
+//       } else {
+//         // For image files
+//         const img = new window.Image();
+//         img.src = result;
+
+//         img.onload = async () => {
+//           // ✅ Skip resolution check if skipResolution is true (for camera) or if it's PDF
+//           if (!skipResolution && resolution) {
+//             const [w, h] = resolution.split('x');
+//             const targetWidth = parseInt(w, 10);
+//             const targetHeight = parseInt(h, 10);
+
+//             if (img.width !== targetWidth || img.height !== targetHeight) {
+//               toast.error(`The uploaded image must be ${targetWidth}x${targetHeight} pixels.`);
+//               return;
+//             }
+//           }
+
+//           // ✅ Skip blur detection for PDF files
+//           if (file.type !== 'application/pdf') {
+//             try {
+//               const blurry = await isImageBlurred(img.src, img.width, img.height);
+//               if (blurry) {
+//                 toast.error('The uploaded image is too blurry. Please upload a clearer image.');
+//                 return;
+//               }
+//             } catch (err) {
+//               console.error('Blur check failed:', err);
+//               toast.error('There was an issue processing the image.');
+//               return;
+//             }
+//           }
+
+//           // ✅ Save for backend submission
+//           setSelectedFiles((prev) => ({
+//             ...prev,
+//             [name]: file,
+//           }));
+
+//           setFileData((prev) => ({
+//             ...prev,
+//             [name]: result,
+//           }));
+
+//           // ✅ Preview target if defined
+//           if (target) {
+//             setFileData((prev) => ({
+//               ...prev,
+//               [target]: result,
+//             }));
+//           }
+//         };
+//       }
+
+//       // ✅ Remove error if previously set
+//       if (errors[name]) {
+//         setErrors((prev) => ({
+//           ...prev,
+//           [name]: '',
+//         }));
+//       }
+
+//       toast.success(`${file.name} selected successfully`);
+//     };
+
+//     reader.readAsDataURL(file);
+//   },
+//   [errors],
+// );
+
+const getPdfFirstPageImage = async (file: File): Promise<string> => {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const page = await pdf.getPage(1);
+
+  const viewport = page.getViewport({ scale: 1.5 });
+
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d")!;
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+
+  await page.render({ canvasContext: context, viewport }).promise;
+
+  return canvas.toDataURL("image/jpeg");
 };
 
 
@@ -384,92 +504,44 @@ const handleFileChange = useCallback(
   async (name: string, file: File, fieldConfig?: any) => {
     if (!file) return;
 
-    const { resolution, target } = fieldConfig || {};
+    const extension = file.name.split(".").pop()?.toLowerCase();
+    let finalBase64 = "";
 
-    // Validate Type
-    if (!file.type.match(/image\/(jpeg|png)/)) {
-      toast.error("Please upload a valid JPEG or PNG image.");
+    const isPDF = extension === "pdf";
+    const isImage = file.type.startsWith("image/");
+
+    if (!isPDF && !isImage) {
+      toast.error("Only PDF or Image files allowed.");
       return;
     }
 
-    // Validate Size (<1MB)
-    if (file.size > 1048576) {
-      toast.error("File size should be less than 1 MB.");
-      return;
+    // PDF → first page preview
+    if (isPDF) {
+      finalBase64 = await getPdfFirstPageImage(file);
     }
 
-    let targetWidth: number;
-    let targetHeight: number;
-
-    // If resolution provided → enforce resize
-    if (resolution) {
-      const [w, h] = resolution.split("x");
-      targetWidth = parseInt(w, 10);
-      targetHeight = parseInt(h, 10);
-    } else {
-      // Else use natural image size
-      const tempImg = new Image();
-      tempImg.src = URL.createObjectURL(file);
-
-      await new Promise((res) => (tempImg.onload = res));
-
-      targetWidth = tempImg.width;
-      targetHeight = tempImg.height;
+    // Image → base64 convert
+    if (isImage) {
+      finalBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
     }
 
-    // ---- AUTO RESIZE USING CANVAS ----
-    const resizedUrl: string = await resizeCanvasImage(file, targetWidth, targetHeight);
-
-    // Convert resized blob URL → Base64
-    const base64 = await fetch(resizedUrl)
-      .then((res) => res.blob())
-      .then(
-        (blob) =>
-          new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(blob);
-          })
-      );
-
-    // ---- BLUR DETECTION ----
-    try {
-      const blurry = await isImageBlurred(base64, targetWidth, targetHeight);
-      if (blurry) {
-        toast.error("The uploaded image is too blurry. Please upload a clearer image.");
-        return;
-      }
-    } catch (err) {
-      console.error("Blur check failed:", err);
-      toast.error("There was an issue processing the image.");
-      return;
-    }
-
-    // ---- SAVE BASE64 ----
+    // Preview + file save
     setFileData((prev) => ({
       ...prev,
-      [name]: base64,
+      [name]: finalBase64,
+      [name + "_file"]: file
     }));
 
-    // If preview target exists → update that also
-    if (target) {
-      setFileData((prev) => ({
-        ...prev,
-        [target]: base64,
-      }));
-    }
-
-    // Clear previous errors
     if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   },
   [errors]
 );
-
 
   const handleConditionChange = useCallback((condition: string, value: boolean) => {
     setConditions((prev) => ({
@@ -774,6 +846,7 @@ const handleFileChange = useCallback(
             onDateChange={handleDateChange}
             onAadhaarChange={handleAadhaarChange}
             onFileChange={handleFileChange}
+            type={type}
           />
         );
       case 1:
@@ -863,7 +936,7 @@ const handleFileChange = useCallback(
           </p>
         </div>
 
-        <div className="p-6">
+        <div className="p-2 md:p-6">
           {/* Stepper */}
           <div className="flex items-center justify-center mb-6 md:mb-8">
             <div className="flex items-center w-full max-w-4xl px-2">
