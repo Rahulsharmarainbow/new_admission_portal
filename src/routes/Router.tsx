@@ -103,7 +103,7 @@ const MainRoutes = [
   {
     path: '/ApplyEditing',
     element: (
-      <ProtectedRoute requiredRole="SUPERADMIN">
+      <ProtectedRoute >
         <EditingLayout />
       </ProtectedRoute>
     ),

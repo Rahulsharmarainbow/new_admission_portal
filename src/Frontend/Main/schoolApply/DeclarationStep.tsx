@@ -71,7 +71,7 @@ const formatContent = (htmlContent: string | null | undefined, formData: any) =>
         (Please read carefully before signing)
       </h6>
       
-      <div 
+      {/* <div 
   dangerouslySetInnerHTML={{ 
     __html: formatContent(content, formData) 
   }} 
@@ -81,7 +81,13 @@ const formatContent = (htmlContent: string | null | undefined, formData: any) =>
     lineHeight: '1.6',
     fontWeight: '400'
   }}
-/>
+/> */}
+
+  <div
+      className="formatted-content max-w-none mb-6 text-gray-700 leading-relaxed text-[15px] font-sans"
+      style={{ lineHeight: '1.6', fontWeight: '400' }}
+      dangerouslySetInnerHTML={{ __html: formatContent(content, formData) }}
+      />
       
       <div className="declaration_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
         <div>

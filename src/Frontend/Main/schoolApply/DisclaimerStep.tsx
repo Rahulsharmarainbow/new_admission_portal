@@ -75,16 +75,11 @@ const DisclaimerStep: React.FC<DisclaimerStepProps> = ({
   return (
     <div className="school_paragraph">
       <div
-        dangerouslySetInnerHTML={{
-          __html: formatContent(content, formData),
-        }}
-         className="max-w-none mb-6 text-gray-700 leading-relaxed text-[15px] font-sans"
-  style={{
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    lineHeight: '1.6',
-    fontWeight: '400'
-  }}
+      className="formatted-content max-w-none mb-6 text-gray-700 leading-relaxed text-[15px] font-sans"
+      style={{ lineHeight: '1.6', fontWeight: '400' }}
+      dangerouslySetInnerHTML={{ __html: formatContent(content, formData) }}
       />
+
 
       <div className="disclaimer_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
         <div>
