@@ -20,6 +20,7 @@ interface ApplyFormProps {
   dynamicBoxes: any[];
   required_child: any[];
   home_other_lines: any;
+  apply_page_header:any;
   header: any;
   cdata: any;
   apply_modal?: any;
@@ -33,6 +34,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   dynamicBoxes,
   required_child,
   home_other_lines,
+  apply_page_header,
   header,
   cdata,
   apply_modal,
@@ -299,253 +301,66 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   );
   
 
-// const handleFileChange = useCallback(
-//     (name: string, file: File, fieldConfig?: any) => {
-//       if (!file) return;
+const getPdfFirstPageImage = async (file: File): Promise<string> => {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const page = await pdf.getPage(1);
 
-//       const { resolution, target, type, validation, validation_message, required } =
-//         fieldConfig || {};
+  const viewport = page.getViewport({ scale: 1.5 });
 
-//       // ✅ Validate Type - Allow both images and PDF
-//       const isImage = file.type.match(/image\/(jpeg|png|jpg)/);
-//       const isPDF = file.type === 'application/pdf';
-      
-//       if (!isImage && !isPDF) {
-//         toast.error('Please upload a valid JPEG, PNG image or PDF file.');
-//         return;
-//       }
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d")!;
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
 
-//       // ✅ Validate Size (< 1 MB)
-//       if (file.size > 1048576) {
-//         toast.error('File size should be less than 1 MB.');
-//         return;
-//       }
+  await page.render({ canvasContext: context, viewport }).promise;
 
-//       // Skip resolution check for PDF files
-//       if (isPDF) {
-//         const reader = new FileReader();
-//         reader.onloadend = () => {
-//           const base64 = reader.result as string;
-          
-//           setFileData((prev) => ({
-//             ...prev,
-//             [name]: base64,
-//           }));
+  return canvas.toDataURL("image/jpeg");
+};
 
-//           if (target) {
-//             setFileData((prev) => ({
-//               ...prev,
-//               [target]: base64,
-//             }));
-//           }
 
-//           if (errors[name]) {
-//             setErrors((prev) => ({
-//               ...prev,
-//               [name]: '',
-//             }));
-//           }
-//         };
-//         reader.readAsDataURL(file);
-//         return;
-//       }
+const handleFileChange = useCallback(
+  async (name: string, file: File, fieldConfig?: any) => {
+    if (!file) return;
 
-//       // For images, proceed with normal processing but skip resolution check
-//       const reader = new FileReader();
-//       reader.onloadend = async () => {
-//         const base64 = reader.result as string;
+    const extension = file.name.split(".").pop()?.toLowerCase();
+    let finalBase64 = "";
 
-//         const img = new window.Image();
-//         img.src = base64;
+    const isPDF = extension === "pdf";
+    const isImage = file.type.startsWith("image/");
 
-//         img.onload = async () => {
-//           const imgWidth = img.width;
-//           const imgHeight = img.height;
+    if (!isPDF && !isImage) {
+      toast.error("Only PDF or Image files allowed.");
+      return;
+    }
 
-//           // ✅ Skip resolution check for all images
-//           // if (resolution && !fieldConfig?.skipResolution) {
-//           //   const [w, h] = resolution.split('x');
-//           //   targetWidth = parseInt(w, 10);
-//           //   targetHeight = parseInt(h, 10);
-//           // 
-//           //   if (imgWidth !== targetWidth || imgHeight !== targetHeight) {
-//           //     toast.error(`The uploaded image must be ${targetWidth}x${targetHeight} pixels.`);
-//           //     return;
-//           //   }
-//           // }
+    // PDF → first page preview
+    if (isPDF) {
+      finalBase64 = await getPdfFirstPageImage(file);
+    }
 
-//           // ✅ Blur Detection (only for images)
-//           try {
-//             const blurry = await isImageBlurred(img.src, imgWidth, imgHeight);
-//             if (blurry) {
-//               toast.error('The uploaded image is too blurry. Please upload a clearer image.');
-//               return;
-//             }
-//           } catch (err) {
-//             console.error('Blur check failed:', err);
-//             toast.error('There was an issue processing the image.');
-//             return;
-//           }
+    // Image → base64 convert
+    if (isImage) {
+      finalBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+    }
 
-//           // ✅ Save base64 for backend submission
-//           setFileData((prev) => ({
-//             ...prev,
-//             [name]: base64,
-//           }));
+    // Preview + file save
+    setFileData((prev) => ({
+      ...prev,
+      [name]: finalBase64,
+      [name + "_file"]: file
+    }));
 
-//           // ✅ Preview target if defined
-//           if (target) {
-//             setFileData((prev) => ({
-//               ...prev,
-//               [target]: base64,
-//             }));
-//           }
-
-//           // ✅ Remove error if previously set
-//           if (errors[name]) {
-//             setErrors((prev) => ({
-//               ...prev,
-//               [name]: '',
-//             }));
-//           }
-//         };
-//       };
-
-//       reader.readAsDataURL(file);
-//     },
-//     [errors],
-//   );
-
-// const handleFileChange = useCallback(
-//   async (name: string, file: File, fieldConfig?: any) => {
-//     if (!file) return;
-
-//     const extension = file.name.split(".").pop()?.toLowerCase();
-//     let finalBase64 = "";
-
-//     const isPDF = extension === "pdf";
-//     const isImage = file.type.startsWith("image/");
-
-//     if (!isImage) {
-//       toast.error("Only Image files allowed.");
-//       return;
-//     }
-
-//     // PDF → first page preview
-//     if (isPDF) {
-//       // finalBase64 = await getPdfFirstPageImage(file);
-//       return
-//     }
-
-//     // Image → base64 convert
-//     if (isImage) {
-//       finalBase64 = await new Promise<string>((resolve) => {
-//         const reader = new FileReader();
-//         reader.onloadend = () => resolve(reader.result as string);
-//         reader.readAsDataURL(file);
-//       });
-//     }
-
-//     // Preview + file save
-//     setFileData((prev) => ({
-//       ...prev,
-//       [name]: finalBase64,
-//       [name + "_file"]: file
-//     }));
-
-//     if (errors[name]) {
-//       setErrors((prev) => ({ ...prev, [name]: "" }));
-//     }
-//   },
-//   [errors]
-// );
-  const handleFileChange = useCallback(
-    (name: string, file: File, fieldConfig?: any) => {
-      if (!file) return;
-
-      const { resolution, target, type, validation, validation_message, required } =
-        fieldConfig || {};
-
-      // ✅ Validate Type
-      if (!file.type.match(/image\/(jpeg|png)/)) {
-        toast.error('Please upload a valid JPEG or PNG image.');
-        return;
-      }
-
-      // ✅ Validate Size (< 1 MB)
-      if (file.size > 1048576) {
-        toast.error('File size should be less than 1 MB.');
-        return;
-      }
-
-      const reader = new FileReader();
-
-      reader.onloadend = async () => {
-        const base64 = reader.result as string;
-
-        const img = new window.Image();
-        img.src = base64;
-
-        img.onload = async () => {
-          const imgWidth = img.width;
-          const imgHeight = img.height;
-
-          let targetWidth = imgWidth;
-          let targetHeight = imgHeight;
-
-          // ✅ Resolution check (if required)
-          if (resolution) {
-            const [w, h] = resolution.split('x');
-            targetWidth = parseInt(w, 10);
-            targetHeight = parseInt(h, 10);
-
-            if (imgWidth !== targetWidth || imgHeight !== targetHeight) {
-              toast.error(`The uploaded image must be ${targetWidth}x${targetHeight} pixels.`);
-              return;
-            }
-          }
-
-          // ✅ Blur Detection
-          try {
-            const blurry = await isImageBlurred(img.src, targetWidth, targetHeight);
-            if (blurry) {
-              toast.error('The uploaded image is too blurry. Please upload a clearer image.');
-              return;
-            }
-          } catch (err) {
-            console.error('Blur check failed:', err);
-            toast.error('There was an issue processing the image.');
-            return;
-          }
-
-          // ✅ Save base64 for backend submission
-          setFileData((prev) => ({
-            ...prev,
-            [name]: base64,
-          }));
-
-          // ✅ Preview target if defined
-          if (target) {
-            setFileData((prev) => ({
-              ...prev,
-              [target]: base64,
-            }));
-          }
-
-          // ✅ Remove error if previously set
-          if (errors[name]) {
-            setErrors((prev) => ({
-              ...prev,
-              [name]: '',
-            }));
-          }
-        };
-      };
-
-      reader.readAsDataURL(file);
-    },
-    [errors],
-  );
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  },
+  [errors]
+);
 
   const validateStep = useCallback(
     (step: number) => {
@@ -862,7 +677,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
         {/* Form Header */}
         <div className="p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
           <p className="text-center text-gray-600 text-sm sm:text-base mt-1 sm:mt-2">
-            {home_other_lines?.[1]?.title || 'Online Application Form'}
+            {apply_page_header || 'Online Application Form'}
           </p>
         </div>
 

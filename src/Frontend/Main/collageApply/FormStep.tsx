@@ -48,21 +48,12 @@ const FormStep: React.FC<FormStepProps> = ({
     if (!file) return;
 
     const isImage = file.type.startsWith('image/');
+    const isPDF = file.type === 'application/pdf';
 
-    if (type === 'school') {
-      const isPDF = file.type === 'application/pdf';
       if (!isPDF && !isImage) {
         toast.error('Only PDF or Image files allowed.');
         return;
       }
-    }
-
-    if (type === 'collage') {
-      if (!isImage) {
-        toast.error('Only Image files allowed.');
-        return;
-      }
-    }
 
     onFileChange(fieldName, file, fieldConfig);
   };
@@ -438,7 +429,6 @@ const FormStep: React.FC<FormStepProps> = ({
               {/* Buttons */}
               <div className="flex justify-center gap-2 file-upload-buttons">
                 {/* CAMERA BUTTON */}
-                {type === 'school' && (
                   <button
                     type="button"
                     onClick={() => handleCameraCapture(child.name, fieldConfig)}
@@ -447,7 +437,6 @@ const FormStep: React.FC<FormStepProps> = ({
                     <Icon icon="solar:camera-line-duotone" className="w-4 h-4" />
                     Camera
                   </button>
-                )}
                 {/* FILE UPLOAD BUTTON */}
                 <label
                   htmlFor={child.name}

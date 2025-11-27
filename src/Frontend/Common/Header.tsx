@@ -32,39 +32,80 @@ const Header = ({ baseUrl, institute_id, instituteName, logo, otherLogo, address
   const { logo: logoData, university } = headerData;
 
   return (
-    <header className="bg-white border-b border-gray-200">
-      <div className="bg-white shadow-md  container mx-auto px-4 py-1 rounded-b-2xl">
-        <div className="flex flex-col md:flex-row items-center justify-center text-center md:text-left">
-          {headerData?.logo && (
-            <Link to={`${baseUrl}`} reloadDocument>
-              <img
-                src={headerData.logo.src}
-                alt="Institute Logo"
-                className="h-28 w-56 md:w-28 object-contain mr-3 cursor-pointer"
-              />
-            </Link>
-          )}
+   <header className="bg-white border-b border-gray-200">
+  <div className="bg-white shadow-md container mx-auto px-4 py-2 rounded-b-2xl">
 
-          <div className="text-center">
-            <h1 className="md:text-3xl xl:text-4xl font-bold text-gray-900 underline underline-offset-4 decoration-red-800 inline-block pb-1 uppercase">
-              {headerData.university?.name || 'Institute Name'}
-            </h1>
-            {headerData.university?.address && (
-              <p className="text-sm text-gray-600 mt-1">{headerData.university.address}</p>
-            )}
-          </div>
-          {otherLogo && (
-            <Link to={`${baseUrl}`} reloadDocument>
-              <img
-                src={`${headerData.otherLogo.src}`}
-                alt="Institute Logo"
-                className="h-28 w-56 md:w-28 object-contain ml-4 cursor-pointer"
-              />
-            </Link>
-          )}
-        </div>
+    {/* MOBILE: 2 logos top row  |  DESKTOP: All in one row */}
+    <div className="flex flex-col md:flex-row items-center md:justify-center">
+
+      {/* MOBILE LOGO ROW */}
+      <div className="flex w-full justify-between md:hidden mb-2">
+        {/* Left Logo */}
+        {headerData?.logo && (
+          <img
+            src={headerData.logo.src}
+            alt="Institute Logo"
+            className="h-16 w-20 object-contain"
+          />
+        )}
+
+        {/* Right Logo */}
+        {otherLogo && (
+          <img
+            src={headerData.otherLogo.src}
+            alt="Institute Logo"
+            className="h-16 w-20 object-contain"
+          />
+        )}
       </div>
-    </header>
+
+      {/* DESKTOP LEFT LOGO */}
+      {headerData?.logo && (
+        <Link
+          to={`${baseUrl}`}
+          reloadDocument
+          className="hidden md:block mr-4"
+        >
+          <img
+            src={headerData.logo.src}
+            alt="Institute Logo"
+            className="h-28 w-28 object-contain cursor-pointer"
+          />
+        </Link>
+      )}
+
+      {/* HEADING */}
+      <div className="text-center">
+        <h1 className="md:text-3xl xl:text-4xl text-lg font-bold text-gray-900 underline underline-offset-4 decoration-red-800 pb-1 uppercase">
+          {headerData.university?.name || "Institute Name"}
+        </h1>
+
+        {headerData.university?.address && (
+          <p className="text-xs md:text-sm text-gray-600 mt-1">
+            {headerData.university.address}
+          </p>
+        )}
+      </div>
+
+      {/* DESKTOP RIGHT LOGO */}
+      {otherLogo && (
+        <Link
+          to={`${baseUrl}`}
+          reloadDocument
+          className="hidden md:block ml-4"
+        >
+          <img
+            src={headerData.otherLogo.src}
+            alt="Institute Logo"
+            className="h-28 w-28 object-contain cursor-pointer"
+          />
+        </Link>
+      )}
+
+    </div>
+  </div>
+</header>
+
   );
 };
 

@@ -21,6 +21,7 @@ interface SchoolApplyFormProps {
   dynamicBoxes: any[];
   required_child: any[];
   home_other_lines: any;
+  apply_page_header: any;
   header: any;
   content_managment: any;
   cdata: any;
@@ -46,6 +47,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
   dynamicBoxes,
   required_child,
   home_other_lines,
+  apply_page_header,
   header,
   content_managment,
   cdata,
@@ -932,7 +934,7 @@ const handleFileChange = useCallback(
         {/* Form Header */}
         <div className="p-2 md:p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
           <p className="text-center text-gray-600 mt-2">
-            {home_other_lines?.[1]?.title || 'Online Application Form'}
+            {apply_page_header || 'Online Application Form'}
           </p>
         </div>
 

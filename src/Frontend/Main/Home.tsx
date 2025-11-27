@@ -341,7 +341,7 @@ const Home = () => {
                 </h4>
               </div>
 
-              <div className="p-6 flex-grow flex items-center bg-gray-50 rounded-b-2xl">
+              <div className="p-6 flex-grow flex bg-gray-50 rounded-b-2xl">
                 <div className="flex flex-col gap-3 w-full">
                   {institute.buttons && institute.buttons.length > 0 ? (
                     institute.buttons.map((btn, index) => {

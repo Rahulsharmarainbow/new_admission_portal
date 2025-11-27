@@ -145,6 +145,7 @@ const Apply = () => {
             dynamicBoxes={applyData.data}
             required_child={applyData.required_child}
             home_other_lines={applyData.home_other_lines}
+            apply_page_header={applyData.apply_page_header}
             header={applyData.header}
             content_managment={applyData.content_managment}
             cdata={applyData.cdata}
@@ -161,6 +162,7 @@ const Apply = () => {
             dynamicBoxes={applyData.data}
             required_child={applyData.required_child}
             home_other_lines={applyData.home_other_lines}
+            apply_page_header={applyData?.apply_page_header}
             header={applyData.header}
             cdata={applyData.cdata}
             apply_modal={applyData.apply_modal}
