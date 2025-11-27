@@ -8,7 +8,7 @@ const Header = ({ baseUrl, institute_id, instituteName, logo, otherLogo, address
     logo: {
       src:
         assetUrl + '/' + logo ||
-        'https://admissionportalbackend.testingscrew.com/public/company_logos/1752817396_academic.jpg',
+        '',
       alt: 'University Logo',
       width: '100',
       height: '100',
@@ -16,7 +16,7 @@ const Header = ({ baseUrl, institute_id, instituteName, logo, otherLogo, address
     otherLogo: {
       src:
         assetUrl + '/' + otherLogo ||
-        'https://admissionportalbackend.testingscrew.com/public/company_logos/1752817396_academic.jpg',
+        '',
       alt: 'University Logo',
       width: '100',
       height: '100',
@@ -76,14 +76,26 @@ const Header = ({ baseUrl, institute_id, instituteName, logo, otherLogo, address
 
       {/* HEADING */}
       <div className="text-center">
+         <Link
+          to={`${baseUrl}`}
+          reloadDocument
+          className="hidden md:block mr-4"
+        >
         <h1 className="md:text-3xl xl:text-4xl text-lg font-bold text-gray-900 underline underline-offset-4 decoration-red-800 pb-1 uppercase">
           {headerData.university?.name || "Institute Name"}
         </h1>
+        </Link>
 
         {headerData.university?.address && (
+           <Link
+          to={`${baseUrl}`}
+          reloadDocument
+          className="hidden md:block mr-4"
+        >
           <p className="text-xs md:text-sm text-gray-600 mt-1">
             {headerData.university.address}
           </p>
+          </Link>
         )}
       </div>
 
