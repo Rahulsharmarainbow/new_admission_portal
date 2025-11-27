@@ -55,6 +55,45 @@ const Home = () => {
     }
   }, [institute_id]);
 
+  const setFavicon = (faviconUrl) => {
+    // Remove existing favicon links
+    const existingLinks = document.querySelectorAll('link[rel*="icon"]');
+    existingLinks.forEach(link => link.remove());
+
+    // Create new favicon link
+    const link = document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/x-icon';
+    link.href = faviconUrl;
+    
+    // Add to head
+    document.head.appendChild(link);
+
+    console.log('Favicon set to:', faviconUrl);
+  };
+
+  // Function to get favicon URL
+  const getFaviconUrl = () => {
+    if (institute?.header?.academic_favicon) {
+      return `${assetUrl}/${institute.header.academic_favicon}`;
+    }
+    if (institute?.header?.logo) {
+      return `${assetUrl}/${institute.header.logo}`;
+    }
+    return '/favicon.ico';
+  };
+
+  useEffect(() => {
+    if (institute) {
+      // Set page title
+      document.title = institute?.header?.name || '';
+      
+      // Set favicon
+      const faviconUrl = getFaviconUrl();
+      setFavicon(faviconUrl);
+    }
+  }, [institute]);
+
   // New Badge Component with fixed background color
   const NewBadge = ({ className = '', size = 'default' }) => {
     const textSize = size === 'small' ? 'text-[8px]' : 'text-[10px]';
@@ -139,18 +178,6 @@ const Home = () => {
   const { examInfo, alert, cards } = transformedData;
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Helmet>
-        <title>{institute?.header?.name || 'Institute Portal'}</title>
-        <link
-          rel="icon"
-          type="image/png"
-          href={institute?.header?.logo ? `${assetUrl}/${institute.header.logo}` : '/favicon.ico'}
-        />
-        <meta
-          name="description"
-          content={`Welcome to ${institute?.header?.name || 'Institute'} admission portal`}
-        />
-      </Helmet>
       <Header
         baseUrl={institute.baseUrl}
         institute_id={institute.unique_code}

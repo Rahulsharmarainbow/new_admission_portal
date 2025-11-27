@@ -141,9 +141,7 @@ const HomeLinesEditor = ({ selectedAcademic, user, apiUrl }) => {
       const res = await axios.post(
         `${apiUrl}/${user?.role}/FrontendEditing/update-homelines`,
         {
-          academic_id: selectedAcademic, 
-          lines, 
-          academic_fields: academicFields
+           academic_id: selectedAcademic, lines, academicFields
         },
         { 
           headers: { 

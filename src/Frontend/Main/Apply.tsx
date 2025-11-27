@@ -104,6 +104,46 @@ const Apply = () => {
     }
   }, []);
 
+  const setFavicon = (faviconUrl) => {
+    // Remove existing favicon links
+    const existingLinks = document.querySelectorAll('link[rel*="icon"]');
+    existingLinks.forEach(link => link.remove());
+
+    // Create new favicon link
+    const link = document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/x-icon';
+    link.href = faviconUrl;
+    
+    // Add to head
+    document.head.appendChild(link);
+
+    console.log('Favicon set to:', faviconUrl);
+  };
+
+  // Function to get favicon URL
+  const getFaviconUrl = () => {
+    if (applyData?.header?.academic_favicon) {
+      return `${assetUrl}/${applyData.header.academic_favicon}`;
+    }
+    if (applyData?.header?.logo) {
+      return `${assetUrl}/${applyData.header.logo}`;
+    }
+    return '/favicon.ico';
+  };
+
+  useEffect(() => {
+    if (applyData) {
+      // Set page title
+      document.title = applyData?.header?.name || '';
+      
+      // Set favicon
+      const faviconUrl = getFaviconUrl();
+      setFavicon(faviconUrl);
+    }
+  }, [applyData]);
+
+
   if (loading) {
     return <Loader />;
   }
