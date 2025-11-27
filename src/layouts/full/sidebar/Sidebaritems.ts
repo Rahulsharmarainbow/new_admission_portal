@@ -639,6 +639,7 @@ const SidebarContent: Record<number, MenuItem[]> = {
             }, 
           ],
         },
+        { name: 'Activity', url: '/CustomerAdmin/activity', icon: 'solar:clock-circle-line-duotone' },
 
          {
           name: 'Transaction',
