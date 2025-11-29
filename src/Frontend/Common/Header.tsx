@@ -45,7 +45,7 @@ const Header = ({ baseUrl, institute_id, instituteName, logo, otherLogo, address
           <img
             src={headerData.logo.src}
             alt="Institute Logo"
-            className="h-16 w-20 object-contain"
+            className="h-16 w-20 object-contain header_logo"
           />
         )}
 

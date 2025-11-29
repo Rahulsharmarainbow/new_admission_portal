@@ -256,5 +256,8 @@
 .rounded-lg.border.border-gray-200.shadow-sm {
     overflow-x: hidden;
 }
+.header_logo {
+  margin:0 auto;
+}
 
 

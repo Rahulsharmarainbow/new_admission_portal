@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MdOutlineRemoveRedEye, MdFilterList, MdSort } from 'react-icons/md';
-import { TbEdit } from "react-icons/tb";
+import { TbEdit, TbFileTypePdf, TbLoader2 } from "react-icons/tb";
 import { BsDownload, BsSearch, BsX } from 'react-icons/bs';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { Button, Tooltip, TextInput } from 'flowbite-react';
@@ -108,6 +108,8 @@ const CollegeApplicationManagementTable: React.FC = () => {
   const [sort, setSort] = useState({ key: 'id', direction: 'desc' as 'asc' | 'desc' });
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
+  const [downloadingId, setDownloadingId] = useState(null);
+
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const apiAssetsUrl = import.meta.env.VITE_ASSET_URL;
@@ -297,6 +299,51 @@ const CollegeApplicationManagementTable: React.FC = () => {
   // Handle edit
   const handleEdit = (application: Application) => {
     navigate(`/${user?.role}/college-applications/edit/${application.id}`);
+  };
+  const handlePdfDownload = async (applicationId) => {
+    try {
+      setDownloadingId(applicationId); // start loader
+  
+      const requestBody = {
+        application_id: applicationId,
+      };
+  
+      const response = await axios.post(
+        `${apiUrl}/${user?.role}/Applications/download-application_pdf_by_id`,
+        requestBody,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            accept: '/',
+            'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+  
+      const { filename, pdf } = response.data;
+  
+      const byteCharacters = atob(pdf);
+      const byteNumbers = new Array(byteCharacters.length)
+        .fill()
+        .map((_, i) => byteCharacters.charCodeAt(i));
+      const byteArray = new Uint8Array(byteNumbers);
+  
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+  
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${filename}.pdf`;
+      link.click();
+  
+      URL.revokeObjectURL(url);
+  
+    } catch (error) {
+      console.error("PDF Download Error:", error);
+    } finally {
+      setDownloadingId(null); // stop loader
+    }
   };
 
   // Handle download Excel
@@ -659,6 +706,24 @@ const CollegeApplicationManagementTable: React.FC = () => {
                                     <TbEdit className="w-5 h-5" />
                                   </button>
                                 </Tooltip>
+
+                                <Tooltip content="Download PDF" placement="top" style="light">
+                                    <button
+                                      onClick={() => handlePdfDownload(application.id)}
+                                      disabled={downloadingId === application.id}
+                                      className={`text-red-600 p-2 rounded-lg transition-colors 
+                                        ${downloadingId === application.id
+                                          ? "opacity-60 cursor-not-allowed"
+                                          : "hover:text-red-800 hover:bg-red-50"
+                                        }`}
+                                    >
+                                      {downloadingId === application.id ? (
+                                        <TbLoader2 className="w-5 h-5 animate-spin" />
+                                      ) : (
+                                        <TbFileTypePdf className="w-5 h-5" />
+                                      )}
+                                    </button>
+                                  </Tooltip>
                               </div>
                             </td>
                           </tr>
