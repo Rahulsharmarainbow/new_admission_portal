@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
 import SchoolDropdown from 'src/Frontend/Common/SchoolDropdown';
 import TransportationSettingsForm from './TransportationSettingsForm';
+import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
 
 interface TransportationSetting {
   id: number;
@@ -37,7 +38,14 @@ interface FormData {
   academic_id: string;
 }
 
-const TransportationSettingsTable: React.FC = () => {
+interface TransportationSettingsTableProps {
+  type?: string; // Optional prop
+}
+
+const TransportationSettingsTable: React.FC<TransportationSettingsTableProps> = ({ type }) => {
+
+  const currentType = type || "1"; // Default to "1" if not provided
+
   const { user } = useAuth();
   const [settings, setSettings] = useState<TransportationSetting[]>([]);
   const [loading, setLoading] = useState(false);
@@ -293,14 +301,25 @@ return (
         </div>
 
         {/* School Dropdown */}
-        {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  ( <div className="w-full sm:w-64">
-          <SchoolDropdown
-            formData={formData}
-            setFormData={setFormData}
-            onChange={handleAcademicChange}
-            includeAllOption
-          />
-        </div> )}
+       {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && (
+  <div className="w-full sm:w-64">
+    {currentType === "2" ? (
+      <AcademicDropdown
+        formData={formData}
+        setFormData={setFormData}
+        onChange={handleAcademicChange}
+        includeAllOption
+      />
+    ) : (
+      <SchoolDropdown
+        formData={formData}
+        setFormData={setFormData}
+        onChange={handleAcademicChange}
+        includeAllOption
+      />
+    )}
+  </div>
+)}
       </div>
 
       {/* Add Button */}

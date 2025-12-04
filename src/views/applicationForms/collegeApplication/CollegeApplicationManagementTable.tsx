@@ -667,7 +667,7 @@ const CollegeApplicationManagementTable: React.FC = () => {
                               </div>
                             </td>
                             <td className="py-4 px-4 text-sm text-gray-600 min-w-[100px]">
-                              <div className="truncate max-w-[90px]" title={application.roll_no}>
+                              <div className="truncate " title={application.roll_no}>
                                 {application.roll_no || 'N/A'}
                               </div>
                             </td>

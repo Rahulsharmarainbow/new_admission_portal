@@ -3,18 +3,18 @@ import BreadcrumbHeader from 'src/Frontend/Common/BreadcrumbHeader';
 import TransportationSettingsTable from './components/TransportationSettingsTable';
 import { useAuth } from 'src/hook/useAuth';
 
-const TransportationSettingsList: React.FC = () => {
+const CollegeSettingList: React.FC = () => {
   const { user } = useAuth();
   
   return (
     <div className="p-6">
       <BreadcrumbHeader
-        title="Settings"
-        paths={[{ name: "Settings", link: "/" + user?.role + "/transportation-settings" }]}
+        title=" Settings"
+        paths={[{ name: " Settings", link: "/" + user?.role + "/transportation-settings" }]}
       />
-      <TransportationSettingsTable />
+      <TransportationSettingsTable type="2" />
     </div>
   );
 };
 
-export default TransportationSettingsList;
+export default CollegeSettingList;

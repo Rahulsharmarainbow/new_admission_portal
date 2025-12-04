@@ -790,9 +790,11 @@ const NotificationsPage: React.FC = () => {
                             }`}>
                               {notification.title}
                             </h3>
-                            <p className="text-gray-600 text-sm mt-2 leading-relaxed">
-                              {notification.message}
-                            </p>
+                            <p
+  className="text-gray-600 text-sm mt-2 leading-relaxed"
+  dangerouslySetInnerHTML={{ __html: notification.message }}
+></p>
+
                           </div>
                           
                           <div className="flex items-center gap-2 ml-4">

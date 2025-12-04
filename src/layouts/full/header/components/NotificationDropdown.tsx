@@ -323,7 +323,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                       )}
                     </div>
                     <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                      {notification.message}
+                      {/* {notification.message} */}
                     </p>
                     <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
                       <Icon icon="solar:clock-circle-line-duotone" height={12} />

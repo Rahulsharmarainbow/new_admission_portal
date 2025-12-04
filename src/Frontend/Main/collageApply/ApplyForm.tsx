@@ -579,37 +579,51 @@ const handleFileChange = useCallback(
     }
   }, [activeStep, formData, fileData, validateStep, academic_id, cdata, apiUrl]);
 
-  const handleDownloadReceipt = async (application_id: String) => {
-    try {
-      const response = await axios.post(
-        `${apiUrl}/frontend/download-receipt`,
-        { application_id },
-        {
-          responseType: 'blob',
+  const handleDownloadReceipt = async (application_id: string) => {
+      try {
+        const response = await fetch(`${apiUrl}/frontend/download-receipt`, {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-        },
-      );
-
-      // 👉 Create blob url
-      const file = new Blob([response.data], { type: 'application/pdf' });
-      const fileURL = URL.createObjectURL(file);
-
-      // 👉 Create a temporary link for download
-      const link = document.createElement('a');
-      link.href = fileURL;
-      link.setAttribute('download', `receipt-${application_id}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-
-      // 👉 Cleanup
-      link.remove();
-      URL.revokeObjectURL(fileURL);
-    } catch (error) {
-      console.error('Receipt download failed:', error);
-    }
-  };
+          body: JSON.stringify({ application_id }),
+        });
+  
+        const data = await response.json();
+  
+        if (data && data.pdf && data.filename) {
+          const { pdf, filename } = data;
+  
+          // Convert base64 to blob
+          const binaryString = window.atob(pdf);
+          const bytes = new Uint8Array(binaryString.length);
+          
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          
+          const blob = new Blob([bytes], { type: 'application/pdf' });
+          const url = window.URL.createObjectURL(blob);
+          
+          const link = document.createElement('a');
+          link.href = url;
+          
+          // Add .pdf extension if not present
+          const downloadFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
+          link.download = downloadFilename;
+          
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        } else {
+          throw new Error('Invalid response format');
+        }
+      } catch (error) {
+        console.error('Receipt download failed:', error);
+        toast.error('Receipt download failed. Please try again.');
+      }
+    };
 
   const renderStep = (step: number) => {
     switch (step) {
@@ -828,13 +842,7 @@ const handleFileChange = useCallback(
                 </p>
               </div>
 
-              {/* Payment Details */}
-              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4">
-                <div className="flex justify-between items-center text-xs sm:text-sm mt-2">
-                  <span className="text-gray-600">Payment For:</span>
-                  <span className="font-semibold text-xs sm:text-sm">College Application Fee</span>
-                </div>
-              </div>
+             
             </div>
 
             {/* Dialog Actions */}

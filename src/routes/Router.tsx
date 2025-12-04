@@ -69,6 +69,7 @@ import Rankcard from 'src/Frontend/rankcard/Rankcard';
 import HallTicket from 'src/Frontend/hallticket/Hallticket';
 import EditingLayout from 'src/layouts/full/EditingLayout';
 import ApplyEditing from 'src/views/Editing/ApplyEditing';
+import CollegeSettingList from 'src/views/schoolServices/transportationSettings/CollegeSettingList';
 
 
 /* ***Layouts**** */
@@ -146,6 +147,7 @@ const MainRoutes = [
       { path: '/SuperAdmin/college-content-Management', element: <CollegeContentList/> },
       { path: '/SuperAdmin/transportation', element: <TransportationList/> },
       { path: '/SuperAdmin/setting', element: <TransportationSettingsList/> },
+      { path: '/SuperAdmin/collegesetting', element: <CollegeSettingList/> },
       { path: '/SuperAdmin/degrees', element: <DegreeManagementTable/> },
       { path: '/SuperAdmin/halltickets', element: <HallticketTable/> },
       { path: '/SuperAdmin//halltickets/add', element: <HallticketForm/> },
@@ -208,6 +210,7 @@ const MainRoutes = [
       { path: 'college-content-Management', element: <CollegeContentList/> },
       { path: 'transportation', element: <TransportationList/> },
       { path: 'setting', element: <TransportationSettingsList/> },
+      { path: 'collegesetting', element: <CollegeSettingList/> },
       { path: 'degrees', element: <DegreeManagementTable/> },
       { path: 'halltickets', element: <HallticketTable/> },
       { path: 'halltickets/add', element: <HallticketForm/> },
@@ -269,6 +272,7 @@ const MainRoutes = [
       { path: 'college-content-Management', element: <CollegeContentList/> },
       { path: 'transportation', element: <TransportationList/> },
       { path: 'setting', element: <TransportationSettingsList/> },
+      { path: 'collegesetting', element: <CollegeSettingList/> },
       { path: 'degrees', element: <DegreeManagementTable/> },
       { path: 'halltickets', element: <HallticketTable/> },
       { path: 'halltickets/add', element: <HallticketForm/> },

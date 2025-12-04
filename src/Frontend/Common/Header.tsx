@@ -39,13 +39,14 @@ const Header = ({ baseUrl, institute_id, instituteName, logo, otherLogo, address
     <div className="flex flex-col md:flex-row items-center md:justify-center">
 
       {/* MOBILE LOGO ROW */}
-      <div className="flex w-full justify-between md:hidden mb-2">
+      <div className="flex w-full justify-center md:hidden mb-2">
         {/* Left Logo */}
         {headerData?.logo && (
+          
           <img
             src={headerData.logo.src}
             alt="Institute Logo"
-            className="h-16 w-20 object-contain header_logo"
+            className="h-16 w-20 object-contain "
           />
         )}
 
@@ -79,7 +80,7 @@ const Header = ({ baseUrl, institute_id, instituteName, logo, otherLogo, address
          <Link
           to={`${baseUrl}`}
           reloadDocument
-          className="hidden md:block mr-4"
+          className=" md:block mr-4"
         >
         <h1 className="md:text-3xl xl:text-4xl text-lg font-bold text-gray-900 underline underline-offset-4 decoration-red-800 pb-1 uppercase">
           {headerData.university?.name || "Institute Name"}
@@ -90,7 +91,7 @@ const Header = ({ baseUrl, institute_id, instituteName, logo, otherLogo, address
            <Link
           to={`${baseUrl}`}
           reloadDocument
-          className="hidden md:block mr-4"
+          className=" md:block mr-4"
         >
           <p className="text-xs md:text-sm text-gray-600 mt-1">
             {headerData.university.address}

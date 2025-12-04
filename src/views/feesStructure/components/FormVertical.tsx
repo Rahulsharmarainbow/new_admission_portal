@@ -139,7 +139,7 @@ const FormVertical = () => {
 
     try {
       // Validate required fields
-      if (state.length === 0 || caste.length === 0 || !applicableFee) {
+      if ( !applicableFee) {
         toast.error('Please fill all required fields in Special Caste Fees Setting');
         return;
       }
@@ -336,7 +336,7 @@ const FormVertical = () => {
                   {/* State Dropdown - React Select Multi */}
                   <div className="md:col-span-5">
                     <Label htmlFor="state" className="block mb-2">
-                      State *
+                      State 
                     </Label>
                     <ReactSelect
                       id="state"
@@ -348,7 +348,7 @@ const FormVertical = () => {
                       placeholder="Select states..."
                       isSearchable
                       isClearable
-                      required
+                      
                       className="react-select-container"
                       classNamePrefix="react-select"
                       noOptionsMessage={({ inputValue }) =>
@@ -367,7 +367,7 @@ const FormVertical = () => {
                   {/* Caste Dropdown - React Select Multi */}
                   <div className="md:col-span-4">
                     <Label htmlFor="caste" className="block mb-2">
-                      Caste *
+                      Caste 
                     </Label>
                     <ReactSelect
                       id="caste"
@@ -379,7 +379,7 @@ const FormVertical = () => {
                       placeholder="Select castes..."
                       isSearchable
                       isClearable
-                      required
+                      
                       className="react-select-container"
                       classNamePrefix="react-select"
                       noOptionsMessage={({ inputValue }) =>

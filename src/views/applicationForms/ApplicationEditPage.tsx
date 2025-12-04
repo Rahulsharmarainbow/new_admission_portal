@@ -101,11 +101,17 @@ const ApplicationEditPage: React.FC = () => {
         }
 
         // Handle Aadhaar fields
-        if (key === 'adharCard' && value && value.length === 12) {
+        if (key === 'adharcard' && value && value.length === 12) {
           for (let i = 0; i < 12; i++) {
-            processedData[`adharCard_${i}`] = value[i];
+            processedData[`adharcard_${i}`] = value[i];
           }
         }
+
+        // if (key === 'adharcard' && value && value.length === 12) {
+        //   for (let i = 0; i < 12; i++) {
+        //     processedData[`adharcard_${i}`] = value[i];
+        //   }
+        // }
       }
     });
 
@@ -616,6 +622,7 @@ const ApplicationEditPage: React.FC = () => {
           const candidateData = response.data.candidate_details;
 
           // Process candidate details to create proper form data
+          
           const processedFormData = processCandidateDetails(candidateData);
           setFormData(processedFormData);
 
@@ -765,11 +772,11 @@ const ApplicationEditPage: React.FC = () => {
             if (!fileData[field.name] && !formData[field.name]) {
               newErrors[field.name] = `${field.label} is required`;
             }
-          } else if (field.name === 'adharCard') {
+          } else if (field.name === 'adharcard') {
             let aadhaarCard = '';
             let hasError = false;
             for (let i = 0; i < 12; i++) {
-              const digit = formData[`adharCard_${i}`];
+              const digit = formData[`adharcard_${i}`];
               if (!digit) {
                 newErrors[field.name] = 'All Aadhaar card digits are required';
                 hasError = true;
@@ -828,12 +835,12 @@ const ApplicationEditPage: React.FC = () => {
       const mainData: any = { ...formData };
       const sData: any = {};
 
-      if (mainData.adharCard_0 !== undefined) {
+      if (mainData.adharcard_0 !== undefined) {
         let combinedAadhaar = '';
         for (let i = 0; i < 12; i++) {
-          combinedAadhaar += mainData[`adharCard_${i}`] || '';
+          combinedAadhaar += mainData[`adharcard_${i}`] || '';
         }
-        mainData.adharCard = combinedAadhaar;
+        mainData.adharcard = combinedAadhaar;
         console.log('Combined Aadhaar:', combinedAadhaar);
       }
 
@@ -1092,67 +1099,22 @@ const ApplicationEditPage: React.FC = () => {
 
       case 'adhar':
         return (
-          <div className={`space-y-3 ${getColumnSpan(child.width)}`}>
-            <label className="flex text-sm font-medium text-gray-700">
+           <div className={`space-y-2 ${getColumnSpan(child.width)}`}>
+            <label className="block text-sm font-medium text-gray-700">
               {child.label}
               {child.required === 1 && <span className="text-red-500 ml-1">*</span>}
             </label>
-
-            <div className="flex flex-col space-y-3">
-              <div className="flex flex-wrap gap-1 sm:gap-2 items-center">
-                {Array.from({ length: 12 }, (_, index) => (
-                  <input
-                    key={index}
-                    type={formData[`${child.name}_visible`] ? 'text' : 'password'}
-                    maxLength={1}
-                    value={formData[`${child.name}_${index}`] || ''}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      console.log('Input change:', value, 'at index:', index);
-                      handleAadhaarChange(index, value, child.name, fieldConfig);
-                    }}
-                    onKeyDown={(e) => {
-                      // Handle backspace specifically
-                      if (
-                        e.key === 'Backspace' &&
-                        !formData[`${child.name}_${index}`] &&
-                        index > 0
-                      ) {
-                        e.preventDefault();
-                        const prevInput = document.querySelector(
-                          `input[name="${child.name}_${index - 1}"]`,
-                        ) as HTMLInputElement;
-                        if (prevInput) {
-                          prevInput.focus();
-                          prevInput.select();
-                        }
-                      }
-                    }}
-                    onFocus={(e) => e.target.select()}
-                    name={`${child.name}_${index}`}
-                    placeholder="●"
-                    className="w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-lg font-semibold transition-all duration-200 bg-white shadow-sm"
-                  />
-                ))}
-                <button
-                  type="button"
-                  onClick={() => handleAadhaarVisibility(child.name)}
-                  className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors rounded-lg hover:border-blue-300 bg-white shadow-sm"
-                >
-                  <Icon
-                    icon={
-                      formData[`${child.name}_visible`]
-                        ? 'solar:eye-line-duotone'
-                        : 'solar:eye-closed-line-duotone'
-                    }
-                    className="w-4 h-4 sm:w-5 sm:h-5"
-                  />
-                </button>
-              </div>
-            </div>
-
+            <input
+              {...commonProps}
+              type="text"
+              placeholder={child.placeholder}
+              onChange={(e) => handleInputChange(child.name, e.target.value, fieldConfig)}
+              className={`${baseInputClasses} ${
+                errors[child.name] ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
             {errors[child.name] && (
-              <p className="text-red-500 text-xs mt-2">{errors[child.name]}</p>
+              <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
             )}
           </div>
         );

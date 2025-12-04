@@ -270,6 +270,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               isPro: false,
             },
             {
+              name: 'Setting',
+              id: uniqueId(),
+              url: '/SuperAdmin/collegesetting',
+              isPro: false,
+            },
+            {
               name: 'Content Management',
               id: uniqueId(),
               url: '/SuperAdmin/college-content-Management',
@@ -455,6 +461,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               url: '/SupportAdmin/rankcard',
               isPro: false,
             },
+             {
+              name: 'Setting',
+              id: uniqueId(),
+              url: '/SupportAdmin/collegesetting',
+              isPro: false,
+            },
             {
               name: 'Content Management',
               id: uniqueId(),
@@ -613,6 +625,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               isPro: false,
             },
             {
+              name: 'Setting',
+              id: uniqueId(),
+              url: '/CustomerAdmin/collegesetting',
+              isPro: false,
+            },
+            {
               name: 'Content Management',
               id: uniqueId(),
               url: '/CustomerAdmin/college-content-Management',
@@ -651,18 +669,18 @@ const SidebarContent: Record<number, MenuItem[]> = {
           id: uniqueId(),
           icon: 'solar:database-line-duotone',
           children: [
-            {
-              name: 'State',
-              id: uniqueId(),
-              url: '/CustomerAdmin/data-manager/State',
-              isPro: false,
-            },
-            {
-              name: 'District',
-              id: uniqueId(),
-              url: '/CustomerAdmin/data-manager/District',
-              isPro: false,
-            },
+            // {
+            //   name: 'State',
+            //   id: uniqueId(),
+            //   url: '/CustomerAdmin/data-manager/State',
+            //   isPro: false,
+            // },
+            // {
+            //   name: 'District',
+            //   id: uniqueId(),
+            //   url: '/CustomerAdmin/data-manager/District',
+            //   isPro: false,
+            // },
             {
               name: 'Type Configuration',
               id: uniqueId(),

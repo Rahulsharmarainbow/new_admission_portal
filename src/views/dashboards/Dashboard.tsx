@@ -537,7 +537,7 @@ const Dashboard = () => {
   const handleRollNoClick = (application: any) => {
     const applicationId = application.application_id || application.id;
     if (applicationId) {
-      navigate(`/SuperAdmin/application-details/${applicationId}`);
+      navigate(`/${user.role}/application-details/${applicationId}`);
     } else {
       toast.error('Application ID not found');
     }
@@ -820,6 +820,132 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
         </div>
       </div>
 
+      <div className="grid grid-cols-12 gap-6 mb-6">
+       
+        <div className="lg:col-span-3 col-span-12">
+          <div className="bg-[#0085db] rounded-lg shadow-lg p-6 relative overflow-hidden border-0">
+            <img
+              alt="img"
+              loading="lazy"
+              width="59"
+              height="81"
+              decoding="async"
+              className="absolute top-0 right-0"
+              src={img1}
+            />
+            <div className="relative z-10">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
+                 <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1.5"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path
+                      strokeLinecap="round"
+                      d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+              <h4 className="text-2xl font-bold text-white mb-1">
+                {dashboardData?.transactionStats?.total_paid_transaction_amount || 0}
+              </h4>
+              <span className="text-sm text-white text-opacity-90 font-medium">
+                Total No. of Transactions
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-3 col-span-12">
+          <div className="bg-[#0085db] rounded-lg shadow-lg p-6 relative overflow-hidden border-0">
+            <img
+              alt="img"
+              loading="lazy"
+              width="59"
+              height="81"
+              decoding="async"
+              className="absolute top-0 right-0"
+              src={img2}
+            />
+            <div className="relative z-10">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1.5"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path
+                      strokeLinecap="round"
+                      d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+              <h4 className="text-2xl font-bold text-white mb-1">
+                {dashboardData?.transactionStats?.total_paid_transaction_count || 0}
+              </h4>
+              <span className="text-sm text-white text-opacity-90 font-medium">
+                Count of Captured
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-3 col-span-12">
+          <div className="bg-[#0085db] rounded-lg shadow-lg p-6 relative overflow-hidden border-0">
+            <img
+              alt="img"
+              loading="lazy"
+              width="59"
+              height="81"
+              decoding="async"
+              className="absolute top-0 right-0"
+              src={img3}
+            />
+            <div className="relative z-10">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1.5"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path
+                      strokeLinecap="round"
+                      d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+              <h4 className="text-2xl font-bold text-white mb-1">
+                {dashboardData?.transactionStats?.total_unpaid_transaction_count || 0}
+              </h4>
+              <span className="text-sm text-white text-opacity-90 font-medium">
+                Count of Initialized
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Charts Section */}
       <div className="grid grid-cols-12 gap-6 mb-6">
         {/* ✅ SuperAdmin and SupportAdmin — dono charts show */}
@@ -859,7 +985,7 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
         )}
       </div>
 
-      {user?.role === 'CustomerAdmin' && (<div className="mb-6">
+      {user?.role === 'CustomerAdmin' && dashboardData.classWisePaidApplications && (<div className="mb-6">
         {/* ✅ CustomerAdmin — academic_type ke basis par */}
         
           <>
