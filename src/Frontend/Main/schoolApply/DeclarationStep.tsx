@@ -22,35 +22,66 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
   errors
 }) => {
 
-const formatContent = (htmlContent: string | null | undefined, formData: any) => {
+   const formatContent = (
+  htmlContent: string | null | undefined,
+  formData: any
+) => {
   if (!htmlContent) return "";
 
   let formattedContent: string = htmlContent;
   const data = formData ?? {};
+  const lookupMap: any = {};
 
-  // Replace placeholders with formData values
+  // Build lookup map
   Object.keys(data).forEach((key) => {
-    const placeholder = `{${key}}`;
-    let value = data[key] ? String(data[key]) : "";
+    const originalValue = data[key];
+    const normalized = key.replace(/^s[_]?/i, "").toLowerCase();
 
-    // Special condition for "class"
-    if (key === "class" && value.includes("$")) {
+    lookupMap[key.toLowerCase()] = originalValue;
+    lookupMap[normalized] = originalValue;
+    lookupMap[key.toLowerCase().replace(/_/g, "")] = originalValue;
+    lookupMap[normalized.replace(/_/g, "")] = originalValue;
+  });
+
+  // --------------------------------------------------
+  // Replace all placeholders EXCEPT {relation_name}
+  // --------------------------------------------------
+  formattedContent = formattedContent.replace(/\{([^}]+)\}/g, (match, p1) => {
+    if (p1.toLowerCase() === "relation_name") {
+      return match; // ⛔ DO NOT replace here — skip
+    }
+
+    const cleanKey = p1.toLowerCase().replace(/^s[_]?/i, "").replace(/_/g, "");
+    let value = lookupMap[cleanKey] ? String(lookupMap[cleanKey]) : "";
+
+    if (p1.toLowerCase() === "class" && value.includes("$")) {
       value = value.split("$")[1] ?? "";
     }
 
-    formattedContent = formattedContent.replace(
-      new RegExp(placeholder, "g"),
-      `<strong>${value}</strong>`
-    );
+    return value;
   });
 
-  // Remove all placeholders not found in formData
-  formattedContent = formattedContent.replace(/\{[^}]+\}/g, "");
+  // -------------------------------------------------------
+  // Special Handler for {relation_name}
+  // -------------------------------------------------------
+  if (formattedContent.includes("{relation_name}")) {
+    const rel = (data.s_relationship || "").toLowerCase();
+
+    let relationKey = rel + "_name";
+    let relationValue = data[relationKey] ? String(data[relationKey]) : "";
+
+    if (rel === "guardian" && !relationValue) {
+      relationValue = data["father_name"] ? String(data["father_name"]) : "";
+    }
+
+    formattedContent = formattedContent.replace(
+      /\{relation_name\}/gi,
+      relationValue
+    );
+  }
 
   return formattedContent;
 };
-
-
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -58,30 +89,39 @@ const formatContent = (htmlContent: string | null | undefined, formData: any) =>
   };
 
   const getParentName = () => {
+  const rel = (formData['s_relationship'] || "").toLowerCase();  
+  let relationKey = `${rel}_name`;  // father_name / mother_name / guardian_name
+
+  // Main value based on Srelationship
+  let value = formData[relationKey] ? String(formData[relationKey]) : '';
+
+  // Fallback for Guardian → if guardian_name missing, use father_name
+  if (rel === "guardian" && !value) {
+    value = formData["father_name"] ? String(formData["father_name"]) : "";
+  }
+
+  // If still no value → fallback to first_name + middle_name + last_name
+  if (!value) {
     return [
       formData['first_name'],
-      formData['middle_name'], 
+      formData['middle_name'],
       formData['last_name']
     ].filter(Boolean).join(' ');
-  };
+  }
+
+  return value;
+};
+
 
   return (
     <div className="school_paragraph">
-      <h6 className="text-center mb-4 text-gray-700 font-semibold">
-        (Please read carefully before signing)
-      </h6>
       
-      {/* <div 
-  dangerouslySetInnerHTML={{ 
-    __html: formatContent(content, formData) 
-  }} 
-  className="max-w-none mb-6 text-gray-700 leading-relaxed text-[15px] font-sans"
-  style={{
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    lineHeight: '1.6',
-    fontWeight: '400'
-  }}
-/> */}
+      <div className="school_para_header">
+      <h1>DECLARATION FORM</h1>
+        <p>(Please read carefully before signing)</p>
+        </div>
+      
+  
 
   <div
       className="formatted-content max-w-none mb-6 text-gray-700 leading-relaxed text-[15px] font-sans"
@@ -108,7 +148,7 @@ const formatContent = (htmlContent: string | null | undefined, formData: any) =>
             />
           )}
           <p className="text-sm font-semibold text-gray-800">
-            Signature of Parent or Legal Guardian
+            Signature of {formData.s_relationship}
           </p>
           <p className="text-xs text-gray-600 block mt-1">
             (Legal Guardian only if they have authority from the child's parent)

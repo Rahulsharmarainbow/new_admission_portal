@@ -31,8 +31,28 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
   };
 
   const getParentName = () => {
-    return formData['father_name'] || formData['first_name'] || 'N/A';
-  };
+  const rel = (formData['s_relationship'] || "").toLowerCase();  
+  let relationKey = `${rel}_name`;  // father_name / mother_name / guardian_name
+
+  // Main value based on Srelationship
+  let value = formData[relationKey] ? String(formData[relationKey]) : '';
+
+  // Fallback for Guardian → if guardian_name missing, use father_name
+  if (rel === "guardian" && !value) {
+    value = formData["father_name"] ? String(formData["father_name"]) : "";
+  }
+
+  // If still no value → fallback to first_name + middle_name + last_name
+  if (!value) {
+    return [
+      formData['first_name'],
+      formData['middle_name'],
+      formData['last_name']
+    ].filter(Boolean).join(' ');
+  }
+
+  return value;
+};
 
   return (
     <div className="fee-tables space-y-6">
@@ -145,7 +165,7 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
         
         <div className="text-center">
           <p className="text-sm font-semibold text-gray-800 mb-2">
-            Parent Name: {getParentName()}
+            {formData.s_relationship} Name: {getParentName()}
           </p>
           {fileData["candidate_signature"] && (
             <img
@@ -155,7 +175,7 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
             />
           )}
           <p className="text-sm font-semibold text-gray-800">
-            Parent Signature
+            {formData.s_relationship} Signature
           </p>
         </div>
       </div>

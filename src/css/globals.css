@@ -259,5 +259,14 @@
 .header_logo {
   margin:0 auto;
 }
-
-
+.position-absolute {
+    position: absolute;
+}
+.school_para_header {
+  text-align:center;
+  margin-bottom:20px;
+}
+.school_para_header h1{
+  font-size:24px;
+  font-weight: bold;
+}

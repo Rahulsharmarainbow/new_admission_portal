@@ -21,6 +21,7 @@ import {
   ModalBody,
   ModalHeader,
 } from 'flowbite-react';
+import NonPaymentApplyForm from './collageApply/NonPaymentApplyForm';
 
 interface ApplyData {
   data: any;
@@ -197,7 +198,9 @@ const Apply = () => {
             type="school"
           />
         ) : (
-          <ApplyForm
+
+          applyData?.cdata?.payment_status === 1 ? (
+      <ApplyForm
             academic_id={applyData.academic_id}
             dynamicBoxes={applyData.data}
             required_child={applyData.required_child}
@@ -208,6 +211,20 @@ const Apply = () => {
             apply_modal={applyData.apply_modal}
             type="collage"
           />
+    ) : (
+      <NonPaymentApplyForm
+            academic_id={applyData.academic_id}
+            dynamicBoxes={applyData.data}
+            required_child={applyData.required_child}
+            home_other_lines={applyData.home_other_lines}
+            apply_page_header={applyData?.apply_page_header}
+            header={applyData.header}
+            cdata={applyData.cdata}
+            apply_modal={applyData.apply_modal}
+            type="collage"
+          />
+    )
+         
         )}
       </div>
 

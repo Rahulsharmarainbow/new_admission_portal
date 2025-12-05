@@ -44,36 +44,98 @@ const DisclaimerStep: React.FC<DisclaimerStepProps> = ({
   //   return formattedContent;
   // };
 
-  const formatContent = (htmlContent: string | null | undefined, formData: any) => {
-    if (!htmlContent) return '';
+  const formatContent = (
+  htmlContent: string | null | undefined,
+  formData: any
+) => {
+  if (!htmlContent) return "";
 
-    let formattedContent: string = htmlContent;
-    const data = formData ?? {};
+  let formattedContent: string = htmlContent;
+  const data = formData ?? {};
+  const lookupMap: any = {};
 
-    // Replace placeholders with formData values
-    Object.keys(data).forEach((key) => {
-      const placeholder = `{${key}}`;
-      let value = data[key] ? String(data[key]) : '';
+  // Build lookup map
+  Object.keys(data).forEach((key) => {
+    const originalValue = data[key];
+    const normalized = key.replace(/^s[_]?/i, "").toLowerCase();
 
-      // Special condition for "class"
-      if (key === 'class' && value.includes('$')) {
-        value = value.split('$')[1] ?? '';
-      }
+    lookupMap[key.toLowerCase()] = originalValue;
+    lookupMap[normalized] = originalValue;
+    lookupMap[key.toLowerCase().replace(/_/g, "")] = originalValue;
+    lookupMap[normalized.replace(/_/g, "")] = originalValue;
+  });
 
-      formattedContent = formattedContent.replace(
-        new RegExp(placeholder, 'g'),
-        `<strong>${value}</strong>`,
-      );
-    });
+  // --------------------------------------------------
+  // Replace all placeholders EXCEPT {relation_name}
+  // --------------------------------------------------
+  formattedContent = formattedContent.replace(/\{([^}]+)\}/g, (match, p1) => {
+    if (p1.toLowerCase() === "relation_name") {
+      return match; // ⛔ DO NOT replace here — skip
+    }
 
-    // Remove all placeholders not found in formData
-    formattedContent = formattedContent.replace(/\{[^}]+\}/g, '');
+    const cleanKey = p1.toLowerCase().replace(/^s[_]?/i, "").replace(/_/g, "");
+    let value = lookupMap[cleanKey] ? String(lookupMap[cleanKey]) : "";
 
-    return formattedContent;
-  };
+    if (p1.toLowerCase() === "class" && value.includes("$")) {
+      value = value.split("$")[1] ?? "";
+    }
+
+    return value;
+  });
+
+  // -------------------------------------------------------
+  // Special Handler for {relation_name}
+  // -------------------------------------------------------
+  if (formattedContent.includes("{relation_name}")) {
+    const rel = (data.s_relationship || "").toLowerCase();
+
+    let relationKey = rel + "_name";
+    let relationValue = data[relationKey] ? String(data[relationKey]) : "";
+
+    if (rel === "guardian" && !relationValue) {
+      relationValue = data["father_name"] ? String(data["father_name"]) : "";
+    }
+
+    formattedContent = formattedContent.replace(
+      /\{relation_name\}/gi,
+      relationValue
+    );
+  }
+
+  return formattedContent;
+};
+const getParentName = () => {
+  const rel = (formData['s_relationship'] || "").toLowerCase();  
+  let relationKey = `${rel}_name`;  // father_name / mother_name / guardian_name
+
+  // Main value based on Srelationship
+  let value = formData[relationKey] ? String(formData[relationKey]) : '';
+
+  // Fallback for Guardian → if guardian_name missing, use father_name
+  if (rel === "guardian" && !value) {
+    value = formData["father_name"] ? String(formData["father_name"]) : "";
+  }
+
+  // If still no value → fallback to first_name + middle_name + last_name
+  if (!value) {
+    return [
+      formData['first_name'],
+      formData['middle_name'],
+      formData['last_name']
+    ].filter(Boolean).join(' ');
+  }
+
+  return value;
+};
+
+
 
   return (
     <div className="school_paragraph">
+      <div className="school_para_header">
+      <h1>GENERAL FORM OF DISCLAIMER</h1>
+        <p>(Consent Form)</p>
+        </div>
       <div
       className="formatted-content max-w-none mb-6 text-gray-700 leading-relaxed text-[15px] font-sans"
       style={{ lineHeight: '1.6', fontWeight: '400' }}
@@ -102,10 +164,13 @@ const DisclaimerStep: React.FC<DisclaimerStepProps> = ({
             />
           )}
           <p className="text-sm font-semibold text-gray-800">
-            Signature of Parent or Legal Guardian
+            Signature of {formData.s_relationship}
           </p>
           <p className="text-xs text-gray-600 mt-1">
             (Legal Guardian only if they have authority from the child's parent)
+          </p>
+            <p className="text-sm text-gray-800 mt-2">
+            Name: <strong>{getParentName()}</strong>
           </p>
         </div>
       </div>

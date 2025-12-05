@@ -485,7 +485,7 @@ const CollegeApplicationManagementTable: React.FC = () => {
       case '0':
         return { text: 'Initialized', color: 'bg-yellow-100 text-yellow-800' };
       default:
-        return { text: 'Initialized ', color: 'text-yellow-600 bg-yellow-50' };
+        return { text: '', color: 'text-yellow-600 bg-yellow-50' };
     }
   };
 

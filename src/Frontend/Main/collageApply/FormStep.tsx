@@ -190,7 +190,7 @@ const FormStep: React.FC<FormStepProps> = ({
               ))}
             </select>
             {errors[child.name] && (
-              <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
+              <p className="text-red-500 text-xs mt-1 position-absolute">{errors[child.name]}</p>
             )}
           </div>
         );
@@ -212,7 +212,7 @@ const FormStep: React.FC<FormStepProps> = ({
               }`}
             />
             {errors[child.name] && (
-              <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
+              <p className="text-red-500 text-xs mt-1 position-absolute">{errors[child.name]}</p>
             )}
           </div>
         );
@@ -263,7 +263,7 @@ const FormStep: React.FC<FormStepProps> = ({
               }`}
             />
             {errors[child.name] && (
-              <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
+              <p className="text-red-500 text-xs mt-1 position-absolute">{errors[child.name]}</p>
             )}
           </div>
         );
