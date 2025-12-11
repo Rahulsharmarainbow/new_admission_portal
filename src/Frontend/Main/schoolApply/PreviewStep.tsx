@@ -1,5 +1,5 @@
 // components/FormSteps/PreviewStep.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Icon } from '@iconify/react';
 
 interface PreviewStepProps {
@@ -18,11 +18,14 @@ const PreviewStep: React.FC<PreviewStepProps> = ({
   payableAmount = 0,
   onEdit,
   onPayment,
-  stepTransitionLoading,
 }) => {
   const formatPrice = (amount: number) => {
     return `₹ ${amount.toLocaleString('en-IN')}`;
   };
+
+      useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const shouldDisplayField = (child: any) => {
     // Skip buttons in preview

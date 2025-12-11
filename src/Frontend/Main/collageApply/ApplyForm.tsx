@@ -209,7 +209,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
       // Handle API calls for select fields
       if (fieldConfig?.apiurl && fieldConfig?.target) {
         console.log(fieldConfig);
-        fetch(`${apiUrl}/frontend/get_district_by_state_id`, {
+        fetch(`${apiUrl}/${fieldConfig.apiurl}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
