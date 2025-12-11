@@ -84,83 +84,155 @@ const ApplicationEditPage: React.FC = () => {
   const apiAssetsUrl = import.meta.env.VITE_ASSET_URL;
 
   // Process candidate details to create proper form data with id$value format
-  const processCandidateDetails = (candidateDetails: CandidateDetails) => {
-    const processedData: { [key: string]: any } = {};
+  // const processCandidateDetails = (candidateDetails: CandidateDetails) => {
+  //   const processedData: { [key: string]: any } = {};
 
-    Object.keys(candidateDetails).forEach((key) => {
-      if (!key.startsWith('S')) {
-        const value = candidateDetails[key];
-        const sKey = `S${key}`;
-        const sValue = candidateDetails[sKey];
+  //   Object.keys(candidateDetails).forEach((key) => {
+  //     if (!key.startsWith('S')) {
+  //       const value = candidateDetails[key];
+  //       const sKey = `S${key}`;
+  //       const sValue = candidateDetails[sKey];
 
-        // For select fields, create id$value format
-        if (value && sValue && !value.includes('$')) {
-          processedData[key] = `${value}$${sValue}`;
-        } else {
-          processedData[key] = value || '';
-        }
+  //       // For select fields, create id$value format
+  //       if (value && sValue && !value.includes('$')) {
+  //         processedData[key] = `${value}$${sValue}`;
+  //       } else {
+  //         processedData[key] = value || '';
+  //       }
 
-        // Handle Aadhaar fields
-        if (key === 'adharcard' && value && value.length === 12) {
-          for (let i = 0; i < 12; i++) {
-            processedData[`adharcard_${i}`] = value[i];
-          }
-        }
+  //       // Handle Aadhaar fields
+  //       if (key === 'adharcard' && value && value.length === 12) {
+  //         for (let i = 0; i < 12; i++) {
+  //           processedData[`adharcard_${i}`] = value[i];
+  //         }
+  //       }
 
-        // if (key === 'adharcard' && value && value.length === 12) {
-        //   for (let i = 0; i < 12; i++) {
-        //     processedData[`adharcard_${i}`] = value[i];
-        //   }
-        // }
-      }
-    });
+  //       // if (key === 'adharcard' && value && value.length === 12) {
+  //       //   for (let i = 0; i < 12; i++) {
+  //       //     processedData[`adharcard_${i}`] = value[i];
+  //       //   }
+  //       // }
+  //     }
+  //   });
 
-    return processedData;
-  };
+  //   return processedData;
+  // };
+const processCandidateDetails = (candidateDetails: CandidateDetails) => {
+  const processedData: { [key: string]: any } = {};
 
-  // Get field options with proper lookup handling
-  const getFieldOptions = (field: FormField) => {
-    let options: Array<{ value: number | string; text: string }> = [];
+  Object.keys(candidateDetails).forEach((key) => {
+    // Skip S-prefixed keys (they're the text values)
+    if (!key.startsWith('S')) {
+      const value = candidateDetails[key];
+      const sKey = `S${key}`;
+      const sValue = candidateDetails[sKey];
 
-    // 1. Check dynamic options first (for state/district)
-    if (dynamicOptions[field.name] && dynamicOptions[field.name].length > 0) {
-      options = dynamicOptions[field.name];
-    }
-    // 2. Check form options (for API loaded data)
-    else if (formOptions[field.name] && formOptions[field.name].length > 0) {
-      options = formOptions[field.name];
-    }
-    // 3. Check field's own options
-    else if (field.options && field.options.length > 0) {
-      options = field.options;
-    }
-    // 4. Check lookups
-    else {
-      const lookupKey = Object.keys(lookups).find(
-        (key) =>
-          key.toLowerCase().includes(field.name.toLowerCase()) ||
-          field.name.toLowerCase().includes(key.toLowerCase()),
-      );
-
-      if (lookupKey && lookups[lookupKey]) {
-        options = lookups[lookupKey];
-      }
-    }
-
-    // Convert all options to id$value format
-    const formattedOptions = options.map((option) => {
-      if (typeof option.value === 'string' && option.value.includes('$')) {
-        return option;
+      // For select fields, create id$value format if we have both id and text
+      if (value && sValue && !value.includes('$')) {
+        processedData[key] = `${value}$${sValue}`;
       } else {
-        return {
-          value: `${option.value}$${option.text}`,
-          text: option.text,
-        };
+        processedData[key] = value || '';
       }
-    });
 
-    return formattedOptions;
-  };
+      // Store text value separately for display if needed
+      if (sValue) {
+        processedData[`s_${key}`] = sValue;
+      }
+    }
+  });
+
+  return processedData;
+};
+  // Get field options with proper lookup handling
+  // const getFieldOptions = (field: FormField) => {
+  //   let options: Array<{ value: number | string; text: string }> = [];
+
+  //   // 1. Check dynamic options first (for state/district)
+  //   if (dynamicOptions[field.name] && dynamicOptions[field.name].length > 0) {
+  //     options = dynamicOptions[field.name];
+  //   }
+  //   // 2. Check form options (for API loaded data)
+  //   else if (formOptions[field.name] && formOptions[field.name].length > 0) {
+  //     options = formOptions[field.name];
+  //   }
+  //   // 3. Check field's own options
+  //   else if (field.options && field.options.length > 0) {
+  //     options = field.options;
+  //   }
+  //   // 4. Check lookups
+  //   else {
+  //     const lookupKey = Object.keys(lookups).find(
+  //       (key) =>
+  //         key.toLowerCase().includes(field.name.toLowerCase()) ||
+  //         field.name.toLowerCase().includes(key.toLowerCase()),
+  //     );
+
+  //     if (lookupKey && lookups[lookupKey]) {
+  //       options = lookups[lookupKey];
+  //     }
+  //   }
+
+  //   // Convert all options to id$value format
+  //   const formattedOptions = options.map((option) => {
+  //     if (typeof option.value === 'string' && option.value.includes('$')) {
+  //       return option;
+  //     } else {
+  //       return {
+  //         value: `${option.value}$${option.text}`,
+  //         text: option.text,
+  //       };
+  //     }
+  //   });
+
+  //   return formattedOptions;
+  // };
+
+  const getFieldOptions = (field: FormField) => {
+  let options: Array<{ value: number | string; text: string }> = [];
+
+  // 1. Check if this is a country field
+  if (field.name === 'country' && field.options && field.options.length > 0) {
+    options = field.options;
+  }
+  // 2. Check dynamic options first (for state/district)
+  else if (dynamicOptions[field.name] && dynamicOptions[field.name].length > 0) {
+    options = dynamicOptions[field.name];
+  }
+  // 3. Check form options (for API loaded data)
+  else if (formOptions[field.name] && formOptions[field.name].length > 0) {
+    options = formOptions[field.name];
+  }
+  // 4. Check field's own options
+  else if (field.options && field.options.length > 0) {
+    options = field.options;
+  }
+  // 5. Check lookups
+  else {
+    const lookupKey = Object.keys(lookups).find(
+      (key) =>
+        key.toLowerCase().includes(field.name.toLowerCase()) ||
+        field.name.toLowerCase().includes(key.toLowerCase()),
+    );
+
+    if (lookupKey && lookups[lookupKey]) {
+      options = lookups[lookupKey];
+    }
+  }
+
+  // Convert all options to id$value format
+  const formattedOptions = options.map((option) => {
+    if (typeof option.value === 'string' && option.value.includes('$')) {
+      return option;
+    } else {
+      return {
+        value: `${option.value}$${option.text}`,
+        text: option.text,
+      };
+    }
+  });
+
+  return formattedOptions;
+};
 
   // Handle input change with API calls
   const handleInputChange = useCallback(
@@ -187,7 +259,7 @@ const ApplicationEditPage: React.FC = () => {
           typeof value === 'string' && value.includes('$') ? value.split('$')[0] : value;
 
         if (stateId) {
-          fetch(`${apiUrl}/frontend/get_district_by_state_id`, {
+          fetch(`${apiUrl}/${fieldConfig.apiurl}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -253,96 +325,266 @@ const ApplicationEditPage: React.FC = () => {
   );
 
   // Handle select change
+  // const handleSelectChange = useCallback(
+  //   (name: string, value: any, fieldConfig?: any) => {
+  //     const [valuePart, textPart] = typeof value === 'string' ? value.split('$') : [value, ''];
+
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       [name]: value,
+  //       [`s_${name}`]: textPart,
+  //     }));
+
+  //     if (errors[name]) {
+  //       setErrors((prev) => ({
+  //         ...prev,
+  //         [name]: '',
+  //       }));
+  //     }
+
+  //     // Handle state to district API calls
+  //     if (
+  //       fieldConfig?.apiurl &&
+  //       fieldConfig.apiurl.includes('get_district_by_state_id') &&
+  //       fieldConfig?.target
+  //     ) {
+  //       const stateId = valuePart;
+
+  //       if (stateId) {
+  //         fetch(`${apiUrl}/${fieldConfig.apiurl}`, {
+  //           method: 'POST',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             Authorization: `Bearer ${user?.token}`,
+  //           },
+  //           body: JSON.stringify({ state_id: stateId }),
+  //         })
+  //           .then((response) => {
+  //             if (!response.ok) {
+  //               throw new Error('Network response was not ok');
+  //             }
+  //             return response.json();
+  //           })
+  //           .then((data) => {
+  //             if (data.districts) {
+  //               const districts = data.districts.map((item: any) => ({
+  //                 value: `${item.id}$${item.district_title}`,
+  //                 text: item.district_title.trim(),
+  //               }));
+
+  //               setFormOptions((prev) => ({
+  //                 ...prev,
+  //                 [fieldConfig.target]: districts,
+  //               }));
+
+  //               setDynamicOptions((prev) => ({
+  //                 ...prev,
+  //                 [fieldConfig.target]: districts,
+  //               }));
+
+  //               // Auto-select district if we have existing district value
+  //               const existingDistrictValue = formData[fieldConfig.target];
+  //               if (existingDistrictValue && districts.length > 0) {
+  //                 const existingDistrictId =
+  //                   typeof existingDistrictValue === 'string' && existingDistrictValue.includes('$')
+  //                     ? existingDistrictValue.split('$')[0]
+  //                     : existingDistrictValue;
+
+  //                 const matchingDistrict = districts.find((option) => {
+  //                   const optionId =
+  //                     typeof option.value === 'string' && option.value.includes('$')
+  //                       ? option.value.split('$')[0]
+  //                       : option.value;
+  //                   return optionId === existingDistrictId;
+  //                 });
+
+  //                 if (matchingDistrict && formData[fieldConfig.target] !== matchingDistrict.value) {
+  //                   setFormData((prev) => ({
+  //                     ...prev,
+  //                     [fieldConfig.target]: matchingDistrict.value,
+  //                   }));
+  //                 }
+  //               }
+  //             }
+  //           })
+  //           .catch((error) => {
+  //             console.error('Error fetching districts:', error);
+  //           });
+  //       }
+  //     }
+  //   },
+  //   [errors, apiUrl, user, formData],
+  // );
+
   const handleSelectChange = useCallback(
-    (name: string, value: any, fieldConfig?: any) => {
-      const [valuePart, textPart] = typeof value === 'string' ? value.split('$') : [value, ''];
+  (name: string, value: any, fieldConfig?: any) => {
+    const [valuePart, textPart] = typeof value === 'string' ? value.split('$') : [value, ''];
 
-      setFormData((prev) => ({
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      [`s_${name}`]: textPart,
+    }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({
         ...prev,
-        [name]: value,
-        [`s_${name}`]: textPart,
+        [name]: '',
       }));
+    }
 
-      if (errors[name]) {
-        setErrors((prev) => ({
-          ...prev,
-          [name]: '',
-        }));
-      }
+    // Handle country to state API calls
+    if (
+      fieldConfig?.apiurl &&
+      fieldConfig.apiurl.includes('get_state_by_country_id') &&
+      fieldConfig?.target
+    ) {
+      const countryId = valuePart;
 
-      // Handle state to district API calls
-      if (
-        fieldConfig?.apiurl &&
-        fieldConfig.apiurl.includes('get_district_by_state_id') &&
-        fieldConfig?.target
-      ) {
-        const stateId = valuePart;
-
-        if (stateId) {
-          fetch(`${apiUrl}/frontend/get_district_by_state_id`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${user?.token}`,
-            },
-            body: JSON.stringify({ state_id: stateId }),
-          })
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error('Network response was not ok');
+      if (countryId) {
+        // Clear dependent fields
+        setFormData((prev) => {
+          const newData = { ...prev };
+          
+          // Clear state field
+          if (fieldConfig.target) {
+            newData[fieldConfig.target] = '';
+            newData[`s_${fieldConfig.target}`] = '';
+          }
+          
+          // Find district field that depends on the state field
+          formSections.forEach((section) => {
+            section.children.forEach((field) => {
+              if (field.h_target === fieldConfig.target && field.type === 'select') {
+                newData[field.name] = '';
+                newData[`s_${field.name}`] = '';
               }
-              return response.json();
-            })
-            .then((data) => {
-              if (data.districts) {
-                const districts = data.districts.map((item: any) => ({
-                  value: `${item.id}$${item.district_title}`,
-                  text: item.district_title.trim(),
-                }));
-
-                setFormOptions((prev) => ({
-                  ...prev,
-                  [fieldConfig.target]: districts,
-                }));
-
-                setDynamicOptions((prev) => ({
-                  ...prev,
-                  [fieldConfig.target]: districts,
-                }));
-
-                // Auto-select district if we have existing district value
-                const existingDistrictValue = formData[fieldConfig.target];
-                if (existingDistrictValue && districts.length > 0) {
-                  const existingDistrictId =
-                    typeof existingDistrictValue === 'string' && existingDistrictValue.includes('$')
-                      ? existingDistrictValue.split('$')[0]
-                      : existingDistrictValue;
-
-                  const matchingDistrict = districts.find((option) => {
-                    const optionId =
-                      typeof option.value === 'string' && option.value.includes('$')
-                        ? option.value.split('$')[0]
-                        : option.value;
-                    return optionId === existingDistrictId;
-                  });
-
-                  if (matchingDistrict && formData[fieldConfig.target] !== matchingDistrict.value) {
-                    setFormData((prev) => ({
-                      ...prev,
-                      [fieldConfig.target]: matchingDistrict.value,
-                    }));
-                  }
-                }
-              }
-            })
-            .catch((error) => {
-              console.error('Error fetching districts:', error);
             });
-        }
+          });
+          
+          return newData;
+        });
+
+        // Clear dynamic options for dependent fields
+        setDynamicOptions((prev) => {
+          const newOptions = { ...prev };
+          if (fieldConfig.target) {
+            newOptions[fieldConfig.target] = [];
+            
+            // Clear district options too
+            formSections.forEach((section) => {
+              section.children.forEach((field) => {
+                if (field.h_target === fieldConfig.target) {
+                  newOptions[field.name] = [];
+                }
+              });
+            });
+          }
+          return newOptions;
+        });
+
+        // Fetch states for the selected country
+        fetch(`${apiUrl}/${fieldConfig.apiurl}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${user?.token}`,
+          },
+          body: JSON.stringify({ state_id: countryId }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.districts) {
+              const states = data.districts.map((item: any) => ({
+                value: `${item.state_id}$${item.district_title}`,
+                text: item.district_title.trim(),
+              }));
+
+              setFormOptions((prev) => ({
+                ...prev,
+                [fieldConfig.target]: states,
+              }));
+
+              setDynamicOptions((prev) => ({
+                ...prev,
+                [fieldConfig.target]: states,
+              }));
+            }
+          })
+          .catch((error) => {
+            console.error('Error fetching states:', error);
+          });
       }
-    },
-    [errors, apiUrl, user, formData],
-  );
+    }
+
+    // Handle state to district API calls
+    if (
+      fieldConfig?.apiurl &&
+      fieldConfig.apiurl.includes('get_district_by_state_id') &&
+      fieldConfig?.target
+    ) {
+      const stateId = valuePart;
+
+      if (stateId) {
+        // Clear dependent district field
+        setFormData((prev) => ({
+          ...prev,
+          [fieldConfig.target]: '',
+          [`s_${fieldConfig.target}`] : '',
+        }));
+
+        // Clear dynamic options for district
+        setDynamicOptions((prev) => ({
+          ...prev,
+          [fieldConfig.target]: [],
+        }));
+
+        fetch(`${apiUrl}/${fieldConfig.apiurl}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${user?.token}`,
+          },
+          body: JSON.stringify({ state_id: stateId }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.districts) {
+              const districts = data.districts.map((item: any) => ({
+                value: `${item.id}$${item.state_id}`,
+                text: item.district_title.trim(),
+              }));
+
+              setFormOptions((prev) => ({
+                ...prev,
+                [fieldConfig.target]: districts,
+              }));
+
+              setDynamicOptions((prev) => ({
+                ...prev,
+                [fieldConfig.target]: districts,
+              }));
+            }
+          })
+          .catch((error) => {
+            console.error('Error fetching districts:', error);
+          });
+      }
+    }
+  },
+  [errors, apiUrl, user, formData, formSections],
+);
+
 
   // Handle checkbox change
   const handleCheckboxChange = useCallback((name: string, value: boolean, fieldConfig?: any) => {
@@ -653,100 +895,242 @@ const ApplicationEditPage: React.FC = () => {
   };
 
   // Load dynamic options (states and districts)
-  const loadDynamicOptions = async (sections: FormSection[], formData: { [key: string]: any }) => {
-    // Load states
-    try {
-      const statesResponse = await axios.get(`${apiUrl}/frontend/get_states`, {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-        },
+  // const loadDynamicOptions = async (sections: FormSection[], formData: { [key: string]: any }) => {
+  //   // Load states
+  //   try {
+  //     const statesResponse = await axios.get(`${apiUrl}/frontend/get_states`, {
+  //       headers: {
+  //         Authorization: `Bearer ${user?.token}`,
+  //       },
+  //     });
+
+  //     if (statesResponse.data?.states) {
+  //       const stateOptions = statesResponse.data.states.map((state: any) => ({
+  //         value: `${state.state_id}$${state.state_title}`,
+  //         text: state.state_title,
+  //       }));
+
+  //       const newDynamicOptions: any = {};
+
+  //       // Find all state fields
+  //       sections.forEach((section) => {
+  //         section.children.forEach((field) => {
+  //           if (field.apiurl && field.apiurl.includes('get_district_by_state_id')) {
+  //             newDynamicOptions[field.name] = stateOptions;
+  //           }
+  //         });
+  //       });
+
+  //       setDynamicOptions((prev) => ({ ...prev, ...newDynamicOptions }));
+
+  //       // Load districts for existing state values
+  //       for (const section of sections) {
+  //         for (const field of section.children) {
+  //           if (field.apiurl && field.apiurl.includes('get_district_by_state_id') && field.target) {
+  //             const stateValue = formData[field.name];
+  //             if (stateValue) {
+  //               const stateId =
+  //                 typeof stateValue === 'string' && stateValue.includes('$')
+  //                   ? stateValue.split('$')[0]
+  //                   : stateValue;
+
+  //               const districtsResponse = await axios.post(
+  //                 `${apiUrl}/${field.apiurl}`,
+  //                 { state_id: stateId },
+  //                 {
+  //                   headers: {
+  //                     Authorization: `Bearer ${user?.token}`,
+  //                   },
+  //                 },
+  //               );
+
+  //               if (districtsResponse.data?.districts) {
+  //                 const districtOptions = districtsResponse.data.districts.map((district: any) => ({
+  //                   value: `${district.id}$${district.district_title}`,
+  //                   text: district.district_title,
+  //                 }));
+
+  //                 setDynamicOptions((prev) => ({
+  //                   ...prev,
+  //                   [field.target]: districtOptions,
+  //                 }));
+
+  //                 // Auto-select district if we have existing district value
+  //                 const existingDistrictValue = formData[field.target];
+  //                 if (existingDistrictValue && districtOptions.length > 0) {
+  //                   const existingDistrictId =
+  //                     typeof existingDistrictValue === 'string' &&
+  //                     existingDistrictValue.includes('$')
+  //                       ? existingDistrictValue.split('$')[0]
+  //                       : existingDistrictValue;
+
+  //                   const matchingDistrict = districtOptions.find((option) => {
+  //                     const optionId =
+  //                       typeof option.value === 'string' && option.value.includes('$')
+  //                         ? option.value.split('$')[0]
+  //                         : option.value;
+  //                     return optionId === existingDistrictId;
+  //                   });
+
+  //                   if (matchingDistrict && formData[field.target] !== matchingDistrict.value) {
+  //                     setFormData((prev) => ({
+  //                       ...prev,
+  //                       [field.target]: matchingDistrict.value,
+  //                     }));
+  //                   }
+  //                 }
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error loading dynamic options:', error);
+  //   }
+  // };
+
+  // Load dynamic options (countries, states and districts)
+const loadDynamicOptions = async (sections: FormSection[], formData: { [key: string]: any }) => {
+  const newDynamicOptions: any = {};
+  
+  // First load countries for country fields
+  try {
+    // Find country fields
+    sections.forEach((section) => {
+      section.children.forEach((field) => {
+        if (field.apiurl && field.apiurl.includes('get_state_by_country_id')) {
+          // If country options are already in field.options, use them
+          if (field.options && field.options.length > 0) {
+            newDynamicOptions[field.name] = field.options.map((option) => ({
+              value: `${option.value}$${option.text}`,
+              text: option.text,
+            }));
+          }
+        }
       });
+    });
 
-      if (statesResponse.data?.states) {
-        const stateOptions = statesResponse.data.states.map((state: any) => ({
-          value: `${state.state_id}$${state.state_title}`,
-          text: state.state_title,
-        }));
+    setDynamicOptions((prev) => ({ ...prev, ...newDynamicOptions }));
 
-        const newDynamicOptions: any = {};
+    // Load states for existing country values
+    for (const section of sections) {
+      for (const field of section.children) {
+        if (field.apiurl && field.apiurl.includes('get_state_by_country_id') && field.target) {
+          const countryValue = formData[field.name];
+          if (countryValue) {
+            const countryId = 
+              typeof countryValue === 'string' && countryValue.includes('$') 
+                ? countryValue.split('$')[0] 
+                : countryValue;
 
-        // Find all state fields
-        sections.forEach((section) => {
-          section.children.forEach((field) => {
-            if (field.apiurl && field.apiurl.includes('get_district_by_state_id')) {
-              newDynamicOptions[field.name] = stateOptions;
-            }
-          });
-        });
-
-        setDynamicOptions((prev) => ({ ...prev, ...newDynamicOptions }));
-
-        // Load districts for existing state values
-        for (const section of sections) {
-          for (const field of section.children) {
-            if (field.apiurl && field.apiurl.includes('get_district_by_state_id') && field.target) {
-              const stateValue = formData[field.name];
-              if (stateValue) {
-                const stateId =
-                  typeof stateValue === 'string' && stateValue.includes('$')
-                    ? stateValue.split('$')[0]
-                    : stateValue;
-
-                const districtsResponse = await axios.post(
-                  `${apiUrl}/frontend/get_district_by_state_id`,
-                  { state_id: stateId },
-                  {
-                    headers: {
-                      Authorization: `Bearer ${user?.token}`,
-                    },
+            try {
+              const statesResponse = await axios.post(
+                `${apiUrl}/${field.apiurl}`,
+                { state_id: countryId },
+                {
+                  headers: {
+                    Authorization: `Bearer ${user?.token}`,
                   },
-                );
+                },
+              );
 
-                if (districtsResponse.data?.districts) {
-                  const districtOptions = districtsResponse.data.districts.map((district: any) => ({
-                    value: `${district.id}$${district.district_title}`,
-                    text: district.district_title,
-                  }));
+              if (statesResponse.data?.districts) {
+                const stateOptions = statesResponse.data.districts.map((state: any) => ({
+                  value: `${state.state_id}$${state.district_title}`,
+                  text: state.district_title,
+                }));
 
-                  setDynamicOptions((prev) => ({
-                    ...prev,
-                    [field.target]: districtOptions,
-                  }));
+                setDynamicOptions((prev) => ({
+                  ...prev,
+                  [field.target]: stateOptions,
+                }));
 
-                  // Auto-select district if we have existing district value
-                  const existingDistrictValue = formData[field.target];
-                  if (existingDistrictValue && districtOptions.length > 0) {
-                    const existingDistrictId =
-                      typeof existingDistrictValue === 'string' &&
-                      existingDistrictValue.includes('$')
-                        ? existingDistrictValue.split('$')[0]
-                        : existingDistrictValue;
+                // Auto-select state if we have existing state value
+                const existingStateValue = formData[field.target];
+                if (existingStateValue && stateOptions.length > 0) {
+                  const existingStateId = 
+                    typeof existingStateValue === 'string' && existingStateValue.includes('$')
+                      ? existingStateValue.split('$')[0]
+                      : existingStateValue;
 
-                    const matchingDistrict = districtOptions.find((option) => {
-                      const optionId =
-                        typeof option.value === 'string' && option.value.includes('$')
-                          ? option.value.split('$')[0]
-                          : option.value;
-                      return optionId === existingDistrictId;
-                    });
+                  const matchingState = stateOptions.find((option) => {
+                    const optionId = 
+                      typeof option.value === 'string' && option.value.includes('$')
+                        ? option.value.split('$')[0]
+                        : option.value;
+                    return optionId === existingStateId;
+                  });
 
-                    if (matchingDistrict && formData[field.target] !== matchingDistrict.value) {
-                      setFormData((prev) => ({
-                        ...prev,
-                        [field.target]: matchingDistrict.value,
+                  if (matchingState && formData[field.target] !== matchingState.value) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      [field.target]: matchingState.value,
+                    }));
+                  }
+
+                  // Now load districts for the state
+                  const stateField = section.children.find(f => f.name === field.target);
+                  if (stateField?.apiurl && stateField.apiurl.includes('get_district_by_state_id') && stateField.target) {
+                    const districtResponse = await axios.post(
+                      `${apiUrl}/${stateField.apiurl}`,
+                      { state_id: existingStateId },
+                      {
+                        headers: {
+                          Authorization: `Bearer ${user?.token}`,
+                        },
+                      },
+                    );
+
+                    if (districtResponse.data?.districts) {
+                      const districtOptions = districtResponse.data.districts.map((district: any) => ({
+                        value: `${district.id}$${district.district_title}`,
+                        text: district.district_title,
                       }));
+
+                      setDynamicOptions((prev) => ({
+                        ...prev,
+                        [stateField.target]: districtOptions,
+                      }));
+
+                      // Auto-select district if we have existing district value
+                      const existingDistrictValue = formData[stateField.target];
+                      if (existingDistrictValue && districtOptions.length > 0) {
+                        const existingDistrictId = 
+                          typeof existingDistrictValue === 'string' && existingDistrictValue.includes('$')
+                            ? existingDistrictValue.split('$')[0]
+                            : existingDistrictValue;
+
+                        const matchingDistrict = districtOptions.find((option) => {
+                          const optionId = 
+                            typeof option.value === 'string' && option.value.includes('$')
+                              ? option.value.split('$')[0]
+                              : option.value;
+                          return optionId === existingDistrictId;
+                        });
+
+                        if (matchingDistrict && formData[stateField.target] !== matchingDistrict.value) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            [stateField.target]: matchingDistrict.value,
+                          }));
+                        }
+                      }
                     }
                   }
                 }
               }
+            } catch (error) {
+              console.error('Error loading states:', error);
             }
           }
         }
       }
-    } catch (error) {
-      console.error('Error loading dynamic options:', error);
     }
-  };
+  } catch (error) {
+    console.error('Error loading dynamic options:', error);
+  }
+};
 
   useEffect(() => {
     fetchApplicationData();
@@ -922,16 +1306,6 @@ const ApplicationEditPage: React.FC = () => {
       'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors outline-none';
 
     switch (child.type) {
-      // case 'heading':
-      //   return (
-      //     <div className={`text-start mb-6 w-full col-span-full`}>
-      //       <h4 className="text-lg font-bold text-[#dc2626] inline-flex items-center">
-      //         <Icon icon={child.icon || 'solar:document-line-duotone'} className="w-4 h-4 mr-2" />
-      //         {child.content}
-      //       </h4>
-      //     </div>
-      //   );
-
       case 'text':
         return (
           <div className={`space-y-2 ${getColumnSpan(child.width)}`}>
@@ -954,34 +1328,67 @@ const ApplicationEditPage: React.FC = () => {
           </div>
         );
 
-      case 'select':
-        const selectOptions = getFieldOptions(child);
+      // case 'select':
+      //   const selectOptions = getFieldOptions(child);
 
-        return (
-          <div className={`space-y-2 ${getColumnSpan(child.width)}`}>
-            <label className="block text-sm font-medium text-gray-700">
-              {child.label}
-              {child.required === 1 && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            <select
-              {...commonProps}
-              onChange={(e) => handleSelectChange(child.name, e.target.value, fieldConfig)}
-              className={`${baseSelectClasses} ${
-                errors[child.name] ? 'border-red-500' : 'border-gray-300'
-              }`}
-            >
-              <option value="">Select {child.label}</option>
-              {selectOptions.map((option: any) => (
-                <option key={option.value} value={option.value}>
-                  {option.text}
-                </option>
-              ))}
-            </select>
-            {errors[child.name] && (
-              <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
-            )}
-          </div>
-        );
+      //   return (
+      //     <div className={`space-y-2 ${getColumnSpan(child.width)}`}>
+      //       <label className="block text-sm font-medium text-gray-700">
+      //         {child.label}
+      //         {child.required === 1 && <span className="text-red-500 ml-1">*</span>}
+      //       </label>
+      //       <select
+      //         {...commonProps}
+      //         onChange={(e) => handleSelectChange(child.name, e.target.value, fieldConfig)}
+      //         className={`${baseSelectClasses} ${
+      //           errors[child.name] ? 'border-red-500' : 'border-gray-300'
+      //         }`}
+      //       >
+      //         <option value="">Select {child.label}</option>
+      //         {selectOptions.map((option: any) => (
+      //           <option key={option.value} value={option.value}>
+      //             {option.text}
+      //           </option>
+      //         ))}
+      //       </select>
+      //       {errors[child.name] && (
+      //         <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
+      //       )}
+      //     </div>
+      //   );
+
+      case 'select':
+  const selectOptions = getFieldOptions(child);
+
+  return (
+    <div className={`space-y-2 ${getColumnSpan(child.width)}`}>
+      <label className="block text-sm font-medium text-gray-700">
+        {child.label}
+        {child.required === 1 && <span className="text-red-500 ml-1">*</span>}
+      </label>
+      <select
+        {...commonProps}
+        onChange={(e) => handleSelectChange(child.name, e.target.value, child)}
+        className={`${baseSelectClasses} ${
+          errors[child.name] ? 'border-red-500' : 'border-gray-300'
+        }`}
+      >
+        <option value="">Select {child.label}</option>
+        {selectOptions.map((option: any) => (
+          <option 
+            key={option.value} 
+            value={option.value}
+            selected={formData[child.name] === option.value}
+          >
+            {option.text}
+          </option>
+        ))}
+      </select>
+      {errors[child.name] && (
+        <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
+      )}
+    </div>
+  );
 
       case 'date':
         const getMaxDate = () => {
