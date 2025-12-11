@@ -222,7 +222,8 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
       console.log(fieldConfig?.apiurl);
       console.log(fieldConfig?.target);
       if (fieldConfig?.apiurl && name === 'class') {
-        fetch(`${apiUrl}/frontend/get_class_by_dob?selectedValue=${valuePart}`, {
+        console.log('hello', fieldConfig?.apiurl);
+        fetch(`${apiUrl}/${fieldConfig.apiurl}?selectedValue=${valuePart}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -265,7 +266,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
 
       // Handle API calls for select fields
       if (fieldConfig?.apiurl && fieldConfig?.target) {
-        fetch(`${apiUrl}/frontend/get_district_by_state_id`, {
+        fetch(`${apiUrl}/${fieldConfig?.apiurl}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
