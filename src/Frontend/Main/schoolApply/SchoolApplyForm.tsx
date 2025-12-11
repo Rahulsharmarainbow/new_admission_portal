@@ -846,7 +846,7 @@ const handleFileChange = useCallback(
   };
 
   const stepHeaders: Record<number, { title: string; subtitle?: string }> = {
-    0: {
+    1: {
       title: "GENERAL FORM OF DISCLAIMER",
       subtitle: "(Consent Form)",
     },
