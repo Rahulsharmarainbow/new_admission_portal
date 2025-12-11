@@ -268,6 +268,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
       if (fieldConfig?.apiurl && fieldConfig?.target) {
         fetch(`${apiUrl}/${fieldConfig?.apiurl}`, {
           method: 'POST',
+          
           headers: {
             'Content-Type': 'application/json',
           },
