@@ -843,6 +843,20 @@ const handleFileChange = useCallback(
       toast.error('Receipt download failed. Please try again.');
     }
   };
+
+  const stepHeaders: Record<number, { title: string; subtitle?: string }> = {
+    0: {
+      title: "GENERAL FORM OF DISCLAIMER",
+      subtitle: "(Consent Form)",
+    },
+    2: {
+      title: "DECLARATION FORM",
+      subtitle: "(Please read carefully before signing)",
+    }
+  };
+
+  const currentHeader = stepHeaders[activeStep];
+
   const renderStep = (step: number) => {
     switch (step) {
       case 0:
@@ -943,12 +957,21 @@ const handleFileChange = useCallback(
       <div className="relative bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#1e40af] to-[#dc2626]"></div>
 
-        {/* Form Header */}
-        <div className="p-2 md:p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
-          <p className="text-center text-gray-600 mt-2">
-            {apply_page_header || 'Online Application Form'}
-          </p>
-        </div>
+       <div className="p-2 md:p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
+        {currentHeader && (
+          <div className="school_para_header text-center">
+            <h1 className="font-semibold text-lg">
+              {currentHeader.title}
+            </h1>
+            {currentHeader.subtitle && (
+              <p className="text-sm text-gray-600 mt-3">
+                {currentHeader.subtitle}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
 
         <div className="p-2 md:p-6">
           {/* Stepper */}
@@ -961,7 +984,7 @@ const handleFileChange = useCallback(
                     <div
                       className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 font-semibold text-xs md:text-sm transition-all duration-300 ${
                         index === activeStep
-                          ? 'bg-blue-600 border-blue-600 text-white shadow-lg transform scale-110'
+                          ? 'bg-red-600 border-red-600 text-white shadow-lg transform scale-110'
                           : index < activeStep
                           ? 'bg-green-500 border-green-500 text-white'
                           : 'bg-white border-gray-300 text-gray-500'
@@ -1072,7 +1095,7 @@ const handleFileChange = useCallback(
                   className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold text-white transition-all duration-200 ${
                     loading || paymentProcessing
                       ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg transform hover:scale-105'
+                      : 'bg-red-600 hover:bg-red-700 hover:shadow-lg transform hover:scale-105'
                   }`}
                 >
                   {loading || paymentProcessing ? (

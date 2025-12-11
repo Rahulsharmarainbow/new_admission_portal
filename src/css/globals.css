@@ -215,12 +215,24 @@
   .stepper-connector {
     display: flex;
   }
+  .school_para_header h1{
+  font-size:27px;
+  font-weight: bold;
+  display:inline-block;
+  padding-left:0;
+  padding-right:0;
+  padding-bottom:10px;
+  margin:0 auto;
+  border-bottom:5px solid red;
+}
 }
 
 
 .formatted-content {
-  color:black;
+  color:#484343;
   font-size: 17px;
+  text-align:justify;
+  padding:20px;
 }
 .formatted-content ul {
   padding-left: 20px; 
@@ -267,6 +279,12 @@
   margin-bottom:20px;
 }
 .school_para_header h1{
-  font-size:24px;
+  font-size:27px;
   font-weight: bold;
+  display:inline-block;
+  padding-left:75px;
+  padding-right:75px;
+  padding-bottom:10px;
+  margin:0 auto;
+  border-bottom:5px solid red;
 }

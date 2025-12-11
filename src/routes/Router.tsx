@@ -388,6 +388,8 @@ const MainRoutes = [
         </ProtectedRoute>
       )
     },
+
+    
     {
       path: '/Frontend/:institute_id/:page_route',
       element: (

@@ -116,13 +116,7 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
   return (
     <div className="school_paragraph">
       
-      <div className="school_para_header">
-      <h1>DECLARATION FORM</h1>
-        <p>(Please read carefully before signing)</p>
-        </div>
-      
-  
-
+     
   <div
       className="formatted-content max-w-none mb-6 text-gray-700 leading-relaxed text-[15px] font-sans"
       style={{ lineHeight: '1.6', fontWeight: '400' }}

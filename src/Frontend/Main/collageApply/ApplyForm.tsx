@@ -10,6 +10,7 @@ import Loader from 'src/Frontend/Common/Loader';
 import * as pdfjsLib from "pdfjs-dist";
 import { GlobalWorkerOptions } from "pdfjs-dist/build/pdf";
 import pdfWorker from "pdfjs-dist/build/pdf.worker?url";
+import PaymentForm from './PaymentForm';
 
 GlobalWorkerOptions.workerSrc = pdfWorker;
 
@@ -456,7 +457,53 @@ const handleFileChange = useCallback(
     validationErrors.current = {};
   }, []);
 
-  const handlePayment = useCallback(async () => {
+
+  const handlePGDirectPayment = useCallback(async () => {
+  setPaymentLoading(true);
+  setStepTransitionLoading(true);
+   console.log(paymentData);
+  try {
+    console.log(paymentData);
+    const response = await axios.post(
+      `${apiUrl}/payment/initiate`,
+      {
+        amount: Number(paymentData.total_payable_fee).toFixed(2),
+        customerEmailID: formData.email,
+        customerMobileNo: formData.mobile,
+        academic_id: academic_id,
+        application_id: formData.application_id,
+        transaction_id: formData.transaction_id,
+        pageFinalredirect:window.location.href
+      }
+    );
+
+    if (response.data.success && response.data.paymentUrl) {
+      // ✅ Redirect to PG hosted payment page
+      window.location.href = response.data.paymentUrl;
+    } else {
+      toast.error('Unable to initiate payment');
+      setStepTransitionLoading(false);
+    }
+
+  } catch (error) {
+    console.error('PG payment initiation failed:', error);
+    toast.error('Payment initiation failed. Please try again.');
+    setStepTransitionLoading(false);
+  } finally {
+    setPaymentLoading(false);
+  }
+}, [
+  paymentData,
+  formData,
+  academic_id,
+  apiUrl,
+]);
+
+
+
+
+
+  const handleRazorpayPayment = useCallback(async () => {
     setPaymentLoading(true); 
     setStepTransitionLoading(true);
     try {
@@ -528,6 +575,14 @@ const handleFileChange = useCallback(
     }
   }, [paymentData, formData, cdata, header, apiUrl]);
 
+  const handlePayment = useCallback(async () => {
+  if (cdata.payment_type === 1) {
+    await handleRazorpayPayment();
+  } else {
+    await handlePGDirectPayment();
+  }
+}, [cdata.payment_type,handlePGDirectPayment,handleRazorpayPayment]);
+
   const handleNext = useCallback(async () => {
     if (!validateStep(activeStep)) {
       return;
@@ -542,7 +597,7 @@ const handleFileChange = useCallback(
           academic_id: academic_id,
           location_id: formData.selectBelong,
         });
-        console.log('payableResponse', payableResponse.data.success);
+        console.log('payableResponse', payableResponse.data);
         if (payableResponse.data?.total_payable_fee) {
           setPaymentData(payableResponse.data);
 
@@ -627,6 +682,10 @@ const handleFileChange = useCallback(
 
   const renderStep = (step: number) => {
     switch (step) {
+      case 10:
+        return (
+          <PaymentForm/>
+        )
       case 0:
         return (
           <FormStep
@@ -655,7 +714,7 @@ const handleFileChange = useCallback(
             stepTransitionLoading={stepTransitionLoading}
           />
         );
-      case 2:
+      case 3:
         return (
           <SuccessStep
             applicationId={formData.application_id}

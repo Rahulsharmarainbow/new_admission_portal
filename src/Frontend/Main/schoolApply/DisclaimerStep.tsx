@@ -132,10 +132,7 @@ const getParentName = () => {
 
   return (
     <div className="school_paragraph">
-      <div className="school_para_header">
-      <h1>GENERAL FORM OF DISCLAIMER</h1>
-        <p>(Consent Form)</p>
-        </div>
+      
       <div
       className="formatted-content max-w-none mb-6 text-gray-700 leading-relaxed text-[15px] font-sans"
       style={{ lineHeight: '1.6', fontWeight: '400' }}
@@ -152,7 +149,7 @@ const getParentName = () => {
               className="w-48 h-20 object-contain block mx-auto mb-2 border border-gray-300 rounded"
             />
           )}
-          <p className="text-sm font-semibold text-gray-800">Signature & Seal of School</p>
+          <p className="text-sm font-semibold text-gray-600">Signature & Seal of School</p>
         </div>
 
         <div className="text-center">
@@ -164,14 +161,14 @@ const getParentName = () => {
             />
           )}
           <p className="text-sm font-semibold text-gray-800">
-            Signature of {formData.s_relationship}
+            Signature of Parent or Legal Guardian
           </p>
           <p className="text-xs text-gray-600 mt-1">
             (Legal Guardian only if they have authority from the child's parent)
           </p>
-            <p className="text-sm text-gray-800 mt-2">
+            {/* <p className="text-sm text-gray-800 mt-2">
             Name: <strong>{getParentName()}</strong>
-          </p>
+          </p> */}
         </div>
       </div>
 

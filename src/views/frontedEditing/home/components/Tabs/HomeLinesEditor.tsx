@@ -133,23 +133,39 @@ const HomeLinesEditor = ({ selectedAcademic, user, apiUrl }) => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const formData = new FormData();
-      formData.append('academic_id', selectedAcademic);
-      formData.append('lines', JSON.stringify(lines));
-      formData.append('academic_fields', JSON.stringify(academicFields));
+      // const formData = new FormData();
+      // formData.append('academic_id', selectedAcademic);
+      // formData.append('lines', JSON.stringify(lines));
+      // formData.append('academic_fields', JSON.stringify(academicFields));
+
+      // const res = await axios.post(
+      //   `${apiUrl}/${user?.role}/FrontendEditing/update-homelines`,
+      //   {
+      //      academic_id: selectedAcademic, lines, academicFields
+      //   },
+      //   { 
+      //     headers: { 
+      //       Authorization: `Bearer ${user?.token}`,
+      //       'Content-Type': 'multipart/form-data'
+      //     } 
+      //   }
+      // );
 
       const res = await axios.post(
         `${apiUrl}/${user?.role}/FrontendEditing/update-homelines`,
         {
-           academic_id: selectedAcademic, lines, academicFields
+          academic_id: selectedAcademic,
+          lines: lines,                         // already JSON
+          academic_fields: academicFields       // already JSON
         },
-        { 
-          headers: { 
+        {
+          headers: {
             Authorization: `Bearer ${user?.token}`,
-            'Content-Type': 'multipart/form-data'
-          } 
+            'Content-Type': 'application/json'
+          }
         }
       );
+
 
       if (res.data.success) {
         toast.success(res.data.message || "Home lines and academic fields updated successfully!");
