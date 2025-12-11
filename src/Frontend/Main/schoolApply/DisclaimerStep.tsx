@@ -1,6 +1,7 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 
+
 interface DisclaimerStepProps {
   content: string;
   formData: { [key: string]: any };

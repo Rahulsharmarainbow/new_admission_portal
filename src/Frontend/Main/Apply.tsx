@@ -181,6 +181,7 @@ const Apply = () => {
 
       <div className="py-2 px-1 md:px-10">
         {applyData.academic_type === 1 ? (
+          <div style={{ fontFamily: "'Montserrat', sans-serif" }}>
           <SchoolApplyForm
             academic_id={applyData.academic_id}
             dynamicBoxes={applyData.data}
@@ -197,6 +198,7 @@ const Apply = () => {
             OtherData={applyData.OtherData}
             type="school"
           />
+          </div>
         ) : (
 
           applyData?.cdata?.payment_status === 1 ? (

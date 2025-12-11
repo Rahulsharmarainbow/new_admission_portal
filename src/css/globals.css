@@ -9,7 +9,12 @@
 @source '../../.flowbite-react/class-list.json';
 @source '../../node_modules/flowbite-react/dist/esm/**/*.mjs';
 
+
+
 @custom-variant dark (&:is(.dark *));
+
+
+
 
 @theme {
 
@@ -233,11 +238,16 @@
   font-size: 17px;
   text-align:justify;
   padding:20px;
+  font-family: 'Montserrat';
+}
+
+.formatted-content p {
+    line-height: 22px;
 }
 .formatted-content ul {
   padding-left: 20px; 
             margin: 0; 
-    margin-left: 20px;     /* add space */
+    margin-left: 4px;     /* add space */
     padding-left: 0;
     list-style: none;      /* remove bullets */
     counter-reset: item;
@@ -252,7 +262,8 @@
     margin: 6px 0;
     counter-increment: item;
     position: relative;
-    padding-left: 25px;  /* space for number */
+    padding-left: 39px; 
+    margin-bottom: 21px;
 }
 
 .formatted-content ul li::before {
