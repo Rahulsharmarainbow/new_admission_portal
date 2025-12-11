@@ -57,6 +57,17 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
   return (
     <div className="fee-tables space-y-6">
       {/* Caution Deposit */}
+
+      <div className="fee_header  text-center">
+        <h6 className="text-xl font-bold text-gray-800 ">
+          DETAILS OF FEE FOR THE ACADEMIC YEAR 2026 – 2027
+        </h6>
+         <p className="text-lg ">
+          (Subject to Government Guidlines)
+        </p>
+      
+      </div>
+
       <div className="tbl_header flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-200">
         <h6 className="text-lg font-bold text-gray-800">
           Caution Deposit (Refundable):
@@ -107,13 +118,13 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
       </div>
 
       {/* Transportation Fee Section */}
-      <div className="tbl_header p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+      <div className="fee_header2 text-center">
         <h6 className="text-lg font-bold text-gray-800">
           TRANSPORTATION: OPTIONAL
         </h6>
-        <p className="text-sm text-gray-600 mt-1">
+        <h6 className="text-sm text-gray-600 mt-1">
           Available only on the routes operated by the school
-        </p>
+        </h6>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
@@ -165,7 +176,7 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
         
         <div className="text-center">
           <p className="text-sm font-semibold text-gray-800 mb-2">
-            {formData.s_relationship} Name: {getParentName()}
+            Parent Name: {getParentName()}
           </p>
           {fileData["candidate_signature"] && (
             <img
@@ -175,7 +186,7 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
             />
           )}
           <p className="text-sm font-semibold text-gray-800">
-            {formData.s_relationship} Signature
+            Parent Signature
           </p>
         </div>
       </div>
@@ -217,7 +228,9 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
         >
            I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
         </label>
+        
       </div>
+      <p className="pl-4">Tuition fee and Transport Fee once paid will not be refundable in any case.</p>
 
       {errors['fee'] && (
         <p className="text-red-500 text-xs mt-1 ml-8">Please accept the terms and conditions.</p>
