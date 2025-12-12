@@ -142,7 +142,7 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
             />
           )}
           <p className="text-sm font-semibold text-gray-800">
-            Signature of {formData.s_relationship}
+            Signature of Parent or Legal Guardian
           </p>
           <p className="text-xs text-gray-600 block mt-1">
             (Legal Guardian only if they have authority from the child's parent)
