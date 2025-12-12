@@ -500,9 +500,6 @@ const handleFileChange = useCallback(
 ]);
 
 
-
-
-
   const handleRazorpayPayment = useCallback(async () => {
     setPaymentLoading(true); 
     setStepTransitionLoading(true);

@@ -1,4 +1,5 @@
 export interface FormData {
+  paymentType: string;
   // Academic Information
   selectType: string;
   selectSubtype: string;

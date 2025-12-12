@@ -123,8 +123,10 @@ export const updateAcademicData = async (formData: FormData, id: string, userId:
     formDataToSend.append('zoho_api_key', formData.zohoApiKey);
     formDataToSend.append('zoho_from_email', formData.zohoFromEmail);
     formDataToSend.append('bounce_address', formData.bounceAddress);
-        formDataToSend.append('whatsap_user', formData.UserId);
-
+    formDataToSend.append('whatsap_user', formData.UserId);
+    formDataToSend.append('payment_type', formData.paymentType);
+    formDataToSend.append('pg_merchant_id', formData.pgMerchantId);
+    formDataToSend.append('pg_secret_key', formData.pgSecretKey);
     
     // Permissions
     formDataToSend.append('hallticket_generate_permission', formData.switchState ? "1" : "0");

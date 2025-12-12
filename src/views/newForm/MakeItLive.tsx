@@ -337,7 +337,6 @@ const MakeItLive: React.FC = () => {
       academicData: academic,
       templateData: template,
       credentialsData: credentials,
-      // Academic Information
       academicName: academic.academic_name || '',
       primary_email: academic.academic_email || '',
       area: academic.academic_area || '',
@@ -391,6 +390,9 @@ const MakeItLive: React.FC = () => {
       razorpayApikey: credentials?.razorpay_api_key || '',
       razorpaySecretkey: credentials?.razorpay_secret_key || '',
       selectedServicesOption: credentials?.mail_type || 'Zoho Api',
+      pgMerchantId: credentials?.pg_merchant_id || '',
+      pgSecretKey: credentials?.pg_secret_key || '',
+      paymentType: credentials?.payment_type || '',
       // Permissions
       isDropdownEnabled: Boolean(credentials?.email_status),
       isTemplatesVisible: Boolean(credentials?.whatsapp_status),
