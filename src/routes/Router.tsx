@@ -70,6 +70,7 @@ import HallTicket from 'src/Frontend/hallticket/Hallticket';
 import EditingLayout from 'src/layouts/full/EditingLayout';
 import ApplyEditing from 'src/views/Editing/ApplyEditing';
 import CollegeSettingList from 'src/views/schoolServices/transportationSettings/CollegeSettingList';
+import CountryTable from 'src/views/dataManager/country/components/CountryTable';
 
 
 /* ***Layouts**** */
@@ -135,6 +136,7 @@ const MainRoutes = [
       { path: "/SuperAdmin/fees", element: <Fees/> },
       { path: "/SuperAdmin/admin/add/:type", element: <UserForm /> },
      { path: "/SuperAdmin/admin/edit/:type/:id", element: <UserForm /> },
+     { path: '/SuperAdmin/data-manager/country', element: <CountryTable/> },
       { path: '/SuperAdmin/data-manager/State', element: <StateTable/> },
       { path: '/SuperAdmin/data-manager/District', element: <CasteTable/> },      // data manager ki District ka component
       { path: '/SuperAdmin/data-manager/type-of-connection', element: <DataManagerPage/> },
@@ -198,6 +200,7 @@ const MainRoutes = [
       { path: "fees", element: <Fees/> },
       { path: "admin/add/:type", element: <UserForm /> },
       { path: "admin/edit/:type/:id", element: <UserForm /> },
+      { path: 'data-manager/country', element: <CountryTable/> },
       { path: 'data-manager/State', element: <StateTable/> },
       { path: 'data-manager/District', element: <CasteTable/> },      // data manager ki District ka component
       { path: 'data-manager/type-of-connection', element: <DataManagerPage/> },
@@ -260,6 +263,7 @@ const MainRoutes = [
       { path: "fees", element: <Fees/> },
       { path: "admin/add/:type", element: <UserForm /> },
       { path: "admin/edit/:type/:id", element: <UserForm /> },
+       { path: 'data-manager/country', element: <CountryTable/> },
       { path: 'data-manager/State', element: <StateTable/> },
       { path: 'data-manager/District', element: <CasteTable/> },      // data manager ki District ka component
       { path: 'data-manager/type-of-connection', element: <DataManagerPage/> },
@@ -322,6 +326,7 @@ const MainRoutes = [
       { path: "fees", element: <Fees/> },
       { path: "admin/add/:type", element: <UserForm /> },
       { path: "admin/edit/:type/:id", element: <UserForm /> },
+      { path: 'data-manager/country', element: <CountryTable/> },
       { path: 'data-manager/State', element: <StateTable/> },
       { path: 'data-manager/District', element: <CasteTable/> },      // data manager ki District ka component
       { path: 'data-manager/type-of-connection', element: <DataManagerPage/> },

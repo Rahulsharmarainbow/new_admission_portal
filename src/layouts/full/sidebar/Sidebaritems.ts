@@ -114,13 +114,19 @@ const SidebarContent: Record<number, MenuItem[]> = {
           icon: 'solar:database-line-duotone',
           children: [
             {
+              name: 'Country',
+              id: uniqueId(),
+              url: '/SuperAdmin/data-manager/country',
+              isPro: false,
+            },
+            {
               name: 'State',
               id: uniqueId(),
               url: '/SuperAdmin/data-manager/State',
               isPro: false,
             },
             {
-              name: 'District',
+              name: 'City',
               id: uniqueId(),
               url: '/SuperAdmin/data-manager/District',
               isPro: false,
