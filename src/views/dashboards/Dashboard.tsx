@@ -671,14 +671,14 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="white"
-                    strokeWidth="1.5"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
                   >
                     <circle cx="12" cy="12" r="10"></circle>
-                    <path
-                      strokeLinecap="round"
-                      d="M9 14h3m-2-2V8.2c0-.186 0-.279.012-.356a1 1 0 0 1 .832-.832C10.92 7 11.014 7 11.2 7h2.3a2.5 2.5 0 0 1 0 5zm0 0v5m0-5H9"
-                    ></path>
+                    <path d="M9 8h6M9 12h6M9 16h6" />
                   </svg>
+
                 </div>
               </div>
               <h4 className="text-2xl font-bold text-white mb-1">
@@ -705,26 +705,23 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
             <div className="relative z-10">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                  <svg
+                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="white"
-                    strokeWidth="1.5"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
                   >
-                    <path
-                      d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12"
-                      opacity="0.5"
-                    ></path>
-                    <path d="M2 14c0-2.8 0-4.2.545-5.27A5 5 0 0 1 4.73 6.545C5.8 6 7.2 6 10 6h4c2.8 0 4.2 0 5.27.545a5 5 0 0 1 2.185 2.185C22 9.8 22 11.2 22 14s0 4.2-.545 5.27a5 5 0 0 1-2.185 2.185C18.2 22 16.8 22 14 22h-4c-2.8 0-4.2 0-5.27-.545a5 5 0 0 1-2.185-2.185C2 18.2 2 16.8 2 14Z"></path>
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 11v6m0 0l2.5-2.5M12 17l-2.5-2.5"
-                    ></path>
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9 7h6" />
+                    <path d="M9 10h6" />
+                    <path d="M9 7h4a3 3 0 0 1 0 6H9l5 5" />
                   </svg>
+
                 </div>
               </div>
               <h4 className="text-2xl font-bold text-white mb-1">
@@ -751,21 +748,22 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
             <div className="relative z-10">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                  <svg
+                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="white"
-                    strokeWidth="1.5"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
                   >
                     <circle cx="12" cy="12" r="10"></circle>
-                    <path
-                      strokeLinecap="round"
-                      d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"
-                    ></path>
+                    <path d="M15 9l-6 6" />
+                    <path d="M9 9l6 6" />
                   </svg>
+
                 </div>
               </div>
               <h4 className="text-2xl font-bold text-white mb-1">
@@ -792,21 +790,21 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
             <div className="relative z-10">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1.5"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path
-                      strokeLinecap="round"
-                      d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"
-                    ></path>
-                  </svg>
+                 <svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="white"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10"></circle>
+  <path d="M12 7v5l3 3" />
+</svg>
+
                 </div>
               </div>
               <h4 className="text-2xl font-bold text-white mb-1">
@@ -836,28 +834,32 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
             <div className="relative z-10">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                 <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1.5"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path
-                      strokeLinecap="round"
-                      d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"
-                    ></path>
-                  </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+
+                  
+                  <path d="M9 7h6" />
+                  <path d="M9 10h6" />
+                  <path d="M9 7h4a3 3 0 0 1 0 6H9l5 5" />
+                </svg>
+
                 </div>
               </div>
               <h4 className="text-2xl font-bold text-white mb-1">
                 {dashboardData?.transactionStats?.total_paid_transaction_amount || 0}
               </h4>
               <span className="text-sm text-white text-opacity-90 font-medium">
-                Total No. of Transactions
+                Total Transactions
               </span>
             </div>
           </div>
@@ -877,21 +879,24 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
             <div className="relative z-10">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1.5"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path
-                      strokeLinecap="round"
-                      d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"
-                    ></path>
-                  </svg>
+                               <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+
+                  
+                  <path d="M9 7h6" />
+                  <path d="M9 10h6" />
+                  <path d="M9 7h4a3 3 0 0 1 0 6H9l5 5" />
+                </svg>
                 </div>
               </div>
               <h4 className="text-2xl font-bold text-white mb-1">
@@ -918,21 +923,24 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
             <div className="relative z-10">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-lg bg-opacity-20 flex items-center justify-center mr-4">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1.5"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path
-                      strokeLinecap="round"
-                      d="M12 6v12m3-8.5C15 8.12 13.657 7 12 7S9 8.12 9 9.5s1.343 2.5 3 2.5s3 1.12 3 2.5s-1.343 2.5-3 2.5s-3-1.12-3-2.5"
-                    ></path>
-                  </svg>
+                              <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+
+                  
+                  <path d="M9 7h6" />
+                  <path d="M9 10h6" />
+                  <path d="M9 7h4a3 3 0 0 1 0 6H9l5 5" />
+                </svg>
                 </div>
               </div>
               <h4 className="text-2xl font-bold text-white mb-1">

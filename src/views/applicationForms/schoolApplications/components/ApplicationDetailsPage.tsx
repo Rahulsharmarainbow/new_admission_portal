@@ -376,25 +376,26 @@ const ApplicationDetailsPage: React.FC = () => {
                 </div>
 
                 {/* File upload fields for this box */}
-                {fields.filter(field => field.type === 'file_button').length > 0 && (
-                  <div className="mt-8 pt-6Uploaded Documents">
+                {fields.filter(field => field.type === 'file_button' && field.name !== 'candidate_pic').length > 0 && (
+                  <div className="mt-8 pt-6 Uploaded Documents">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Uploaded Documents</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {fields
-                        .filter(field => field.type === 'file_button')
+                        .filter(field => field.type === 'file_button' && field.name !== 'candidate_pic')
                         .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
                         .map(field => (
-                        <div key={`${field.id}-${field.name}`} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                          <label className="block text-sm font-medium text-gray-700 mb-3">
-                            {field.content || field.label}
-                            {field.required === 1 && <span className="text-red-500 ml-1">*</span>}
-                          </label>
-                          {renderFieldValue(field)}
-                        </div>
+                          <div key={`${field.id}-${field.name}`} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                            <label className="block text-sm font-medium text-gray-700 mb-3">
+                              {field.content || field.label}
+                              {field.required === 1 && <span className="text-red-500 ml-1">*</span>}
+                            </label>
+                            {renderFieldValue(field)}
+                          </div>
                       ))}
                     </div>
                   </div>
                 )}
+
               </div>
             ))}
           </div>
@@ -424,6 +425,7 @@ const ApplicationDetailsPage: React.FC = () => {
                 </div>
 
                 {/* Signature */}
+                {candidateDetails?.candidate_signature && (
                 <div className="text-center">
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Signature
@@ -437,6 +439,7 @@ const ApplicationDetailsPage: React.FC = () => {
                     />
                   </div>
                 </div>
+                 )}
 
                 {/* Caste Certificate */}
                 {candidateDetails?.caste_certificate && (
