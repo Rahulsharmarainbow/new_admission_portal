@@ -393,6 +393,7 @@ const MakeItLive: React.FC = () => {
       pgMerchantId: credentials?.pg_merchant_id || '',
       pgSecretKey: credentials?.pg_secret_key || '',
       paymentType: credentials?.payment_type || '',
+      paymentEnabled: credentials?.payment_status,
       // Permissions
       isDropdownEnabled: Boolean(credentials?.email_status),
       isTemplatesVisible: Boolean(credentials?.whatsapp_status),
