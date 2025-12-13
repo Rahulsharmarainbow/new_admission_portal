@@ -126,7 +126,7 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
       <div className="declaration_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
         <div>
           <p className="text-sm font-semibold text-gray-800">
-            Place: {formData['address_street'] || 'Hyderabad'}
+            Place: {'Hyderabad'}
           </p>
           <p className="text-sm font-semibold text-gray-800 mt-2">
             Date: {getCurrentDate()}

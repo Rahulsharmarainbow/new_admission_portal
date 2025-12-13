@@ -45,6 +45,7 @@ const FormStep: React.FC<FormStepProps> = ({
     fieldConfig: any,
   ) => {
     const file = event.target.files?.[0];
+    console.log('fileeeeee', event.target.files?.[0]);
     if (!file) return;
 
     const isImage = file.type.startsWith('image/');
@@ -368,29 +369,43 @@ const FormStep: React.FC<FormStepProps> = ({
           });
         };
 
-        const handleCameraCapture = async (fieldName: string, fieldConfig: any) => {
-          let file: File | null = null;
+       const handleCameraCapture = async (fieldName: string, fieldConfig: any) => {
+  let file: File | null = null;
 
-          // Mobile capture
-          if (/Mobi|Android/i.test(navigator.userAgent)) {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.capture = 'environment';
+  // Mobile
+  if (/Mobi|Android/i.test(navigator.userAgent)) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
 
-            input.onchange = (e: any) => {
-              file = e.target.files?.[0];
-              if (file) onFileChange(fieldName, file, fieldConfig);
-            };
+    input.onchange = (e: any) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        onFileChange(fieldName, file, fieldConfig);
+      }
+    };
 
-            input.click();
-            return;
-          }
+    input.click();
+    return;
+  }
 
-          // Desktop fallback
-          file = await openDesktopCamera();
-          onFileChange(fieldName, file, fieldConfig);
-        };
+  // Desktop camera
+  file = await openDesktopCamera();
+
+  if (file) {
+
+    const fileInput = document.getElementById(child.name) as HTMLInputElement;
+
+    if (fileInput) {
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      fileInput.files = dataTransfer.files;
+    }
+
+    onFileChange(fieldName, file, fieldConfig);
+  }
+};
 
         return (
           <div className="text-center space-y-3 field-container">

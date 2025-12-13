@@ -655,12 +655,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               url: '/CustomerAdmin/frontend-editing/home',
               isPro: false,
             },
-            {
-              name: 'Apply Page',
-              id: uniqueId(),
-              url: '/ApplyEditing/get',
-              isPro: false,
-            }, 
+            // {
+            //   name: 'Apply Page',
+            //   id: uniqueId(),
+            //   url: '/ApplyEditing/get',
+            //   isPro: false,
+            // }, 
           ],
         },
         { name: 'Activity', url: '/CustomerAdmin/activity', icon: 'solar:clock-circle-line-duotone' },

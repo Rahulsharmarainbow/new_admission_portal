@@ -360,9 +360,9 @@ const ActivitiesTable: React.FC = () => {
                         {getSortIcon('created_at')}
                       </div>
                     </th>
-                    <th className="w-20 py-3 px-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    {/* <th className="w-20 py-3 px-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Actions
-                    </th>
+                    </th> */}
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -403,7 +403,7 @@ const ActivitiesTable: React.FC = () => {
                         <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
                           {activity.created_at}
                         </td>
-                        <td className="py-4 px-4 whitespace-nowrap text-center relative">
+                        {/* <td className="py-4 px-4 whitespace-nowrap text-center relative">
                           <div
                             ref={(el) => setDropdownRef(activity.id, el)}
                             className="relative flex justify-center"
@@ -455,7 +455,7 @@ const ActivitiesTable: React.FC = () => {
                                 document.body,
                               )}
                           </div>
-                        </td>
+                        </td> */}
                       </tr>
                     ))
                   ) : (
