@@ -23,8 +23,8 @@ const PreviewStep: React.FC<PreviewStepProps> = ({
     return `₹ ${amount.toLocaleString('en-IN')}`;
   };
 
-      useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const shouldDisplayField = (child: any) => {
@@ -181,19 +181,6 @@ const PreviewStep: React.FC<PreviewStepProps> = ({
                   {aadhaarNumber[index] || 'X'}
                 </div>
               ))}
-              {/* <button
-                type="button"
-                className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-              >
-                <Icon
-                  icon={
-                    formData[`${child.name}_visible`]
-                      ? 'solar:eye-line-duotone'
-                      : 'solar:eye-closed-line-duotone'
-                  }
-                  className="w-5 h-5"
-                />
-              </button> */}
             </div>
           );
         } else {
@@ -294,15 +281,6 @@ const PreviewStep: React.FC<PreviewStepProps> = ({
 
                     // Calculate column span based on width percentage - SAME LOGIC
                     const getColumnSpan = () => {
-                      // Full width elements
-                      // if (
-                      //   child.type === 'heading' ||
-                      //   child.type === 'heading2' ||
-                      //   child.type === 'para' ||
-                      //   child.type === 'adhar'
-                      // ) {
-                      //   return 'full';
-                      // }
 
                       // Width-based spans
                       if (childWidthValue >= 80) return 'full';

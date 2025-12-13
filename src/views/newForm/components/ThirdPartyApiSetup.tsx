@@ -1487,10 +1487,10 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
               </Label>
               <Select
                 id="paymentType"
-                value={formData.payment_type || '1'}
-                onChange={(e) => handleSelectChange('payment_type', e.target.value)}
-                color={errors.payment_type ? "failure" : "gray"}
-                helperText={errors.payment_type}
+                value={formData.paymentType || '1'}
+                onChange={(e) => handleSelectChange('paymentType', e.target.value)}
+                color={errors.paymentType ? "failure" : "gray"}
+                helperText={errors.paymentType}
                 className="w-full"
               >
                 <option value="1">Razorpay</option>
@@ -1499,7 +1499,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
             </div>
 
             {/* Razorpay Integration - Show only when Razorpay is selected and enabled */}
-            {formData.payment_type === '1' && (
+            {formData.paymentType == '1' && (
               <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                 <h5 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 break-words">
                   Razorpay Integration
@@ -1563,7 +1563,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
             )}
 
             {/* UG Payment Integration - Show only when UG Payment is selected and enabled */}
-            {formData.payment_type === '2' && (
+            {formData.paymentType == '2' && (
               <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                 <h5 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 break-words">
                   UG Payment Integration
@@ -1629,7 +1629,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
         )}
 
         {/* Payment Status Display - Always show */}
-        <div className="mt-4 text-sm text-gray-600">
+        {/* <div className="mt-4 text-sm text-gray-600">
           <span className="font-medium">Payment Status:</span> 
           <span className={`ml-2 px-2 py-1 rounded ${
             !formData.paymentEnabled || !formData.payment_status ? 'bg-gray-200 text-gray-700' : 
@@ -1640,7 +1640,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
              formData.payment_status === '1' ? 'Razorpay Enabled' : 
              'UG Payment Enabled'}
           </span>
-        </div>
+        </div> */}
       </Card>
 
       {/* Rest of the component remains same */}

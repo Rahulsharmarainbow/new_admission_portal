@@ -51,10 +51,10 @@ const FormStep: React.FC<FormStepProps> = ({
     const isImage = file.type.startsWith('image/');
     const isPDF = file.type === 'application/pdf';
 
-      if (!isPDF && !isImage) {
-        toast.error('Only PDF or Image files allowed.');
-        return;
-      }
+    if (!isPDF && !isImage) {
+      toast.error('Only PDF or Image files allowed.');
+      return;
+    }
 
     onFileChange(fieldName, file, fieldConfig);
   };
@@ -369,43 +369,42 @@ const FormStep: React.FC<FormStepProps> = ({
           });
         };
 
-       const handleCameraCapture = async (fieldName: string, fieldConfig: any) => {
-  let file: File | null = null;
+        const handleCameraCapture = async (fieldName: string, fieldConfig: any) => {
+          let file: File | null = null;
 
-  // Mobile
-  if (/Mobi|Android/i.test(navigator.userAgent)) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.capture = 'environment';
+          // Mobile
+          if (/Mobi|Android/i.test(navigator.userAgent)) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.capture = 'environment';
 
-    input.onchange = (e: any) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        onFileChange(fieldName, file, fieldConfig);
-      }
-    };
+            input.onchange = (e: any) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                onFileChange(fieldName, file, fieldConfig);
+              }
+            };
 
-    input.click();
-    return;
-  }
+            input.click();
+            return;
+          }
 
-  // Desktop camera
-  file = await openDesktopCamera();
+          // Desktop camera
+          file = await openDesktopCamera();
 
-  if (file) {
+          if (file) {
+            const fileInput = document.getElementById(child.name) as HTMLInputElement;
 
-    const fileInput = document.getElementById(child.name) as HTMLInputElement;
+            if (fileInput) {
+              const dataTransfer = new DataTransfer();
+              dataTransfer.items.add(file);
+              fileInput.files = dataTransfer.files;
+            }
 
-    if (fileInput) {
-      const dataTransfer = new DataTransfer();
-      dataTransfer.items.add(file);
-      fileInput.files = dataTransfer.files;
-    }
-
-    onFileChange(fieldName, file, fieldConfig);
-  }
-};
+            onFileChange(fieldName, file, fieldConfig);
+          }
+        };
 
         return (
           <div className="text-center space-y-3 field-container">
@@ -444,14 +443,14 @@ const FormStep: React.FC<FormStepProps> = ({
               {/* Buttons */}
               <div className="flex justify-center gap-2 file-upload-buttons">
                 {/* CAMERA BUTTON */}
-                  <button
-                    type="button"
-                    onClick={() => handleCameraCapture(child.name, fieldConfig)}
-                    className="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200 file-upload-button mobile-full"
-                  >
-                    <Icon icon="solar:camera-line-duotone" className="w-4 h-4" />
-                    Camera
-                  </button>
+                <button
+                  type="button"
+                  onClick={() => handleCameraCapture(child.name, fieldConfig)}
+                  className="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-200 file-upload-button mobile-full"
+                >
+                  <Icon icon="solar:camera-line-duotone" className="w-4 h-4" />
+                  Camera
+                </button>
                 {/* FILE UPLOAD BUTTON */}
                 <label
                   htmlFor={child.name}
