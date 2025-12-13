@@ -234,15 +234,15 @@
 
 
 .formatted-content {
-  color:#484343;
-  font-size: 17px;
+  color: #484343;
+  font-size: 12px;
   text-align:justify;
-  padding:20px;
+  padding: 10px;
   font-family: 'Montserrat';
 }
 
 .formatted-content p {
-    line-height: 22px;
+    line-height: 17px;
 }
 .formatted-content ul {
   padding-left: 20px; 
@@ -259,11 +259,11 @@
             line-height: 1.1;     /* 🔥 Reduce line height */
             margin-top: 4px;      /* 🔥 Add margin-top */
             margin-bottom: 0px; 
-    margin: 6px 0;
     counter-increment: item;
     position: relative;
-    padding-left: 39px; 
     margin-bottom: 21px;
+    margin: 6px 0 21px;
+    padding-left: 14px;
 }
 
 .formatted-content ul li::before {
