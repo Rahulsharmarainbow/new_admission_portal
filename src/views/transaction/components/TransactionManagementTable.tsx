@@ -13,6 +13,7 @@ import { Pagination } from 'src/Frontend/Common/Pagination';
 import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
 import { set } from 'lodash';
 import { useLocation } from 'react-router';
+import AllAcademicsDropdown from 'src/Frontend/Common/AllAcademicsDropdown';
 
 interface Transaction {
   id: number;
@@ -26,7 +27,6 @@ interface Transaction {
   transaction_id: string;
   created_at: string;
 }
-
 
 interface Filters {
   page: number;
@@ -43,7 +43,7 @@ interface Filters {
 const statusOptions = [
   { value: '', label: 'All' },
   { value: '0', label: 'Initialized' },
-  { value: '1', label: 'Captured' }
+  { value: '1', label: 'Captured' },
 ];
 
 const TransactionManagementTable: React.FC = () => {
@@ -60,7 +60,11 @@ const TransactionManagementTable: React.FC = () => {
     orderBy: 'id',
     search: '',
     academic_id: dashboardFilters.academic || '',
-    status: dashboardFilters.CountStatus ? dashboardFilters.CountStatus == 'captured' ? "1" : "0" : '' ,
+    status: dashboardFilters.CountStatus
+      ? dashboardFilters.CountStatus == 'captured'
+        ? '1'
+        : '0'
+      : '',
     startDate: '',
     endDate: '',
   });
@@ -111,7 +115,17 @@ const TransactionManagementTable: React.FC = () => {
 
   useEffect(() => {
     fetchTransactions();
-  }, [filters.page, filters.rowsPerPage, filters.order, filters.orderBy, debouncedSearch, filters.academic_id, filters.status, filters.startDate, filters.endDate]);
+  }, [
+    filters.page,
+    filters.rowsPerPage,
+    filters.order,
+    filters.orderBy,
+    debouncedSearch,
+    filters.academic_id,
+    filters.status,
+    filters.startDate,
+    filters.endDate,
+  ]);
 
   // Fetch transaction details
   const fetchTransactionDetails = async (transactionId: number) => {
@@ -221,67 +235,67 @@ const TransactionManagementTable: React.FC = () => {
   // };
 
   // Update the handleDownloadExcel function
-const handleDownloadExcel = async () => {
-  try {
-    setLoading2(true);
-    
-    const response = await axios.post(
-      `${apiUrl}/${user?.role}/Transactions/export-transaction`,
-      {
-        s_id: "1", // You might want to make this dynamic based on your requirements
-        academic_id: filters.academic_id || "",
-        startDate: filters.startDate || "",
-        endDate: filters.endDate || "",
-        status: filters.status || "",
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-          accept: '/',
-          'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
-          'Content-Type': 'application/json',
-        },
-        responseType: 'json',
-      }
-    );
+  const handleDownloadExcel = async () => {
+    try {
+      setLoading2(true);
 
-    if (response.data.success) {
-      // Extract the base64 data and filename from the response
-      const { excel_base64, filename } = response.data.data;
-      
-      // Convert base64 to blob
-      const byteCharacters = atob(excel_base64);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      const response = await axios.post(
+        `${apiUrl}/${user?.role}/Transactions/export-transaction`,
+        {
+          s_id: '1', // You might want to make this dynamic based on your requirements
+          academic_id: filters.academic_id || '',
+          startDate: filters.startDate || '',
+          endDate: filters.endDate || '',
+          status: filters.status || '',
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            accept: '/',
+            'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
+            'Content-Type': 'application/json',
+          },
+          responseType: 'json',
+        },
+      );
+
+      if (response.data.success) {
+        // Extract the base64 data and filename from the response
+        const { excel_base64, filename } = response.data.data;
+
+        // Convert base64 to blob
+        const byteCharacters = atob(excel_base64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        toast.success('Excel file downloaded successfully!');
+      } else {
+        toast.error('Failed to prepare Excel file');
       }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-      });
-      
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      toast.success('Excel file downloaded successfully!');
-    } else {
-      toast.error('Failed to prepare Excel file');
+    } catch (Downloading) {
+      console.error('Error downloading Excel:', Downloading);
+      toast.dismiss();
+      toast.error('Failed to download Excel file');
+    } finally {
+      setLoading2(false);
     }
-  } catch (Downloading) {
-    console.error('Error downloading Excel:', Downloading);
-    toast.dismiss();
-    toast.error('Failed to download Excel file');
-  }finally{
-    setLoading2(false);
-  }
-};
+  };
 
   // Get status badge
   const getStatusBadge = (status: number) => {
@@ -290,10 +304,15 @@ const handleDownloadExcel = async () => {
       1: { label: 'Captured', color: 'bg-green-100 text-green-800' },
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig] || { label: 'Unknown', color: 'bg-gray-100 text-gray-800' };
+    const config = statusConfig[status as keyof typeof statusConfig] || {
+      label: 'Unknown',
+      color: 'bg-gray-100 text-gray-800',
+    };
 
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}
+      >
         {config.label}
       </span>
     );
@@ -311,10 +330,7 @@ const handleDownloadExcel = async () => {
   return (
     <>
       <div className="mb-6">
-        <BreadcrumbHeader
-          title="Transactions"
-          paths={[{ name: 'Transactions', link: '#' }]}
-        />
+        <BreadcrumbHeader title="Transactions" paths={[{ name: 'Transactions', link: '#' }]} />
       </div>
 
       <div className="p-4 bg-white rounded-lg shadow-md">
@@ -340,15 +356,18 @@ const handleDownloadExcel = async () => {
               </div>
 
               {/* Academic Dropdown */}
-               {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') &&  (<div className="w-full sm:w-64">
-                <AcademicDropdown
-                  value={filters.academic_id}
-                  onChange={handleAcademicChange}
-                  placeholder="Select school..."
-                  includeAllOption={true}
-                  label=""
-                />
-              </div>)}
+              {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && (
+                <div className="w-full sm:w-64">
+                  <AllAcademicsDropdown
+                    name="academic"
+                    value={filters.academic_id}
+                    onChange={handleAcademicChange}
+                    includeAllOption
+                    label=""
+                    className="min-w-[250px] text-sm"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Download Button */}
@@ -357,12 +376,14 @@ const handleDownloadExcel = async () => {
               className="whitespace-nowrap bg-green-600 hover:bg-green-700 text-white"
               disabled={loading2}
             >
-              {loading2 ? 'Preparing...' : 
-                <><BsDownload className="w-4 h-4 mr-2" />
-                <span>Download Excel</span>
-              </>  
-              }
-              
+              {loading2 ? (
+                'Preparing...'
+              ) : (
+                <>
+                  <BsDownload className="w-4 h-4 mr-2" />
+                  <span>Download Excel</span>
+                </>
+              )}
             </Button>
           </div>
 
@@ -383,42 +404,40 @@ const handleDownloadExcel = async () => {
                 />
               </div>
 
-            {/* To Date Field */}
-<div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-  <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-    To Date:
-  </label>
-  <input
-    type="date"
-    value={filters.endDate}
-    onChange={(e) => handleDateChange('endDate', e.target.value)}
-    className="block w-full sm:w-48 px-3 py-2 text-sm border border-gray-300 rounded-lg 
+              {/* To Date Field */}
+              <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                  To Date:
+                </label>
+                <input
+                  type="date"
+                  value={filters.endDate}
+                  onChange={(e) => handleDateChange('endDate', e.target.value)}
+                  className="block w-full sm:w-48 px-3 py-2 text-sm border border-gray-300 rounded-lg 
            bg-white focus:ring-blue-500 focus:border-blue-500"
-  />
-</div>
+                />
+              </div>
 
-{/* Payment Status Field (same line style) */}
-<div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center w-full sm:w-64">
-  <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-    Payment Status:
-  </label>
-  <div className="w-full sm:w-48">
-    <Select
-      options={statusOptions}
-      value={statusOptions.find(option => option.value === filters.status)}
-      onChange={handleStatusChange}
-      placeholder="Select status..."
-      isSearchable={true}
-      className="react-select-container"
-      classNamePrefix="react-select"
-    />
-  </div>
-</div>
-
+              {/* Payment Status Field (same line style) */}
+              <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center w-full sm:w-64">
+                <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                  Payment Status:
+                </label>
+                <div className="w-full sm:w-48">
+                  <Select
+                    options={statusOptions}
+                    value={statusOptions.find((option) => option.value === filters.status)}
+                    onChange={handleStatusChange}
+                    placeholder="Select status..."
+                    isSearchable={true}
+                    className="react-select-container"
+                    classNamePrefix="react-select"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Status Dropdown */}
-           
           </div>
         </div>
 
@@ -478,7 +497,10 @@ const handleDownloadExcel = async () => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {transactions.length > 0 ? (
                     transactions.map((transaction, index) => (
-                      <tr key={transaction.id} className="hover:bg-gray-50 transition-colors duration-150">
+                      <tr
+                        key={transaction.id}
+                        className="hover:bg-gray-50 transition-colors duration-150"
+                      >
                         <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {filters.page * filters.rowsPerPage + index + 1}
                         </td>
@@ -520,7 +542,9 @@ const handleDownloadExcel = async () => {
                               d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                           </svg>
-                          <p className="text-lg font-medium text-gray-600 mb-2">No transactions found</p>
+                          <p className="text-lg font-medium text-gray-600 mb-2">
+                            No transactions found
+                          </p>
                           <p className="text-sm text-gray-500">
                             {filters.search || filters.academic_id || filters.status
                               ? 'Try adjusting your search criteria'

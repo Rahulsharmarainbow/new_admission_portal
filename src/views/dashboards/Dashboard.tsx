@@ -65,7 +65,7 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({
         <span className="text-sm text-white text-opacity-90 font-medium">
           {title}
         </span>
-        <p className="text-xs text-white text-opacity-80 mt-1">{subtitle}</p>
+        {/* <p className="text-xs text-white text-opacity-80 mt-1">{subtitle}</p> */}
       </div>
     </div>
   );
