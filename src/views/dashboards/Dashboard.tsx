@@ -75,10 +75,9 @@ const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { filters: dashboardFilters, updateFilter } = useDashboardFilters();
-  
+  const { academics, loading: academicLoading } = useAllAcademics();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
-  const { academics, loading: academicLoading } = useAllAcademics();
   const [filters, setFilters] = useState<DashboardFilters>({
     page: 0,
     rowsPerPage: 10,
@@ -86,16 +85,36 @@ const Dashboard = () => {
     orderBy: 'id',
     search: '',
     year: dashboardFilters.year,
-    academic: dashboardFilters.academic,
+    academic: user.role === 'CustomerAdmin' ? user.academic_id : dashboardFilters.academic,
   });
 
-  // ✅ Get selected academic type and name
-  const selectedAcademic = academics.find(a => 
-    String(a.id) === String(dashboardFilters.academic)
-  );
-  
+  // ✅ CustomerAdmin के लिए user data से academic details
+  const customerAdminAcademic = {
+    id: user?.academic_id,
+    academic_name: user?.academic_name,
+    academic_type: user?.academic_type
+  };
+
+  // ✅ Get selected academic type and name based on role
+  const getSelectedAcademic = () => {
+    if (user?.role === 'CustomerAdmin') {
+      return customerAdminAcademic;
+    }
+    
+    // For SuperAdmin/SupportAdmin, get from dashboardFilters
+    return {
+      id: dashboardFilters.academic,
+      academic_name: dashboardFilters.academicName,
+      academic_type: dashboardFilters.academicType
+    };
+  };
+
+  const selectedAcademic = getSelectedAcademic();
   const selectedAcademicType = selectedAcademic?.academic_type;
   const selectedAcademicName = selectedAcademic?.academic_name;
+  const hasSelectedAcademic = user?.role === 'CustomerAdmin' 
+    ? !!user?.academic_id 
+    : !!dashboardFilters.academic;
 
   // Debounced search
   const debouncedSearch = useDebounce(filters.search, 500);
@@ -108,7 +127,6 @@ const Dashboard = () => {
     try {
       const data = await dashboardService.getDashboardData(filters, user.id, user.token, user.role);
       setDashboardData(data);
-      
     } catch (error: any) {
       console.error('Error fetching dashboard data:', error);
       toast.error(error.response?.data?.message || 'Failed to fetch dashboard data');
@@ -129,34 +147,63 @@ const Dashboard = () => {
     filters.academic,
   ]);
 
-  // Sync local filters with context
+  // ✅ Initialize filters for CustomerAdmin on component mount
   useEffect(() => {
-    setFilters(prev => ({
-      ...prev,
-      year: dashboardFilters.year,
-      academic: dashboardFilters.academic,
-    }));
-  }, [dashboardFilters.year, dashboardFilters.academic]);
+    if (user?.role === 'CustomerAdmin') {
+      // Set CustomerAdmin's academic info in dashboard context
+      updateFilter('academic', user.academic_id);
+      updateFilter('academicType', user.academic_type);
+      updateFilter('academicName', user.academic_name);
+      
+      // Also update local filters
+      setFilters(prev => ({
+        ...prev,
+        academic: user.academic_id,
+        year: dashboardFilters.year || new Date().getFullYear().toString()
+      }));
+    }
+  }, [user]);
+
+  // Sync local filters with context for SuperAdmin/SupportAdmin
+  useEffect(() => {
+    if (user?.role !== 'CustomerAdmin') {
+      setFilters(prev => ({
+        ...prev,
+        year: dashboardFilters.year,
+        academic: dashboardFilters.academic,
+      }));
+    }
+  }, [dashboardFilters.year, dashboardFilters.academic, user?.role]);
 
   // ✅ Handle Card Clicks
   const handleCardClick = (cardType: string) => {
     // Check if academic is selected for cards that require it
     const requiresAcademic = ['total', 'paid', 'incomplete'];
     
-    if (requiresAcademic.includes(cardType) && !dashboardFilters.academic) {
-      toast.error('Please select an academic first');
+    if (requiresAcademic.includes(cardType) && !hasSelectedAcademic) {
+      if (user?.role === 'CustomerAdmin') {
+        toast.error('Academic information not available');
+      } else {
+        toast.error('Please select an academic first');
+      }
       return;
     }
+
+    // For CustomerAdmin, always use their own academic
+    const academicId = user?.role === 'CustomerAdmin' 
+      ? user.academic_id 
+      : dashboardFilters.academic;
 
     switch (cardType) {
       case 'total':
         updateFilter('ApplicationStatus', null);
+        console.log("total", selectedAcademicType)
         if (selectedAcademicType === 1) {
           navigate(`/${user.role}/school-applications`,{
             state: {
               filters: {
-                academic: dashboardFilters.academic,
-                year: dashboardFilters.year
+                academic: academicId,
+                year: filters.year
               }
             }
           });
@@ -164,8 +211,8 @@ const Dashboard = () => {
           navigate(`/${user.role}/college-applications`,{
             state: {
               filters: {
-                academic: dashboardFilters.academic,
-                year: dashboardFilters.year
+                academic: academicId,
+                year: filters.year
               }
             }
           });
@@ -179,9 +226,9 @@ const Dashboard = () => {
             state: { 
               filters: {
                 ApplicationStatus: 'captured',
-                academic: dashboardFilters.academic,
+                academic: academicId,
                 academicName: selectedAcademicName,
-                year: dashboardFilters.year
+                year: filters.year
               }
             }
           });
@@ -190,9 +237,9 @@ const Dashboard = () => {
             state: { 
               filters: {
                 ApplicationStatus: 'captured',
-                academic: dashboardFilters.academic,
+                academic: academicId,
                 academicName: selectedAcademicName,
-                year: dashboardFilters.year
+                year: filters.year
               }
             }
           });
@@ -206,9 +253,9 @@ const Dashboard = () => {
             state: { 
               filters: {
                 ApplicationStatus: 'initialized',
-                academic: dashboardFilters.academic,
+                academic: academicId,
                 academicName: selectedAcademicName,
-                year: dashboardFilters.year
+                year: filters.year
               }
             }
           });
@@ -217,9 +264,9 @@ const Dashboard = () => {
             state: { 
               filters: {
                 ApplicationStatus: 'initialized',
-                academic: dashboardFilters.academic,
+                academic: academicId,
                 academicName: selectedAcademicName,
-                year: dashboardFilters.year
+                year: filters.year
               }
             }
           });
@@ -231,7 +278,7 @@ const Dashboard = () => {
         navigate(`/${user.role}/transaction`,{
             state: {
               filters: {
-                academic: dashboardFilters.academic,
+                academic: academicId,
               }
             }
           });
@@ -243,7 +290,7 @@ const Dashboard = () => {
           state: { 
             filters: {
               CountStatus: 'captured',
-              academic: dashboardFilters.academic,
+              academic: academicId,
             }
           }
         });
@@ -255,7 +302,7 @@ const Dashboard = () => {
           state: { 
             filters: {
               CountStatus: 'initialized',
-              academic: dashboardFilters.academic,
+              academic: academicId,
             }
           }
         });
@@ -281,17 +328,29 @@ const Dashboard = () => {
     setFilters((prev) => ({ ...prev, rowsPerPage, page: 0 }));
   };
 
-  // Update year in context
+  // Update year in context (only for SuperAdmin/SupportAdmin)
   const handleYearChange = (year: string) => {
     updateFilter('year', year);
   };
 
-  // Update academic in context
+  // Update academic in context (only for SuperAdmin/SupportAdmin)
   const handleAcademicChange = (academic: string) => {
-    const selected = academics.find(a => String(a.id) === academic);
+    console.log("handleAcademicChange", academic);
+    const selected = academics?.find((a: any) => String(a.id) === academic);
+    console.log("selected", selected);
     updateFilter('academic', academic);
     updateFilter('academicType', selected?.academic_type);
     updateFilter('academicName', selected?.academic_name);
+  };
+
+  // ✅ Handle Roll No Click
+  const handleRollNoClick = (application: any) => {
+    const applicationId = application.application_id || application.id;
+    if (applicationId) {
+      navigate(`/${user.role}/application-details/${applicationId}`);
+    } else {
+      toast.error('Application ID not found');
+    }
   };
 
   // Loading state
@@ -305,17 +364,17 @@ const Dashboard = () => {
 
   return (
     <>
-      {/* Filter Section */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-          {/* Year Dropdown */}
-          {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && (
+      {/* Filter Section - Only show for SuperAdmin/SupportAdmin */}
+      {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && (
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+            {/* Year Dropdown */}
             <div className="relative w-full sm:w-auto">
               <select
                 value={dashboardFilters.year}
                 onChange={(e) => handleYearChange(e.target.value)}
                 className="w-full sm:w-auto min-w-[250px] px-3 py-2.5 border border-gray-300 rounded-md bg-white 
-focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
+  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
               >
                 <option value="2025">2025</option>
                 <option value="2024">2024</option>
@@ -326,10 +385,8 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
                 <HiChevronDown className="w-4 h-4" />
               </div>
             </div>
-          )}
 
-          {/* Academic Dropdown */}
-          {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && (
+            {/* Academic Dropdown */}
             <div className="relative w-full sm:w-auto">
               <AllAcademicsDropdown
                 name="academic"
@@ -340,9 +397,32 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
                 className="min-w-[250px] text-sm"
               />
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Customer Admin Info Banner */}
+      {/* {user?.role === 'CustomerAdmin' && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-blue-800">
+                {selectedAcademicName || 'Your Academic'}
+              </h3>
+              <div className="mt-2 text-sm text-blue-700">
+                <p>
+                  Academic Type: {selectedAcademicType === 1 ? 'School' : 'College'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )} */}
 
       {/* Statistics Cards - Row 1 */}
       <div className="grid grid-cols-9 gap-6 mb-6">
@@ -370,7 +450,7 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
             image={img2}
             subtitle="All submitted applications"
             onClick={() => handleCardClick('total')}
-            isClickable={!!dashboardFilters.academic}
+            isClickable={hasSelectedAcademic}
           />
         </div>
 
@@ -400,7 +480,7 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
             image={img1}
             subtitle="Applications with successful payment"
             onClick={() => handleCardClick('paid')}
-            isClickable={!!dashboardFilters.academic}
+            isClickable={hasSelectedAcademic}
           />
         </div>
 
@@ -428,7 +508,7 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
             image={img3}
             subtitle="Applications with pending payment"
             onClick={() => handleCardClick('incomplete')}
-            isClickable={!!dashboardFilters.academic}
+            isClickable={hasSelectedAcademic}
           />
         </div>
       </div>
@@ -565,12 +645,11 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
         )}
       </div>
 
-      {user?.role === 'CustomerAdmin' && dashboardData.classWisePaidApplications && (
+      {user?.role === 'CustomerAdmin' && dashboardData && (
         <div className="mb-6">
           {/* ✅ CustomerAdmin — academic_type ke basis par */}
-
           <>
-            {user?.academic_type === 1 && (
+            {user?.academic_type === 1 && dashboardData?.classWisePaidApplications && (
               <div className="lg:col-span-6 col-span-12">
                 <BarChart
                   labels={
@@ -588,7 +667,7 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
               </div>
             )}
 
-            {user?.academic_type === 2 && (
+            {user?.academic_type === 2 && dashboardData?.degreeWisePaidApplications && (
               <div className="lg:col-span-6 col-span-12">
                 <BarChart
                   labels={
@@ -614,7 +693,12 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
             <div>
               <h5 className="text-lg font-semibold text-gray-900">Recently Added Application</h5>
-              <h6 className="text-sm text-gray-600">Application List across all Academic</h6>
+              <h6 className="text-sm text-gray-600">
+                {user?.role === 'CustomerAdmin' 
+                  ? `Application List for ${selectedAcademicName || 'Your Academic'}`
+                  : 'Application List across all Academic'
+                }
+              </h6>
             </div>
             <div className="relative w-full lg:w-auto">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -665,8 +749,6 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
                       <tr
                         key={app.id}
                         className="hover:bg-gray-50 transition-colors duration-150"
-                        // ✅ Optional: Uncomment if you want whole row clickable
-                        // onClick={() => handleRowClick(app)}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {(filters.page || 0) * (filters.rowsPerPage || 10) + index + 1}
@@ -678,7 +760,6 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
                           {app.academic_name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          {/* ✅ Updated Roll No with click handler */}
                           <span
                             className="text-blue-600 font-medium hover:text-blue-800 hover:underline cursor-pointer transition-colors duration-200"
                             onClick={() => handleRollNoClick(app)}
@@ -698,7 +779,7 @@ focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent app
                                 : 'bg-yellow-100 text-yellow-800'
                             }`}
                           >
-                            {app.payment_status === 1 ? 'Captured' : 'Intilized'}
+                            {app.payment_status === 1 ? 'Captured' : 'Initialized'}
                           </span>
                         </td>
                       </tr>

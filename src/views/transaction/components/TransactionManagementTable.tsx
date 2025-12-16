@@ -60,7 +60,7 @@ const TransactionManagementTable: React.FC = () => {
     orderBy: 'id',
     search: '',
     academic_id: dashboardFilters.academic || '',
-    status: dashboardFilters.CountStatus ? dashboardFilters.CountStatus == 'captured' ? "1" : "0" : '' || '',
+    status: dashboardFilters.CountStatus ? dashboardFilters.CountStatus == 'captured' ? "1" : "0" : '' ,
     startDate: '',
     endDate: '',
   });

@@ -514,7 +514,11 @@ const SidebarContent: Record<number, MenuItem[]> = {
             },
           ],
         },
-
+        {
+          name: 'Transaction',
+          url: '/SupportAdmin/transaction',
+          icon: 'solar:card-transfer-line-duotone',
+        },
         {
           name: 'Data Manager',
           id: uniqueId(),
