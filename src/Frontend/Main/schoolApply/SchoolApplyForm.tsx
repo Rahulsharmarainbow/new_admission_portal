@@ -10,9 +10,9 @@ import axios from 'axios';
 import FormStep from '../collageApply/FormStep';
 import { isImageBlurred } from './Blurred';
 import Loader from 'src/Frontend/Common/Loader';
-import * as pdfjsLib from "pdfjs-dist";
-import { GlobalWorkerOptions } from "pdfjs-dist/build/pdf";
-import pdfWorker from "pdfjs-dist/build/pdf.worker?url";
+import * as pdfjsLib from 'pdfjs-dist';
+import { GlobalWorkerOptions } from 'pdfjs-dist/build/pdf';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker?url';
 
 GlobalWorkerOptions.workerSrc = pdfWorker;
 
@@ -30,7 +30,7 @@ interface SchoolApplyFormProps {
   transportation_setting: any;
   apply_modal?: any;
   OtherData?: any;
-  type:string;
+  type: string;
 }
 
 const steps = [
@@ -56,7 +56,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
   transportation_setting,
   apply_modal,
   OtherData,
-  type
+  type,
 }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
@@ -268,7 +268,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
       if (fieldConfig?.apiurl && fieldConfig?.target) {
         fetch(`${apiUrl}/${fieldConfig?.apiurl}`, {
           method: 'POST',
-          
+
           headers: {
             'Content-Type': 'application/json',
           },
@@ -369,183 +369,182 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
     [],
   );
 
-// const handleFileChange = useCallback(
-//   (name: string, file: File, fieldConfig?: any) => {
-//     if (!file) return;
+  // const handleFileChange = useCallback(
+  //   (name: string, file: File, fieldConfig?: any) => {
+  //     if (!file) return;
 
-//     const { resolution, target, skipResolution } = fieldConfig || {};
+  //     const { resolution, target, skipResolution } = fieldConfig || {};
 
-//     // ✅ Validate Type (Allow JPEG, PNG, PDF)
-//     const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-//     if (!allowedTypes.includes(file.type)) {
-//       toast.error('Please upload a valid JPEG, PNG image or PDF document.');
-//       return;
-//     }
+  //     // ✅ Validate Type (Allow JPEG, PNG, PDF)
+  //     const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+  //     if (!allowedTypes.includes(file.type)) {
+  //       toast.error('Please upload a valid JPEG, PNG image or PDF document.');
+  //       return;
+  //     }
 
-//     // ✅ Validate Size (< 2 MB for PDF, < 1 MB for images)
-//     const maxSize = file.type === 'application/pdf' ? 2097152 : 1048576; // 2MB for PDF, 1MB for images
-//     if (file.size > maxSize) {
-//       const maxSizeMB = maxSize / 1048576;
-//       toast.error(`File size should be less than ${maxSizeMB} MB.`);
-//       return;
-//     }
+  //     // ✅ Validate Size (< 2 MB for PDF, < 1 MB for images)
+  //     const maxSize = file.type === 'application/pdf' ? 2097152 : 1048576; // 2MB for PDF, 1MB for images
+  //     if (file.size > maxSize) {
+  //       const maxSizeMB = maxSize / 1048576;
+  //       toast.error(`File size should be less than ${maxSizeMB} MB.`);
+  //       return;
+  //     }
 
-//     const reader = new FileReader();
+  //     const reader = new FileReader();
 
-//     reader.onloadend = async () => {
-//       const result = reader.result as string;
+  //     reader.onloadend = async () => {
+  //       const result = reader.result as string;
 
-//       // For PDF files, we'll store the file directly and show PDF icon
-//       if (file.type === 'application/pdf') {
-//         // Store file for submission
-//         setSelectedFiles((prev) => ({
-//           ...prev,
-//           [name]: file,
-//         }));
+  //       // For PDF files, we'll store the file directly and show PDF icon
+  //       if (file.type === 'application/pdf') {
+  //         // Store file for submission
+  //         setSelectedFiles((prev) => ({
+  //           ...prev,
+  //           [name]: file,
+  //         }));
 
-//         // Store preview URL (we'll use a PDF icon in the UI)
-//         setFileData((prev) => ({
-//           ...prev,
-//           [name]: result, // Store base64 for PDF as well
-//         }));
+  //         // Store preview URL (we'll use a PDF icon in the UI)
+  //         setFileData((prev) => ({
+  //           ...prev,
+  //           [name]: result, // Store base64 for PDF as well
+  //         }));
 
-//         // Preview target if defined
-//         if (target) {
-//           setFileData((prev) => ({
-//             ...prev,
-//             [target]: result,
-//           }));
-//         }
-//       } else {
-//         // For image files
-//         const img = new window.Image();
-//         img.src = result;
+  //         // Preview target if defined
+  //         if (target) {
+  //           setFileData((prev) => ({
+  //             ...prev,
+  //             [target]: result,
+  //           }));
+  //         }
+  //       } else {
+  //         // For image files
+  //         const img = new window.Image();
+  //         img.src = result;
 
-//         img.onload = async () => {
-//           // ✅ Skip resolution check if skipResolution is true (for camera) or if it's PDF
-//           if (!skipResolution && resolution) {
-//             const [w, h] = resolution.split('x');
-//             const targetWidth = parseInt(w, 10);
-//             const targetHeight = parseInt(h, 10);
+  //         img.onload = async () => {
+  //           // ✅ Skip resolution check if skipResolution is true (for camera) or if it's PDF
+  //           if (!skipResolution && resolution) {
+  //             const [w, h] = resolution.split('x');
+  //             const targetWidth = parseInt(w, 10);
+  //             const targetHeight = parseInt(h, 10);
 
-//             if (img.width !== targetWidth || img.height !== targetHeight) {
-//               toast.error(`The uploaded image must be ${targetWidth}x${targetHeight} pixels.`);
-//               return;
-//             }
-//           }
+  //             if (img.width !== targetWidth || img.height !== targetHeight) {
+  //               toast.error(`The uploaded image must be ${targetWidth}x${targetHeight} pixels.`);
+  //               return;
+  //             }
+  //           }
 
-//           // ✅ Skip blur detection for PDF files
-//           if (file.type !== 'application/pdf') {
-//             try {
-//               const blurry = await isImageBlurred(img.src, img.width, img.height);
-//               if (blurry) {
-//                 toast.error('The uploaded image is too blurry. Please upload a clearer image.');
-//                 return;
-//               }
-//             } catch (err) {
-//               console.error('Blur check failed:', err);
-//               toast.error('There was an issue processing the image.');
-//               return;
-//             }
-//           }
+  //           // ✅ Skip blur detection for PDF files
+  //           if (file.type !== 'application/pdf') {
+  //             try {
+  //               const blurry = await isImageBlurred(img.src, img.width, img.height);
+  //               if (blurry) {
+  //                 toast.error('The uploaded image is too blurry. Please upload a clearer image.');
+  //                 return;
+  //               }
+  //             } catch (err) {
+  //               console.error('Blur check failed:', err);
+  //               toast.error('There was an issue processing the image.');
+  //               return;
+  //             }
+  //           }
 
-//           // ✅ Save for backend submission
-//           setSelectedFiles((prev) => ({
-//             ...prev,
-//             [name]: file,
-//           }));
+  //           // ✅ Save for backend submission
+  //           setSelectedFiles((prev) => ({
+  //             ...prev,
+  //             [name]: file,
+  //           }));
 
-//           setFileData((prev) => ({
-//             ...prev,
-//             [name]: result,
-//           }));
+  //           setFileData((prev) => ({
+  //             ...prev,
+  //             [name]: result,
+  //           }));
 
-//           // ✅ Preview target if defined
-//           if (target) {
-//             setFileData((prev) => ({
-//               ...prev,
-//               [target]: result,
-//             }));
-//           }
-//         };
-//       }
+  //           // ✅ Preview target if defined
+  //           if (target) {
+  //             setFileData((prev) => ({
+  //               ...prev,
+  //               [target]: result,
+  //             }));
+  //           }
+  //         };
+  //       }
 
-//       // ✅ Remove error if previously set
-//       if (errors[name]) {
-//         setErrors((prev) => ({
-//           ...prev,
-//           [name]: '',
-//         }));
-//       }
+  //       // ✅ Remove error if previously set
+  //       if (errors[name]) {
+  //         setErrors((prev) => ({
+  //           ...prev,
+  //           [name]: '',
+  //         }));
+  //       }
 
-//       toast.success(`${file.name} selected successfully`);
-//     };
+  //       toast.success(`${file.name} selected successfully`);
+  //     };
 
-//     reader.readAsDataURL(file);
-//   },
-//   [errors],
-// );
+  //     reader.readAsDataURL(file);
+  //   },
+  //   [errors],
+  // );
 
-const getPdfFirstPageImage = async (file: File): Promise<string> => {
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  const page = await pdf.getPage(1);
+  const getPdfFirstPageImage = async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const page = await pdf.getPage(1);
 
-  const viewport = page.getViewport({ scale: 1.5 });
+    const viewport = page.getViewport({ scale: 1.5 });
 
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d")!;
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d')!;
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
 
-  await page.render({ canvasContext: context, viewport }).promise;
+    await page.render({ canvasContext: context, viewport }).promise;
 
-  return canvas.toDataURL("image/jpeg");
-};
+    return canvas.toDataURL('image/jpeg');
+  };
 
+  const handleFileChange = useCallback(
+    async (name: string, file: File, fieldConfig?: any) => {
+      if (!file) return;
 
-const handleFileChange = useCallback(
-  async (name: string, file: File, fieldConfig?: any) => {
-    if (!file) return;
+      const extension = file.name.split('.').pop()?.toLowerCase();
+      let finalBase64 = '';
 
-    const extension = file.name.split(".").pop()?.toLowerCase();
-    let finalBase64 = "";
+      const isPDF = extension === 'pdf';
+      const isImage = file.type.startsWith('image/');
 
-    const isPDF = extension === "pdf";
-    const isImage = file.type.startsWith("image/");
+      if (!isPDF && !isImage) {
+        toast.error('Only PDF or Image files allowed.');
+        return;
+      }
 
-    if (!isPDF && !isImage) {
-      toast.error("Only PDF or Image files allowed.");
-      return;
-    }
+      // PDF → first page preview
+      if (isPDF) {
+        finalBase64 = await getPdfFirstPageImage(file);
+      }
 
-    // PDF → first page preview
-    if (isPDF) {
-      finalBase64 = await getPdfFirstPageImage(file);
-    }
+      // Image → base64 convert
+      if (isImage) {
+        finalBase64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+      }
 
-    // Image → base64 convert
-    if (isImage) {
-      finalBase64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(file);
-      });
-    }
+      // Preview + file save
+      setFileData((prev) => ({
+        ...prev,
+        [name]: finalBase64,
+        [name + '_file']: file,
+      }));
 
-    // Preview + file save
-    setFileData((prev) => ({
-      ...prev,
-      [name]: finalBase64,
-      [name + "_file"]: file
-    }));
-
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  },
-  [errors]
-);
+      if (errors[name]) {
+        setErrors((prev) => ({ ...prev, [name]: '' }));
+      }
+    },
+    [errors],
+  );
 
   const handleConditionChange = useCallback((condition: string, value: boolean) => {
     setConditions((prev) => ({
@@ -800,7 +799,7 @@ const handleFileChange = useCallback(
     }
   }, [activeStep, formData, fileData, validateStep, academic_id, cdata, apiUrl]);
 
- const handleDownloadReceipt = async (application_id: string) => {
+  const handleDownloadReceipt = async (application_id: string) => {
     try {
       const response = await fetch(`${apiUrl}/frontend/download-receipt`, {
         method: 'POST',
@@ -818,21 +817,21 @@ const handleFileChange = useCallback(
         // Convert base64 to blob
         const binaryString = window.atob(pdf);
         const bytes = new Uint8Array(binaryString.length);
-        
+
         for (let i = 0; i < binaryString.length; i++) {
           bytes[i] = binaryString.charCodeAt(i);
         }
-        
+
         const blob = new Blob([bytes], { type: 'application/pdf' });
         const url = window.URL.createObjectURL(blob);
-        
+
         const link = document.createElement('a');
         link.href = url;
-        
+
         // Add .pdf extension if not present
         const downloadFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
         link.download = downloadFilename;
-        
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -848,13 +847,13 @@ const handleFileChange = useCallback(
 
   const stepHeaders: Record<number, { title: string; subtitle?: string }> = {
     1: {
-      title: "GENERAL FORM OF DISCLAIMER",
-      subtitle: "(Consent Form)",
+      title: 'GENERAL FORM OF DISCLAIMER',
+      subtitle: '(Consent Form)',
     },
     2: {
-      title: "DECLARATION FORM",
-      subtitle: "(Please read carefully before signing)",
-    }
+      title: 'DECLARATION FORM',
+      subtitle: '(Please read carefully before signing)',
+    },
   };
 
   const currentHeader = stepHeaders[activeStep];
@@ -959,21 +958,18 @@ const handleFileChange = useCallback(
       <div className="relative bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#1e40af] to-[#dc2626]"></div>
 
-       <div className="p-2 md:p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
-        {currentHeader && (
-          <div className="school_para_header text-center">
-            <h1 className="font-semibold text-lg">
-              {currentHeader.title}
-            </h1>
-            {currentHeader.subtitle && (
-              <p className="text-sm text-gray-600 mt-3">
-                {currentHeader.subtitle}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-
+        <div className="p-2 md:p-6 border-b border-gray-100 bg-gradient-to-r from-[#1e40af]/5 to-[#dc2626]/5">
+          {currentHeader && (
+            <div className="school_para_header text-center">
+              <h1 className="font-semibold text-lg sm:text-xl md:text-2xl">
+                {currentHeader.title}
+              </h1>
+              {currentHeader.subtitle && (
+                <p className="text-sm text-gray-600 mt-3">{currentHeader.subtitle}</p>
+              )}
+            </div>
+          )}
+        </div>
 
         <div className="p-2 md:p-6">
           {/* Stepper */}
@@ -1154,8 +1150,6 @@ const handleFileChange = useCallback(
                   You will be redirected to secure payment gateway
                 </p>
               </div>
-
-            
             </div>
 
             {/* Dialog Actions */}

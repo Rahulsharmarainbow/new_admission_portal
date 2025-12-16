@@ -12,6 +12,7 @@ import { useDebounce } from 'src/hook/useDebounce';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
 import { set } from 'lodash';
+import { useLocation } from 'react-router';
 
 interface Transaction {
   id: number;
@@ -47,6 +48,8 @@ const statusOptions = [
 
 const TransactionManagementTable: React.FC = () => {
   const { user } = useAuth();
+  const location = useLocation();
+  const dashboardFilters = location.state?.filters || {};
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
@@ -56,8 +59,8 @@ const TransactionManagementTable: React.FC = () => {
     order: 'desc',
     orderBy: 'id',
     search: '',
-    academic_id: '',
-    status: '',
+    academic_id: dashboardFilters.academic || '',
+    status: dashboardFilters.CountStatus ? dashboardFilters.CountStatus == 'captured' ? "1" : "0" : '' || '',
     startDate: '',
     endDate: '',
   });

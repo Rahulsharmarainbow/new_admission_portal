@@ -14,7 +14,8 @@ import { useDebounce } from 'src/hook/useDebounce';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import ApplicationDetailModal from '../schoolApplications/components/ApplicationDetailModal';
 import CollegeFilterSidebar from './components/CollegeFilterSidebar';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
+import { useDashboardFilters } from 'src/hook/DashboardFilterContext';
 
 interface Application {
   id: number;
@@ -71,6 +72,8 @@ interface CdFilters {
 
 const CollegeApplicationManagementTable: React.FC = () => {
   const { user } = useAuth();
+    const location = useLocation();
+   const dashboardFilters = location.state?.filters || {};
   const navigate = useNavigate();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(false);
@@ -81,10 +84,10 @@ const CollegeApplicationManagementTable: React.FC = () => {
     order: 'desc',
     orderBy: 'id',
     search: '',
-    academic_id: '',
-    year: '',
+    academic_id: dashboardFilters.academic || '',
+    year: dashboardFilters.year || '',
     degree: '',
-    paymentStatus: '',
+    paymentStatus: dashboardFilters.ApplicationStatus ? dashboardFilters.ApplicationStatus == 'captured' ? "1" : "2" : '' || '',
     applicationNumber: '',
     transactions_id: '',
     amounts: '',

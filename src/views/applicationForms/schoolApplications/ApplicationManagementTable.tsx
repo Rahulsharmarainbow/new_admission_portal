@@ -13,7 +13,7 @@ import { useAuth } from 'src/hook/useAuth';
 import { useDebounce } from 'src/hook/useDebounce';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import ApplicationDetailModal from './components/ApplicationDetailModal';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import SchoolFilterSidebar from './components/SchoolFilterSidebar';
 
 interface Application {
@@ -72,6 +72,8 @@ interface CdFilters {
 
 const ApplicationManagementTable: React.FC = () => {
   const { user } = useAuth();
+    const location = useLocation();
+   const dashboardFilters = location.state?.filters || {};
   const navigate = useNavigate();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(false);
@@ -82,11 +84,11 @@ const ApplicationManagementTable: React.FC = () => {
     order: 'desc',
     orderBy: 'id',
     search: '',
-    academic_id: user?.role === 'CustomerAdmin' ? user?.academic_id?.toString() || '' : '',
-    year: '',
+    academic_id: user?.role === 'CustomerAdmin' ? user?.academic_id?.toString() || dashboardFilters.academic : dashboardFilters.academic || '',
+    year: dashboardFilters.year || '',
     classAppliedFor: '',
     gender: '',
-    paymentStatus: '',
+    paymentStatus: dashboardFilters.ApplicationStatus ? dashboardFilters.ApplicationStatus == 'captured' ? "1" : "2" : '' || '',
     fromDate: '',
     toDate: '',
     applicationNumber: '',

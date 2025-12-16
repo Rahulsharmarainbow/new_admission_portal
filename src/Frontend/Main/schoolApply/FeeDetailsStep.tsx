@@ -11,7 +11,7 @@ interface FeeDetailsStepProps {
   errors: { [key: string]: string };
 }
 
-const assetUrl = import.meta.env.VITE_ASSET_URL;
+  const assetUrl = import.meta.env.VITE_ASSET_URL;
 
 const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
   classes,
@@ -31,541 +31,232 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
   };
 
   const getParentName = () => {
-    const rel = (formData['s_relationship'] || "").toLowerCase();  
-    let relationKey = `${rel}_name`;  // father_name / mother_name / guardian_name
+  const rel = (formData['s_relationship'] || "").toLowerCase();  
+  let relationKey = `${rel}_name`;  // father_name / mother_name / guardian_name
 
-    // Main value based on Srelationship
-    let value = formData[relationKey] ? String(formData[relationKey]) : '';
+  // Main value based on Srelationship
+  let value = formData[relationKey] ? String(formData[relationKey]) : '';
 
-    // Fallback for Guardian → if guardian_name missing, use father_name
-    if (rel === "guardian" && !value) {
-      value = formData["father_name"] ? String(formData["father_name"]) : "";
-    }
+  // Fallback for Guardian → if guardian_name missing, use father_name
+  if (rel === "guardian" && !value) {
+    value = formData["father_name"] ? String(formData["father_name"]) : "";
+  }
 
-    // If still no value → fallback to first_name + middle_name + last_name
-    if (!value) {
-      return [
-        formData['first_name'],
-        formData['middle_name'],
-        formData['last_name']
-      ].filter(Boolean).join(' ');
-    }
+  // If still no value → fallback to first_name + middle_name + last_name
+  if (!value) {
+    return [
+      formData['first_name'],
+      formData['middle_name'],
+      formData['last_name']
+    ].filter(Boolean).join(' ');
+  }
 
-    return value;
-  };
+  return value;
+};
 
   return (
-    <div className="fee-tables space-y-4 md:space-y-6 px-2 md:px-0">
-      {/* Header Section */}
-      <div className="fee_header text-center">
-        <h6 className="text-lg md:text-xl font-bold text-gray-800 leading-tight">
+    <div className="fee-tables space-y-6">
+      {/* Caution Deposit */}
+
+      <div className="fee_header  text-center">
+        <h6 className="md:text-xl text-sm font-bold text-gray-800 ">
           DETAILS OF FEE FOR THE ACADEMIC YEAR 2026 – 2027
         </h6>
-        <p className="text-sm md:text-lg text-gray-600 mt-1">
-          (Subject to Government Guidelines)
+         <p className="text-lg ">
+          (Subject to Government Guidlines)
         </p>
+      
       </div>
 
-      {/* Caution Deposit */}
-      <div className="tbl_header flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 md:p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <h6 className="text-base md:text-lg font-bold text-gray-800 mb-2 sm:mb-0">
+      <div className="tbl_header flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <h6 className="text-lg font-bold text-gray-800">
           Caution Deposit (Refundable):
         </h6>
-        <h6 className="text-base md:text-lg font-bold text-blue-600">
+        <h6 className="text-lg font-bold text-blue-600">
           {formatPrice(transportation_setting)} /-
         </h6>
       </div>
 
-      {/* Tuition Fee Table with Custom Scrollbar */}
-      <div className="relative">
-        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-          <div className="min-w-[640px] md:min-w-full">
-            <table className="w-full divide-y divide-gray-200">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap sticky left-0 bg-gray-100 z-10 border-r border-gray-200">
-                    Class Name
-                  </th>
-                  <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
-                    Tuition Fee-I<br /><span className="text-xs font-normal">(June – Sept)</span>
-                  </th>
-                  <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
-                    Tuition Fee-II<br /><span className="text-xs font-normal">(Oct – Jan)</span>
-                  </th>
-                  <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
-                    Tuition Fee-III<br /><span className="text-xs font-normal">(Feb – May)</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {classes?.map((classData, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-3 py-2 md:px-4 md:py-3 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 border-r border-gray-200">
-                      {classData.class_name}
-                    </td>
-                    <td className="px-3 py-2 md:px-4 md:py-3 whitespace-nowrap text-sm text-gray-700">
-                      {formatPrice(classData.tution_fee_1)}
-                    </td>
-                    <td className="px-3 py-2 md:px-4 md:py-3 whitespace-nowrap text-sm text-gray-700">
-                      {formatPrice(classData.tution_fee_2)}
-                    </td>
-                    <td className="px-3 py-2 md:px-4 md:py-3 whitespace-nowrap text-sm text-gray-700">
-                      {formatPrice(classData.tution_fee_3)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-        {/* Mobile scroll indicator */}
-        <div className="md:hidden flex items-center justify-center mt-2">
-          <div className="text-xs text-gray-500 flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full">
-            <svg className="w-4 h-4 animate-bounce-horizontal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-            <span>Scroll horizontally to view all columns</span>
-            <svg className="w-4 h-4 animate-bounce-horizontal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </div>
+      {/* Tuition Fee Table */}
+      <div className="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                Class Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                Tuition Fee-I (June 24 to Sept 24)
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                Tuition Fee-II (Oct 24 to Jan 25)
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                Tuition Fee-III (Feb 25 to May 25)
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {classes?.map((classData, index) => (
+              <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {classData.class_name}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {formatPrice(classData.tution_fee_1)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {formatPrice(classData.tution_fee_2)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {formatPrice(classData.tution_fee_3)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
         </div>
       </div>
 
-      {/* Transportation Fee Header */}
+      {/* Transportation Fee Section */}
       <div className="fee_header2 text-center">
-        <h6 className="text-base md:text-lg font-bold text-gray-800">
+        <h6 className="text-lg font-bold text-gray-800">
           TRANSPORTATION: OPTIONAL
         </h6>
-        <h6 className="text-xs md:text-sm text-gray-600 mt-1">
+        <h6 className="text-sm text-gray-600 mt-1">
           Available only on the routes operated by the school
         </h6>
       </div>
 
-      {/* Transportation Fee Table with Custom Scrollbar */}
-      <div className="relative">
-        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-          <div className="min-w-[640px] md:min-w-full">
-            <table className="w-full divide-y divide-gray-200">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap sticky left-0 bg-gray-100 z-10 border-r border-gray-200">
-                    Distance
-                  </th>
-                  <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
-                    June – Sept
-                  </th>
-                  <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
-                    Oct – Jan
-                  </th>
-                  <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
-                    Feb – May
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {transportation_fee?.map((transportData, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-3 py-2 md:px-4 md:py-3 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 border-r border-gray-200">
-                      {transportData.distance}
-                    </td>
-                    <td className="px-3 py-2 md:px-4 md:py-3 whitespace-nowrap text-sm text-gray-700">
-                      {formatPrice(transportData.fee1)}
-                    </td>
-                    <td className="px-3 py-2 md:px-4 md:py-3 whitespace-nowrap text-sm text-gray-700">
-                      {formatPrice(transportData.fee2)}
-                    </td>
-                    <td className="px-3 py-2 md:px-4 md:py-3 whitespace-nowrap text-sm text-gray-700">
-                      {formatPrice(transportData.fee3)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-        {/* Mobile scroll indicator */}
-        <div className="md:hidden flex items-center justify-center mt-2">
-          <div className="text-xs text-gray-500 flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full">
-            <svg className="w-4 h-4 animate-bounce-horizontal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-            <span>Scroll horizontally to view all columns</span>
-            <svg className="w-4 h-4 animate-bounce-horizontal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      {/* Custom CSS for scrollbar */}
-      <style>{`
-        .overflow-x-auto::-webkit-scrollbar {
-          height: 8px;
-        }
-        
-        .overflow-x-auto::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 4px;
-        }
-        
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-          background: #888;
-          border-radius: 4px;
-        }
-        
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-          background: #555;
-        }
-        
-        @keyframes bounce-horizontal {
-          0%, 100% {
-            transform: translateX(0);
-          }
-          50% {
-            transform: translateX(5px);
-          }
-        }
-        
-        .animate-bounce-horizontal {
-          animation: bounce-horizontal 1s infinite;
-        }
-      `}</style>
-
+     <div className="rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+  <div className="overflow-x-auto">
+    <table className="min-w-full divide-y divide-gray-200">
+      <thead className="bg-gray-100">
+        <tr>
+          <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+            Class Name
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+            Tuition Fee-I (June 24 to Sept 24)
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+            Tuition Fee-II (Oct 24 to Jan 25)
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+            Tuition Fee-III (Feb 25 to May 25)
+          </th>
+        </tr>
+      </thead>
+      <tbody className="bg-white divide-y divide-gray-200">
+        {classes?.map((classData, index) => (
+          <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              {classData.class_name}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+              {formatPrice(classData.tution_fee_1)}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+              {formatPrice(classData.tution_fee_2)}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+              {formatPrice(classData.tution_fee_3)}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
       {/* Parent Agreement Section */}
-      <div className="disclaimer_footer_flex flex flex-col md:flex-row justify-between items-start gap-4 md:gap-8 mt-6 md:mt-8 p-4 md:p-6 border-t border-gray-200 bg-gray-50/50 rounded-lg">
-        <div className="w-full md:w-auto">
-          <p className="text-sm md:text-base font-semibold text-gray-800">
-            I accept to pay the tuition fee as above.
-          </p>
-        </div>
-        
-        <div className="w-full md:w-auto text-center md:text-left">
-          <p className="text-sm md:text-base font-semibold text-gray-800 mb-2">
-            Parent Name: <span className="font-bold">{getParentName()}</span>
-          </p>
-          {fileData["candidate_signature"] ? (
-            <>
-              <img
-                src={fileData["candidate_signature"]}
-                alt="Parent Signature"
-                className="w-24 h-12 md:w-32 md:h-16 object-contain mx-auto md:mx-0 mb-2 border border-gray-300 rounded"
-              />
-              <p className="text-xs md:text-sm font-semibold text-gray-800">
-                Parent Signature
-              </p>
-            </>
-          ) : (
-            <div className="text-center md:text-left">
-              <div className="w-24 h-12 md:w-32 md:h-16 border-2 border-dashed border-gray-300 rounded flex items-center justify-center mb-2 bg-white mx-auto md:mx-0">
-                <span className="text-xs text-gray-500">No Signature</span>
-              </div>
-              <p className="text-xs md:text-sm font-semibold text-gray-800">
-                Parent Signature
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Checkbox Section */}
-      <div className="flex items-start gap-3 mt-4 md:mt-6 p-3 md:p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="flex-shrink-0 mt-0.5">
-          <input
-            type="checkbox"
-            id="fee-checkbox"
-            checked={accepted}
-            onChange={(e) => onConditionChange('fee', e.target.checked)}
-            className={`w-4 h-4 md:w-5 md:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
-              errors['fee'] ? 'border-red-500' : 'border-gray-300'
-            }`}
+       <div className="disclaimer_footer_flex flex flex-col md:flex-row justify-between items-start gap-4 md:gap-8 mt-6 md:mt-8 p-4 md:p-6 border-t border-gray-200 bg-gray-50/50 rounded-lg">
+    <div className="w-full md:w-auto">
+      <p className="text-sm md:text-base font-semibold text-gray-800">
+        I accept to pay the tuition fee as above.
+      </p>
+    </div>
+    
+    <div className="w-full md:w-auto text-center md:text-left">
+      <p className="text-sm md:text-base font-semibold text-gray-800 mb-2">
+        Parent Name: <span className="font-bold">{getParentName()}</span>
+      </p>
+      {fileData["candidate_signature"] ? (
+        <>
+          <img
+            src={fileData["candidate_signature"]}
+            alt="Parent Signature"
+            className="w-24 h-12 md:w-32 md:h-16 object-contain mx-auto md:mx-0 mb-2 border border-gray-300 rounded"
           />
-        </div>
-        
-        <div className="flex-1">
-          <label
-            htmlFor="fee-checkbox"
-            className={`block text-xs md:text-sm leading-relaxed cursor-pointer ${
-              errors['fee'] ? 'text-red-600' : 'text-gray-700'
-            }`}
-          >
-            I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
-          </label>
-          
-          <p className="text-xs md:text-sm text-gray-600 mt-2 md:mt-3 pl-0 md:pl-1">
-            Tuition fee and Transport Fee once paid will not be refundable in any case.
+          <p className="text-xs md:text-sm font-semibold text-gray-800">
+            Parent Signature
           </p>
-          
-          {errors['fee'] && (
-            <p className="text-red-500 text-xs mt-1 md:mt-2 ml-0">
-              Please accept the terms and conditions.
-            </p>
-          )}
+        </>
+      ) : (
+        <div className="text-center md:text-left">
+          <div className="w-24 h-12 md:w-32 md:h-16 border-2 border-dashed border-gray-300 rounded flex items-center justify-center mb-2 bg-white mx-auto md:mx-0">
+            <span className="text-xs text-gray-500">No Signature</span>
+          </div>
+          <p className="text-xs md:text-sm font-semibold text-gray-800">
+            Parent Signature
+          </p>
         </div>
-      </div>
+      )}
+    </div>
+  </div>
+      {/* Agreement Checkbox */}
+      {/* <div className="flex items-start space-x-3 mt-6 p-4 bg-gray-50 rounded-lg">
+        <input
+          type="checkbox"
+          id="fee-checkbox"
+          checked={accepted}
+          onChange={(e) => onConditionChange('fee', e.target.checked)}
+          className={`w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1 ${
+                  errors["fee-checkbox"] ? 'border-red-500' : 'border-gray-300'
+                }`}
+        />
+        <label htmlFor="fee-checkbox" className="text-sm text-gray-700">
+          I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
+        </label>
+        {errors["fee-checkbox"] && (
+              <p className="text-red-500 text-xs mt-1 ml-7">{"Please accept the terms and conditions."}</p>
+            )}
+      </div> */}
 
-      {/* Mobile spacing */}
-      <div className="h-4 md:h-0"></div>
+       <div className="flex items-start gap-3 mt-6 p-4 bg-gray-50 rounded-lg relative">
+        <input
+          type="checkbox"
+          id="fee-checkbox"
+          checked={accepted}
+          onChange={(e) => onConditionChange('fee', e.target.checked)}
+          className={`w-4 h-4 mt-1 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
+            errors['fee'] ? 'border-red-500' : 'border-gray-300'
+          }`}
+        />
+
+        <label
+          htmlFor="fee-checkbox"
+          className={`text-sm leading-5 
+      ${errors['fee'] ? 'text-red-500' : 'text-gray-700'}`}
+        >
+           I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
+        </label>
+        
+      </div>
+      <p className="pl-4">Tuition fee and Transport Fee once paid will not be refundable in any case.</p>
+
+      {errors['fee'] && (
+        <p className="text-red-500 text-xs mt-1 ml-8">Please accept the terms and conditions.</p>
+      )}
+
+      {/* Important Note */}
+      {/* <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p className="text-sm text-red-700 font-semibold text-center">
+          Tuition fee and Transport Fee once paid will not be refunded in any case
+        </p>
+      </div> */}
     </div>
   );
 };
 
 export default FeeDetailsStep;
-
-
-
-
-
-
-
-// import React from 'react';
-
-// interface FeeDetailsStepProps {
-//   classes: any[];
-//   transportation_fee: any[];
-//   transportation_setting: any;
-//   formData: { [key: string]: any };
-//   fileData: { [key: string]: any };
-//   accepted: boolean;
-//   onConditionChange: (condition: string, value: boolean) => void;
-//   errors: { [key: string]: string };
-// }
-
-//   const assetUrl = import.meta.env.VITE_ASSET_URL;
-
-// const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
-//   classes,
-//   transportation_fee,
-//   transportation_setting,
-//   formData,
-//   fileData,
-//   accepted,
-//   onConditionChange,
-//   errors
-// }) => {
-//   const formatPrice = (amount: string | number) => {
-//     if (!amount || isNaN(Number(amount))) return amount;
-//     const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-//     const formattedAmount = numericAmount.toLocaleString('en-IN');
-//     return `₹ ${formattedAmount}`;
-//   };
-
-//   const getParentName = () => {
-//   const rel = (formData['s_relationship'] || "").toLowerCase();  
-//   let relationKey = `${rel}_name`;  // father_name / mother_name / guardian_name
-
-//   // Main value based on Srelationship
-//   let value = formData[relationKey] ? String(formData[relationKey]) : '';
-
-//   // Fallback for Guardian → if guardian_name missing, use father_name
-//   if (rel === "guardian" && !value) {
-//     value = formData["father_name"] ? String(formData["father_name"]) : "";
-//   }
-
-//   // If still no value → fallback to first_name + middle_name + last_name
-//   if (!value) {
-//     return [
-//       formData['first_name'],
-//       formData['middle_name'],
-//       formData['last_name']
-//     ].filter(Boolean).join(' ');
-//   }
-
-//   return value;
-// };
-
-//   return (
-//     <div className="fee-tables space-y-6">
-//       {/* Caution Deposit */}
-
-//       <div className="fee_header  text-center">
-//         <h6 className="text-xl font-bold text-gray-800 ">
-//           DETAILS OF FEE FOR THE ACADEMIC YEAR 2026 – 2027
-//         </h6>
-//          <p className="text-lg ">
-//           (Subject to Government Guidlines)
-//         </p>
-      
-//       </div>
-
-//       <div className="tbl_header flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-200">
-//         <h6 className="text-lg font-bold text-gray-800">
-//           Caution Deposit (Refundable):
-//         </h6>
-//         <h6 className="text-lg font-bold text-blue-600">
-//           {formatPrice(transportation_setting)} /-
-//         </h6>
-//       </div>
-
-//       {/* Tuition Fee Table */}
-//       <div className="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
-//         <table className="min-w-full divide-y divide-gray-200">
-//           <thead className="bg-gray-100">
-//             <tr>
-//               <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-//                 Class Name
-//               </th>
-//               <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-//                 Tuition Fee-I (June 24 to Sept 24)
-//               </th>
-//               <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-//                 Tuition Fee-II (Oct 24 to Jan 25)
-//               </th>
-//               <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-//                 Tuition Fee-III (Feb 25 to May 25)
-//               </th>
-//             </tr>
-//           </thead>
-//           <tbody className="bg-white divide-y divide-gray-200">
-//             {classes?.map((classData, index) => (
-//               <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-//                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-//                   {classData.class_name}
-//                 </td>
-//                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-//                   {formatPrice(classData.tution_fee_1)}
-//                 </td>
-//                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-//                   {formatPrice(classData.tution_fee_2)}
-//                 </td>
-//                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-//                   {formatPrice(classData.tution_fee_3)}
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {/* Transportation Fee Section */}
-//       <div className="fee_header2 text-center">
-//         <h6 className="text-lg font-bold text-gray-800">
-//           TRANSPORTATION: OPTIONAL
-//         </h6>
-//         <h6 className="text-sm text-gray-600 mt-1">
-//           Available only on the routes operated by the school
-//         </h6>
-//       </div>
-
-//       <div className="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
-//         <table className="min-w-full divide-y divide-gray-200">
-//           <thead className="bg-gray-100">
-//             <tr>
-//               <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-//                 Distance
-//               </th>
-//               <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-//                 (June 24 to Sept 24)
-//               </th>
-//               <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-//                 (Oct 24 to Jan 25)
-//               </th>
-//               <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-//                 (Feb 25 to May 25)
-//               </th>
-//             </tr>
-//           </thead>
-//           <tbody className="bg-white divide-y divide-gray-200">
-//             {transportation_fee?.map((transportData, index) => (
-//               <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-//                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-//                   {transportData.distance}
-//                 </td>
-//                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-//                   {formatPrice(transportData.fee1)}
-//                 </td>
-//                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-//                   {formatPrice(transportData.fee2)}
-//                 </td>
-//                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-//                   {formatPrice(transportData.fee3)}
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {/* Parent Agreement Section */}
-//       <div className="disclaimer_footer_flex flex justify-between items-start mt-8 p-6 border-t border-gray-200">
-//         <div>
-//           <p className="text-sm font-semibold text-gray-800">
-//             I accept to pay the tuition fee as above.
-//           </p>
-//         </div>
-        
-//         <div className="text-center">
-//           <p className="text-sm font-semibold text-gray-800 mb-2">
-//             Parent Name: {getParentName()}
-//           </p>
-//           {fileData["candidate_signature"] && (
-//             <img
-//               src={fileData["candidate_signature"]}
-//               alt="Parent Signature"
-//               className="w-32 h-16 object-contain block mx-auto mb-2 border border-gray-300 rounded"
-//             />
-//           )}
-//           <p className="text-sm font-semibold text-gray-800">
-//             Parent Signature
-//           </p>
-//         </div>
-//       </div>
-
-//       {/* Agreement Checkbox */}
-//       {/* <div className="flex items-start space-x-3 mt-6 p-4 bg-gray-50 rounded-lg">
-//         <input
-//           type="checkbox"
-//           id="fee-checkbox"
-//           checked={accepted}
-//           onChange={(e) => onConditionChange('fee', e.target.checked)}
-//           className={`w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1 ${
-//                   errors["fee-checkbox"] ? 'border-red-500' : 'border-gray-300'
-//                 }`}
-//         />
-//         <label htmlFor="fee-checkbox" className="text-sm text-gray-700">
-//           I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
-//         </label>
-//         {errors["fee-checkbox"] && (
-//               <p className="text-red-500 text-xs mt-1 ml-7">{"Please accept the terms and conditions."}</p>
-//             )}
-//       </div> */}
-
-//        <div className="flex items-start gap-3 mt-6 p-4 bg-gray-50 rounded-lg relative">
-//         <input
-//           type="checkbox"
-//           id="fee-checkbox"
-//           checked={accepted}
-//           onChange={(e) => onConditionChange('fee', e.target.checked)}
-//           className={`w-4 h-4 mt-1 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
-//             errors['fee'] ? 'border-red-500' : 'border-gray-300'
-//           }`}
-//         />
-
-//         <label
-//           htmlFor="fee-checkbox"
-//           className={`text-sm leading-5 
-//       ${errors['fee'] ? 'text-red-500' : 'text-gray-700'}`}
-//         >
-//            I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
-//         </label>
-        
-//       </div>
-//       <p className="pl-4">Tuition fee and Transport Fee once paid will not be refundable in any case.</p>
-
-//       {errors['fee'] && (
-//         <p className="text-red-500 text-xs mt-1 ml-8">Please accept the terms and conditions.</p>
-//       )}
-
-//       {/* Important Note */}
-//       {/* <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-//         <p className="text-sm text-red-700 font-semibold text-center">
-//           Tuition fee and Transport Fee once paid will not be refunded in any case
-//         </p>
-//       </div> */}
-//     </div>
-//   );
-// };
-
-// export default FeeDetailsStep;

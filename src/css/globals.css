@@ -299,7 +299,28 @@
   border-bottom:5px solid red;
 }
 .fee_header h6 {
-  text-transform:uppercase;
-  font-weight:bold;
-  font-size: 27px;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 27px; /* Desktop */
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .fee_header h6 {
+    font-size: 22px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .fee_header h6 {
+    font-size: 18px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .fee_header h6 {
+    font-size: 16px;
+  }
 }

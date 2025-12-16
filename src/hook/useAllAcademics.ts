@@ -6,6 +6,7 @@ import { useAuth } from "./useAuth";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export interface Academic {
+  academic_type( academic_type: String): unknown;
   id: number;
   academic_name: string;
 }

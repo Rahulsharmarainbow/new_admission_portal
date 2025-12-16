@@ -53,7 +53,6 @@
 
 //  <CustomToaster />    {/* toast file with title and description*/ }
 
-
 //       <CookiesProvider>
 //         <React.StrictMode>
 //         <AuthProvider>
@@ -69,19 +68,6 @@
 // }
 
 // export default App;
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import { RouterProvider } from 'react-router';
 // import { ThemeModeScript, ThemeProvider } from 'flowbite-react';
@@ -118,17 +104,6 @@
 
 // export default App;
 
-
-
-
-
-
-
-
-
-
-
-
 import { RouterProvider } from 'react-router';
 import { ThemeModeScript, ThemeProvider } from 'flowbite-react';
 import customTheme from './utils/theme/custom-theme';
@@ -140,23 +115,25 @@ import React from 'react';
 import CustomToaster from './components/CustomToaster';
 import { SidebarProvider } from './layouts/full/sidebar/SidebarContext';
 import { NotificationProvider } from './layouts/full/header/components/NotificationContext'; // ✅ Import NotificationProvider
+import { DashboardFilterProvider } from './hook/DashboardFilterContext';
 
 function App() {
   return (
     <>
-      <CustomToaster /> {/* toast file with title and description*/ }
-
+      <CustomToaster /> {/* toast file with title and description*/}
       <CookiesProvider>
         <React.StrictMode>
           <AuthProvider>
-            <NotificationProvider>
-              <SidebarProvider>
-                <ThemeModeScript />
-                <ThemeProvider theme={customTheme}>
-                  <RouterProvider router={router} />
-                </ThemeProvider>
-              </SidebarProvider>
-            </NotificationProvider>
+            <DashboardFilterProvider>
+              <NotificationProvider>
+                <SidebarProvider>
+                  <ThemeModeScript />
+                  <ThemeProvider theme={customTheme}>
+                    <RouterProvider router={router} />
+                  </ThemeProvider>
+                </SidebarProvider>
+              </NotificationProvider>
+            </DashboardFilterProvider>
           </AuthProvider>
         </React.StrictMode>
       </CookiesProvider>
