@@ -62,7 +62,7 @@ const AllAcademicsDropdown: React.FC<AllAcademicsDropdownProps> = ({
 
   const handleChange = (selected: any) => {
     const selectedValue = selected ? selected.value : "";
-    console.log('selectedValue', selectedValue);
+    // console.log('selectedValue', selectedValue);
     // Call onChange callback if provided
     if (onChange) onChange(selectedValue);
     

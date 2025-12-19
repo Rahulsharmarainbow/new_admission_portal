@@ -860,7 +860,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
 
   const renderStep = (step: number) => {
     switch (step) {
-      case 0:
+      case 10:
         return (
           <FormStep
             dynamicBoxes={dynamicBoxes}
@@ -902,7 +902,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
             directorSignature={header?.director_signature}
           />
         );
-      case 3:
+      case 0:
         return (
           <FeeDetailsStep
             classes={classes}

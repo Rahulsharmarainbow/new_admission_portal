@@ -135,33 +135,33 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
       <thead className="bg-gray-100">
         <tr>
           <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Class Name
+            Distance
           </th>
           <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Tuition Fee-I (June 24 to Sept 24)
+            (June 24 to Sept 24)
           </th>
           <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Tuition Fee-II (Oct 24 to Jan 25)
+            (Oct 24 to Jan 25)
           </th>
           <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Tuition Fee-III (Feb 25 to May 25)
+            (Feb 25 to May 25)
           </th>
         </tr>
       </thead>
       <tbody className="bg-white divide-y divide-gray-200">
-        {classes?.map((classData, index) => (
+        {transportation_fee?.map((classData, index) => (
           <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              {classData.class_name}
+              {classData.distance}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-              {formatPrice(classData.tution_fee_1)}
+              {formatPrice(classData.fee1)}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-              {formatPrice(classData.tution_fee_2)}
+              {formatPrice(classData.fee2)}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-              {formatPrice(classData.tution_fee_3)}
+              {formatPrice(classData.fee3)}
             </td>
           </tr>
         ))}
@@ -236,14 +236,14 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
 
         <label
           htmlFor="fee-checkbox"
-          className={`text-sm leading-5 
+          className={`text-sm leading-5 font-semibold 
       ${errors['fee'] ? 'text-red-500' : 'text-gray-700'}`}
         >
            I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
         </label>
         
       </div>
-      <p className="pl-4">Tuition fee and Transport Fee once paid will not be refundable in any case.</p>
+      <label className="pl-4 text-gray-700 font-semibold">Tuition fee and Transport Fee once paid will not be refundable in any case.</label>
 
       {errors['fee'] && (
         <p className="text-red-500 text-xs mt-1 ml-8">Please accept the terms and conditions.</p>
