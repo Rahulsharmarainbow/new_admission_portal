@@ -240,14 +240,14 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
 
         <label
           htmlFor="fee-checkbox"
-          className={`text-sm leading-5 
+          className={`text-sm leading-5 font-semibold 
       ${errors['fee'] ? 'text-red-500' : 'text-gray-700'}`}
         >
            I have carefully gone through the instructions and I am conversant and shall abide by the eligibility conditions and other regulations.
         </label>
         
       </div>
-      <p className="pl-4">Tuition fee and Transport Fee once paid will not be refundable in any case.</p>
+      <label className="pl-4 text-gray-700 font-semibold">Tuition fee and Transport Fee once paid will not be refundable in any case.</label>
 
       {errors['fee'] && (
         <p className="text-red-500 text-xs mt-1 ml-8">Please accept the terms and conditions.</p>

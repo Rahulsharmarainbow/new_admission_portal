@@ -235,7 +235,7 @@
 
 .formatted-content {
   color: #484343;
-  font-size: 12px;
+  /* font-size: 12px; */
   text-align:justify;
   padding: 10px;
   font-family: 'Montserrat';
@@ -263,7 +263,7 @@
     position: relative;
     margin-bottom: 21px;
     margin: 6px 0 21px;
-    padding-left: 14px;
+    padding-left: 36px;
 }
 
 .formatted-content ul li::before {
@@ -323,4 +323,13 @@
   .fee_header h6 {
     font-size: 16px;
   }
+
+  .formatted-content ul li {
+
+    padding-left: 12px;
+}
+
+}
+.fee-tables th {
+    font-size: 14px;
 }
