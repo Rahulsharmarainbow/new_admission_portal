@@ -193,6 +193,8 @@ const Apply = () => {
             cdata={applyData.cdata}
             class={applyData.class}
             transportation_fee={applyData.transportation_fee}
+            transportation_fee_details={applyData.transportation_fee_details}
+            fees_details={applyData.fees_details}
             transportation_setting={applyData.transportation_setting}
             apply_modal={applyData.apply_modal}
             OtherData={applyData.OtherData}

@@ -3,6 +3,8 @@ import React from 'react';
 interface FeeDetailsStepProps {
   classes: any[];
   transportation_fee: any[];
+  fees_details: any[];
+  transportation_fee_details: any[];
   transportation_setting: any;
   formData: { [key: string]: any };
   fileData: { [key: string]: any };
@@ -16,6 +18,8 @@ interface FeeDetailsStepProps {
 const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
   classes,
   transportation_fee,
+  fees_details,
+  transportation_fee_details,
   transportation_setting,
   formData,
   fileData,
@@ -60,10 +64,10 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
 
       <div className="fee_header  text-center">
         <h6 className="md:text-xl text-sm font-bold text-gray-800 ">
-          DETAILS OF FEE FOR THE ACADEMIC YEAR 2026 – 2027
+         {fees_details.main_title}
         </h6>
          <p className="text-lg ">
-          (Subject to Government Guidlines)
+          {fees_details.sub_title}
         </p>
       
       </div>
@@ -84,16 +88,16 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
           <thead className="bg-gray-100">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                Class Name
+          {fees_details.class_name}
               </th>
               <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                Tuition Fee-I (June 24 to Sept 24)
+                {fees_details.tution_fee_1}
               </th>
               <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                Tuition Fee-II (Oct 24 to Jan 25)
+              {fees_details.tution_fee_2}
               </th>
               <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                Tuition Fee-III (Feb 25 to May 25)
+               {fees_details.tution_fee_3}
               </th>
             </tr>
           </thead>
@@ -122,10 +126,10 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
       {/* Transportation Fee Section */}
       <div className="fee_header2 text-center">
         <h6 className="text-lg font-bold text-gray-800">
-          TRANSPORTATION: OPTIONAL
+        {transportation_fee_details.main_title}
         </h6>
         <h6 className="text-sm text-gray-600 mt-1">
-          Available only on the routes operated by the school
+        {transportation_fee_details.sub_title}
         </h6>
       </div>
 
@@ -135,33 +139,33 @@ const FeeDetailsStep: React.FC<FeeDetailsStepProps> = ({
       <thead className="bg-gray-100">
         <tr>
           <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Class Name
+        {transportation_fee_details.class_name}
           </th>
           <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Tuition Fee-I (June 24 to Sept 24)
+            {transportation_fee_details.tution_fee_1}
           </th>
           <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Tuition Fee-II (Oct 24 to Jan 25)
+          {transportation_fee_details.tution_fee_2}
           </th>
           <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Tuition Fee-III (Feb 25 to May 25)
+          {transportation_fee_details.tution_fee_3}
           </th>
         </tr>
       </thead>
       <tbody className="bg-white divide-y divide-gray-200">
-        {classes?.map((classData, index) => (
+        {transportation_fee?.map((classData, index) => (
           <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              {classData.class_name}
+              {classData.distance}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-              {formatPrice(classData.tution_fee_1)}
+              {formatPrice(classData.fee1)}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-              {formatPrice(classData.tution_fee_2)}
+              {formatPrice(classData.fee2)}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-              {formatPrice(classData.tution_fee_3)}
+              {formatPrice(classData.fee3)}
             </td>
           </tr>
         ))}

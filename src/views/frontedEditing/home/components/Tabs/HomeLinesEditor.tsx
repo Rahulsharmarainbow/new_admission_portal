@@ -133,23 +133,6 @@ const HomeLinesEditor = ({ selectedAcademic, user, apiUrl }) => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // const formData = new FormData();
-      // formData.append('academic_id', selectedAcademic);
-      // formData.append('lines', JSON.stringify(lines));
-      // formData.append('academic_fields', JSON.stringify(academicFields));
-
-      // const res = await axios.post(
-      //   `${apiUrl}/${user?.role}/FrontendEditing/update-homelines`,
-      //   {
-      //      academic_id: selectedAcademic, lines, academicFields
-      //   },
-      //   { 
-      //     headers: { 
-      //       Authorization: `Bearer ${user?.token}`,
-      //       'Content-Type': 'multipart/form-data'
-      //     } 
-      //   }
-      // );
 
       const res = await axios.post(
         `${apiUrl}/${user?.role}/FrontendEditing/update-homelines`,

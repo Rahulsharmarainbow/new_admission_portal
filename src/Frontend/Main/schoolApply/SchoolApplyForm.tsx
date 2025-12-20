@@ -27,6 +27,8 @@ interface SchoolApplyFormProps {
   cdata: any;
   class: any[];
   transportation_fee: any[];
+  transportation_fee_details:any[];
+  fees_details: any[];
   transportation_setting: any;
   apply_modal?: any;
   OtherData?: any;
@@ -53,6 +55,8 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
   cdata,
   class: classes,
   transportation_fee,
+  transportation_fee_details,
+  fees_details,
   transportation_setting,
   apply_modal,
   OtherData,
@@ -860,7 +864,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
 
   const renderStep = (step: number) => {
     switch (step) {
-      case 0:
+      case 10:
         return (
           <FormStep
             dynamicBoxes={dynamicBoxes}
@@ -902,12 +906,14 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
             directorSignature={header?.director_signature}
           />
         );
-      case 3:
+      case 0:
         return (
           <FeeDetailsStep
             classes={classes}
             errors={errors}
             transportation_fee={transportation_fee}
+            fees_details={fees_details}
+            transportation_fee_details={transportation_fee_details}
             transportation_setting={transportation_setting}
             formData={formData}
             fileData={fileData}

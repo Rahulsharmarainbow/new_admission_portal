@@ -12,6 +12,9 @@ import ApplicationTabs from './Tabs/ApplicationTabs';
 import HomeLinesEditor from './Tabs/HomeLinesEditor';
 import PopupEditor from './Tabs/PopupEditor';
 import AllAcademicsDropdown from 'src/Frontend/Common/AllAcademicsDropdown';
+import { MdMoney } from 'react-icons/md';
+import FeesManagement from './Tabs/FeesManagement';
+import FeesManagements from './Tabs/FeesManagements';
 
 const HomeForm = () => {
   const { user } = useAuth();
@@ -58,6 +61,13 @@ const HomeForm = () => {
 
           <Tabs.Item icon={HiOutlineCog} title="Popup">
             <PopupEditor selectedAcademic={selectedAcademic} user={user} apiUrl={apiUrl} />
+          </Tabs.Item>
+          {/* <Tabs.Item icon={MdMoney} title="Fees">
+            <PopupEditor selectedAcademic={selectedAcademic} user={user} apiUrl={apiUrl} />
+          </Tabs.Item> */}
+          
+          <Tabs.Item icon={MdMoney} title="Fees Management">
+            <FeesManagements selectedAcademic={selectedAcademic} user={user} apiUrl={apiUrl} />
           </Tabs.Item>
         </Tabs>
       </div>
