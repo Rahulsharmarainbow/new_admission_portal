@@ -359,6 +359,10 @@ const MakeItLive: React.FC = () => {
        previewNewLogo: academic.academic_new_logo
       ? `${import.meta.env.VITE_ASSET_URL}/${academic.academic_new_logo}`
       : null,
+       signature_seal: academic.signature_seal || '',
+    previewSignatureSeal: academic.signature_seal
+      ? `${import.meta.env.VITE_ASSET_URL}/${academic.signature_seal}`
+      : null,
       technicalName: technicalContact.name || '',
       technicalEmail: technicalContact.email || '',
       technicalPhone: technicalContact.phone || '',

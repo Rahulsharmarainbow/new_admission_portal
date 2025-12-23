@@ -18,6 +18,8 @@ export interface FormData {
   previewSignature?: string;
   academic_new_logo: File | null;
   previewNewLogo?: string | null;
+   signature_seal: File | null;
+  previewSignatureSeal: string | null;
   // Contact Information
   technicalName: string;
   technicalEmail: string;

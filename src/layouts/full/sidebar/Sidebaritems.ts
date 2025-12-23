@@ -143,6 +143,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               url: '/SuperAdmin/data-manager/type-of-connection',
               isPro: false,
             },
+            {
+              name: 'Export Configuration',
+              id: uniqueId(),
+              url: '/SuperAdmin/data-manager/export-configuration',
+              isPro: false,
+            },
           ],
         },
         {

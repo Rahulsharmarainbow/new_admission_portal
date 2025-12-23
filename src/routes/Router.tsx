@@ -71,6 +71,7 @@ import EditingLayout from 'src/layouts/full/EditingLayout';
 import ApplyEditing from 'src/views/Editing/ApplyEditing';
 import CollegeSettingList from 'src/views/schoolServices/transportationSettings/CollegeSettingList';
 import CountryTable from 'src/views/dataManager/country/components/CountryTable';
+import ExportConfig from 'src/views/dataManager/exportConfiguration/ExportConfig';
 
 
 /* ***Layouts**** */
@@ -174,7 +175,9 @@ const MainRoutes = [
       { path: '/SuperAdmin/school-applications/edit/:applicationId', element: <ApplicationEditPage/> },
       { path: '/SuperAdmin/college-applications/edit/:applicationId', element: <ApplicationEditPage/> },
       { path: '/SuperAdmin/application-details/:applicationId', element: <ApplicationDetailsPage/> },
+      { path: '/SuperAdmin/data-manager/export-configuration', element: <ExportConfig/> },
       { path: '*', element: <Navigate to="/auth/404" /> },
+      
     ],
   },
   {
@@ -237,6 +240,7 @@ const MainRoutes = [
       { path: 'college-applications/edit/:applicationId', element: <ApplicationEditPage/> },
       { path: 'application-details/:applicationId', element: <ApplicationDetailsPage/> },
        { path: 'notifications', element: <NotificationsPage/> },
+       { path: 'data-manager/export-configuration', element: <ExportConfig/> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
