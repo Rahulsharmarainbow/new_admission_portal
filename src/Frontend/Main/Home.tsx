@@ -125,11 +125,13 @@ const Home = () => {
 
   // Transform API data to match component structure
   const transformApiData = (data) => {
+    console.log("hhhhhhhhhhhhhhhhhhhh",data)
     const homeLines = data.home_other_lines || [];
     const titleLine =  homeLines[0] ||  {};
     const subtitleLine =  homeLines[1] || {};
     const descriptionLine = homeLines[2] || {};
     const descriptionLine2 =  homeLines[3] || {};
+    const homePageTabs = data.home_page_tab || {};
 
     return {
       name: data.header?.name || 'Institute',
@@ -171,11 +173,12 @@ const Home = () => {
           showNewBadge: data.news?.some((n) => n.new === 1) || false,
         },
       },
+       homePageTabs,
     };
   };
 
   const transformedData = transformApiData(institute);
-  const { examInfo, alert, cards } = transformedData;
+  const { examInfo, alert, cards ,homePageTabs } = transformedData;
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header
@@ -304,7 +307,7 @@ const Home = () => {
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Notifications
+                  {homePageTabs?.tab_header_1}
                   {/* {institute.notification?.length > 0 && <NewBadge className="ml-2" />} */}
                 </h4>
               </div>
@@ -363,7 +366,7 @@ const Home = () => {
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                   </svg>
-                  Applications
+                  {homePageTabs?.tab_header_2}
                   {/* {institute.buttons?.length > 0 && <NewBadge className="ml-2" />} */}
                 </h4>
               </div>
@@ -422,7 +425,7 @@ const Home = () => {
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" />
                   </svg>
-                  Latest News
+                   {homePageTabs?.tab_header_3}
                   {/* {institute.news?.length > 0 && <NewBadge className="ml-2" />} */}
                 </h4>
               </div>
