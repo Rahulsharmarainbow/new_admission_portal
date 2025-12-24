@@ -5,6 +5,7 @@ import axios from "axios";
 import { useAuth } from "src/hook/useAuth";
 import toast from "react-hot-toast";
 import SchoolDropdown from "src/Frontend/Common/SchoolDropdown";
+import AcademicDropdown from "src/Frontend/Common/AcademicDropdown";
 
 interface TransportationSetting {
   id: number;
@@ -21,6 +22,7 @@ interface TransportationSettingsFormProps {
   onClose: () => void;
   onSuccess: () => void;
   editingSetting?: TransportationSetting | null;
+  type?: string;
 }
 
 interface FormData {
@@ -35,6 +37,7 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
   onClose,
   onSuccess,
   editingSetting,
+  type,
 }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -186,15 +189,32 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
               htmlFor="academic_id"
               className="block mb-1 text-sm font-medium text-gray-700"
             >
-              Select School <span className="text-red-500">*</span>
+              Select {`${type === '2' ? 'Academic' : 'Scholl'}`} <span className="text-red-500">*</span>
             </label>
-            <SchoolDropdown
+            {/* <SchoolDropdown
               value={formData.academic_id}
               formData={formData}
               setFormData={setFormData}
               onChange={handleAcademicChange}
               includeAllOption={false}
-            />
+            /> */}
+             {type === "2" ? (
+                  <AcademicDropdown
+                    value={formData.academic_id}
+              formData={formData}
+              setFormData={setFormData}
+              onChange={handleAcademicChange}
+              includeAllOption={false}
+                  />
+                ) : (
+                  <SchoolDropdown
+                   value={formData.academic_id}
+              formData={formData}
+              setFormData={setFormData}
+              onChange={handleAcademicChange}
+              includeAllOption={false}
+                  />
+                )}
             {errors.academic_id && (
               <p className="text-red-500 text-sm mt-1">{errors.academic_id}</p>
             )}

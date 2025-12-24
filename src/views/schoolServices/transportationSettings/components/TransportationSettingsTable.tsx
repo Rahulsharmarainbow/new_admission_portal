@@ -111,6 +111,7 @@ const TransportationSettingsTable: React.FC<TransportationSettingsTableProps> = 
         order: filters.order,
         orderBy: filters.orderBy,
         search: filters.search,
+        type: currentType,
       };
 
       const response = await axios.post(
@@ -576,6 +577,7 @@ return (
       }}
       onSuccess={handleFormSuccess}
       editingSetting={editingSetting}
+      type={currentType}
     />
   </div>
 );
