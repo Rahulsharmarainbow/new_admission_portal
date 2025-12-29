@@ -7,7 +7,7 @@ const LiveAccount: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <div className="p-6">
+    <div >
       <BreadcrumbHeader
               title="Live Accounts"
               paths={[{ name: "Live Accounts", link: "/" + user?.role + "/live-accounts" }]}

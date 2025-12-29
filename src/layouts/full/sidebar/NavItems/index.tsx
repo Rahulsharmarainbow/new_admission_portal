@@ -118,6 +118,8 @@ import { ChildItem } from "../Sidebaritems";
 import { SidebarItem } from "flowbite-react";
 import { Icon } from "@iconify/react";
 import { Link, useLocation } from "react-router";
+import "simplebar-react/dist/simplebar.min.css";
+
 
 interface NavItemsProps {
   item: ChildItem;

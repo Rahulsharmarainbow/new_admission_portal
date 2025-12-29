@@ -1306,33 +1306,44 @@
 
 
 
+// live wala working code
 
 
+// import { useState, useEffect, useRef } from 'react';
+// import { Navbar, Drawer, DrawerItems } from 'flowbite-react';
+// import { Icon } from '@iconify/react';
+// import { AiOutlineClose } from 'react-icons/ai';
+// import { useNavigate } from 'react-router';
+// import Profile from './Profile';
+// import MobileSidebar from '../sidebar/MobileSidebar';
+// import NotificationIcon from './components/NotificationIcon';
+// import NotificationDropdown from './components/NotificationDropdown';
+// import { useAuth } from 'src/hook/useAuth';
+// import { useNotification } from './components/NotificationContext';
+// import axios from 'axios';
+// import Loader from 'src/Frontend/Common/Loader';
 
-import { useState, useEffect, useRef } from 'react';
-import { Navbar, Drawer, DrawerItems } from 'flowbite-react';
-import { Icon } from '@iconify/react';
-import { AiOutlineClose } from 'react-icons/ai';
-import { useNavigate } from 'react-router';
-import Profile from './Profile';
-import MobileSidebar from '../sidebar/MobileSidebar';
-import NotificationIcon from './components/NotificationIcon';
-import NotificationDropdown from './components/NotificationDropdown';
-import { useAuth } from 'src/hook/useAuth';
-import { useNotification } from './components/NotificationContext';
-import axios from 'axios';
-import Loader from 'src/Frontend/Common/Loader';
+// interface AcademicItem {
+//   id: number;
+//   academic_name: string;
+//   academic_type: string;
+//   academic_email: string;
+//   path: string;
+//   unique_code: string;
+//   status: number;
+//   created_at: string;
+// }
 
-interface AcademicItem {
-  id: number;
-  academic_name: string;
-  academic_type: string;
-  academic_email: string;
-  path: string;
-  unique_code: string;
-  status: number;
-  created_at: string;
-}
+// // interface ApplicationItem {
+// //   id: number;
+// //   application_id: number;
+// //   application_number?: string;
+// //   roll_no?: string;
+// //   student_name?: string;
+// //   applicant_name?: string;
+// //   college_name?: string;
+// //   academic_name?: string;
+// // }
 
 // interface ApplicationItem {
 //   id: number;
@@ -1345,675 +1356,662 @@ interface AcademicItem {
 //   academic_name?: string;
 // }
 
-interface ApplicationItem {
-  id: number;
-  application_id: number;
-  application_number?: string;
-  roll_no?: string;
-  student_name?: string;
-  applicant_name?: string;
-  college_name?: string;
-  academic_name?: string;
-}
+// interface SuperAdminItem {
+//   id: number;
+//   name: string;
+//   email: string;
+// }
 
-interface SuperAdminItem {
-  id: number;
-  name: string;
-  email: string;
-}
+// interface SearchResponse {
+//   academic: AcademicItem[];
+//   applications: ApplicationItem[];
+//   superadmins: SuperAdminItem[];
+// }
 
-interface SearchResponse {
-  academic: AcademicItem[];
-  applications: ApplicationItem[];
-  superadmins: SuperAdminItem[];
-}
+// interface Notification {
+//   id: number;
+//   s_id: number;
+//   c_id: number | null;
+//   is_read: number;
+//   academic_id: number;
+//   title: string;
+//   message: string;
+//   date: string;
+// }
 
-interface Notification {
-  id: number;
-  s_id: number;
-  c_id: number | null;
-  is_read: number;
-  academic_id: number;
-  title: string;
-  message: string;
-  date: string;
-}
+// const apiUrl = import.meta.env.VITE_API_URL;
 
-const apiUrl = import.meta.env.VITE_API_URL;
+// const Header = () => {
+//   const [isOpen, setIsOpen] = useState(false);
+//   const [searchValue, setSearchValue] = useState('');
+//   const [searchResults, setSearchResults] = useState<SearchResponse>({
+//     academic: [],
+//     applications: [],
+//     superadmins: []
+//   });
+//   const [suggestions, setSuggestions] = useState<string[]>([]);
+//   const [activeIndex, setActiveIndex] = useState(-1);
+//   const [showNotifications, setShowNotifications] = useState(false);
+//   const [notifications, setNotifications] = useState<Notification[]>([]);
+//   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+//   const [sidebarOpen, setSidebarOpen] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const [notificationLoading, setNotificationLoading] = useState(false);
+//   const [notificationsLoaded, setNotificationsLoaded] = useState(false);
+//   const dropdownRef = useRef<HTMLDivElement>(null);
+//   const notificationRef = useRef<HTMLDivElement>(null);
+//   const navigate = useNavigate();
+//   const { user } = useAuth();
+//   const { updateUnreadCount, refreshNotifications } = useNotification();
 
-const Header = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
-  const [searchResults, setSearchResults] = useState<SearchResponse>({
-    academic: [],
-    applications: [],
-    superadmins: []
-  });
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [notificationLoading, setNotificationLoading] = useState(false);
-  const [notificationsLoaded, setNotificationsLoaded] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const notificationRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const { updateUnreadCount, refreshNotifications } = useNotification();
+//   const handleClose = () => setIsOpen(false);
 
-  const handleClose = () => setIsOpen(false);
+//   // 🔹 Preload notifications when component mounts or user changes
+//   useEffect(() => {
+//     if (user?.id && !notificationsLoaded) {
+//       fetchNotifications();
+//     }
+//   }, [user, notificationsLoaded]);
 
-  // 🔹 Preload notifications when component mounts or user changes
-  useEffect(() => {
-    if (user?.id && !notificationsLoaded) {
-      fetchNotifications();
-    }
-  }, [user, notificationsLoaded]);
+//   // 🔹 Fetch search results from API
+//   useEffect(() => {
+//     const fetchSearchResults = async () => {
+//       if (!searchValue.trim()) {
+//         setSearchResults({
+//           academic: [],
+//           applications: [],
+//           superadmins: []
+//         });
+//         setSuggestions([]);
+//         return;
+//       }
 
-  // 🔹 Fetch search results from API
-  useEffect(() => {
-    const fetchSearchResults = async () => {
-      if (!searchValue.trim()) {
-        setSearchResults({
-          academic: [],
-          applications: [],
-          superadmins: []
-        });
-        setSuggestions([]);
-        return;
-      }
+//       setLoading(true);
+//       try {
+//         const response = await axios.post(
+//           `${apiUrl}/${user.role}/Notifications/search-bar`,
+//           { query: searchValue,
+//              s_id: user?.id
+//            }, 
+//           {
+//             headers: {
+//               'Authorization': `Bearer ${user?.token}`,
+//               'superadmin_auth_token': user?.token,
+//               'accept': 'application/json, text/plain, */*',
+//               'accept-language': 'en-US,en;q=0.9',
+//               'content-type': 'application/json',
+//             }
+//           }
+//         );
 
-      setLoading(true);
-      try {
-        const response = await axios.post(
-          `${apiUrl}/${user.role}/Notifications/search-bar`,
-          { query: searchValue,
-             s_id: user?.id
-           }, 
-          {
-            headers: {
-              'Authorization': `Bearer ${user?.token}`,
-              'superadmin_auth_token': user?.token,
-              'accept': 'application/json, text/plain, */*',
-              'accept-language': 'en-US,en;q=0.9',
-              'content-type': 'application/json',
-            }
-          }
-        );
-
-        if (response.data.data) {
-          const data = response.data.data;
+//         if (response.data.data) {
+//           const data = response.data.data;
           
-          // ✅ Handle academic data
-          let academicArray: any[] = [];
-          if (Array.isArray(data.academic)) {
-            academicArray = data.academic;
-          } else if (data.academic && typeof data.academic === 'object') {
-            academicArray = Object.values(data.academic);
-          }
+//           // ✅ Handle academic data
+//           let academicArray: any[] = [];
+//           if (Array.isArray(data.academic)) {
+//             academicArray = data.academic;
+//           } else if (data.academic && typeof data.academic === 'object') {
+//             academicArray = Object.values(data.academic);
+//           }
 
-          // ✅ Handle applications data (it's an object with numeric keys)
-          let applicationsArray: any[] = [];
-          if (Array.isArray(data.applications)) {
-            applicationsArray = data.applications;
-          } else if (data.applications && typeof data.applications === 'object') {
-            applicationsArray = Object.values(data.applications);
-          }
+//           // ✅ Handle applications data (it's an object with numeric keys)
+//           let applicationsArray: any[] = [];
+//           if (Array.isArray(data.applications)) {
+//             applicationsArray = data.applications;
+//           } else if (data.applications && typeof data.applications === 'object') {
+//             applicationsArray = Object.values(data.applications);
+//           }
 
-          // ✅ Handle superadmins data
-          let superadminsArray: any[] = [];
-          if (Array.isArray(data.superadmins)) {
-            superadminsArray = data.superadmins;
-          } else if (data.superadmins && typeof data.superadmins === 'object') {
-            superadminsArray = Object.values(data.superadmins);
-          }
+//           // ✅ Handle superadmins data
+//           let superadminsArray: any[] = [];
+//           if (Array.isArray(data.superadmins)) {
+//             superadminsArray = data.superadmins;
+//           } else if (data.superadmins && typeof data.superadmins === 'object') {
+//             superadminsArray = Object.values(data.superadmins);
+//           }
 
-          setSearchResults({
-            academic: academicArray as AcademicItem[],
-            applications: applicationsArray,
-            superadmins: superadminsArray
-          });
+//           setSearchResults({
+//             academic: academicArray as AcademicItem[],
+//             applications: applicationsArray,
+//             superadmins: superadminsArray
+//           });
           
-          const suggestionList = [
-            ...academicArray.map((item: any) => 
-              `${item.academic_name} (${item.academic_type})`
-            ),
-            ...applicationsArray.map((item: any) => 
-              `${item.application_number || item.roll_no} - ${item.applicant_name || item.student_name}`
-            ),
-          ];
-          setSuggestions(suggestionList);
-        }
-      } catch (error) {
-        console.error('Error fetching search results:', error);
-        setSearchResults({
-          academic: [],
-          applications: [],
-          superadmins: []
-        });
-        setSuggestions([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+//           const suggestionList = [
+//             ...academicArray.map((item: any) => 
+//               `${item.academic_name} (${item.academic_type})`
+//             ),
+//             ...applicationsArray.map((item: any) => 
+//               `${item.application_number || item.roll_no} - ${item.applicant_name || item.student_name}`
+//             ),
+//           ];
+//           setSuggestions(suggestionList);
+//         }
+//       } catch (error) {
+//         console.error('Error fetching search results:', error);
+//         setSearchResults({
+//           academic: [],
+//           applications: [],
+//           superadmins: []
+//         });
+//         setSuggestions([]);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
 
-    const timeout = setTimeout(fetchSearchResults, 500);
-    return () => clearTimeout(timeout);
-  }, [searchValue, user?.token]);
+//     const timeout = setTimeout(fetchSearchResults, 500);
+//     return () => clearTimeout(timeout);
+//   }, [searchValue, user?.token]);
 
-  const handleSelect = (text: string) => {
-    setSearchValue(text);
-    setSearchResults({
-      academic: [],
-      applications: [],
-      superadmins: []
-    });
-    setSuggestions([]);
-  };
+//   const handleSelect = (text: string) => {
+//     setSearchValue(text);
+//     setSearchResults({
+//       academic: [],
+//       applications: [],
+//       superadmins: []
+//     });
+//     setSuggestions([]);
+//   };
 
-  // 🔹 Handle academic item click
-  const handleAcademicClick = (academic: AcademicItem) => {
-    navigate(academic.path || `/SuperAdmin/Academic/${academic.id}`);
-    setSearchValue('');
-    setSearchResults({
-      academic: [],
-      applications: [],
-      superadmins: []
-    });
-    setSuggestions([]);
-  };
+//   // 🔹 Handle academic item click
+//   const handleAcademicClick = (academic: AcademicItem) => {
+//     navigate(academic.path || `/SuperAdmin/Academic/${academic.id}`);
+//     setSearchValue('');
+//     setSearchResults({
+//       academic: [],
+//       applications: [],
+//       superadmins: []
+//     });
+//     setSuggestions([]);
+//   };
 
-  // 🔹 Handle application item click
-  // const handleApplicationClick = (application: ApplicationItem) => {
-  //   navigate(`/SuperAdmin/school-applications/${application.application_id || application.id}`);
-  //   setSearchValue('');
-  //   setSearchResults({
-  //     academic: [],
-  //     applications: [],
-  //     superadmins: []
-  //   });
-  //   setSuggestions([]);
-  // };
+//   // 🔹 Handle application item click
+//   // const handleApplicationClick = (application: ApplicationItem) => {
+//   //   navigate(`/SuperAdmin/school-applications/${application.application_id || application.id}`);
+//   //   setSearchValue('');
+//   //   setSearchResults({
+//   //     academic: [],
+//   //     applications: [],
+//   //     superadmins: []
+//   //   });
+//   //   setSuggestions([]);
+//   // };
 
- const handleApplicationClick = (application: ApplicationItem) => {
-  // Navigate to application details page
-  navigate(`/${user.role}/application-details/${application.application_id || application.id}`);
-  setSearchValue('');
-  setSearchResults({
-    academic: [],
-    applications: [],
-    superadmins: []
-  });
-  setSuggestions([]);
-};
+//  const handleApplicationClick = (application: ApplicationItem) => {
+//   // Navigate to application details page
+//   navigate(`/${user.role}/application-details/${application.application_id || application.id}`);
+//   setSearchValue('');
+//   setSearchResults({
+//     academic: [],
+//     applications: [],
+//     superadmins: []
+//   });
+//   setSuggestions([]);
+// };
 
-  // 🔹 Handle superadmin item click
-  const handleSuperAdminClick = (superadmin: SuperAdminItem) => {
-    navigate(`/SuperAdmin/users/${superadmin.id}`);
-    setSearchValue('');
-    setSearchResults({
-      academic: [],
-      applications: [],
-      superadmins: []
-    });
-    setSuggestions([]);
-  };
+//   // 🔹 Handle superadmin item click
+//   const handleSuperAdminClick = (superadmin: SuperAdminItem) => {
+//     navigate(`/SuperAdmin/users/${superadmin.id}`);
+//     setSearchValue('');
+//     setSearchResults({
+//       academic: [],
+//       applications: [],
+//       superadmins: []
+//     });
+//     setSuggestions([]);
+//   };
 
-  // 🔹 Keyboard navigation
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowDown') {
-      setActiveIndex((prev) => {
-        const totalItems = 
-          searchResults.academic.length + 
-          searchResults.applications.length + 
-          searchResults.superadmins.length;
-        return (prev + 1) % totalItems;
-      });
-    } else if (e.key === 'ArrowUp') {
-      setActiveIndex((prev) => {
-        const totalItems = 
-          searchResults.academic.length + 
-          searchResults.applications.length + 
-          searchResults.superadmins.length;
-        return (prev - 1 + totalItems) % totalItems;
-      });
-    } else if (e.key === 'Enter' && activeIndex >= 0) {
-      const totalAcademic = searchResults.academic.length;
-      const totalApplications = searchResults.applications.length;
+//   // 🔹 Keyboard navigation
+//   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+//     if (e.key === 'ArrowDown') {
+//       setActiveIndex((prev) => {
+//         const totalItems = 
+//           searchResults.academic.length + 
+//           searchResults.applications.length + 
+//           searchResults.superadmins.length;
+//         return (prev + 1) % totalItems;
+//       });
+//     } else if (e.key === 'ArrowUp') {
+//       setActiveIndex((prev) => {
+//         const totalItems = 
+//           searchResults.academic.length + 
+//           searchResults.applications.length + 
+//           searchResults.superadmins.length;
+//         return (prev - 1 + totalItems) % totalItems;
+//       });
+//     } else if (e.key === 'Enter' && activeIndex >= 0) {
+//       const totalAcademic = searchResults.academic.length;
+//       const totalApplications = searchResults.applications.length;
       
-      if (activeIndex < totalAcademic) {
-        handleAcademicClick(searchResults.academic[activeIndex]);
-      } else if (activeIndex < totalAcademic + totalApplications) {
-        handleApplicationClick(searchResults.applications[activeIndex - totalAcademic]);
-      } else {
-        const superadminIndex = activeIndex - totalAcademic - totalApplications;
-        handleSuperAdminClick(searchResults.superadmins[superadminIndex]);
-      }
-    } else if (e.key === 'Enter' && searchValue.trim()) {
-      setActiveIndex(-1);
-    }
-  };
+//       if (activeIndex < totalAcademic) {
+//         handleAcademicClick(searchResults.academic[activeIndex]);
+//       } else if (activeIndex < totalAcademic + totalApplications) {
+//         handleApplicationClick(searchResults.applications[activeIndex - totalAcademic]);
+//       } else {
+//         const superadminIndex = activeIndex - totalAcademic - totalApplications;
+//         handleSuperAdminClick(searchResults.superadmins[superadminIndex]);
+//       }
+//     } else if (e.key === 'Enter' && searchValue.trim()) {
+//       setActiveIndex(-1);
+//     }
+//   };
 
-  // 🔹 Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setSearchResults({
-          academic: [],
-          applications: [],
-          superadmins: []
-        });
-        setSuggestions([]);
-      }
-      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
-        setShowNotifications(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+//   // 🔹 Close suggestions when clicking outside
+//   useEffect(() => {
+//     const handleClickOutside = (event: MouseEvent) => {
+//       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+//         setSearchResults({
+//           academic: [],
+//           applications: [],
+//           superadmins: []
+//         });
+//         setSuggestions([]);
+//       }
+//       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+//         setShowNotifications(false);
+//       }
+//     };
+//     document.addEventListener('mousedown', handleClickOutside);
+//     return () => document.removeEventListener('mousedown', handleClickOutside);
+//   }, []);
 
-  // 🔹 Clear input
-  const clearSearch = () => {
-    setSearchValue('');
-    setSearchResults({
-      academic: [],
-      applications: [],
-      superadmins: []
-    });
-    setSuggestions([]);
-  };
+//   // 🔹 Clear input
+//   const clearSearch = () => {
+//     setSearchValue('');
+//     setSearchResults({
+//       academic: [],
+//       applications: [],
+//       superadmins: []
+//     });
+//     setSuggestions([]);
+//   };
 
-  // 🔹 Get total search results count
-  const getTotalResultsCount = () => {
-    return (
-      searchResults.academic.length + 
-      searchResults.applications.length + 
-      searchResults.superadmins.length
-    );
-  };
+//   // 🔹 Get total search results count
+//   const getTotalResultsCount = () => {
+//     return (
+//       searchResults.academic.length + 
+//       searchResults.applications.length + 
+//       searchResults.superadmins.length
+//     );
+//   };
 
-  // 🔹 Notification functions - Preload on mount
-  const fetchNotifications = async () => {
-    if (!user?.id) return;
+//   // 🔹 Notification functions - Preload on mount
+//   const fetchNotifications = async () => {
+//     if (!user?.id) return;
 
-    setNotificationLoading(true);
-    try {
-      const response = await axios.post(
-        `${apiUrl}/${user?.role}/Notifications/get-noitifications`,
-        { s_id: user.id },
-        {
-          headers: {
-            'Authorization': `Bearer ${user?.token}`,
-            'superadmin_auth_token': user?.token,
-            'accept': 'application/json',
-            'content-type': 'application/json',
-          }
-        }
-      );
+//     setNotificationLoading(true);
+//     try {
+//       const response = await axios.post(
+//         `${apiUrl}/${user?.role}/Notifications/get-noitifications`,
+//         { s_id: user.id },
+//         {
+//           headers: {
+//             'Authorization': `Bearer ${user?.token}`,
+//             'superadmin_auth_token': user?.token,
+//             'accept': 'application/json',
+//             'content-type': 'application/json',
+//           }
+//         }
+//       );
 
-      if (response.data.status === 'success') {
-        const fetchedNotifications = response.data.data.notifications || [];
-        setNotifications(fetchedNotifications);
-        setNotificationsLoaded(true);
+//       if (response.data.status === 'success') {
+//         const fetchedNotifications = response.data.data.notifications || [];
+//         setNotifications(fetchedNotifications);
+//         setNotificationsLoaded(true);
         
-        // ✅ Update global unread count
-        const unreadCount = fetchedNotifications.filter((n: Notification) => !n.is_read).length;
-        updateUnreadCount(unreadCount);
-      }
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-      setNotificationsLoaded(true);
-    } finally {
-      setNotificationLoading(false);
-    }
-  };
+//         // ✅ Update global unread count
+//         const unreadCount = fetchedNotifications.filter((n: Notification) => !n.is_read).length;
+//         updateUnreadCount(unreadCount);
+//       }
+//     } catch (error) {
+//       console.error('Error fetching notifications:', error);
+//       setNotificationsLoaded(true);
+//     } finally {
+//       setNotificationLoading(false);
+//     }
+//   };
 
-  // ✅ Show notifications immediately on hover (no loading)
-  const handleNotificationMouseEnter = () => {
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout);
-      setHoverTimeout(null);
-    }
-    setShowNotifications(true);
+//   // ✅ Show notifications immediately on hover (no loading)
+//   const handleNotificationMouseEnter = () => {
+//     if (hoverTimeout) {
+//       clearTimeout(hoverTimeout);
+//       setHoverTimeout(null);
+//     }
+//     setShowNotifications(true);
     
-    // ✅ Only fetch if not already loaded
-    if (!notificationsLoaded && user?.id) {
-      fetchNotifications();
-    }
-  };
+//     // ✅ Only fetch if not already loaded
+//     if (!notificationsLoaded && user?.id) {
+//       fetchNotifications();
+//     }
+//   };
 
-  const handleNotificationMouseLeave = () => {
-    const timeout = setTimeout(() => {
-      setShowNotifications(false);
-    }, 300);
-    setHoverTimeout(timeout);
-  };
+//   const handleNotificationMouseLeave = () => {
+//     const timeout = setTimeout(() => {
+//       setShowNotifications(false);
+//     }, 300);
+//     setHoverTimeout(timeout);
+//   };
 
-  const handleDropdownMouseEnter = () => {
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout);
-      setHoverTimeout(null);
-    }
-    setShowNotifications(true);
-  };
+//   const handleDropdownMouseEnter = () => {
+//     if (hoverTimeout) {
+//       clearTimeout(hoverTimeout);
+//       setHoverTimeout(null);
+//     }
+//     setShowNotifications(true);
+//   };
 
-  const handleDropdownMouseLeave = () => {
-    const timeout = setTimeout(() => {
-      setShowNotifications(false);
-    }, 300);
-    setHoverTimeout(timeout);
-  };
+//   const handleDropdownMouseLeave = () => {
+//     const timeout = setTimeout(() => {
+//       setShowNotifications(false);
+//     }, 300);
+//     setHoverTimeout(timeout);
+//   };
 
-  const handleShowAllNotifications = () => {
-    setShowNotifications(false);
-    navigate(`/${user?.role}/notifications`);
-  };
+//   const handleShowAllNotifications = () => {
+//     setShowNotifications(false);
+//     navigate(`/${user?.role}/notifications`);
+//   };
 
-  const markAsRead = async (id: number) => {
-    try {
-      await axios.post(
-        `${apiUrl}/${user?.role}/Notifications/read-noitifications`,
-        { id },
-        {
-          headers: {
-            'Authorization': `Bearer ${user?.token}`,
-            'superadmin_auth_token': user?.token,
-            'accept': 'application/json',
-            'content-type': 'application/json',
-          }
-        }
-      );
+//   const markAsRead = async (id: number) => {
+//     try {
+//       await axios.post(
+//         `${apiUrl}/${user?.role}/Notifications/read-noitifications`,
+//         { id },
+//         {
+//           headers: {
+//             'Authorization': `Bearer ${user?.token}`,
+//             'superadmin_auth_token': user?.token,
+//             'accept': 'application/json',
+//             'content-type': 'application/json',
+//           }
+//         }
+//       );
 
-      // Update local state
-      const updatedNotifications = notifications.map((notification) =>
-        notification.id === id ? { ...notification, is_read: 1 } : notification
-      );
-      setNotifications(updatedNotifications);
+//       // Update local state
+//       const updatedNotifications = notifications.map((notification) =>
+//         notification.id === id ? { ...notification, is_read: 1 } : notification
+//       );
+//       setNotifications(updatedNotifications);
 
-      // ✅ Update global unread count
-      const unreadCount = updatedNotifications.filter((n: Notification) => !n.is_read).length;
-      updateUnreadCount(unreadCount);
+//       // ✅ Update global unread count
+//       const unreadCount = updatedNotifications.filter((n: Notification) => !n.is_read).length;
+//       updateUnreadCount(unreadCount);
 
-      // ✅ Trigger refresh in other components
-      refreshNotifications();
+//       // ✅ Trigger refresh in other components
+//       refreshNotifications();
 
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-    }
-  };
+//     } catch (error) {
+//       console.error('Error marking notification as read:', error);
+//     }
+//   };
 
-  const markAllAsRead = async () => {
-    if (!user?.id) return;
+//   const markAllAsRead = async () => {
+//     if (!user?.id) return;
 
-    try {
-      const response = await axios.post(
-        `${apiUrl}/${user?.role}/Notifications/all-read-noitifications`,
-        { s_id: user.id },
-        {
-          headers: {
-            'Authorization': `Bearer ${user?.token}`,
-            'superadmin_auth_token': user?.token,
-            'accept': 'application/json',
-            'content-type': 'application/json',
-          }
-        }
-      );
+//     try {
+//       const response = await axios.post(
+//         `${apiUrl}/${user?.role}/Notifications/all-read-noitifications`,
+//         { s_id: user.id },
+//         {
+//           headers: {
+//             'Authorization': `Bearer ${user?.token}`,
+//             'superadmin_auth_token': user?.token,
+//             'accept': 'application/json',
+//             'content-type': 'application/json',
+//           }
+//         }
+//       );
 
-      // Update local state
-      const updatedNotifications = notifications.map((notification) => ({ 
-        ...notification, 
-        is_read: 1 
-      }));
-      setNotifications(updatedNotifications);
+//       // Update local state
+//       const updatedNotifications = notifications.map((notification) => ({ 
+//         ...notification, 
+//         is_read: 1 
+//       }));
+//       setNotifications(updatedNotifications);
 
-      // ✅ Update global unread count to 0
-      updateUnreadCount(0);
+//       // ✅ Update global unread count to 0
+//       updateUnreadCount(0);
 
-      // ✅ Trigger refresh in other components
-      refreshNotifications();
+//       // ✅ Trigger refresh in other components
+//       refreshNotifications();
 
-      if (response.data.status == 'success') {
-       setActiveIndex(-1);
-      }
+//       if (response.data.status == 'success') {
+//        setActiveIndex(-1);
+//       }
 
-    } catch (error) {
-      console.error('Error marking all notifications as read:', error);
-    }
-  };
+//     } catch (error) {
+//       console.error('Error marking all notifications as read:', error);
+//     }
+//   };
 
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
+//   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-  // Format role for display
-  const formatRole = (role: string) => {
-    const roleMap: { [key: string]: string } = {
-      super_admin: 'Super Admin',
-      support_admin: 'Support Admin',
-      admin: 'Admin',
-      user: 'User',
-      moderator: 'Moderator',
-    };
-    return (
-      roleMap[role] ||
-      role
-        .split('_')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ')
-    );
-  };
+//   // Format role for display
+//   const formatRole = (role: string) => {
+//     const roleMap: { [key: string]: string } = {
+//       super_admin: 'Super Admin',
+//       support_admin: 'Support Admin',
+//       admin: 'Admin',
+//       user: 'User',
+//       moderator: 'Moderator',
+//     };
+//     return (
+//       roleMap[role] ||
+//       role
+//         .split('_')
+//         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+//         .join(' ')
+//     );
+//   };
 
-  // Get user's display name
-  const getUserDisplayName = () => {
-    if (user?.name) return user.name;
-    if (user?.username) return user.username;
-    if (user?.email) return user.email.split('@')[0];
-    return 'User';
-  };
+//   // Get user's display name
+//   const getUserDisplayName = () => {
+//     if (user?.name) return user.name;
+//     if (user?.username) return user.username;
+//     if (user?.email) return user.email.split('@')[0];
+//     return 'User';
+//   };
 
-  return (
-    <>
-      <header className="sticky top-0 z-50">
-        <Navbar fluid className="rounded-lg bg-white shadow-md py-4">
-          <div className="flex gap-3 items-center justify-between w-full">
-            <div className="flex gap-2 items-center w-full">
-              {/* Search Bar with 900px width */}
-              <div className="relative w-[900px] max-w-[900px]" ref={dropdownRef}>
-                <input
-                  type="text"
-                  placeholder="Search academics, applications, users..."
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {/* Search Icon */}
-                <svg
-                  className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
+//   return (
+//     <>
+//       <header className="sticky top-0 z-50">
+//         <Navbar fluid className="rounded-lg bg-white shadow-md py-4">
+//           <div className="flex gap-3 items-center justify-between w-full">
+//             <div className="flex gap-2 items-center w-full">
+//               {/* Search Bar with 900px width */}
+//               <div className="relative w-[900px] max-w-[900px]" ref={dropdownRef}>
+//                 <input
+//                   type="text"
+//                   placeholder="Search academics, applications, users..."
+//                   value={searchValue}
+//                   onChange={(e) => setSearchValue(e.target.value)}
+//                   onKeyDown={handleKeyDown}
+//                   className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+//                 />
+//                 {/* Search Icon */}
+//                 <svg
+//                   className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
+//                   fill="none"
+//                   viewBox="0 0 24 24"
+//                   stroke="currentColor"
+//                 >
+//                   <path
+//                     strokeLinecap="round"
+//                     strokeLinejoin="round"
+//                     strokeWidth={2}
+//                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+//                   />
+//                 </svg>
 
-                {/* Clear Icon */}
-                {searchValue && (
-                  <button
-                    onClick={clearSearch}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                  >
-                    <AiOutlineClose size={18} />
-                  </button>
-                )}
+//                 {/* Clear Icon */}
+//                 {searchValue && (
+//                   <button
+//                     onClick={clearSearch}
+//                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+//                   >
+//                     <AiOutlineClose size={18} />
+//                   </button>
+//                 )}
 
-                {/* Search Results Dropdown */}
-                {(getTotalResultsCount() > 0 || loading) && (
-                  <div className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-md z-50 overflow-hidden max-h-80 overflow-y-auto">
-                    {loading ? (
-                      <div className="px-4 py-3 text-center text-gray-500">
-                        <Loader />
-                      </div>
-                    ) : (
-                      <>
-                        {/* Academics Section */}
-                        {searchResults.academic.length > 0 && (
-                          <div className="border-b border-gray-100">
-                            <div className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
-                              Academics ({searchResults.academic.length})
-                            </div>
-                            {searchResults.academic.map((academic, index) => (
-                              <div
-                                key={`academic-${academic.id}`}
-                                onClick={() => handleAcademicClick(academic)}
-                                className={`px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
-                                  index === activeIndex ? 'bg-blue-50 text-blue-700' : 'hover:bg-blue-100'
-                                }`}
-                              >
-                                <div className="flex flex-col">
-                                  <span className="font-medium text-sm">
-                                    {academic.academic_name}
-                                  </span>
-                                  <span className="text-xs text-gray-600">
-                                    {academic.academic_type} • {academic.academic_email}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+//                 {/* Search Results Dropdown */}
+//                 {(getTotalResultsCount() > 0 || loading) && (
+//                   <div className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-md z-50 overflow-hidden max-h-80 overflow-y-auto">
+//                     {loading ? (
+//                       <div className="px-4 py-3 text-center text-gray-500">
+//                         <Loader />
+//                       </div>
+//                     ) : (
+//                       <>
+//                         {/* Academics Section */}
+//                         {searchResults.academic.length > 0 && (
+//                           <div className="border-b border-gray-100">
+//                             <div className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+//                               Academics ({searchResults.academic.length})
+//                             </div>
+//                             {searchResults.academic.map((academic, index) => (
+//                               <div
+//                                 key={`academic-${academic.id}`}
+//                                 onClick={() => handleAcademicClick(academic)}
+//                                 className={`px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+//                                   index === activeIndex ? 'bg-blue-50 text-blue-700' : 'hover:bg-blue-100'
+//                                 }`}
+//                               >
+//                                 <div className="flex flex-col">
+//                                   <span className="font-medium text-sm">
+//                                     {academic.academic_name}
+//                                   </span>
+//                                   <span className="text-xs text-gray-600">
+//                                     {academic.academic_type} • {academic.academic_email}
+//                                   </span>
+//                                 </div>
+//                               </div>
+//                             ))}
+//                           </div>
+//                         )}
 
-                        {/* Applications Section */}
-                        {searchResults.applications.length > 0 && (
-                          <div className="border-b border-gray-100">
-                            <div className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
-                              Applications ({searchResults.applications.length})
-                            </div>
-                            {searchResults.applications.map((application, index) => {
-                              const flatIndex = searchResults.academic.length + index;
-                              return (
-                                <div
-                                  key={`application-${application.application_id || application.id}`}
-                                  onClick={() => handleApplicationClick(application)}
-                                  className={`px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
-                                    flatIndex === activeIndex ? 'bg-blue-50 text-blue-700' : 'hover:bg-blue-100'
-                                  }`}
-                                >
-                                  <div className="flex flex-col">
-                                    <span className="font-medium text-sm">
-                                      {application.application_number || application.roll_no}
-                                    </span>
-                                    <span className="text-xs text-gray-600">
-                                      {application.applicant_name || application.student_name} • {application.academic_name || application.college_name}
-                                    </span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
+//                         {/* Applications Section */}
+//                         {searchResults.applications.length > 0 && (
+//                           <div className="border-b border-gray-100">
+//                             <div className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+//                               Applications ({searchResults.applications.length})
+//                             </div>
+//                             {searchResults.applications.map((application, index) => {
+//                               const flatIndex = searchResults.academic.length + index;
+//                               return (
+//                                 <div
+//                                   key={`application-${application.application_id || application.id}`}
+//                                   onClick={() => handleApplicationClick(application)}
+//                                   className={`px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+//                                     flatIndex === activeIndex ? 'bg-blue-50 text-blue-700' : 'hover:bg-blue-100'
+//                                   }`}
+//                                 >
+//                                   <div className="flex flex-col">
+//                                     <span className="font-medium text-sm">
+//                                       {application.application_number || application.roll_no}
+//                                     </span>
+//                                     <span className="text-xs text-gray-600">
+//                                       {application.applicant_name || application.student_name} • {application.academic_name || application.college_name}
+//                                     </span>
+//                                   </div>
+//                                 </div>
+//                               );
+//                             })}
+//                           </div>
+//                         )}
 
-                        {/* Super Admins Section */}
-                        {searchResults.superadmins.length > 0 && (
-                          <div>
-                            <div className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
-                              Users ({searchResults.superadmins.length})
-                            </div>
-                            {searchResults.superadmins.map((superadmin, index) => {
-                              const flatIndex = searchResults.academic.length + searchResults.applications.length + index;
-                              return (
-                                <div
-                                  key={`superadmin-${superadmin.id}`}
-                                  onClick={() => handleSuperAdminClick(superadmin)}
-                                  className={`px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
-                                    flatIndex === activeIndex ? 'bg-blue-50 text-blue-700' : 'hover:bg-blue-100'
-                                  }`}
-                                >
-                                  <div className="flex flex-col">
-                                    <span className="font-medium text-sm">
-                                      {superadmin.name}
-                                    </span>
-                                    <span className="text-xs text-gray-600">
-                                      {superadmin.email}
-                                    </span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
+//                         {/* Super Admins Section */}
+//                         {searchResults.superadmins.length > 0 && (
+//                           <div>
+//                             <div className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+//                               Users ({searchResults.superadmins.length})
+//                             </div>
+//                             {searchResults.superadmins.map((superadmin, index) => {
+//                               const flatIndex = searchResults.academic.length + searchResults.applications.length + index;
+//                               return (
+//                                 <div
+//                                   key={`superadmin-${superadmin.id}`}
+//                                   onClick={() => handleSuperAdminClick(superadmin)}
+//                                   className={`px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+//                                     flatIndex === activeIndex ? 'bg-blue-50 text-blue-700' : 'hover:bg-blue-100'
+//                                   }`}
+//                                 >
+//                                   <div className="flex flex-col">
+//                                     <span className="font-medium text-sm">
+//                                       {superadmin.name}
+//                                     </span>
+//                                     <span className="text-xs text-gray-600">
+//                                       {superadmin.email}
+//                                     </span>
+//                                   </div>
+//                                 </div>
+//                               );
+//                             })}
+//                           </div>
+//                         )}
+//                       </>
+//                     )}
+//                   </div>
+//                 )}
+//               </div>
 
-              {/* Notification Icon (between search and profile) */}
-              <div className="relative" ref={notificationRef}>
-                <NotificationIcon
-                  unreadCount={unreadCount}
-                  onMouseEnter={handleNotificationMouseEnter}
-                  onMouseLeave={handleNotificationMouseLeave}
-                />
+//               {/* Notification Icon (between search and profile) */}
+//               <div className="relative" ref={notificationRef}>
+//                 <NotificationIcon
+//                   unreadCount={unreadCount}
+//                   onMouseEnter={handleNotificationMouseEnter}
+//                   onMouseLeave={handleNotificationMouseLeave}
+//                 />
 
-                <NotificationDropdown
-                  notifications={notifications}
-                  unreadCount={unreadCount}
-                  showNotifications={showNotifications}
-                  onMarkAsRead={markAsRead}
-                  onMarkAllAsRead={markAllAsRead}
-                  onShowAll={handleShowAllNotifications}
-                  onMouseEnter={handleDropdownMouseEnter}
-                  onMouseLeave={handleDropdownMouseLeave}
-                  loading={!notificationsLoaded}
-                />
-              </div>
+//                 <NotificationDropdown
+//                   notifications={notifications}
+//                   unreadCount={unreadCount}
+//                   showNotifications={showNotifications}
+//                   onMarkAsRead={markAsRead}
+//                   onMarkAllAsRead={markAllAsRead}
+//                   onShowAll={handleShowAllNotifications}
+//                   onMouseEnter={handleDropdownMouseEnter}
+//                   onMouseLeave={handleDropdownMouseLeave}
+//                   loading={!notificationsLoaded}
+//                 />
+//               </div>
 
-              {/* Profile with User Info */}
-              <div className="flex gap-4 items-center">
-                <div className="flex items-center gap-3">
-                  <Profile />
+//               {/* Profile with User Info */}
+//               <div className="flex gap-4 items-center">
+//                 <div className="flex items-center gap-3">
+//                   <Profile />
 
-                  {/* User Name and Role */}
-                  {user && (
-                    <div className="hidden sm:block">
-                      <div className="flex flex-col items-start w-auto max-w-full">
-                        <span className="text-sm font-semibold text-gray-900 leading-tight whitespace-normal break-words">
-                          {getUserDisplayName()}
-                        </span>
-                        <span className="text-xs text-gray-500 leading-tight whitespace-normal break-words">
-                          {formatRole(user.role || 'user')}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </Navbar>
-      </header>
+//                   {/* User Name and Role */}
+//                   {user && (
+//                     <div className="hidden sm:block">
+//                       <div className="flex flex-col items-start w-auto max-w-full">
+//                         <span className="text-sm font-semibold text-gray-900 leading-tight whitespace-normal break-words">
+//                           {getUserDisplayName()}
+//                         </span>
+//                         <span className="text-xs text-gray-500 leading-tight whitespace-normal break-words">
+//                           {formatRole(user.role || 'user')}
+//                         </span>
+//                       </div>
+//                     </div>
+//                   )}
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </Navbar>
+//       </header>
 
-      {/* Mobile Sidebar */}
-      <Drawer open={isOpen} onClose={handleClose} className="w-64">
-        <DrawerItems>
-          <MobileSidebar />
-        </DrawerItems>
-      </Drawer>
-    </>
-  );
-};
+//       {/* Mobile Sidebar */}
+//       <Drawer open={isOpen} onClose={handleClose} className="w-64">
+//         <DrawerItems>
+//           <MobileSidebar />
+//         </DrawerItems>
+//       </Drawer>
+//     </>
+//   );
+// };
 
-export default Header;
-
-
+// export default Header;
 
 
 
@@ -2026,7 +2024,9 @@ export default Header;
 
 
 
-// working code niche
+
+
+
 
 
 // import { useState, useEffect, useRef } from 'react';
@@ -2722,3 +2722,1340 @@ export default Header;
 // };
 
 // export default Header;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { useState, useEffect, useRef } from 'react';
+// import { Navbar, Drawer, DrawerItems } from 'flowbite-react';
+// import { Icon } from '@iconify/react';
+// import { AiOutlineClose } from 'react-icons/ai';
+// import { useNavigate } from 'react-router';
+// import Profile from './Profile';
+// import MobileSidebar from '../sidebar/MobileSidebar';
+// import NotificationIcon from './components/NotificationIcon';
+// import NotificationDropdown from './components/NotificationDropdown';
+// import { useAuth } from 'src/hook/useAuth';
+// import { useNotification } from './components/NotificationContext';
+// import axios from 'axios';
+// import Loader from 'src/Frontend/Common/Loader';
+
+// interface AcademicItem {
+//   id: number;
+//   academic_name: string;
+//   academic_type: string;
+//   academic_email: string;
+//   path: string;
+//   unique_code: string;
+//   status: number;
+//   created_at: string;
+// }
+
+// interface ApplicationItem {
+//   id: number;
+//   application_id: number;
+//   application_number?: string;
+//   roll_no?: string;
+//   student_name?: string;
+//   applicant_name?: string;
+//   college_name?: string;
+//   academic_name?: string;
+// }
+
+// interface SuperAdminItem {
+//   id: number;
+//   name: string;
+//   email: string;
+// }
+
+// interface SearchResponse {
+//   academic: AcademicItem[];
+//   applications: ApplicationItem[];
+//   superadmins: SuperAdminItem[];
+// }
+
+// interface Notification {
+//   id: number;
+//   s_id: number;
+//   c_id: number | null;
+//   is_read: number;
+//   academic_id: number;
+//   title: string;
+//   message: string;
+//   date: string;
+// }
+
+// // ✅ NEW PROPS INTERFACE FOR SIDEBAR TOGGLE
+// interface HeaderProps {
+//   isSidebarMinimized?: boolean;
+//   onToggleSidebar?: () => void;
+// }
+
+// const apiUrl = import.meta.env.VITE_API_URL;
+
+// const Header = ({ 
+//   isSidebarMinimized = false, 
+  
+//   onToggleSidebar 
+// }: HeaderProps) => {
+//   const [isOpen, setIsOpen] = useState(false);
+//   const [searchValue, setSearchValue] = useState('');
+//   const [searchResults, setSearchResults] = useState<SearchResponse>({
+//     academic: [],
+//     applications: [],
+//     superadmins: []
+//   });
+//   const [suggestions, setSuggestions] = useState<string[]>([]);
+//   const [activeIndex, setActiveIndex] = useState(-1);
+//   const [showNotifications, setShowNotifications] = useState(false);
+//   const [notifications, setNotifications] = useState<Notification[]>([]);
+//   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+//   const [sidebarOpen, setSidebarOpen] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const [notificationLoading, setNotificationLoading] = useState(false);
+//   const [notificationsLoaded, setNotificationsLoaded] = useState(false);
+//   const dropdownRef = useRef<HTMLDivElement>(null);
+//   const notificationRef = useRef<HTMLDivElement>(null);
+//   const navigate = useNavigate();
+//   const { user } = useAuth();
+//   const { updateUnreadCount, refreshNotifications } = useNotification();
+
+//   const handleClose = () => setIsOpen(false);
+
+//   // 🔹 Preload notifications when component mounts or user changes
+//   useEffect(() => {
+//     if (user?.id && !notificationsLoaded) {
+//       fetchNotifications();
+//     }
+//   }, [user, notificationsLoaded]);
+
+//   // 🔹 Fetch search results from API
+//   useEffect(() => {
+//     const fetchSearchResults = async () => {
+//       if (!searchValue.trim()) {
+//         setSearchResults({
+//           academic: [],
+//           applications: [],
+//           superadmins: []
+//         });
+//         setSuggestions([]);
+//         return;
+//       }
+
+//       setLoading(true);
+//       try {
+//         const response = await axios.post(
+//           `${apiUrl}/${user.role}/Notifications/search-bar`,
+//           { 
+//             query: searchValue,
+//             s_id: user?.id 
+//           }, 
+//           {
+//             headers: {
+//               'Authorization': `Bearer ${user?.token}`,
+//               'superadmin_auth_token': user?.token,
+//               'accept': 'application/json, text/plain, */*',
+//               'accept-language': 'en-US,en;q=0.9',
+//               'content-type': 'application/json',
+//             }
+//           }
+//         );
+
+//         if (response.data.data) {
+//           const data = response.data.data;
+          
+//           // ✅ Handle academic data
+//           let academicArray: any[] = [];
+//           if (Array.isArray(data.academic)) {
+//             academicArray = data.academic;
+//           } else if (data.academic && typeof data.academic === 'object') {
+//             academicArray = Object.values(data.academic);
+//           }
+
+//           // ✅ Handle applications data (it's an object with numeric keys)
+//           let applicationsArray: any[] = [];
+//           if (Array.isArray(data.applications)) {
+//             applicationsArray = data.applications;
+//           } else if (data.applications && typeof data.applications === 'object') {
+//             applicationsArray = Object.values(data.applications);
+//           }
+
+//           // ✅ Handle superadmins data
+//           let superadminsArray: any[] = [];
+//           if (Array.isArray(data.superadmins)) {
+//             superadminsArray = data.superadmins;
+//           } else if (data.superadmins && typeof data.superadmins === 'object') {
+//             superadminsArray = Object.values(data.superadmins);
+//           }
+
+//           setSearchResults({
+//             academic: academicArray as AcademicItem[],
+//             applications: applicationsArray,
+//             superadmins: superadminsArray
+//           });
+          
+//           const suggestionList = [
+//             ...academicArray.map((item: any) => 
+//               `${item.academic_name} (${item.academic_type})`
+//             ),
+//             ...applicationsArray.map((item: any) => 
+//               `${item.application_number || item.roll_no} - ${item.applicant_name || item.student_name}`
+//             ),
+//           ];
+//           setSuggestions(suggestionList);
+//         }
+//       } catch (error) {
+//         console.error('Error fetching search results:', error);
+//         setSearchResults({
+//           academic: [],
+//           applications: [],
+//           superadmins: []
+//         });
+//         setSuggestions([]);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     const timeout = setTimeout(fetchSearchResults, 500);
+//     return () => clearTimeout(timeout);
+//   }, [searchValue, user?.token]);
+
+//   const handleSelect = (text: string) => {
+//     setSearchValue(text);
+//     setSearchResults({
+//       academic: [],
+//       applications: [],
+//       superadmins: []
+//     });
+//     setSuggestions([]);
+//   };
+
+//   // 🔹 Handle academic item click
+//   const handleAcademicClick = (academic: AcademicItem) => {
+//     navigate(academic.path || `/SuperAdmin/Academic/${academic.id}`);
+//     setSearchValue('');
+//     setSearchResults({
+//       academic: [],
+//       applications: [],
+//       superadmins: []
+//     });
+//     setSuggestions([]);
+//   };
+
+//   const handleApplicationClick = (application: ApplicationItem) => {
+//     // Navigate to application details page
+//     navigate(`/${user.role}/application-details/${application.application_id || application.id}`);
+//     setSearchValue('');
+//     setSearchResults({
+//       academic: [],
+//       applications: [],
+//       superadmins: []
+//     });
+//     setSuggestions([]);
+//   };
+
+//   // 🔹 Handle superadmin item click
+//   const handleSuperAdminClick = (superadmin: SuperAdminItem) => {
+//     navigate(`/SuperAdmin/users/${superadmin.id}`);
+//     setSearchValue('');
+//     setSearchResults({
+//       academic: [],
+//       applications: [],
+//       superadmins: []
+//     });
+//     setSuggestions([]);
+//   };
+
+//   // 🔹 Keyboard navigation
+//   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+//     if (e.key === 'ArrowDown') {
+//       setActiveIndex((prev) => {
+//         const totalItems = 
+//           searchResults.academic.length + 
+//           searchResults.applications.length + 
+//           searchResults.superadmins.length;
+//         return (prev + 1) % totalItems;
+//       });
+//     } else if (e.key === 'ArrowUp') {
+//       setActiveIndex((prev) => {
+//         const totalItems = 
+//           searchResults.academic.length + 
+//           searchResults.applications.length + 
+//           searchResults.superadmins.length;
+//         return (prev - 1 + totalItems) % totalItems;
+//       });
+//     } else if (e.key === 'Enter' && activeIndex >= 0) {
+//       const totalAcademic = searchResults.academic.length;
+//       const totalApplications = searchResults.applications.length;
+      
+//       if (activeIndex < totalAcademic) {
+//         handleAcademicClick(searchResults.academic[activeIndex]);
+//       } else if (activeIndex < totalAcademic + totalApplications) {
+//         handleApplicationClick(searchResults.applications[activeIndex - totalAcademic]);
+//       } else {
+//         const superadminIndex = activeIndex - totalAcademic - totalApplications;
+//         handleSuperAdminClick(searchResults.superadmins[superadminIndex]);
+//       }
+//     } else if (e.key === 'Enter' && searchValue.trim()) {
+//       setActiveIndex(-1);
+//     }
+//   };
+
+//   // 🔹 Close suggestions when clicking outside
+//   useEffect(() => {
+//     const handleClickOutside = (event: MouseEvent) => {
+//       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+//         setSearchResults({
+//           academic: [],
+//           applications: [],
+//           superadmins: []
+//         });
+//         setSuggestions([]);
+//       }
+//       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+//         setShowNotifications(false);
+//       }
+//     };
+//     document.addEventListener('mousedown', handleClickOutside);
+//     return () => document.removeEventListener('mousedown', handleClickOutside);
+//   }, []);
+
+//   // 🔹 Clear input
+//   const clearSearch = () => {
+//     setSearchValue('');
+//     setSearchResults({
+//       academic: [],
+//       applications: [],
+//       superadmins: []
+//     });
+//     setSuggestions([]);
+//   };
+
+//   // 🔹 Get total search results count
+//   const getTotalResultsCount = () => {
+//     return (
+//       searchResults.academic.length + 
+//       searchResults.applications.length + 
+//       searchResults.superadmins.length
+//     );
+//   };
+
+//   // 🔹 Notification functions - Preload on mount
+//   const fetchNotifications = async () => {
+//     if (!user?.id) return;
+
+//     setNotificationLoading(true);
+//     try {
+//       const response = await axios.post(
+//         `${apiUrl}/${user?.role}/Notifications/get-noitifications`,
+//         { s_id: user.id },
+//         {
+//           headers: {
+//             'Authorization': `Bearer ${user?.token}`,
+//             'superadmin_auth_token': user?.token,
+//             'accept': 'application/json',
+//             'content-type': 'application/json',
+//           }
+//         }
+//       );
+
+//       if (response.data.status === 'success') {
+//         const fetchedNotifications = response.data.data.notifications || [];
+//         setNotifications(fetchedNotifications);
+//         setNotificationsLoaded(true);
+        
+//         // ✅ Update global unread count
+//         const unreadCount = fetchedNotifications.filter((n: Notification) => !n.is_read).length;
+//         updateUnreadCount(unreadCount);
+//       }
+//     } catch (error) {
+//       console.error('Error fetching notifications:', error);
+//       setNotificationsLoaded(true);
+//     } finally {
+//       setNotificationLoading(false);
+//     }
+//   };
+
+//   // ✅ Show notifications immediately on hover (no loading)
+//   const handleNotificationMouseEnter = () => {
+//     if (hoverTimeout) {
+//       clearTimeout(hoverTimeout);
+//       setHoverTimeout(null);
+//     }
+//     setShowNotifications(true);
+    
+//     // ✅ Only fetch if not already loaded
+//     if (!notificationsLoaded && user?.id) {
+//       fetchNotifications();
+//     }
+//   };
+
+//   const handleNotificationMouseLeave = () => {
+//     const timeout = setTimeout(() => {
+//       setShowNotifications(false);
+//     }, 300);
+//     setHoverTimeout(timeout);
+//   };
+
+//   const handleDropdownMouseEnter = () => {
+//     if (hoverTimeout) {
+//       clearTimeout(hoverTimeout);
+//       setHoverTimeout(null);
+//     }
+//     setShowNotifications(true);
+//   };
+
+//   const handleDropdownMouseLeave = () => {
+//     const timeout = setTimeout(() => {
+//       setShowNotifications(false);
+//     }, 300);
+//     setHoverTimeout(timeout);
+//   };
+
+//   const handleShowAllNotifications = () => {
+//     setShowNotifications(false);
+//     navigate(`/${user?.role}/notifications`);
+//   };
+
+//   const markAsRead = async (id: number) => {
+//     try {
+//       await axios.post(
+//         `${apiUrl}/${user?.role}/Notifications/read-noitifications`,
+//         { id },
+//         {
+//           headers: {
+//             'Authorization': `Bearer ${user?.token}`,
+//             'superadmin_auth_token': user?.token,
+//             'accept': 'application/json',
+//             'content-type': 'application/json',
+//           }
+//         }
+//       );
+
+//       // Update local state
+//       const updatedNotifications = notifications.map((notification) =>
+//         notification.id === id ? { ...notification, is_read: 1 } : notification
+//       );
+//       setNotifications(updatedNotifications);
+
+//       // ✅ Update global unread count
+//       const unreadCount = updatedNotifications.filter((n: Notification) => !n.is_read).length;
+//       updateUnreadCount(unreadCount);
+
+//       // ✅ Trigger refresh in other components
+//       refreshNotifications();
+
+//     } catch (error) {
+//       console.error('Error marking notification as read:', error);
+//     }
+//   };
+
+//   const markAllAsRead = async () => {
+//     if (!user?.id) return;
+
+//     try {
+//       const response = await axios.post(
+//         `${apiUrl}/${user?.role}/Notifications/all-read-noitifications`,
+//         { s_id: user.id },
+//         {
+//           headers: {
+//             'Authorization': `Bearer ${user?.token}`,
+//             'superadmin_auth_token': user?.token,
+//             'accept': 'application/json',
+//             'content-type': 'application/json',
+//           }
+//         }
+//       );
+
+//       // Update local state
+//       const updatedNotifications = notifications.map((notification) => ({ 
+//         ...notification, 
+//         is_read: 1 
+//       }));
+//       setNotifications(updatedNotifications);
+
+//       // ✅ Update global unread count to 0
+//       updateUnreadCount(0);
+
+//       // ✅ Trigger refresh in other components
+//       refreshNotifications();
+
+//       if (response.data.status == 'success') {
+//        setActiveIndex(-1);
+//       }
+
+//     } catch (error) {
+//       console.error('Error marking all notifications as read:', error);
+//     }
+//   };
+
+//   const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+//   // Format role for display
+//   const formatRole = (role: string) => {
+//     const roleMap: { [key: string]: string } = {
+//       super_admin: 'Super Admin',
+//       support_admin: 'Support Admin',
+//       admin: 'Admin',
+//       user: 'User',
+//       moderator: 'Moderator',
+//     };
+//     return (
+//       roleMap[role] ||
+//       role
+//         .split('_')
+//         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+//         .join(' ')
+//     );
+//   };
+
+//   // Get user's display name
+//   const getUserDisplayName = () => {
+//     if (user?.name) return user.name;
+//     if (user?.username) return user.username;
+//     if (user?.email) return user.email.split('@')[0];
+//     return 'User';
+//   };
+
+//   return (
+//     <>
+//       <header className="sticky top-0 z-50">
+//         <Navbar fluid className="rounded-lg bg-white shadow-md py-4">
+//           <div className="flex gap-3 items-center justify-between w-full">
+            
+//             {/* ✅ NEW SIDEBAR TOGGLE BUTTON */}
+//             <div className="flex items-center">
+//               <button
+//                 onClick={onToggleSidebar}
+//                 className="p-3 rounded-xl hover:bg-gray-100 transition-all duration-200 text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm lg:flex xl:flex"
+//                 aria-label={isSidebarMinimized ? "Expand sidebar" : "Minimize sidebar"}
+//                 title={isSidebarMinimized ? "Expand sidebar" : "Minimize sidebar"}
+//               >
+//                 {isSidebarMinimized ? (
+//                   // Expand icon (double bars)
+//                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+//                   </svg>
+//                 ) : (
+//                   // Minimize icon (hamburger → collapse)
+//                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+//                   </svg>
+//                 )}
+//               </button>
+//             </div>
+
+//             {/* Search Bar Container */}
+//             <div className="flex-1 max-w-[900px] relative" ref={dropdownRef}>
+//               <input
+//                 type="text"
+//                 placeholder="Search academics, applications, users..."
+//                 value={searchValue}
+//                 onChange={(e) => setSearchValue(e.target.value)}
+//                 onKeyDown={handleKeyDown}
+//                 className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+//               />
+//               {/* Search Icon */}
+//               <svg
+//                 className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
+//                 fill="none"
+//                 viewBox="0 0 24 24"
+//                 stroke="currentColor"
+//               >
+//                 <path
+//                   strokeLinecap="round"
+//                   strokeLinejoin="round"
+//                   strokeWidth={2}
+//                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+//                 />
+//               </svg>
+
+//               {/* Clear Icon */}
+//               {searchValue && (
+//                 <button
+//                   onClick={clearSearch}
+//                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+//                 >
+//                   <AiOutlineClose size={18} />
+//                 </button>
+//               )}
+
+//               {/* Search Results Dropdown */}
+//               {(getTotalResultsCount() > 0 || loading) && (
+//                 <div className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-md z-50 overflow-hidden max-h-80 overflow-y-auto">
+//                   {loading ? (
+//                     <div className="px-4 py-3 text-center text-gray-500">
+//                       <Loader />
+//                     </div>
+//                   ) : (
+//                     <>
+//                       {/* Academics Section */}
+//                       {searchResults.academic.length > 0 && (
+//                         <div className="border-b border-gray-100">
+//                           <div className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+//                             Academics ({searchResults.academic.length})
+//                           </div>
+//                           {searchResults.academic.map((academic, index) => (
+//                             <div
+//                               key={`academic-${academic.id}`}
+//                               onClick={() => handleAcademicClick(academic)}
+//                               className={`px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+//                                 index === activeIndex ? 'bg-blue-50 text-blue-700' : 'hover:bg-blue-100'
+//                               }`}
+//                             >
+//                               <div className="flex flex-col">
+//                                 <span className="font-medium text-sm">
+//                                   {academic.academic_name}
+//                                 </span>
+//                                 <span className="text-xs text-gray-600">
+//                                   {academic.academic_type} • {academic.academic_email}
+//                                 </span>
+//                               </div>
+//                             </div>
+//                           ))}
+//                         </div>
+//                       )}
+
+//                       {/* Applications Section */}
+//                       {searchResults.applications.length > 0 && (
+//                         <div className="border-b border-gray-100">
+//                           <div className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+//                             Applications ({searchResults.applications.length})
+//                           </div>
+//                           {searchResults.applications.map((application, index) => {
+//                             const flatIndex = searchResults.academic.length + index;
+//                             return (
+//                               <div
+//                                 key={`application-${application.application_id || application.id}`}
+//                                 onClick={() => handleApplicationClick(application)}
+//                                 className={`px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+//                                   flatIndex === activeIndex ? 'bg-blue-50 text-blue-700' : 'hover:bg-blue-100'
+//                                 }`}
+//                               >
+//                                 <div className="flex flex-col">
+//                                   <span className="font-medium text-sm">
+//                                     {application.application_number || application.roll_no}
+//                                   </span>
+//                                   <span className="text-xs text-gray-600">
+//                                     {application.applicant_name || application.student_name} • {application.academic_name || application.college_name}
+//                                   </span>
+//                                 </div>
+//                               </div>
+//                             );
+//                           })}
+//                         </div>
+//                       )}
+
+//                       {/* Super Admins Section */}
+//                       {searchResults.superadmins.length > 0 && (
+//                         <div>
+//                           <div className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+//                             Users ({searchResults.superadmins.length})
+//                           </div>
+//                           {searchResults.superadmins.map((superadmin, index) => {
+//                             const flatIndex = searchResults.academic.length + searchResults.applications.length + index;
+//                             return (
+//                               <div
+//                                 key={`superadmin-${superadmin.id}`}
+//                                 onClick={() => handleSuperAdminClick(superadmin)}
+//                                 className={`px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+//                                   flatIndex === activeIndex ? 'bg-blue-50 text-blue-700' : 'hover:bg-blue-100'
+//                                 }`}
+//                               >
+//                                 <div className="flex flex-col">
+//                                   <span className="font-medium text-sm">
+//                                     {superadmin.name}
+//                                   </span>
+//                                   <span className="text-xs text-gray-600">
+//                                     {superadmin.email}
+//                                   </span>
+//                                 </div>
+//                               </div>
+//                             );
+//                           })}
+//                         </div>
+//                       )}
+//                     </>
+//                   )}
+//                 </div>
+//               )}
+//             </div>
+
+//             {/* Notification Icon */}
+//             <div className="relative" ref={notificationRef}>
+//               <NotificationIcon
+//                 unreadCount={unreadCount}
+//                 onMouseEnter={handleNotificationMouseEnter}
+//                 onMouseLeave={handleNotificationMouseLeave}
+//               />
+
+//               <NotificationDropdown
+//                 notifications={notifications}
+//                 unreadCount={unreadCount}
+//                 showNotifications={showNotifications}
+//                 onMarkAsRead={markAsRead}
+//                 onMarkAllAsRead={markAllAsRead}
+//                 onShowAll={handleShowAllNotifications}
+//                 onMouseEnter={handleDropdownMouseEnter}
+//                 onMouseLeave={handleDropdownMouseLeave}
+//                 loading={!notificationsLoaded}
+//               />
+//             </div>
+
+//             {/* Profile with User Info */}
+//             <div className="flex gap-4 items-center">
+//               <div className="flex items-center gap-3">
+//                 <Profile />
+
+//                 {/* User Name and Role */}
+//                 {user && (
+//                   <div className="hidden sm:block">
+//                     <div className="flex flex-col items-start w-auto max-w-full">
+//                       <span className="text-sm font-semibold text-gray-900 leading-tight whitespace-normal break-words">
+//                         {getUserDisplayName()}
+//                       </span>
+//                       <span className="text-xs text-gray-500 leading-tight whitespace-normal break-words">
+//                         {formatRole(user.role || 'user')}
+//                       </span>
+//                     </div>
+//                   </div>
+//                 )}
+//               </div>
+//             </div>
+//           </div>
+//         </Navbar>
+//       </header>
+
+//       {/* Mobile Sidebar */}
+//       <Drawer open={isOpen} onClose={handleClose} className="w-64">
+//         <DrawerItems>
+//           <MobileSidebar />
+//         </DrawerItems>
+//       </Drawer>
+//     </>
+//   );
+// };
+
+// export default Header;
+
+
+
+// src/layout/header/Header.tsx
+
+
+
+
+
+
+
+
+
+import { useState, useEffect, useRef } from "react";
+import { Navbar } from "flowbite-react";
+import { AiOutlineClose } from "react-icons/ai";
+import { useNavigate } from "react-router";
+import Profile from "./Profile";
+import NotificationIcon from "./components/NotificationIcon";
+import NotificationDropdown from "./components/NotificationDropdown";
+import { useAuth } from "src/hook/useAuth";
+import { useNotification } from "./components/NotificationContext";
+import axios from "axios";
+import Loader from "src/Frontend/Common/Loader";
+
+interface AcademicItem {
+  id: number;
+  academic_name: string;
+  academic_type: string;
+  academic_email: string;
+  path: string;
+  unique_code: string;
+  status: number;
+  created_at: string;
+}
+
+interface ApplicationItem {
+  id: number;
+  application_id: number;
+  application_number?: string;
+  roll_no?: string;
+  student_name?: string;
+  applicant_name?: string;
+  college_name?: string;
+  academic_name?: string;
+}
+
+interface SuperAdminItem {
+  id: number;
+  name: string;
+  email: string;
+}
+
+interface SearchResponse {
+  academic: AcademicItem[];
+  applications: ApplicationItem[];
+  superadmins: SuperAdminItem[];
+}
+
+interface Notification {
+  id: number;
+  s_id: number;
+  c_id: number | null;
+  is_read: number;
+  academic_id: number;
+  title: string;
+  message: string;
+  date: string;
+}
+
+export interface HeaderProps {
+  isSidebarMinimized?: boolean;
+  onToggleSidebar?: () => void;
+  isMobileDrawerOpen?: boolean;
+  onToggleMobileDrawer?: () => void;
+}
+
+const apiUrl = import.meta.env.VITE_API_URL;
+
+const Header = ({
+  isSidebarMinimized = false,
+  onToggleSidebar,
+  isMobileDrawerOpen = false,
+  onToggleMobileDrawer,
+}: HeaderProps) => {
+  const [searchValue, setSearchValue] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchResponse>({
+    academic: [],
+    applications: [],
+    superadmins: [],
+  });
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [loading, setLoading] = useState(false);
+
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationsLoaded, setNotificationsLoaded] = useState(false);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { updateUnreadCount, refreshNotifications } = useNotification();
+
+  // -------- SEARCH --------
+  useEffect(() => {
+    const fetchSearchResults = async () => {
+      if (!searchValue.trim() || !user?.token) {
+        setSearchResults({ academic: [], applications: [], superadmins: [] });
+        setActiveIndex(-1);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const res = await axios.post(
+          `${apiUrl}/${user.role}/Notifications/search-bar`,
+          { query: searchValue, s_id: user.id },
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              superadmin_auth_token: user.token,
+              accept: "application/json",
+              "content-type": "application/json",
+            },
+          }
+        );
+
+        const data = res.data?.data || {};
+        const academicArray: AcademicItem[] = Array.isArray(data.academic)
+          ? data.academic
+          : Object.values(data.academic || {});
+        const applicationsArray: ApplicationItem[] = Array.isArray(
+          data.applications
+        )
+          ? data.applications
+          : Object.values(data.applications || {});
+        const superadminsArray: SuperAdminItem[] = Array.isArray(
+          data.superadmins
+        )
+          ? data.superadmins
+          : Object.values(data.superadmins || {});
+
+        setSearchResults({
+          academic: academicArray,
+          applications: applicationsArray,
+          superadmins: superadminsArray,
+        });
+      } catch {
+        setSearchResults({ academic: [], applications: [], superadmins: [] });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const id = setTimeout(fetchSearchResults, 400);
+    return () => clearTimeout(id);
+  }, [searchValue, user?.token, user?.role, user?.id]);
+
+  const getTotalResultsCount = () =>
+    searchResults.academic.length +
+    searchResults.applications.length +
+    searchResults.superadmins.length;
+
+  const clearSearch = () => {
+    setSearchValue("");
+    setSearchResults({ academic: [], applications: [], superadmins: [] });
+    setActiveIndex(-1);
+  };
+
+  const handleAcademicClick = (academic: AcademicItem) => {
+    navigate(academic.path || `/SuperAdmin/Academic/${academic.id}`);
+    clearSearch();
+  };
+
+  const handleApplicationClick = (application: ApplicationItem) => {
+    navigate(
+      `/${user?.role}/application-details/${
+        application.application_id || application.id
+      }`
+    );
+    clearSearch();
+  };
+
+  const handleSuperAdminClick = (sa: SuperAdminItem) => {
+    navigate(`/SuperAdmin/users/${sa.id}`);
+    clearSearch();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const total = getTotalResultsCount();
+    if (!total) return;
+
+    if (e.key === "ArrowDown") {
+      setActiveIndex((prev) => (prev + 1) % total);
+    } else if (e.key === "ArrowUp") {
+      setActiveIndex((prev) => (prev - 1 + total) % total);
+    } else if (e.key === "Enter" && activeIndex >= 0) {
+      const aLen = searchResults.academic.length;
+      const appLen = searchResults.applications.length;
+
+      if (activeIndex < aLen) {
+        handleAcademicClick(searchResults.academic[activeIndex]);
+      } else if (activeIndex < aLen + appLen) {
+        handleApplicationClick(
+          searchResults.applications[activeIndex - aLen]
+        );
+      } else {
+        handleSuperAdminClick(
+          searchResults.superadmins[activeIndex - aLen - appLen]
+        );
+      }
+    }
+  };
+
+  // outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setSearchResults({ academic: [], applications: [], superadmins: [] });
+      }
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(e.target as Node)
+      ) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // -------- NOTIFICATIONS --------
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+  const fetchNotifications = async () => {
+    if (!user?.id || !user?.token) return;
+
+    try {
+      const res = await axios.post(
+        `${apiUrl}/${user.role}/Notifications/get-noitifications`,
+        { s_id: user.id },
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            superadmin_auth_token: user.token,
+            accept: "application/json",
+            "content-type": "application/json",
+          },
+        }
+      );
+
+      const list: Notification[] = res.data?.data?.notifications || [];
+      setNotifications(list);
+      setNotificationsLoaded(true);
+      updateUnreadCount(list.filter((n) => !n.is_read).length);
+    } catch {
+      setNotificationsLoaded(true);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.id && !notificationsLoaded) {
+      fetchNotifications();
+    }
+  }, [user?.id, notificationsLoaded]);
+
+  const openNotifications = () => {
+    setShowNotifications(true);
+    if (!notificationsLoaded) fetchNotifications();
+  };
+
+  const markAsRead = async (id: number) => {
+    if (!user?.token) return;
+
+    try {
+      await axios.post(
+        `${apiUrl}/${user.role}/Notifications/read-noitifications`,
+        { id },
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            superadmin_auth_token: user.token,
+            accept: "application/json",
+            "content-type": "application/json",
+          },
+        }
+      );
+
+      const updated = notifications.map((n) =>
+        n.id === id ? { ...n, is_read: 1 } : n
+      );
+      setNotifications(updated);
+      updateUnreadCount(updated.filter((n) => !n.is_read).length);
+      refreshNotifications();
+    } catch {}
+  };
+
+  const markAllAsRead = async () => {
+    if (!user?.token || !user?.id) return;
+
+    try {
+      await axios.post(
+        `${apiUrl}/${user.role}/Notifications/all-read-noitifications`,
+        { s_id: user.id },
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            superadmin_auth_token: user.token,
+            accept: "application/json",
+            "content-type": "application/json",
+          },
+        }
+      );
+
+      const updated = notifications.map((n) => ({ ...n, is_read: 1 }));
+      setNotifications(updated);
+      updateUnreadCount(0);
+      refreshNotifications();
+    } catch {}
+  };
+
+  const gotoAllNotifications = () => {
+    setShowNotifications(false);
+    navigate(`/${user?.role}/notifications`);
+  };
+
+  // -------- USER INFO --------
+  const formatRole = (role: string) => {
+    const map: Record<string, string> = {
+      super_admin: "Super Admin",
+      support_admin: "Support Admin",
+      admin: "Admin",
+      user: "User",
+      moderator: "Moderator",
+    };
+    if (map[role]) return map[role];
+    return role
+      .split("_")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  };
+
+  const getUserDisplayName = () => {
+    if (user?.name) return user.name;
+    if (user?.username) return user.username;
+    if (user?.email) return user.email.split("@")[0];
+    return "User";
+  };
+
+  // -------- RENDER --------
+  return (
+    <header className="sticky top-0 z-50">
+      <Navbar fluid className="h-[88px] px-4 rounded-none bg-white shadow-md">
+        <div className="flex items-center justify-between w-full gap-3">
+          {/* LEFT: toggles */}
+          <div className="flex items-center gap-2">
+            {/* MOBILE HAMBURGER */}
+            <button
+              type="button"
+              onClick={onToggleMobileDrawer}
+              className="flex lg:hidden h-11 w-11 items-center justify-center rounded-2xl border border-blue-100 bg-white shadow-sm"
+              aria-label={isMobileDrawerOpen ? "Close menu" : "Open menu"}
+            >
+              <svg
+                className="w-6 h-6 text-gray-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d={
+                    isMobileDrawerOpen
+                      ? "M6 18L18 6M6 6l12 12"
+                      : "M4 6h16M4 12h16M4 18h16"
+                  }
+                />
+              </svg>
+            </button>
+
+            {/* DESKTOP COLLAPSE */}
+            <button
+              type="button"
+              onClick={onToggleSidebar}
+              className="hidden lg:inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-100 bg-white shadow-sm"
+              aria-label={
+                isSidebarMinimized ? "Expand sidebar" : "Collapse sidebar"
+              }
+            >
+              {isSidebarMinimized ? (
+                <svg
+                  className="w-5 h-5 text-gray-700"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 8h16M4 16h16"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="w-5 h-5 text-gray-700"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              )}
+            </button>
+          </div>
+
+          {/* CENTER: search */}
+          <div
+            ref={dropdownRef}
+            className="flex-1 max-w-[900px] relative mx-2"
+          >
+            <input
+              type="text"
+              placeholder="Search academics, applications, users..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            />
+            <svg
+              className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            {searchValue && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <AiOutlineClose size={18} />
+              </button>
+            )}
+
+            {(getTotalResultsCount() > 0 || loading) && (
+              <div className="absolute left-0 right-0 mt-2 max-h-80 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg z-40 text-sm">
+                {loading ? (
+                  <div className="px-4 py-3 text-center text-gray-500">
+                    <Loader />
+                  </div>
+                ) : (
+                  <>
+                    {/* Academics */}
+                    {searchResults.academic.length > 0 && (
+                      <div className="border-b border-gray-100">
+                        <div className="px-4 py-2 bg-gray-50 text-xs font-semibold uppercase text-gray-500">
+                          Academics ({searchResults.academic.length})
+                        </div>
+                        {searchResults.academic.map((a, idx) => (
+                          <div
+                            key={a.id}
+                            onClick={() => handleAcademicClick(a)}
+                            className={`px-4 py-2 cursor-pointer border-t border-gray-50 hover:bg-blue-50 ${
+                              activeIndex === idx
+                                ? "bg-blue-50 text-blue-700"
+                                : ""
+                            }`}
+                          >
+                            <div className="font-medium">{a.academic_name}</div>
+                            <div className="text-xs text-gray-500">
+                              {a.academic_type} • {a.academic_email}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Applications */}
+                    {searchResults.applications.length > 0 && (
+                      <div className="border-b border-gray-100">
+                        <div className="px-4 py-2 bg-gray-50 text-xs font-semibold uppercase text-gray-500">
+                          Applications ({searchResults.applications.length})
+                        </div>
+                        {searchResults.applications.map((app, idx) => {
+                          const flatIdx =
+                            searchResults.academic.length + idx;
+                          return (
+                            <div
+                              key={app.application_id || app.id}
+                              onClick={() => handleApplicationClick(app)}
+                              className={`px-4 py-2 cursor-pointer border-t border-gray-50 hover:bg-blue-50 ${
+                                activeIndex === flatIdx
+                                  ? "bg-blue-50 text-blue-700"
+                                  : ""
+                              }`}
+                            >
+                              <div className="font-medium">
+                                {app.application_number || app.roll_no}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {app.applicant_name || app.student_name} •{" "}
+                                {app.academic_name || app.college_name}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Users */}
+                    {searchResults.superadmins.length > 0 && (
+                      <div>
+                        <div className="px-4 py-2 bg-gray-50 text-xs font-semibold uppercase text-gray-500">
+                          Users ({searchResults.superadmins.length})
+                        </div>
+                        {searchResults.superadmins.map((sa, idx) => {
+                          const flatIdx =
+                            searchResults.academic.length +
+                            searchResults.applications.length +
+                            idx;
+                          return (
+                            <div
+                              key={sa.id}
+                              onClick={() => handleSuperAdminClick(sa)}
+                              className={`px-4 py-2 cursor-pointer border-t border-gray-50 hover:bg-blue-50 ${
+                                activeIndex === flatIdx
+                                  ? "bg-blue-50 text-blue-700"
+                                  : ""
+                              }`}
+                            >
+                              <div className="font-medium">{sa.name}</div>
+                              <div className="text-xs text-gray-500">
+                                {sa.email}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* RIGHT: notifications + profile */}
+          <div className="flex items-center gap-4">
+            <div
+              ref={notificationRef}
+              className="relative"
+              onMouseEnter={openNotifications}
+            >
+              <NotificationIcon unreadCount={unreadCount} />
+              <NotificationDropdown
+                notifications={notifications}
+                unreadCount={unreadCount}
+                showNotifications={showNotifications}
+                onMarkAsRead={markAsRead}
+                onMarkAllAsRead={markAllAsRead}
+                onShowAll={gotoAllNotifications}
+                loading={!notificationsLoaded}
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Profile />
+              {user && (
+                <div className="hidden sm:block">
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-semibold text-gray-900">
+                      {getUserDisplayName()}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {formatRole(user.role || "user")}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </Navbar>
+    </header>
+  );
+};
+
+export default Header;
+

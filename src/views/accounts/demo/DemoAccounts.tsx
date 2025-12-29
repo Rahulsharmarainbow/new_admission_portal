@@ -6,7 +6,7 @@ import { useAuth } from 'src/hook/useAuth';
 const DemoAccount: React.FC = () => {
   const { user } = useAuth();
   return (
-    <div className="p-6">
+    <div >
        <BreadcrumbHeader
         title="Demo Accounts"
         paths={[{ name: "Demo Accounts", link: "/" + user?.role + "/demo-accounts" }]}
