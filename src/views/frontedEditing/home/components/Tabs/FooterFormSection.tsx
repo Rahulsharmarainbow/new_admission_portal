@@ -6,6 +6,7 @@ import Loader from 'src/Frontend/Common/Loader';
 import JoditEditor from 'jodit-react';
 
 interface FooterData {
+  home_page_tabs: {};
   id?: number;
   admissio_query_mobile: string;
   admissio_query_email: string;
@@ -49,6 +50,12 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
   const [academicAddress, setAcademicAddress] = useState("");
   const [pages, setPages] = useState<any[]>([]);
   const [selectedPages, setSelectedPages] = useState<any[]>([]);
+  const [homePageTabs, setHomePageTabs] = useState<any>({
+  tab_header_1: '',
+  tab_header_2: '',
+  tab_header_3: '',
+});
+
 
   // New fields
   const [academicWebsite, setAcademicWebsite] = useState('');
@@ -161,6 +168,7 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
   };
 
   const setFormFields = (data: FooterData) => {
+    console.log('data', data);
     setAdmissionQueryMobile(data.admissio_query_mobile || '');
     setAdmissionQueryEmail(data.admissio_query_email || '');
     setTechnicalSupportEmail(data.technical_support_email || '');
@@ -175,7 +183,12 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
 
     setAcademicName(data.name || '');
     setAcademicAddress(data.address || '');
-    
+    setHomePageTabs(data.home_page_tab || {
+  tab_header_1: '',
+  tab_header_2: '',
+  tab_header_3: '',
+});
+
     // New fields
     setAcademicWebsite(data.academic_website || '');
     
@@ -204,6 +217,16 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
     }
   };
 
+  const handleTabChange =
+  (key: 'tab_header_1' | 'tab_header_2' | 'tab_header_3') =>
+  (e: React.ChangeEvent<HTMLInputElement>) => {
+    setHomePageTabs((prev: any) => ({
+      ...prev,
+      [key]: e.target.value,
+    }));
+  };
+
+
   const resetForm = () => {
     setAdmissionQueryMobile('');
     setAdmissionQueryEmail('');
@@ -223,8 +246,9 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
     setAcademicName('');
     setAcademicLogo(null);
     setLogoPreview('');
+    setHomePageTabs({});
   };
-
+console.log('selectedAcademic:', homePageTabs);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -256,6 +280,7 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
       formData.append('academic_name', academicName || '');
       formData.append('academic_address', academicAddress || '');
       formData.append('academic_website', academicWebsite || '');
+      formData.append('home_page_tabs', JSON.stringify(homePageTabs));
 
       // ✅ Append files only if they are File objects
       if (academicLogo instanceof File) {
@@ -466,7 +491,48 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
                     />
                   </div>
                 </div>
+
+                
               </div>
+
+             <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+  Tabs Heading Setting
+</h3>
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+
+  <div>
+    <Label className="block mb-2">Application Heading</Label>
+    <TextInput
+      type="text"
+      value={homePageTabs.tab_header_2 || ''}
+      onChange={handleTabChange('tab_header_2')}
+      placeholder="Enter Application Heading name"
+    />
+  </div>
+
+  <div>
+    <Label className="block mb-2">Notification Heading</Label>
+    <TextInput
+      type="text"
+      value={homePageTabs.tab_header_1 || ''}
+      onChange={handleTabChange('tab_header_1')}
+      placeholder="Enter Notification Heading name"
+    />
+  </div>
+
+  <div>
+    <Label className="block mb-2">News Heading</Label>
+    <TextInput
+      type="text"
+      value={homePageTabs.tab_header_3 || ''}
+      onChange={handleTabChange('tab_header_3')}
+      placeholder="Enter News Heading name"
+    />
+  </div>
+
+</div>
+
 
               <h2 className="text-xl font-semibold mb-6">Footer Editing</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

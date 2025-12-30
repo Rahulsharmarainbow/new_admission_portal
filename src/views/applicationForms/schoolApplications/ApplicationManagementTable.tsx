@@ -33,6 +33,7 @@ interface Application {
   class_id?: number;
   academic_id?: number;
   candidate_details?: any;
+  created_at_formatted?: string;
 }
 
 interface Filters {
@@ -117,7 +118,7 @@ const ApplicationManagementTable: React.FC = () => {
   const apiAssetsUrl = import.meta.env.VITE_ASSET_URL;
 
   const debouncedSearch = useDebounce(filters.search, 500);
-
+console.log(applications);
   // Year options for dropdown
   const yearOptions = [
     { value: '2025', label: '2025' },
@@ -608,6 +609,9 @@ const ApplicationManagementTable: React.FC = () => {
                         </div>
                       </th>
                       <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
+                        Created At
+                      </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
                         Academic Name
                       </th>
                       <th 
@@ -631,6 +635,7 @@ const ApplicationManagementTable: React.FC = () => {
                     {applications.length > 0 ? (
                       applications.map((application, index) => {
                         const paymentStatus = getPaymentStatus(application.payment_status);
+                        console.log(application.created_at_formatted);
                         return (
                           <tr key={application.id} className="hover:bg-gray-50 transition-colors duration-150">
                             <td className="py-4 px-4 text-sm font-medium text-gray-900">
@@ -673,9 +678,15 @@ const ApplicationManagementTable: React.FC = () => {
                                 <span className="text-xs text-gray-500">No Signature</span>
                               </div>
                             </td>
+                            
                             <td className="py-4 px-4 text-sm text-gray-600 min-w-[100px]">
                               <div className="truncate " title={application.roll_no}>
                                 {application.roll_no || 'N/A'}
+                              </div>
+                            </td>
+                            <td className="py-4 px-4 text-sm text-gray-600 min-w-[100px]">
+                              <div className="truncate " title={application?.created_at_formatted}>
+                                {application?.created_at_formatted || 'N/A'}
                               </div>
                             </td>
                             <td className="py-4 px-4 text-sm text-gray-600 min-w-[150px]">

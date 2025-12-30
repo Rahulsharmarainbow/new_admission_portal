@@ -36,6 +36,7 @@ interface FormData {
   academic_id: string;
   profile: File | null;
   profilePreview: string;
+  notify: number;
 }
 
 interface ApiResponse {
@@ -63,6 +64,7 @@ const UserForm: React.FC = () => {
     academic_id: '',
     profile: null,
     profilePreview: '',
+    notify: 1,
   });
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -97,6 +99,7 @@ const UserForm: React.FC = () => {
         academic_id: '',
         profile: null,
         profilePreview: '',
+        notify: 1,
       });
     }
   }, [id]);
@@ -312,6 +315,7 @@ const UserForm: React.FC = () => {
           password: userData.d_password || '',
           academic_id: userData.academic_id?.toString() || '',
           profilePreview: userData.profile ? `${assetUrl}/${userData.profile}` : '',
+          notify: userData.notify ?? 1, 
         }));
         // Validate existing phone number
         if (userData.number) {
@@ -421,6 +425,7 @@ const UserForm: React.FC = () => {
       formDataToSend.append('email', formData.email);
       formDataToSend.append('number', formData.number);
       formDataToSend.append('type', type || '');
+      if(type === '3')formDataToSend.append('notify', formData.notify.toString());
 
       // Only append password for new users or if password is provided in edit
       if ((!isEdit && formData.password) || (isEdit && formData.password)) {
@@ -802,6 +807,50 @@ const UserForm: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Notify Field - Only for Customer Admin */}
+{type === '3' && (
+  <div className="mb-6">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Notify Customer *
+    </label>
+
+    <div className="flex items-center gap-6">
+      {/* YES */}
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="radio"
+          name="notify"
+          value="1"
+          checked={formData.notify === 1}
+          onChange={() =>
+            setFormData((prev) => ({ ...prev, notify: 1 }))
+          }
+          disabled={loading}
+          className="w-4 h-4 accent-blue-600"
+        />
+        <span className="text-sm text-gray-700">Yes</span>
+      </label>
+
+      {/* NO */}
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="radio"
+          name="notify"
+          value="0"
+          checked={formData.notify === 0}
+          onChange={() =>
+            setFormData((prev) => ({ ...prev, notify: 0 }))
+          }
+          disabled={loading}
+          className="w-4 h-4 accent-blue-600"
+        />
+        <span className="text-sm text-gray-700">No</span>
+      </label>
+    </div>
+  </div>
+)}
+
 
             {/* Action Buttons */}
             <div className="pt-6 border-t border-gray-200 flex justify-end space-x-4">
