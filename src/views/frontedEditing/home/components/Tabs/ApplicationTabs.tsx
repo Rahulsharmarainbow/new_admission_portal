@@ -13,49 +13,53 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
 
   // 初始化表单数据，包含日期和时间字段
   const [formData, setFormData] = useState({
-    application: { 
-      title: '', 
-      isNew: false, 
-      type: 'url', 
-      redirectUrl: '', 
+    application: {
+      title: '',
+      isNew: false,
+      type: 'url',
+      redirectUrl: '',
+      full_url: '',
       document: null,
       startDate: '',
       startTime: '00:00',
       endDate: '',
-      endTime: '23:59'
+      endTime: '23:59',
     },
-    news: { 
-      title: '', 
-      isNew: false, 
-      type: 'url', 
-      redirectUrl: '', 
+    news: {
+      title: '',
+      isNew: false,
+      type: 'url',
+      full_url: '',
+      redirectUrl: '',
       document: null,
       startDate: '',
       startTime: '00:00',
       endDate: '',
-      endTime: '23:59'
+      endTime: '23:59',
     },
-    notification: { 
-      title: '', 
-      isNew: false, 
-      type: 'url', 
-      redirectUrl: '', 
+    notification: {
+      title: '',
+      isNew: false,
+      type: 'url',
+      redirectUrl: '',
+      full_url: '',
       document: null,
       startDate: '',
       startTime: '00:00',
       endDate: '',
-      endTime: '23:59'
+      endTime: '23:59',
     },
-    marquee: { 
-      title: '', 
-      isNew: false, 
-      type: 'url', 
-      redirectUrl: '', 
+    marquee: {
+      title: '',
+      isNew: false,
+      type: 'url',
+      redirectUrl: '',
+      full_url: '',
       document: null,
       startDate: '',
       startTime: '00:00',
       endDate: '',
-      endTime: '23:59'
+      endTime: '23:59',
     },
   });
 
@@ -128,13 +132,12 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
   const handleEdit = (item) => {
     const tabKey = item.tab_name;
     setEditId((prev) => ({ ...prev, [tabKey]: item.id }));
-    
-    // 解析数据库中的日期时间
+
     let startDate = '';
     let startTime = '00:00';
     let endDate = '';
     let endTime = '23:59';
-    
+
     if (item.start_date) {
       if (item.start_date.includes(' ')) {
         const [datePart, timePart] = item.start_date.split(' ');
@@ -144,7 +147,7 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
         startDate = item.start_date;
       }
     }
-    
+
     if (item.end_date) {
       if (item.end_date.includes(' ')) {
         const [datePart, timePart] = item.end_date.split(' ');
@@ -154,7 +157,7 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
         endDate = item.end_date;
       }
     }
-    
+
     setFormData((prev) => ({
       ...prev,
       [tabKey]: {
@@ -162,11 +165,12 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
         isNew: item.new === '1',
         type: item.url ? 'url' : 'document',
         redirectUrl: item.url || '',
+        full_url: item.full_url || '',
         document: null,
         startDate,
         startTime,
         endDate,
-        endTime
+        endTime,
       },
     }));
     const idx = TAB_KEYS.indexOf(tabKey);
@@ -177,16 +181,17 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
     setEditId((prev) => ({ ...prev, [tabKey]: null }));
     setFormData((prev) => ({
       ...prev,
-      [tabKey]: { 
-        title: '', 
-        isNew: false, 
-        type: 'url', 
-        redirectUrl: '', 
+      [tabKey]: {
+        title: '',
+        isNew: false,
+        type: 'url',
+        redirectUrl: '',
+        full_url: '',
         document: null,
         startDate: '',
         startTime: '00:00',
         endDate: '',
-        endTime: '23:59'
+        endTime: '23:59',
       },
     }));
   };
@@ -219,8 +224,8 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
 
     // Reorder items locally
     const items = [...tabItems[tabKey]];
-    const sourceIndex = items.findIndex(item => item.id === sourceId);
-    const targetIndex = items.findIndex(item => item.id === targetId);
+    const sourceIndex = items.findIndex((item) => item.id === sourceId);
+    const targetIndex = items.findIndex((item) => item.id === targetId);
 
     if (sourceIndex === -1 || targetIndex === -1) return;
 
@@ -228,14 +233,14 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
     items.splice(targetIndex, 0, movedItem);
 
     // Update local state
-    setTabItems(prev => ({
+    setTabItems((prev) => ({
       ...prev,
-      [tabKey]: items
+      [tabKey]: items,
     }));
 
     // Update order in backend
     await updateItemOrder(items, tabKey);
-    
+
     setDraggingId(null);
   };
 
@@ -248,7 +253,7 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
     try {
       const orderData = items.map((item, index) => ({
         id: item.id,
-        display_order: index + 1
+        display_order: index + 1,
       }));
 
       const res = await axios.post(
@@ -256,9 +261,9 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
         {
           academic_id: selectedAcademic,
           tab_name: tabKey,
-          order_data: orderData
+          order_data: orderData,
         },
-        { headers: { Authorization: `Bearer ${user?.token}` } }
+        { headers: { Authorization: `Bearer ${user?.token}` } },
       );
 
       if (res.data.success) {
@@ -304,21 +309,21 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
     data.append('title', fd.title);
     data.append('is_new', fd.isNew ? '1' : '0');
     data.append('type', fd.type);
-    
+
     if (fd.type === 'url') data.append('url', fd.redirectUrl);
     else if (fd.document) data.append('file', fd.document);
-    
+
     // Add start and end dates with time
     if (fd.startDate) {
       const startDateTime = `${fd.startDate} ${fd.startTime}:00`;
       data.append('start_date', startDateTime);
     }
-    
+
     if (fd.endDate) {
       const endDateTime = `${fd.endDate} ${fd.endTime}:00`;
       data.append('end_date', endDateTime);
     }
-    
+
     if (editId[tabKey]) data.append('id', editId[tabKey]);
 
     setSaving(true);
@@ -337,16 +342,17 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
         toast.success(editId[tabKey] ? `${tabKey} updated` : `${tabKey} added`);
         setFormData((prev) => ({
           ...prev,
-          [tabKey]: { 
-            title: '', 
-            isNew: false, 
-            type: 'url', 
-            redirectUrl: '', 
+          [tabKey]: {
+            title: '',
+            isNew: false,
+            type: 'url',
+            redirectUrl: '',
+            full_url: '',
             document: null,
             startDate: '',
             startTime: '00:00',
             endDate: '',
-            endTime: '23:59'
+            endTime: '23:59',
           },
         }));
         setEditId((prev) => ({ ...prev, [tabKey]: null }));
@@ -371,7 +377,7 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
   // Format date for display with time
   const formatDateTimeForDisplay = (dateTimeString) => {
     if (!dateTimeString) return 'Not set';
-    
+
     try {
       const date = new Date(dateTimeString);
       if (dateTimeString.includes(' ')) {
@@ -380,13 +386,13 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
         return `${date.toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'short',
-          day: 'numeric'
+          day: 'numeric',
         })} at ${time}`;
       } else {
         return date.toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'short',
-          day: 'numeric'
+          day: 'numeric',
         });
       }
     } catch (error) {
@@ -397,9 +403,9 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
   // Check if item is currently active based on dates and times
   const isItemActive = (item) => {
     if (!item.start_date && !item.end_date) return true; // No date restriction
-    
+
     const now = new Date();
-    
+
     if (item.start_date && item.end_date) {
       const start = new Date(item.start_date);
       const end = new Date(item.end_date);
@@ -411,7 +417,7 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
       const end = new Date(item.end_date);
       return now <= end;
     }
-    
+
     return true;
   };
 
@@ -483,7 +489,9 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
             {/* Start Date and Time Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <h4 className="font-medium text-gray-700 border-b pb-2">Start Date & Time (Optional)</h4>
+                <h4 className="font-medium text-gray-700 border-b pb-2">
+                  Start Date & Time (Optional)
+                </h4>
                 <div>
                   <label
                     htmlFor={`${currentTabKey}-startDate`}
@@ -519,7 +527,9 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
 
               {/* End Date and Time Fields */}
               <div className="space-y-4">
-                <h4 className="font-medium text-gray-700 border-b pb-2">End Date & Time (Optional)</h4>
+                <h4 className="font-medium text-gray-700 border-b pb-2">
+                  End Date & Time (Optional)
+                </h4>
                 <div>
                   <label
                     htmlFor={`${currentTabKey}-endDate`}
@@ -593,8 +603,19 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
                 <input
                   id={`${currentTabKey}-redirectUrl`}
                   type="url"
-                  value={formData[currentTabKey].redirectUrl}
-                  onChange={(e) => handleInputChange(currentTabKey, 'redirectUrl', e.target.value)}
+                  value={formData[currentTabKey].full_url}
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    setFormData((prev) => ({
+                      ...prev,
+                      [currentTabKey]: {
+                        ...prev[currentTabKey],
+                        full_url: value, // 👈 UI value (input)
+                        redirectUrl: value, // 👈 submit value (default)
+                      },
+                    }));
+                  }}
                   className="w-full p-2 rounded-lg border border-gray-300  text-gray-900 focus:border-blue-700 focus:outline-none transition"
                 />
               </div>
@@ -678,7 +699,9 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-1">
                           <span className="text-gray-400 text-lg">⋮⋮</span>
-                          <span className="text-sm text-gray-500 w-6 text-center">{index + 1}.</span>
+                          <span className="text-sm text-gray-500 w-6 text-center">
+                            {index + 1}.
+                          </span>
                           <span className="font-medium">{item.text}</span>
                           {item.new === '1' && (
                             <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
@@ -691,7 +714,7 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
                             </span>
                           )}
                         </div>
-                        
+
                         {/* Date and Time information */}
                         <div className="ml-10 text-xs text-gray-500 space-y-1">
                           {(item.start_date || item.end_date) && (
@@ -751,9 +774,6 @@ const ApplicationTabs = ({ selectedAcademic, user, apiUrl }) => {
 };
 
 export default ApplicationTabs;
-
-
-
 
 // import React, { useEffect, useState } from 'react';
 // import axios from 'axios';
@@ -917,7 +937,7 @@ export default ApplicationTabs;
 
 //     // Update order in backend
 //     await updateItemOrder(items, tabKey);
-    
+
 //     setDraggingId(null);
 //   };
 

@@ -45,24 +45,23 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
 
   // Form fields
   const [academicLogo, setAcademicLogo] = useState<File | string | null>(null);
-  const [logoPreview, setLogoPreview] = useState("");
-  const [academicName, setAcademicName] = useState("");
-  const [academicAddress, setAcademicAddress] = useState("");
+  const [logoPreview, setLogoPreview] = useState('');
+  const [academicName, setAcademicName] = useState('');
+  const [academicAddress, setAcademicAddress] = useState('');
   const [pages, setPages] = useState<any[]>([]);
   const [selectedPages, setSelectedPages] = useState<any[]>([]);
   const [homePageTabs, setHomePageTabs] = useState<any>({
-  tab_header_1: '',
-  tab_header_2: '',
-  tab_header_3: '',
-});
-
+    tab_header_1: '',
+    tab_header_2: '',
+    tab_header_3: '',
+  });
 
   // New fields
   const [academicWebsite, setAcademicWebsite] = useState('');
   const [academicNewLogo, setAcademicNewLogo] = useState<File | string | null>(null);
-  const [academicNewLogoPreview, setAcademicNewLogoPreview] = useState("");
+  const [academicNewLogoPreview, setAcademicNewLogoPreview] = useState('');
   const [academicFavicon, setAcademicFavicon] = useState<File | string | null>(null);
-  const [academicFaviconPreview, setAcademicFaviconPreview] = useState("");
+  const [academicFaviconPreview, setAcademicFaviconPreview] = useState('');
 
   const [admissionQueryMobile, setAdmissionQueryMobile] = useState('');
   const [admissionQueryEmail, setAdmissionQueryEmail] = useState('');
@@ -84,47 +83,47 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
       toolbarSticky: false,
       toolbarAdaptive: false,
       buttons: [
-        "source",
-        "|",
-        "bold",
-        "italic",
-        "underline",
-        "strikethrough",
-        "|",
-        "ul",
-        "ol",
-        "|",
-        "font",
-        "fontsize",
-        "brush",
-        "paragraph",
-        "|",
-        "image",
-        "video",
-        "table",
-        "link",
-        "|",
-        "left",
-        "center",
-        "right",
-        "justify",
-        "|",
-        "undo",
-        "redo",
-        "|",
-        "hr",
-        "eraser",
-        "copyformat",
-        "fullsize",
+        'source',
+        '|',
+        'bold',
+        'italic',
+        'underline',
+        'strikethrough',
+        '|',
+        'ul',
+        'ol',
+        '|',
+        'font',
+        'fontsize',
+        'brush',
+        'paragraph',
+        '|',
+        'image',
+        'video',
+        'table',
+        'link',
+        '|',
+        'left',
+        'center',
+        'right',
+        'justify',
+        '|',
+        'undo',
+        'redo',
+        '|',
+        'hr',
+        'eraser',
+        'copyformat',
+        'fullsize',
       ],
       showXPathInStatusbar: false,
       showCharsCounter: false,
       showWordsCounter: false,
       uploader: { insertImageAsBase64URI: true },
-      placeholder: "Start typing your content here...",
-      theme: "default",
+      placeholder: 'Start typing your content here...',
+      theme: 'default',
     }),
-    []
+    [],
   );
 
   const handleEditorBlur = useCallback((newContent: string) => {
@@ -149,7 +148,7 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
             Authorization: `Bearer ${user?.token}`,
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       if (response.data.success) {
@@ -168,7 +167,6 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
   };
 
   const setFormFields = (data: FooterData) => {
-    console.log('data', data);
     setAdmissionQueryMobile(data.admissio_query_mobile || '');
     setAdmissionQueryEmail(data.admissio_query_email || '');
     setTechnicalSupportEmail(data.technical_support_email || '');
@@ -183,15 +181,17 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
 
     setAcademicName(data.name || '');
     setAcademicAddress(data.address || '');
-    setHomePageTabs(data.home_page_tab || {
-  tab_header_1: '',
-  tab_header_2: '',
-  tab_header_3: '',
-});
+    setHomePageTabs(
+      data.home_page_tab || {
+        tab_header_1: '',
+        tab_header_2: '',
+        tab_header_3: '',
+      },
+    );
 
     // New fields
     setAcademicWebsite(data.academic_website || '');
-    
+
     if (data.academic_new_logo) {
       setAcademicNewLogo(data.academic_new_logo);
       setAcademicNewLogoPreview(`${assetUrl}/${data.academic_new_logo}`);
@@ -199,7 +199,7 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
       setAcademicNewLogo(null);
       setAcademicNewLogoPreview('');
     }
-    
+
     if (data.academic_favicon) {
       setAcademicFavicon(data.academic_favicon);
       setAcademicFaviconPreview(`${assetUrl}/${data.academic_favicon}`);
@@ -218,14 +218,13 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
   };
 
   const handleTabChange =
-  (key: 'tab_header_1' | 'tab_header_2' | 'tab_header_3') =>
-  (e: React.ChangeEvent<HTMLInputElement>) => {
-    setHomePageTabs((prev: any) => ({
-      ...prev,
-      [key]: e.target.value,
-    }));
-  };
-
+    (key: 'tab_header_1' | 'tab_header_2' | 'tab_header_3') =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setHomePageTabs((prev: any) => ({
+        ...prev,
+        [key]: e.target.value,
+      }));
+    };
 
   const resetForm = () => {
     setAdmissionQueryMobile('');
@@ -248,7 +247,7 @@ const FooterFormSection: React.FC<FooterFormSectionProps> = ({
     setLogoPreview('');
     setHomePageTabs({});
   };
-console.log('selectedAcademic:', homePageTabs);
+  console.log('selectedAcademic:', homePageTabs);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -311,7 +310,7 @@ console.log('selectedAcademic:', homePageTabs);
             Authorization: `Bearer ${user?.token}`,
             'Content-Type': 'multipart/form-data',
           },
-        }
+        },
       );
 
       if (response.data.success) {
@@ -333,8 +332,8 @@ console.log('selectedAcademic:', homePageTabs);
     (event: React.ChangeEvent<HTMLInputElement>) =>
       setState(event.target.value);
 
-  const handleFileChange = (setFile: any, setPreview: any) => 
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange =
+    (setFile: any, setPreview: any) => (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (file) {
         setFile(file);
@@ -449,7 +448,7 @@ console.log('selectedAcademic:', homePageTabs);
                     onChange={handleInputChange(setAcademicWebsite)}
                     placeholder="https://example.com"
                   />
-                </div>                
+                </div>
 
                 {/* Academic Favicon */}
                 <div>
@@ -491,48 +490,43 @@ console.log('selectedAcademic:', homePageTabs);
                     />
                   </div>
                 </div>
-
-                
               </div>
 
-             <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
-  Tabs Heading Setting
-</h3>
+              <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                Tabs Heading Setting
+              </h3>
 
-<div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                <div>
+                  <Label className="block mb-2">Application Heading</Label>
+                  <TextInput
+                    type="text"
+                    value={homePageTabs.tab_header_2 || ''}
+                    onChange={handleTabChange('tab_header_2')}
+                    placeholder="Enter Application Heading name"
+                  />
+                </div>
 
-  <div>
-    <Label className="block mb-2">Application Heading</Label>
-    <TextInput
-      type="text"
-      value={homePageTabs.tab_header_2 || ''}
-      onChange={handleTabChange('tab_header_2')}
-      placeholder="Enter Application Heading name"
-    />
-  </div>
+                <div>
+                  <Label className="block mb-2">Notification Heading</Label>
+                  <TextInput
+                    type="text"
+                    value={homePageTabs.tab_header_1 || ''}
+                    onChange={handleTabChange('tab_header_1')}
+                    placeholder="Enter Notification Heading name"
+                  />
+                </div>
 
-  <div>
-    <Label className="block mb-2">Notification Heading</Label>
-    <TextInput
-      type="text"
-      value={homePageTabs.tab_header_1 || ''}
-      onChange={handleTabChange('tab_header_1')}
-      placeholder="Enter Notification Heading name"
-    />
-  </div>
-
-  <div>
-    <Label className="block mb-2">News Heading</Label>
-    <TextInput
-      type="text"
-      value={homePageTabs.tab_header_3 || ''}
-      onChange={handleTabChange('tab_header_3')}
-      placeholder="Enter News Heading name"
-    />
-  </div>
-
-</div>
-
+                <div>
+                  <Label className="block mb-2">News Heading</Label>
+                  <TextInput
+                    type="text"
+                    value={homePageTabs.tab_header_3 || ''}
+                    onChange={handleTabChange('tab_header_3')}
+                    placeholder="Enter News Heading name"
+                  />
+                </div>
+              </div>
 
               <h2 className="text-xl font-semibold mb-6">Footer Editing</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -680,7 +674,7 @@ console.log('selectedAcademic:', homePageTabs);
                   <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
                     Select Pages to Show in Footer
                   </h3>
-                  
+
                   {pages.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       {pages.map((page) => (
@@ -694,7 +688,7 @@ console.log('selectedAcademic:', homePageTabs);
                               if (e.target.checked) {
                                 setSelectedPages([...selectedPages, id]);
                               } else {
-                                setSelectedPages(selectedPages.filter(pid => pid !== id));
+                                setSelectedPages(selectedPages.filter((pid) => pid !== id));
                               }
                             }}
                             className="w-4 h-4 accent-blue-600"

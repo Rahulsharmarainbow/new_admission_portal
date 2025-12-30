@@ -118,7 +118,7 @@ const ApplicationManagementTable: React.FC = () => {
   const apiAssetsUrl = import.meta.env.VITE_ASSET_URL;
 
   const debouncedSearch = useDebounce(filters.search, 500);
-console.log(applications);
+
   // Year options for dropdown
   const yearOptions = [
     { value: '2025', label: '2025' },
@@ -584,6 +584,9 @@ console.log(applications);
                       <th className="w-16 py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         S.NO
                       </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
+                        Created At
+                      </th>
                       <th 
                         className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px] cursor-pointer select-none"
                         onClick={() => handleSort('applicant_name')}
@@ -607,10 +610,7 @@ console.log(applications);
                           <span>Roll No</span>
                           {getSortIcon('roll_no')}
                         </div>
-                      </th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
-                        Created At
-                      </th>
+                      </th>                      
                       <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
                         Academic Name
                       </th>
@@ -635,11 +635,15 @@ console.log(applications);
                     {applications.length > 0 ? (
                       applications.map((application, index) => {
                         const paymentStatus = getPaymentStatus(application.payment_status);
-                        console.log(application.created_at_formatted);
                         return (
                           <tr key={application.id} className="hover:bg-gray-50 transition-colors duration-150">
                             <td className="py-4 px-4 text-sm font-medium text-gray-900">
                               {filters.page * filters.rowsPerPage + index + 1}
+                            </td>
+                            <td className="py-4 px-4 text-sm text-gray-600 min-w-[100px]">
+                              <div className="truncate " title={application?.created_at_formatted}>
+                                {application?.created_at_formatted || 'N/A'}
+                              </div>
                             </td>
                             <td className="py-4 px-4 text-sm font-medium text-gray-900 min-w-[150px]">
                               <div className="truncate max-w-[140px]" title={application.applicant_name}>
@@ -682,11 +686,6 @@ console.log(applications);
                             <td className="py-4 px-4 text-sm text-gray-600 min-w-[100px]">
                               <div className="truncate " title={application.roll_no}>
                                 {application.roll_no || 'N/A'}
-                              </div>
-                            </td>
-                            <td className="py-4 px-4 text-sm text-gray-600 min-w-[100px]">
-                              <div className="truncate " title={application?.created_at_formatted}>
-                                {application?.created_at_formatted || 'N/A'}
                               </div>
                             </td>
                             <td className="py-4 px-4 text-sm text-gray-600 min-w-[150px]">
