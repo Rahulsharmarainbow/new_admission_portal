@@ -141,7 +141,7 @@ const getParentName = () => {
   />
 
   {/* Footer Section with Signatures */}
-  <div className="disclaimer_footer_flex flex flex-col sm:flex-row justify-between items-start gap-6 md:gap-8 mt-6 md:mt-8 p-4 md:p-6 border-t border-gray-200 bg-gray-50/50 rounded-lg">
+  <div className="disclaimer_footer_flex flex flex-col sm:flex-row justify-between items-center gap-6 md:gap-8 mt-6 md:mt-8 p-4 md:p-6 border-t border-gray-200 bg-gray-50/50 rounded-lg">
     {/* School Signature Section */}
     <div className="w-full sm:w-auto text-center sm:text-left">
       {directorSignature ? (
@@ -149,7 +149,7 @@ const getParentName = () => {
           <img
             src={assetUrl + '/' + directorSignature}
             alt="School Signature"
-            className="w-32 h-14 md:w-48 md:h-20 object-contain mx-auto sm:mx-0 mb-2 border border-gray-300 rounded"
+            className="w-32 h-14 md:w-48 md:h-20 object-contain mx-auto sm:mx-0 mb-2  rounded"
           />
           <p className="text-xs md:text-sm font-semibold text-gray-600">
             Signature & Seal of School

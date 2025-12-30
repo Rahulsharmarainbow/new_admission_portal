@@ -121,7 +121,7 @@ const DeclarationStep: React.FC<DeclarationStepProps> = ({
     dangerouslySetInnerHTML={{ __html: formatContent(content, formData) }}
   />
   
-  <div className="declaration_footer_flex flex flex-col md:flex-row justify-between items-start md:items-start gap-6 md:gap-8 mt-6 md:mt-8 p-4 md:p-6 border-t border-gray-200 bg-gray-50/50 rounded-lg">
+  <div className="declaration_footer_flex flex flex-col md:flex-row justify-between items-center md:items-center gap-6 md:gap-8 mt-6 md:mt-8 p-4 md:p-6 border-t border-gray-200 bg-gray-50/50 rounded-lg">
     {/* Left Section - Place & Date */}
     <div className="w-full md:w-auto">
       <p className="text-sm font-semibold text-gray-800 mb-2 md:mb-0">

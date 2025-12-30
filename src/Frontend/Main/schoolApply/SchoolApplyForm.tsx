@@ -891,7 +891,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
             fileData={fileData}
             accepted={conditions.disclaimer}
             onConditionChange={handleConditionChange}
-            directorSignature={header?.director_signature}
+            directorSignature={header?.signature_seal}
           />
         );
       case 2:
