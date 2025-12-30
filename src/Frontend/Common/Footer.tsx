@@ -1,8 +1,17 @@
 import React from 'react';
 import { Link, useParams } from 'react-router';
 import { IconMail, IconPhone } from '@tabler/icons-react';
-import NewBadge from './NewBadge'; // Assuming you have this component
 import { TbWorldLatitude } from 'react-icons/tb';
+const getFirst10Digits = (phone) => {
+  if (!phone) return '1234567890';
+
+  // Remove non-numeric characters
+  const digitsOnly = phone.replace(/\D/g, '');
+
+  // Take first 10 digits
+  return digitsOnly.slice(0, 10);
+};
+
 
 const Footer = ({ footerData, baseUrl }) => {
   const { institute_id } = useParams();
@@ -31,7 +40,9 @@ const Footer = ({ footerData, baseUrl }) => {
           {
             type: 'phone',
             value: footerData?.admission?.admissio_query_mobile || '1234567890',
-            href: `tel:${footerData?.admission?.admissio_query_mobile || '1234567890'}`,
+            href: `tel:${
+              getFirst10Digits(footerData?.admission?.admissio_query_mobile) || '1234567890'
+            }`,
           },
         ],
       },
