@@ -136,7 +136,7 @@ const SuccessStep: React.FC<SuccessStepProps> = ({
           ) : (
             <>
               <Icon icon="solar:download-line-duotone" className="w-5 h-5" />
-              Download Receipt
+              Download
             </>
           )}
         </button>

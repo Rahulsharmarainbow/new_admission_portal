@@ -435,7 +435,7 @@ const FormStep: React.FC<FormStepProps> = ({
                 )}
               </div>
 
-              <p className="text-xs text-gray-600 mb-2">{child.content}</p>
+              <p className="text-xs text-gray-600 mb-2">{child.content}{child.required == 1 && <span className="text-red-500 ml-1">*</span>}</p>
               {child.resolution && type === 'collage' && (
                 <p className="text-xs text-gray-600 mb-2">{child.resolution}</p>
               )}
