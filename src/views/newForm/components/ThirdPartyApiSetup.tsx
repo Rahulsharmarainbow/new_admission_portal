@@ -1494,7 +1494,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                 className="w-full"
               >
                 <option value="1">Razorpay</option>
-                <option value="2">UG Payment</option>
+                <option value="2">ICICI Payment</option>
               </Select>
             </div>
 
@@ -1566,7 +1566,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
             {formData.paymentType == '2' && (
               <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                 <h5 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 break-words">
-                  UG Payment Integration
+                  ICICI Payment Integration
                 </h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
