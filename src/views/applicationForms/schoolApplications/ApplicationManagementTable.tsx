@@ -383,6 +383,7 @@ const ApplicationManagementTable: React.FC = () => {
         applicationNumber: filters.applicationNumber || "",
         paymentStatus: filters.paymentStatus || "",
         email: filters.search.includes('@') ? filters.search : "",
+        year: filters.year || "",
       };
 
       // Add cdFilters if they exist

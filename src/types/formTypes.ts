@@ -50,6 +50,7 @@ export interface FormData {
   smsSecretkey: string;
   razorpayApikey: string;
   razorpaySecretkey: string;
+  send_email_status: string;
 
   // Templates
   whatsappTemplate: string;

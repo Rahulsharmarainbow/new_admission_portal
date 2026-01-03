@@ -10,10 +10,10 @@
 //   errors?: Record<string, string>;
 // }
 
-// const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({ 
-//   formData, 
+// const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
+//   formData,
 //   updateFormData,
-//   errors = {} 
+//   errors = {}
 // }) => {
 //   const [showApiKey, setShowApiKey] = useState(false);
 //   const [showPassword, setShowPassword] = useState(false);
@@ -103,13 +103,13 @@
 
 //   const handleSelectChange = (field: keyof FormData, value: string) => {
 //     console.log(`Select ${field}:`, value);
-    
+
 //     // Handle payment type change specially
 //     if (field === 'paymentType') {
 //       // Update payment type and payment status based on selection
 //       const paymentStatus = value === 'razorpay' ? '1' : value === 'ug_payment' ? '2' : '';
-      
-//       updateFormData({ 
+
+//       updateFormData({
 //         [field]: value,
 //         paymentStatus: paymentStatus
 //       });
@@ -136,12 +136,12 @@
 //     error?: string;
 //   }
 
-//   const PasswordInput: React.FC<PasswordInputProps> = ({ 
-//     id, 
-//     value, 
-//     onChange, 
-//     showPassword, 
-//     setShowPassword, 
+//   const PasswordInput: React.FC<PasswordInputProps> = ({
+//     id,
+//     value,
+//     onChange,
+//     showPassword,
+//     setShowPassword,
 //     placeholder,
 //     error
 //   }) => {
@@ -252,8 +252,8 @@
 //   return (
 //     <div className="space-y-6">
 //       <Alert color="info" icon={HiInformationCircle} className="break-words">
-//         Note: For inputs such as WhatsApp, Email, SMS, and Payment configurations, 
-//         you may skip entering values. If left blank, the system will automatically apply 
+//         Note: For inputs such as WhatsApp, Email, SMS, and Payment configurations,
+//         you may skip entering values. If left blank, the system will automatically apply
 //         the default administration settings for these services.
 //       </Alert>
 
@@ -277,7 +277,7 @@
 //               <option value="2">UG Payment</option>
 //             </Select>
 //           </div>
-          
+
 //           {/* Display payment status */}
 //           {/* <div>
 //             <Label htmlFor="paymentStatusDisplay" className="mb-2 block">
@@ -290,8 +290,8 @@
 //               className="w-full bg-gray-50"
 //             />
 //             <div className="mt-1 text-xs text-gray-500">
-//               {formData.paymentStatus === '1' ? 'Razorpay Selected' : 
-//                formData.paymentStatus === '2' ? 'UG Payment Selected' : 
+//               {formData.paymentStatus === '1' ? 'Razorpay Selected' :
+//                formData.paymentStatus === '2' ? 'UG Payment Selected' :
 //                'Select payment type'}
 //             </div>
 //           </div> */}
@@ -331,7 +331,7 @@
 //                 <p className="mt-1 text-sm text-red-600">{errors.razorpayApikey}</p>
 //               )}
 //             </div>
-            
+
 //             <div>
 //               <Label htmlFor="razorpaySecretKey" className="mb-2 block">
 //                 Secret Key
@@ -395,7 +395,7 @@
 //                 <p className="mt-1 text-sm text-red-600">{errors.pgMerchantId}</p>
 //               )}
 //             </div>
-            
+
 //             <div>
 //               <Label htmlFor="pgSecretKey" className="mb-2 block">
 //                 Secret Key
@@ -460,7 +460,7 @@
 //                   <option value="Other">Other</option>
 //                 </Select>
 //               </div>
-              
+
 //               <div>
 //                 <Label htmlFor="emailTemplate" className="mb-2 block">
 //                   Email Template <span className="text-red-600">*</span>
@@ -607,7 +607,7 @@
 //                 className="w-full"
 //               />
 //             </div>
-            
+
 //             {/* UserId Input */}
 //             <div>
 //               <Label htmlFor="userId" className="mb-2 block">User ID</Label>
@@ -622,7 +622,7 @@
 //                 Current Value: {formData.UserId || 'Empty'}
 //               </div>
 //             </div>
-            
+
 //             <div>
 //               <Label htmlFor="wPassword" className="mb-2 block">Password</Label>
 //               <PasswordInput
@@ -695,13 +695,6 @@
 
 // export default ThirdPartyApiSetup;
 
-
-
-
-
-
-
-
 // // import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 // // import { Card, Label, Select, TextInput, Textarea, Checkbox, Alert } from "flowbite-react";
 // // import { HiInformationCircle, HiEye, HiEyeOff } from "react-icons/hi";
@@ -714,10 +707,10 @@
 // //   errors?: Record<string, string>;
 // // }
 
-// // const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({ 
-// //   formData, 
+// // const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
+// //   formData,
 // //   updateFormData,
-// //   errors = {} 
+// //   errors = {}
 // // }) => {
 // //   const [showApiKey, setShowApiKey] = useState(false);
 // //   const [showPassword, setShowPassword] = useState(false);
@@ -825,12 +818,12 @@
 // //     error?: string;
 // //   }
 
-// //   const PasswordInput: React.FC<PasswordInputProps> = ({ 
-// //     id, 
-// //     value, 
-// //     onChange, 
-// //     showPassword, 
-// //     setShowPassword, 
+// //   const PasswordInput: React.FC<PasswordInputProps> = ({
+// //     id,
+// //     value,
+// //     onChange,
+// //     showPassword,
+// //     setShowPassword,
 // //     placeholder,
 // //     error
 // //   }) => {
@@ -898,8 +891,8 @@
 // //   return (
 // //     <div className="space-y-6">
 // //       <Alert color="info" icon={HiInformationCircle} className="break-words">
-// //         Note: For inputs such as WhatsApp, Email, SMS, and Razorpay API configurations, 
-// //         you may skip entering values. If left blank, the system will automatically apply 
+// //         Note: For inputs such as WhatsApp, Email, SMS, and Razorpay API configurations,
+// //         you may skip entering values. If left blank, the system will automatically apply
 // //         the default administration settings for these services.
 // //       </Alert>
 
@@ -937,7 +930,7 @@
 // //                   <option value="Other">Other</option>
 // //                 </Select>
 // //               </div>
-              
+
 // //               <div>
 // //                 <Label htmlFor="emailTemplate" className="mb-2 block">
 // //                   Email Template <span className="text-red-600">*</span>
@@ -1084,7 +1077,7 @@
 // //                 className="w-full"
 // //               />
 // //             </div>
-            
+
 // //             {/* UserId Input - FIXED */}
 // //             <div>
 // //               <Label htmlFor="userId" className="mb-2 block">User ID</Label>
@@ -1099,7 +1092,7 @@
 // //                 Current Value: {formData.UserId || 'Empty'}
 // //               </div>
 // //             </div>
-            
+
 // //             <div>
 // //               <Label htmlFor="wPassword" className="mb-2 block">Password</Label>
 // //               <PasswordInput
@@ -1196,7 +1189,7 @@
 // //               </button>
 // //             </div>
 // //           </div>
-          
+
 // //           <div>
 // //             <Label htmlFor="razorpaySecretKey" className="mb-2 block">
 // //               Secret Key
@@ -1228,12 +1221,11 @@
 
 // // export default ThirdPartyApiSetup;
 
-
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { Card, Label, Select, TextInput, Textarea, Checkbox, Alert } from "flowbite-react";
-import { HiInformationCircle, HiEye, HiEyeOff } from "react-icons/hi";
-import { FormData } from "src/types/formTypes";
-import JoditEditor from "jodit-react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { Card, Label, Select, TextInput, Textarea, Checkbox, Alert } from 'flowbite-react';
+import { HiInformationCircle, HiEye, HiEyeOff } from 'react-icons/hi';
+import { FormData } from 'src/types/formTypes';
+import JoditEditor from 'jodit-react';
 
 interface ThirdPartyApiSetupProps {
   formData: FormData;
@@ -1241,10 +1233,10 @@ interface ThirdPartyApiSetupProps {
   errors?: Record<string, string>;
 }
 
-const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({ 
-  formData, 
+const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
+  formData,
   updateFormData,
-  errors = {} 
+  errors = {},
 }) => {
   const [showApiKey, setShowApiKey] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -1268,86 +1260,89 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
       toolbarSticky: false,
       toolbarAdaptive: false,
       buttons: [
-        "source",
-        "|",
-        "bold",
-        "italic",
-        "underline",
-        "strikethrough",
-        "|",
-        "ul",
-        "ol",
-        "|",
-        "font",
-        "fontsize",
-        "brush",
-        "paragraph",
-        "|",
-        "image",
-        "video",
-        "table",
-        "link",
-        "|",
-        "left",
-        "center",
-        "right",
-        "justify",
-        "|",
-        "undo",
-        "redo",
-        "|",
-        "hr",
-        "eraser",
-        "copyformat",
-        "fullsize",
+        'source',
+        '|',
+        'bold',
+        'italic',
+        'underline',
+        'strikethrough',
+        '|',
+        'ul',
+        'ol',
+        '|',
+        'font',
+        'fontsize',
+        'brush',
+        'paragraph',
+        '|',
+        'image',
+        'video',
+        'table',
+        'link',
+        '|',
+        'left',
+        'center',
+        'right',
+        'justify',
+        '|',
+        'undo',
+        'redo',
+        '|',
+        'hr',
+        'eraser',
+        'copyformat',
+        'fullsize',
       ],
       showXPathInStatusbar: false,
       showCharsCounter: false,
       showWordsCounter: false,
       uploader: { insertImageAsBase64URI: true },
-      placeholder: "Start typing your email template here...",
-      theme: "default",
+      placeholder: 'Start typing your email template here...',
+      theme: 'default',
     }),
-    []
+    [],
   );
 
-  const handleEmailTemplateChange = useCallback((newContent: string) => {
-    console.log('Email template changed:', newContent);
-    updateFormData({ emailTemplate: newContent });
-  }, [updateFormData]);
-
-  // Debug effect
-  useEffect(() => {
-    console.log('ThirdPartyApiSetup - Current paymentEnabled:', formData.paymentEnabled);
-    console.log('Current Payment Type:', formData.payment_type);
-    console.log('Current Payment Status:', formData.payment_status);
-  }, [formData.paymentEnabled, formData.payment_type, formData.payment_status]);
+  const handleEmailTemplateChange = useCallback(
+    (newContent: string) => {
+      console.log('Email template changed:', newContent);
+      updateFormData({ emailTemplate: newContent });
+    },
+    [updateFormData],
+  );
 
   const handleCheckboxChange = (field: keyof FormData, value: boolean) => {
     console.log(`Checkbox ${field}:`, value);
-    
+
+    if (field === 'send_email_status') {
+      updateFormData({
+        send_email_status: value ? '1' : '0',
+      });
+      return;
+    }
+
     if (field === 'paymentEnabled') {
       if (value) {
         // Enable payments - set payment status based on selected payment type
         const paymentType = formData.payment_type || '1'; // Default to Razorpay
         const paymentStatus = paymentType === '1' ? '1' : '2'; // 1 for Razorpay, 2 for UG Payment
-        
-        updateFormData({ 
+
+        updateFormData({
           paymentEnabled: true,
           payment_type: paymentType,
-          payment_status: paymentStatus
+          payment_status: paymentStatus,
         });
       } else {
         // Disable payments - Set both to empty strings (not 0)
-        updateFormData({ 
+        updateFormData({
           paymentEnabled: false,
-          payment_type: '', // Empty string
-          payment_status: '', // Empty string
-          // Also clear payment credentials
+          payment_type: '',
+          payment_status: '',
           razorpayApikey: '',
           razorpaySecretkey: '',
           pgMerchantId: '',
-          pgSecretKey: ''
+          pgSecretKey: '',
+          send_email_status: '0',
         });
       }
     } else {
@@ -1362,19 +1357,19 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
 
   const handleSelectChange = (field: keyof FormData, value: string) => {
     console.log(`Select ${field}:`, value);
-    
+
     if (field === 'payment_type') {
       // Only update if payments are enabled
       if (formData.paymentEnabled) {
         const paymentStatus = value === '1' ? '1' : '2';
-        updateFormData({ 
+        updateFormData({
           [field]: value,
-          payment_status: paymentStatus
+          payment_status: paymentStatus,
         });
       } else {
         // If payments are disabled, don't update payment_status
-        updateFormData({ 
-          [field]: value
+        updateFormData({
+          [field]: value,
           // payment_status remains empty
         });
       }
@@ -1401,14 +1396,14 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
     error?: string;
   }
 
-  const PasswordInput: React.FC<PasswordInputProps> = ({ 
-    id, 
-    value, 
-    onChange, 
-    showPassword, 
-    setShowPassword, 
+  const PasswordInput: React.FC<PasswordInputProps> = ({
+    id,
+    value,
+    onChange,
+    showPassword,
+    setShowPassword,
     placeholder,
-    error
+    error,
   }) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -1432,7 +1427,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
         <input
           ref={inputRef}
           id={id}
-          type={showPassword ? "text" : "password"}
+          type={showPassword ? 'text' : 'password'}
           value={value}
           onChange={handleChange}
           placeholder={placeholder}
@@ -1447,9 +1442,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
         >
           {showPassword ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
         </button>
-        {error && (
-          <p className="mt-1 text-sm text-red-600">{error}</p>
-        )}
+        {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
       </div>
     );
   };
@@ -1459,9 +1452,9 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
   return (
     <div className="space-y-6">
       <Alert color="info" icon={HiInformationCircle} className="break-words">
-        Note: For inputs such as WhatsApp, Email, SMS, and Payment configurations, 
-        you may skip entering values. If left blank, the system will automatically apply 
-        the default administration settings for these services.
+        Note: For inputs such as WhatsApp, Email, SMS, and Payment configurations, you may skip
+        entering values. If left blank, the system will automatically apply the default
+        administration settings for these services.
       </Alert>
 
       {/* Payment Configuration Card */}
@@ -1473,7 +1466,10 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
             onChange={(e) => handleCheckboxChange('paymentEnabled', e.target.checked)}
             className="mr-2"
           />
-          <Label htmlFor="enablePayments" className="font-semibold text-gray-900 dark:text-white cursor-pointer">
+          <Label
+            htmlFor="enablePayments"
+            className="font-semibold text-gray-900 dark:text-white cursor-pointer"
+          >
             Enable Payment Service
           </Label>
         </div>
@@ -1489,7 +1485,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                 id="paymentType"
                 value={formData.paymentType || '1'}
                 onChange={(e) => handleSelectChange('paymentType', e.target.value)}
-                color={errors.paymentType ? "failure" : "gray"}
+                color={errors.paymentType ? 'failure' : 'gray'}
                 helperText={errors.paymentType}
                 className="w-full"
               >
@@ -1512,7 +1508,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                     <div className="relative">
                       <input
                         id="razorpayApiKey"
-                        type={showRazorpayApiKey ? "text" : "password"}
+                        type={showRazorpayApiKey ? 'text' : 'password'}
                         value={formData.razorpayApikey || ''}
                         onChange={(e) => handleInputChange('razorpayApikey', e.target.value)}
                         className={`block w-full border rounded-lg bg-white p-2.5 text-sm text-gray-900 pr-10 ${
@@ -1524,14 +1520,18 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                         onClick={() => setShowRazorpayApiKey(!showRazorpayApiKey)}
                       >
-                        {showRazorpayApiKey ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
+                        {showRazorpayApiKey ? (
+                          <HiEyeOff className="w-5 h-5" />
+                        ) : (
+                          <HiEye className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                     {errors.razorpayApikey && (
                       <p className="mt-1 text-sm text-red-600">{errors.razorpayApikey}</p>
                     )}
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="razorpaySecretKey" className="mb-2 block">
                       Secret Key
@@ -1539,7 +1539,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                     <div className="relative">
                       <input
                         id="razorpaySecretKey"
-                        type={showRazorpaySecretKey ? "text" : "password"}
+                        type={showRazorpaySecretKey ? 'text' : 'password'}
                         value={formData.razorpaySecretkey || ''}
                         onChange={(e) => handleInputChange('razorpaySecretkey', e.target.value)}
                         className={`block w-full border rounded-lg bg-white p-2.5 text-sm text-gray-900 pr-10 ${
@@ -1551,12 +1551,38 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                         onClick={() => setShowRazorpaySecretKey(!showRazorpaySecretKey)}
                       >
-                        {showRazorpaySecretKey ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
+                        {showRazorpaySecretKey ? (
+                          <HiEyeOff className="w-5 h-5" />
+                        ) : (
+                          <HiEye className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                     {errors.razorpaySecretkey && (
                       <p className="mt-1 text-sm text-red-600">{errors.razorpaySecretkey}</p>
                     )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="sendEmailStatus" className="text-sm font-medium">
+                      Send Email
+                    </Label>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        id="sendEmailStatus"
+                        className="sr-only peer"
+                        checked={formData.send_email_status === '1'}
+                        onChange={(e) =>
+                          handleCheckboxChange('send_email_status', e.target.checked)
+                        }
+                      />
+                      <div
+                        className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600
+      after:content-[''] after:absolute after:top-0.5 after:left-[2px]
+      after:bg-white after:border after:rounded-full after:h-5 after:w-5
+      after:transition-all peer-checked:after:translate-x-full"
+                      ></div>
+                    </label>
                   </div>
                 </div>
               </div>
@@ -1576,7 +1602,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                     <div className="relative">
                       <input
                         id="pgMerchantId"
-                        type={showPgMerchantId ? "text" : "password"}
+                        type={showPgMerchantId ? 'text' : 'password'}
                         value={formData.pgMerchantId || ''}
                         onChange={(e) => handleInputChange('pgMerchantId', e.target.value)}
                         className={`block w-full border rounded-lg bg-white p-2.5 text-sm text-gray-900 pr-10 ${
@@ -1588,14 +1614,18 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                         onClick={() => setShowPgMerchantId(!showPgMerchantId)}
                       >
-                        {showPgMerchantId ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
+                        {showPgMerchantId ? (
+                          <HiEyeOff className="w-5 h-5" />
+                        ) : (
+                          <HiEye className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                     {errors.pgMerchantId && (
                       <p className="mt-1 text-sm text-red-600">{errors.pgMerchantId}</p>
                     )}
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="pgSecretKey" className="mb-2 block">
                       Secret Key
@@ -1603,7 +1633,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                     <div className="relative">
                       <input
                         id="pgSecretKey"
-                        type={showPgSecretKey ? "text" : "password"}
+                        type={showPgSecretKey ? 'text' : 'password'}
                         value={formData.pgSecretKey || ''}
                         onChange={(e) => handleInputChange('pgSecretKey', e.target.value)}
                         className={`block w-full border rounded-lg bg-white p-2.5 text-sm text-gray-900 pr-10 ${
@@ -1615,7 +1645,11 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                         onClick={() => setShowPgSecretKey(!showPgSecretKey)}
                       >
-                        {showPgSecretKey ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
+                        {showPgSecretKey ? (
+                          <HiEyeOff className="w-5 h-5" />
+                        ) : (
+                          <HiEye className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                     {errors.pgSecretKey && (
@@ -1639,8 +1673,8 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
             {!formData.paymentEnabled || !formData.payment_status ? 'Disabled' : 
              formData.payment_status === '1' ? 'Razorpay Enabled' : 
              'UG Payment Enabled'}
-          </span>
-        </div> */}
+          </span> 
+        </div>*/}
       </Card>
 
       {/* Rest of the component remains same */}
@@ -1653,7 +1687,10 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
             onChange={(e) => handleCheckboxChange('isDropdownEnabled', e.target.checked)}
             className="mr-2"
           />
-          <Label htmlFor="enableEmail" className="font-semibold text-gray-900 dark:text-white cursor-pointer">
+          <Label
+            htmlFor="enableEmail"
+            className="font-semibold text-gray-900 dark:text-white cursor-pointer"
+          >
             Enable Email Service
           </Label>
         </div>
@@ -1662,12 +1699,14 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="emailService" className="mb-2 block">Select Email Service</Label>
+                <Label htmlFor="emailService" className="mb-2 block">
+                  Select Email Service
+                </Label>
                 <Select
                   id="emailService"
                   value={formData.selectedServicesOption}
                   onChange={(e) => handleSelectChange('selectedServicesOption', e.target.value)}
-                  color={errors.selectedServicesOption ? "failure" : "gray"}
+                  color={errors.selectedServicesOption ? 'failure' : 'gray'}
                   helperText={errors.selectedServicesOption}
                   className="w-full"
                 >
@@ -1678,7 +1717,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                   <option value="Other">Other</option>
                 </Select>
               </div>
-              
+
               <div>
                 <Label htmlFor="emailTemplate" className="mb-2 block">
                   Email Template <span className="text-red-600">*</span>
@@ -1698,43 +1737,51 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
             </div>
 
             {/* MailGun SMTP Configuration */}
-            {formData.selectedServicesOption === "MailGun SMTP" && (
+            {formData.selectedServicesOption === 'MailGun SMTP' && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 <div>
-                  <Label htmlFor="fromEmail" className="mb-2 block">From Email</Label>
+                  <Label htmlFor="fromEmail" className="mb-2 block">
+                    From Email
+                  </Label>
                   <TextInput
                     id="fromEmail"
                     value={formData.fromEmail || ''}
                     onChange={(e) => handleInputChange('fromEmail', e.target.value)}
-                    color={errors.fromEmail ? "failure" : "gray"}
+                    color={errors.fromEmail ? 'failure' : 'gray'}
                     helperText={errors.fromEmail}
                     className="w-full"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="smtpHost" className="mb-2 block">SMTP Host</Label>
+                  <Label htmlFor="smtpHost" className="mb-2 block">
+                    SMTP Host
+                  </Label>
                   <TextInput
                     id="smtpHost"
                     value={formData.smtpHost || ''}
                     onChange={(e) => handleInputChange('smtpHost', e.target.value)}
-                    color={errors.smtpHost ? "failure" : "gray"}
+                    color={errors.smtpHost ? 'failure' : 'gray'}
                     helperText={errors.smtpHost}
                     className="w-full"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="smtpPort" className="mb-2 block">SMTP Port</Label>
+                  <Label htmlFor="smtpPort" className="mb-2 block">
+                    SMTP Port
+                  </Label>
                   <TextInput
                     id="smtpPort"
                     value={formData.smtpPort || ''}
                     onChange={(e) => handleInputChange('smtpPort', e.target.value)}
-                    color={errors.smtpPort ? "failure" : "gray"}
+                    color={errors.smtpPort ? 'failure' : 'gray'}
                     helperText={errors.smtpPort}
                     className="w-full"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="smtpUsername" className="mb-2 block">SMTP Username</Label>
+                  <Label htmlFor="smtpUsername" className="mb-2 block">
+                    SMTP Username
+                  </Label>
                   <TextInput
                     id="smtpUsername"
                     value={formData.smtpUsername || ''}
@@ -1743,7 +1790,9 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="smtpPassword" className="mb-2 block">SMTP Password</Label>
+                  <Label htmlFor="smtpPassword" className="mb-2 block">
+                    SMTP Password
+                  </Label>
                   <PasswordInput
                     id="smtpPassword"
                     value={formData.smtpPassword || ''}
@@ -1756,10 +1805,12 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
             )}
 
             {/* Zoho API Configuration */}
-            {formData.selectedServicesOption === "Zoho Api" && (
+            {formData.selectedServicesOption === 'Zoho Api' && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="zohoApiKey" className="mb-2 block">Zoho API Key</Label>
+                  <Label htmlFor="zohoApiKey" className="mb-2 block">
+                    Zoho API Key
+                  </Label>
                   <PasswordInput
                     id="zohoApiKey"
                     value={formData.zohoApiKey || ''}
@@ -1770,18 +1821,22 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="zohoFromEmail" className="mb-2 block">From Address</Label>
+                  <Label htmlFor="zohoFromEmail" className="mb-2 block">
+                    From Address
+                  </Label>
                   <TextInput
                     id="zohoFromEmail"
                     value={formData.zohoFromEmail || ''}
                     onChange={(e) => handleInputChange('zohoFromEmail', e.target.value)}
-                    color={errors.zohoFromEmail ? "failure" : "gray"}
+                    color={errors.zohoFromEmail ? 'failure' : 'gray'}
                     helperText={errors.zohoFromEmail}
                     className="w-full"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="bounceAddress" className="mb-2 block">Bounce Address</Label>
+                  <Label htmlFor="bounceAddress" className="mb-2 block">
+                    Bounce Address
+                  </Label>
                   <TextInput
                     id="bounceAddress"
                     value={formData.bounceAddress || ''}
@@ -1804,7 +1859,10 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
             onChange={(e) => handleCheckboxChange('isTemplatesVisible', e.target.checked)}
             className="mr-2"
           />
-          <Label htmlFor="enableWhatsApp" className="font-semibold text-gray-900 dark:text-white cursor-pointer">
+          <Label
+            htmlFor="enableWhatsApp"
+            className="font-semibold text-gray-900 dark:text-white cursor-pointer"
+          >
             Enable WhatsApp Service
           </Label>
         </div>
@@ -1819,16 +1877,18 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                 id="whatsappTemplate"
                 value={formData.whatsappTemplate || ''}
                 onChange={(e) => handleInputChange('whatsappTemplate', e.target.value)}
-                color={errors.whatsappTemplate ? "failure" : "gray"}
+                color={errors.whatsappTemplate ? 'failure' : 'gray'}
                 helperText={errors.whatsappTemplate}
                 required
                 className="w-full"
               />
             </div>
-            
+
             {/* UserId Input */}
             <div>
-              <Label htmlFor="userId" className="mb-2 block">User ID</Label>
+              <Label htmlFor="userId" className="mb-2 block">
+                User ID
+              </Label>
               <TextInput
                 id="userId"
                 value={formData.UserId || ''}
@@ -1840,9 +1900,11 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                 Current Value: {formData.UserId || 'Empty'}
               </div>
             </div>
-            
+
             <div>
-              <Label htmlFor="wPassword" className="mb-2 block">Password</Label>
+              <Label htmlFor="wPassword" className="mb-2 block">
+                Password
+              </Label>
               <PasswordInput
                 id="wPassword"
                 value={formData.wPassword || ''}
@@ -1864,7 +1926,10 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
             onChange={(e) => handleCheckboxChange('isSmsApiEnabled', e.target.checked)}
             className="mr-2"
           />
-          <Label htmlFor="enableSMS" className="font-semibold text-gray-900 dark:text-white cursor-pointer">
+          <Label
+            htmlFor="enableSMS"
+            className="font-semibold text-gray-900 dark:text-white cursor-pointer"
+          >
             Enable SMS Service
           </Label>
         </div>
@@ -1879,14 +1944,16 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                 id="smsTemplate"
                 value={formData.smsTemplate || ''}
                 onChange={(e) => handleInputChange('smsTemplate', e.target.value)}
-                color={errors.smsTemplate ? "failure" : "gray"}
+                color={errors.smsTemplate ? 'failure' : 'gray'}
                 helperText={errors.smsTemplate}
                 required
                 className="w-full"
               />
             </div>
             <div>
-              <Label htmlFor="smsApiKey" className="mb-2 block">API Key</Label>
+              <Label htmlFor="smsApiKey" className="mb-2 block">
+                API Key
+              </Label>
               <TextInput
                 id="smsApiKey"
                 value={formData.smsApikey || ''}
@@ -1895,7 +1962,9 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
               />
             </div>
             <div>
-              <Label htmlFor="smsSecretKey" className="mb-2 block">Secret Key</Label>
+              <Label htmlFor="smsSecretKey" className="mb-2 block">
+                Secret Key
+              </Label>
               <PasswordInput
                 id="smsSecretKey"
                 value={formData.smsSecretkey || ''}

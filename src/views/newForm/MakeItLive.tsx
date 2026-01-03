@@ -126,6 +126,7 @@ const MakeItLive: React.FC = () => {
     smsSecretkey: '',
     razorpayApikey: '',
     razorpaySecretkey: '',
+    send_email_status: '',
 
     // Templates
     whatsappTemplate: '',
@@ -310,13 +311,11 @@ const MakeItLive: React.FC = () => {
     const credentials = data.credentials;
     const template = data.template;
 
-    console.log('Raw API Data:', { academic, credentials, template });
-
     // Parse contact information
     let technicalContact = { name: '', email: '', phone: '', location: '' };
     let billingContact = { name: '', email: '', phone: '', location: '' };
     let additionalContact = { name: '', email: '', phone: '', location: '' };
-
+    
     try {
       if (academic.technical_contact) {
         technicalContact = JSON.parse(academic.technical_contact);
@@ -331,6 +330,7 @@ const MakeItLive: React.FC = () => {
       console.error('Error parsing contact data:', e);
     }
 
+        const sendEmailStatus = credentials?.send_email_status?.toString() || '0';
     console.log('Parsed Contacts:', { technicalContact, billingContact, additionalContact });
 
     const updates: Partial<FormDataType> = {
@@ -398,6 +398,7 @@ const MakeItLive: React.FC = () => {
       pgSecretKey: credentials?.pg_secret_key || '',
       paymentType: credentials?.payment_type || '',
       paymentEnabled: credentials?.payment_status,
+      send_email_status: sendEmailStatus, 
       // Permissions
       isDropdownEnabled: Boolean(credentials?.email_status),
       isTemplatesVisible: Boolean(credentials?.whatsapp_status),
