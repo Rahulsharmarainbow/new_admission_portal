@@ -8,6 +8,7 @@ interface SuccessStepProps {
   amount?: number;
   onDownloadReceipt: (applicationId: string) => Promise<void>;
   onNewApplication?: () => void;
+  send_email_status?: number
 }
 
 const SuccessStep: React.FC<SuccessStepProps> = ({
@@ -15,7 +16,8 @@ const SuccessStep: React.FC<SuccessStepProps> = ({
   transactionId,
   amount,
   onDownloadReceipt,
-  onNewApplication
+  onNewApplication,
+  send_email_status
 }) => {
   const [downloading, setDownloading] = useState(false);
 
@@ -119,7 +121,7 @@ const SuccessStep: React.FC<SuccessStepProps> = ({
 
       {/* Action Buttons */}
       <div className="flex justify-center gap-4 flex-wrap">
-        <button
+        {send_email_status == 1 && <button
           onClick={handleDownload}
           disabled={downloading}
           className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 ${
@@ -140,6 +142,7 @@ const SuccessStep: React.FC<SuccessStepProps> = ({
             </>
           )}
         </button>
+}
 
         {onNewApplication && (
           <button

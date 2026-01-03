@@ -938,6 +938,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
             amount={paymentData?.total_payable_fee}
             onDownloadReceipt={handleDownloadReceipt}
             onNewApplication={handleReset}
+            send_email_status={cdata?.send_email_status}
           />
         );
       default:

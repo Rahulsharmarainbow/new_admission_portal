@@ -26,6 +26,7 @@ interface ApplyFormProps {
   cdata: any;
   apply_modal?: any;
   type: string;
+
 }
 
 const steps = ['FILL APPLICATION', 'CONFIRM & PAY', 'SUCCESS'];
@@ -39,7 +40,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   header,
   cdata,
   apply_modal,
-  type
+  type,
 }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
@@ -719,6 +720,7 @@ const handleFileChange = useCallback(
             amount={paymentData?.total_payable_fee}
             onDownloadReceipt={handleDownloadReceipt}
             onNewApplication={handleReset}
+            send_email_status={cdata?.send_email_status}
           />
         );
       default:
