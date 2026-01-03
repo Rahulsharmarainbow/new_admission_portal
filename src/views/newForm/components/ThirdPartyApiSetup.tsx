@@ -1494,6 +1494,19 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
               </Select>
             </div>
 
+            <div className="w-[50%]">
+                  <Label htmlFor="platform_fee" className="mb-2 block">
+                    Platform Fees
+                  </Label>
+                  <TextInput
+                    type='number'
+                    id="platform_fee"
+                    value={formData.platform_fee || ''}
+                    onChange={(e) => handleInputChange('platform_fee', e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+
             {/* Razorpay Integration - Show only when Razorpay is selected and enabled */}
             {formData.paymentType == '1' && (
               <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">

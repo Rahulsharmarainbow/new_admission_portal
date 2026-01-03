@@ -127,6 +127,7 @@ const MakeItLive: React.FC = () => {
     razorpayApikey: '',
     razorpaySecretkey: '',
     send_email_status: '',
+    platform_fee: '',
 
     // Templates
     whatsappTemplate: '',
@@ -399,6 +400,7 @@ const MakeItLive: React.FC = () => {
       paymentType: credentials?.payment_type || '',
       paymentEnabled: credentials?.payment_status,
       send_email_status: sendEmailStatus, 
+      platform_fee: credentials?.platform_fee,
       // Permissions
       isDropdownEnabled: Boolean(credentials?.email_status),
       isTemplatesVisible: Boolean(credentials?.whatsapp_status),
