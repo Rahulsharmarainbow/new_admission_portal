@@ -167,7 +167,13 @@ const SidebarContent: Record<number, MenuItem[]> = {
               id: uniqueId(),
               url: '/ApplyEditing/get',
               isPro: false,
-            },            
+            },    
+            {
+              name: 'Career Page',
+              id: uniqueId(),
+              url: '/SuperAdmin/frontend-editing/career',
+              isPro: false,
+            },        
           ],
         },
 
@@ -415,6 +421,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               name: 'Apply Page',
               id: uniqueId(),
               url: '/ApplyEditing/get',
+              isPro: false,
+            }, 
+            {
+              name: 'Career Page',
+              id: uniqueId(),
+              url: '/SuperAdmin/frontend-editing/career',
               isPro: false,
             }, 
           ],

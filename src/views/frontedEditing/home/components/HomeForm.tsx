@@ -13,7 +13,6 @@ import HomeLinesEditor from './Tabs/HomeLinesEditor';
 import PopupEditor from './Tabs/PopupEditor';
 import AllAcademicsDropdown from 'src/Frontend/Common/AllAcademicsDropdown';
 import { MdMoney } from 'react-icons/md';
-import FeesManagement from './Tabs/FeesManagement';
 import FeesManagements from './Tabs/FeesManagements';
 
 const HomeForm = () => {

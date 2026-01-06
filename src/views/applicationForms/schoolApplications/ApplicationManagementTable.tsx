@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MdOutlineRemoveRedEye, MdFilterList, MdSort } from 'react-icons/md';
+import { MdOutlineRemoveRedEye, MdFilterList, MdSort, MdClass } from 'react-icons/md';
 import { TbEdit, TbFileTypePdf, TbLoader2 } from 'react-icons/tb';
 import { BsDownload, BsSearch, BsX } from 'react-icons/bs';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
@@ -598,29 +598,26 @@ const ApplicationManagementTable: React.FC = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="w-16 py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th className="w-12 py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         S.NO
                       </th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
-                        Created On
+                      <th className="w-28 py-3 px-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Actions
                       </th>
-                      <th
-                        className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px] cursor-pointer select-none"
-                        onClick={() => handleSort('applicant_name')}
-                      >
-                        <div className="flex items-center space-x-1">
-                          <span>Applicant Name</span>
+                      <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[180px]">
+                        <div
+                          className="flex items-center space-x-1 cursor-pointer select-none"
+                          onClick={() => handleSort('applicant_name')}
+                        >
+                          <span>Candidate Details</span>
                           {getSortIcon('applicant_name')}
                         </div>
                       </th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
-                        Candidate Pic
-                      </th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[140px]">
+                      <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
                         Signature
                       </th>
                       <th
-                        className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none min-w-[100px]"
+                        className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[100px] cursor-pointer select-none"
                         onClick={() => handleSort('roll_no')}
                       >
                         <div className="flex items-center space-x-1">
@@ -628,23 +625,14 @@ const ApplicationManagementTable: React.FC = () => {
                           {getSortIcon('roll_no')}
                         </div>
                       </th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
+                      <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[140px]">
                         {user?.role === 'CustomerAdmin' ? 'Email' : 'Academic Name'}
                       </th>
-                      <th
-                        className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px] cursor-pointer select-none"
-                        onClick={() => handleSort('class_name')}
-                      >
-                        <div className="flex items-center space-x-1">
-                          <span>Class</span>
-                          {getSortIcon('class_name')}
-                        </div>
+                      <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
+                        Created On
                       </th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
-                        Payment Status
-                      </th>
-                      <th className="w-28 py-3 px-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Actions
+                      <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[100px]">
+                        Payment
                       </th>
                     </tr>
                   </thead>
@@ -657,49 +645,99 @@ const ApplicationManagementTable: React.FC = () => {
                             key={application.id}
                             className="hover:bg-gray-50 transition-colors duration-150"
                           >
-                            <td className="py-4 px-4 text-sm font-medium text-gray-900">
+                            <td className="py-3 px-3 text-sm font-medium text-gray-900">
                               {filters.page * filters.rowsPerPage + index + 1}
                             </td>
-                            <td className="py-4 px-4 text-sm text-gray-600 min-w-[100px]">
-                              <div className="truncate " title={application?.created_at_formatted}>
-                                {application?.created_at_formatted || 'N/A'}
+                            <td className="py-5 px-4 border-r border-gray-100 group-hover:border-blue-100">
+                              <div className="flex items-center justify-start space-x-2">
+                                <Tooltip content="View Details" placement="top" style="light">
+                                  <button
+                                    onClick={() => handleViewDetails(application)}
+                                    className="p-2 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 hover:text-orange-700 transition-all duration-200 shadow-sm hover:shadow"
+                                  >
+                                    <MdOutlineRemoveRedEye className="w-4 h-4" />
+                                  </button>
+                                </Tooltip>
+                                <Tooltip content="Edit" placement="top" style="light">
+                                  <button
+                                    onClick={() => handleEdit(application)}
+                                    className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-all duration-200 shadow-sm hover:shadow"
+                                  >
+                                    <TbEdit className="w-4 h-4" />
+                                  </button>
+                                </Tooltip>
+                                <Tooltip content="Download PDF" placement="top" style="light">
+                                  <button
+                                    onClick={() => handlePdfDownload(application.id)}
+                                    disabled={downloadingId === application.id}
+                                    className={`p-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow
+                        ${
+                          downloadingId === application.id
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700'
+                        }`}
+                                  >
+                                    {downloadingId === application.id ? (
+                                      <TbLoader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <TbFileTypePdf className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                </Tooltip>
                               </div>
                             </td>
-                            <td className="py-4 px-4 text-sm font-medium text-gray-900 min-w-[150px]">
-                              <div
-                                className="truncate max-w-[140px] hover:text-blue-800 cursor-pointer"
-                                title={application.applicant_name}
-                                onClick={() => handleViewDetails(application)}
-                              >
-                                {application.applicant_name}
+                            <td className="py-5 px-4 border-r border-gray-100 group-hover:border-blue-100">
+                              <div className="flex items-center space-x-3">
+                                <div className="relative flex-shrink-0">
+                                  {application.candidate_pic ? (
+                                    <img
+                                      src={`${apiAssetsUrl}/${application.candidate_pic}`}
+                                      alt="Candidate"
+                                      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                                      onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        e.target.nextSibling.style.display = 'flex';
+                                      }}
+                                    />
+                                  ) : null}
+                                  <div
+                                    className={`w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center border-2 border-white shadow-sm ${
+                                      application.candidate_pic ? 'hidden' : 'flex'
+                                    }`}
+                                  >
+                                    <span className="text-xs font-medium text-gray-500">
+                                      No Image
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div
+                                    className="text-sm font-semibold text-gray-800 hover:text-blue-700 cursor-pointer mb-1 transition-colors truncate"
+                                    title={application.applicant_name}
+                                    onClick={() => handleViewDetails(application)}
+                                  >
+                                    {application.applicant_name}
+                                  </div>
+                                  <div className="flex items-center">
+                                    <div className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-xs font-medium text-gray-600">
+                                      <MdClass className="w-3 h-3 mr-1.5" />
+                                      <span
+                                        className="truncate max-w-[120px]"
+                                        title={application.class_name}
+                                      >
+                                        {application.class_name || 'N/A'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                             </td>
-                            <td className="py-4 px-4 min-w-[120px]">
-                              {application.candidate_pic ? (
-                                <img
-                                  src={`${apiAssetsUrl}/${application.candidate_pic}`}
-                                  alt="Candidate"
-                                  className="w-12 h-12 rounded-full object-cover border mx-auto"
-                                  onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'flex';
-                                  }}
-                                />
-                              ) : null}
-                              <div
-                                className={`w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center border mx-auto ${
-                                  application.candidate_pic ? 'hidden' : 'flex'
-                                }`}
-                              >
-                                <span className="text-xs text-gray-500">No Image</span>
-                              </div>
-                            </td>
-                            <td className="py-4 px-4 min-w-[140px]">
+                            <td className="py-3 px-3">
                               {application.candidate_signature ? (
                                 <img
                                   src={`${apiAssetsUrl}/${application.candidate_signature}`}
                                   alt="Signature"
-                                  className="w-20 h-10 object-contain border mx-auto"
+                                  className="w-16 h-8 object-contain border mx-auto"
                                   onError={(e) => {
                                     e.target.style.display = 'none';
                                     e.target.nextSibling.style.display = 'flex';
@@ -707,102 +745,59 @@ const ApplicationManagementTable: React.FC = () => {
                                 />
                               ) : null}
                               <div
-                                className={`w-20 h-10 bg-gray-200 flex items-center justify-center border rounded mx-auto ${
+                                className={`w-16 h-8 bg-gray-200 flex items-center justify-center border rounded mx-auto ${
                                   application.candidate_signature ? 'hidden' : 'flex'
                                 }`}
                               >
                                 <span className="text-xs text-gray-500">No Signature</span>
                               </div>
                             </td>
-
-                            <td className="py-4 px-4 text-sm text-gray-600 min-w-[100px]">
-                              <div className="truncate " title={application.roll_no}>
+                            <td className="py-3 px-3 text-sm text-gray-600">
+                              <div className="truncate" title={application.roll_no}>
                                 {application.roll_no || 'N/A'}
                               </div>
                             </td>
-                            <td className="py-4 px-4 text-sm text-gray-600 min-w-[150px]">
+                            <td className="py-3 px-3 text-sm text-gray-600">
                               {user?.role !== 'CustomerAdmin' ? (
                                 <Tooltip
                                   content={application.academic_name}
                                   placement="top"
                                   style="light"
                                 >
-                                  <div className="truncate max-w-[140px]">
+                                  <div className="truncate max-w-[130px]">
                                     {application.academic_name || 'N/A'}
                                   </div>
                                 </Tooltip>
-                              ) : (                          
+                              ) : (
                                 <Tooltip
                                   content={application.candidate_details.father_emailid}
                                   placement="top"
                                   style="light"
                                 >
-                                  <div className="truncate max-w-[140px]">
-                                  {application.candidate_details.father_emailid || 'N/A'}
-                                </div>
+                                  <div className="truncate max-w-[130px]">
+                                    {application.candidate_details.father_emailid || 'N/A'}
+                                  </div>
                                 </Tooltip>
                               )}
                             </td>
-                            <td className="py-4 px-4 text-sm text-gray-600 min-w-[120px]">
-                              <div
-                                className="truncate max-w-[110px]"
-                                title={application.class_name}
-                              >
-                                {application.class_name || 'N/A'}
+                            <td className="py-3 px-3 text-sm text-gray-600">
+                              <div className="truncate" title={application?.created_at_formatted}>
+                                {application?.created_at_formatted || 'N/A'}
                               </div>
                             </td>
-                            <td className="py-4 px-4 min-w-[120px]">
+                            <td className="py-3 px-3">
                               <span
-                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${paymentStatus.color}`}
+                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${paymentStatus.color}`}
                               >
                                 {paymentStatus.text}
                               </span>
-                            </td>
-                            <td className="py-4 px-4 text-center w-28">
-                              <div className="flex items-center justify-center space-x-2">
-                                <Tooltip content="View Details" placement="top" style="light">
-                                  <button
-                                    onClick={() => handleViewDetails(application)}
-                                    className="text-orange-600 hover:text-orange-800 p-2 rounded-lg hover:bg-orange-50 transition-colors"
-                                  >
-                                    <MdOutlineRemoveRedEye className="w-5 h-5" />
-                                  </button>
-                                </Tooltip>
-                                <Tooltip content="Edit" placement="top" style="light">
-                                  <button
-                                    onClick={() => handleEdit(application)}
-                                    className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
-                                  >
-                                    <TbEdit className="w-5 h-5" />
-                                  </button>
-                                </Tooltip>
-
-                                <Tooltip content="Download PDF" placement="top" style="light">
-                                  <button
-                                    onClick={() => handlePdfDownload(application.id)}
-                                    disabled={downloadingId === application.id}
-                                    className={`text-red-600 p-2 rounded-lg transition-colors 
-                                      ${
-                                        downloadingId === application.id
-                                          ? 'opacity-60 cursor-not-allowed'
-                                          : 'hover:text-red-800 hover:bg-red-50'
-                                      }`}
-                                  >
-                                    {downloadingId === application.id ? (
-                                      <TbLoader2 className="w-5 h-5 animate-spin" />
-                                    ) : (
-                                      <TbFileTypePdf className="w-5 h-5" />
-                                    )}
-                                  </button>
-                                </Tooltip>
-                              </div>
                             </td>
                           </tr>
                         );
                       })
                     ) : (
                       <tr>
-                        <td colSpan={9} className="py-8 text-center">
+                        <td colSpan={8} className="py-8 text-center">
                           <div className="flex flex-col items-center justify-center text-gray-500">
                             <svg
                               className="w-16 h-16 text-gray-300 mb-4"

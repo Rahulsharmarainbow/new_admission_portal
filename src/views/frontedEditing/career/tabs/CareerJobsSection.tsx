@@ -8,17 +8,21 @@ import {
   Textarea, 
   Select,
   Modal,
-  Badge
+  Badge,
+  ModalBody,
+  ModalHeader,
+  ModalFooter
 } from 'flowbite-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import Loader from 'src/Frontend/Common/Loader';
 import { HiPlus, HiSearch, HiExclamation } from 'react-icons/hi';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import { TbEdit } from 'react-icons/tb';
+import { Pagination } from 'src/Frontend/Common/Pagination';
+import Header from 'src/Frontend/Common/Header';
 import DeleteConfirmationModal from 'src/Frontend/Common/DeleteConfirmationModal';
-import Pagination from 'src/views/commons/components/Pagination';
-import Loader from 'src/Frontend/Common/Loader';
 
 interface CareerJobData {
   id: number;
@@ -49,6 +53,7 @@ interface Filters {
   orderBy: string;
   search: string;
 }
+
 
 const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
   selectedAcademic,
@@ -380,7 +385,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
               </div>
             )}
             
-            {/* <div className="shadow-md rounded-lg min-w-full">
+            <div className="shadow-md rounded-lg min-w-full">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -483,7 +488,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                         </td>
                         <td className="px-8 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center space-x-3">
-                            
+                            {/* Edit Button */}
                             <button
                               className="text-blue-500 hover:text-blue-700 p-1 transition-colors duration-200 rounded-lg hover:bg-blue-50"
                               onClick={() => editJob(job)}
@@ -492,6 +497,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                               <TbEdit size={18} />
                             </button>
 
+                            {/* Delete Button */}
                             <button
                               className="text-red-500 hover:text-red-700 p-1 transition-colors duration-200 rounded-lg hover:bg-red-50"
                               onClick={() => handleDeleteClick(job)}
@@ -536,32 +542,30 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                   )}
                 </tbody>
               </table>
-            </div> */}
+            </div>
           </div>
 
-          {/* Pagination */}
-          {/* {jobs.length > 0 && (
-            <div className="mt-6 p-4 border-t border-gray-200">
-              <Pagination
-                currentPage={filters.page + 1}
-                totalPages={Math.ceil(total / filters.rowsPerPage)}
-                totalItems={total}
-                rowsPerPage={filters.rowsPerPage}
-                onPageChange={handlePageChange}
-                onRowsPerPageChange={handleRowsPerPageChange}
-              />
-            </div>
-          )} */}
+          {/* Custom Pagination */}
+          {jobs.length > 0 && (
+            <Pagination
+              currentPage={filters.page + 1}
+              totalPages={Math.ceil(total / filters.rowsPerPage)}
+              totalItems={total}
+              rowsPerPage={filters.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleRowsPerPageChange}
+            />
+          )}
         </div>
       </div>
 
       {/* Add/Edit Job Modal */}
-      <Modal show={showModal} onClose={() => setShowModal(false)} size="2xl">
-        {/* <Modal.Header>
+      <Modal show={showModal} onClose={() => setShowModal(false)} size="2xl" className='overscroll-x-auto'>
+        <ModalHeader>
           {modalType === 'add' ? 'Add New Job' : 'Edit Job'}
-        </Modal.Header>
+        </ModalHeader>
         <form onSubmit={handleSubmit}>
-          <Modal.Body>
+          <ModalBody>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="jobTitle" className="block mb-2">
@@ -673,8 +677,8 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                 />
               </div>
             </div>
-          </Modal.Body>
-          <Modal.Footer>
+          </ModalBody>
+          <ModalFooter>
             <Button
               type="button"
               color="light"
@@ -693,22 +697,22 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                 modalType === 'add' ? 'Add Job' : 'Update Job'
               )}
             </Button>
-          </Modal.Footer>
-        </form> */}
+          </ModalFooter>
+        </form>
       </Modal>
 
-
-        {/* <DeleteConfirmationModal
-          isOpen={showDeleteModal}
-          onClose={() => {
-            setShowDeleteModal(false);
-            setSelectedJob(null);
-          }}
-          onConfirm={deleteJob}
-          title="Delete Job"
-          message={`Are you sure you want to delete "${selectedJob?.job_title}"? This action cannot be undone.`}
-          loading={deleteLoading}
-        /> */}
+      {/* Custom Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedJob(null);
+        }}
+        onConfirm={deleteJob}
+        title="Delete Job"
+        message={`Are you sure you want to delete "${selectedJob?.job_title}"? This action cannot be undone.`}
+        loading={deleteLoading}
+      />
     </>
   );
 };
