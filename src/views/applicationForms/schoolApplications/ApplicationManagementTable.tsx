@@ -604,6 +604,10 @@ const ApplicationManagementTable: React.FC = () => {
                       <th className="w-28 py-3 px-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Actions
                       </th>
+                       <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
+                        Created On
+                      </th>
+
                       <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[180px]">
                         <div
                           className="flex items-center space-x-1 cursor-pointer select-none"
@@ -614,7 +618,7 @@ const ApplicationManagementTable: React.FC = () => {
                         </div>
                       </th>
                       <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
-                        Signature
+                        Sign
                       </th>
                       <th
                         className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[100px] cursor-pointer select-none"
@@ -626,11 +630,9 @@ const ApplicationManagementTable: React.FC = () => {
                         </div>
                       </th>
                       <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[140px]">
-                        {user?.role === 'CustomerAdmin' ? 'Email' : 'Academic Name'}
+                        {user?.role === 'CustomerAdmin' ? 'Email ID' : 'Academic Name'}
                       </th>
-                      <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
-                        Created On
-                      </th>
+                     
                       <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[100px]">
                         Payment
                       </th>
@@ -648,7 +650,7 @@ const ApplicationManagementTable: React.FC = () => {
                             <td className="py-3 px-3 text-sm font-medium text-gray-900">
                               {filters.page * filters.rowsPerPage + index + 1}
                             </td>
-                            <td className="py-5 px-4 border-r border-gray-100 group-hover:border-blue-100">
+                            <td className="py-5 px-4  border-gray-100 group-hover:border-blue-100">
                               <div className="flex items-center justify-start space-x-2">
                                 <Tooltip content="View Details" placement="top" style="light">
                                   <button
@@ -684,6 +686,11 @@ const ApplicationManagementTable: React.FC = () => {
                                     )}
                                   </button>
                                 </Tooltip>
+                              </div>
+                            </td>
+                             <td className="py-3 px-3 border-r border-gray-100 group-hover:border-blue-100 text-sm text-gray-600">
+                              <div className="truncate" title={application?.created_at_formatted}>
+                                {application?.created_at_formatted || 'N/A'}
                               </div>
                             </td>
                             <td className="py-5 px-4 border-r border-gray-100 group-hover:border-blue-100">
@@ -780,11 +787,7 @@ const ApplicationManagementTable: React.FC = () => {
                                 </Tooltip>
                               )}
                             </td>
-                            <td className="py-3 px-3 text-sm text-gray-600">
-                              <div className="truncate" title={application?.created_at_formatted}>
-                                {application?.created_at_formatted || 'N/A'}
-                              </div>
-                            </td>
+                           
                             <td className="py-3 px-3">
                               <span
                                 className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${paymentStatus.color}`}

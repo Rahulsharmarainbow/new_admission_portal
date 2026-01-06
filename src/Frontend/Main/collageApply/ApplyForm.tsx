@@ -712,7 +712,7 @@ const handleFileChange = useCallback(
             stepTransitionLoading={stepTransitionLoading}
           />
         );
-      case 3:
+      case 2:
         return (
           <SuccessStep
             applicationId={formData.application_id}

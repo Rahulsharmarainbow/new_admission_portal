@@ -805,7 +805,7 @@ const Dashboard = () => {
                 </table>
               </div>
 
-              <Pagination
+              {/* <Pagination
                 currentPage={(filters.page || 0) + 1}
                 totalPages={Math.ceil(
                   (dashboardData?.totalLatestApplications || 0) / (filters.rowsPerPage || 10),
@@ -814,7 +814,7 @@ const Dashboard = () => {
                 rowsPerPage={filters.rowsPerPage || 10}
                 onPageChange={(page) => handlePageChange(page - 1)}
                 onRowsPerPageChange={handleRowsPerPageChange}
-              />
+              /> */}
             </>
           )}
         </div>
