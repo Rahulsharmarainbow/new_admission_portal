@@ -1574,29 +1574,7 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                     {errors.razorpaySecretkey && (
                       <p className="mt-1 text-sm text-red-600">{errors.razorpaySecretkey}</p>
                     )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="sendEmailStatus" className="text-sm font-medium">
-                      Send Email
-                    </Label>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        id="sendEmailStatus"
-                        className="sr-only peer"
-                        checked={formData.send_email_status === '1'}
-                        onChange={(e) =>
-                          handleCheckboxChange('send_email_status', e.target.checked)
-                        }
-                      />
-                      <div
-                        className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600
-      after:content-[''] after:absolute after:top-0.5 after:left-[2px]
-      after:bg-white after:border after:rounded-full after:h-5 after:w-5
-      after:transition-all peer-checked:after:translate-x-full"
-                      ></div>
-                    </label>
-                  </div>
+                  </div>                  
                 </div>
               </div>
             )}
@@ -1859,6 +1837,29 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                 </div>
               </div>
             )}
+
+            <div className="flex items-center gap-2">
+                    <Label htmlFor="sendEmailStatus" className="text-sm font-medium">
+                      Send PDF via Email
+                    </Label>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        id="sendEmailStatus"
+                        className="sr-only peer"
+                        checked={formData.send_email_status === '1'}
+                        onChange={(e) =>
+                          handleCheckboxChange('send_email_status', e.target.checked)
+                        }
+                      />
+                      <div
+                        className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600
+      after:content-[''] after:absolute after:top-0.5 after:left-[2px]
+      after:bg-white after:border after:rounded-full after:h-5 after:w-5
+      after:transition-all peer-checked:after:translate-x-full"
+                      ></div>
+                    </label>
+                  </div>
           </div>
         )}
       </Card>

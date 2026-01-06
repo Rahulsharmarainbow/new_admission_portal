@@ -251,7 +251,7 @@ const SchoolFilterSidebar: React.FC<SchoolFilterSidebarProps> = ({
       },
     }),
   };
-
+console.log(filters.classAppliedFor.label)
   return (
     <div className={`fixed inset-0 z-50 transform transition-transform duration-300 ease-in-out ${
       isOpen ? 'translate-x-0' : 'translate-x-full'
@@ -315,7 +315,7 @@ const SchoolFilterSidebar: React.FC<SchoolFilterSidebarProps> = ({
               Class
             </Label>
             <ClassDropdown
-              value={filters.classAppliedFor}
+              value={filters.classAppliedFor.value?.toString() || ''}
               onChange={(value) => handleInputChange('classAppliedFor', value)}
               academicId={filters.academic_id}
               placeholder={filters.academic_id ? "Select class..." : "Select academic first"}
