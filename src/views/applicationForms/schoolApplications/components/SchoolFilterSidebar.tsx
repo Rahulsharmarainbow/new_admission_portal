@@ -315,7 +315,7 @@ const SchoolFilterSidebar: React.FC<SchoolFilterSidebarProps> = ({
               Class
             </Label>
             <ClassDropdown
-              value={filters.classAppliedFor}
+              value={filters?.classAppliedFor?.value?.toString() || ''}
               onChange={(value) => handleInputChange('classAppliedFor', value)}
               academicId={filters.academic_id}
               placeholder={filters.academic_id ? "Select class..." : "Select academic first"}

@@ -1498,6 +1498,19 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
               </Select>
             </div>
 
+            <div className="w-[50%]">
+              <Label htmlFor="platform_fee" className="mb-2 block">
+                Platform Fees
+              </Label>
+              <TextInput
+                type="number"
+                id="platform_fee"
+                value={formData.platform_fee || ''}
+                onChange={(e) => handleInputChange('platform_fee', e.target.value)}
+                className="w-full"
+              />
+            </div>
+
             {/* Razorpay Integration - Show only when Razorpay is selected and enabled */}
             {formData.paymentType == '1' && (
               <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
@@ -1791,6 +1804,27 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                 </div>
               </div>
             )}
+
+            <div className="flex items-center gap-2">
+              <Label htmlFor="sendEmailStatus" className="text-sm font-medium">
+                Send PDF via Email
+              </Label>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  id="sendEmailStatus"
+                  className="sr-only peer"
+                  checked={formData.send_email_status === '1'}
+                  onChange={(e) => handleCheckboxChange('send_email_status', e.target.checked)}
+                />
+                <div
+                  className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600
+      after:content-[''] after:absolute after:top-0.5 after:left-[2px]
+      after:bg-white after:border after:rounded-full after:h-5 after:w-5
+      after:transition-all peer-checked:after:translate-x-full"
+                ></div>
+              </label>
+            </div>
           </div>
         )}
       </Card>

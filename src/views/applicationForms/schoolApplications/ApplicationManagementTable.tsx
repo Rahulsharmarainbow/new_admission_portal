@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MdOutlineRemoveRedEye, MdFilterList, MdSort } from 'react-icons/md';
+import { MdOutlineRemoveRedEye, MdFilterList, MdSort, MdClass } from 'react-icons/md';
 import { TbEdit, TbFileTypePdf, TbLoader2 } from 'react-icons/tb';
 import { BsDownload, BsSearch, BsX } from 'react-icons/bs';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
@@ -101,11 +101,18 @@ const ApplicationManagementTable: React.FC = () => {
     order: 'desc',
     orderBy: 'id',
     search: '',
-    academic_id: user?.role === 'CustomerAdmin' ? user?.academic_id?.toString() || dashboardFilters.academic : dashboardFilters.academic || '',
+    academic_id:
+      user?.role === 'CustomerAdmin'
+        ? user?.academic_id?.toString() || dashboardFilters.academic
+        : dashboardFilters.academic || '',
     year: dashboardFilters.year || '',
     classAppliedFor: '',
     gender: '',
-    paymentStatus: dashboardFilters.ApplicationStatus ? dashboardFilters.ApplicationStatus == 'captured' ? "1" : "2" : '' || '',
+    paymentStatus: dashboardFilters.ApplicationStatus
+      ? dashboardFilters.ApplicationStatus == 'captured'
+        ? '1'
+        : '2'
+      : '' || '',
     fromDate: '',
     toDate: '',
     applicationNumber: '',
@@ -141,7 +148,7 @@ const ApplicationManagementTable: React.FC = () => {
   // Calculate active filters count
   useEffect(() => {
     let count = 0;
-    if (filters.academic_id && user?.role != "CustomerAdmin") count++;
+    if (filters.academic_id && user?.role != 'CustomerAdmin') count++;
     if (filters.year) count++;
     if (filters.classAppliedFor) count++;
     if (filters.gender) count++;
@@ -157,14 +164,14 @@ const ApplicationManagementTable: React.FC = () => {
     if (filters.annual) count++;
     if (filters.special) count++;
     if (filters.localarea) count++;
-    
+
     // Count dynamic cdFilters
-    Object.keys(cdFilters).forEach(key => {
+    Object.keys(cdFilters).forEach((key) => {
       if (cdFilters[key] && cdFilters[key].length > 0) {
         count++;
       }
     });
-    
+
     setActiveFiltersCount(count);
   }, [filters, cdFilters]);
 
@@ -231,11 +238,11 @@ const ApplicationManagementTable: React.FC = () => {
   useEffect(() => {
     fetchApplications();
   }, [
-    filters.page, 
-    filters.rowsPerPage, 
-    filters.order, 
-    filters.orderBy, 
-    debouncedSearch, 
+    filters.page,
+    filters.rowsPerPage,
+    filters.order,
+    filters.orderBy,
+    debouncedSearch,
     filters.academic_id,
     filters.year,
     filters.classAppliedFor,
@@ -252,7 +259,7 @@ const ApplicationManagementTable: React.FC = () => {
     filters.annual,
     filters.special,
     filters.localarea,
-    cdFilters
+    cdFilters,
   ]);
 
   // Handle search
@@ -333,7 +340,7 @@ const ApplicationManagementTable: React.FC = () => {
             'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       const { filename, pdf } = response.data;
@@ -353,9 +360,8 @@ const ApplicationManagementTable: React.FC = () => {
       link.click();
 
       URL.revokeObjectURL(url);
-
     } catch (error) {
-      console.error("PDF Download Error:", error);
+      console.error('PDF Download Error:', error);
     } finally {
       setDownloadingId(null); // stop loader
     }
@@ -367,22 +373,23 @@ const ApplicationManagementTable: React.FC = () => {
       setLoading2(true);
 
       const requestBody: any = {
-        academic_id: filters.academic_id || "",
-        s_id: user?.id || "",
-        classAppliedFor: filters.classAppliedFor || "",
-        startDate: filters.fromDate || "",
-        endDate: filters.toDate || "",
-        caste: filters.caste || "",
-        annual: filters.annual || "",
-        gender: filters.gender || "",
-        special: filters.special || "",
-        state: filters.state || "",
-        district: filters.district || "",
-        localarea: filters.localarea || "",
-        contact: filters.contact || "",
-        applicationNumber: filters.applicationNumber || "",
-        paymentStatus: filters.paymentStatus || "",
-        email: filters.search.includes('@') ? filters.search : "",
+        academic_id: filters.academic_id || '',
+        s_id: user?.id || '',
+        classAppliedFor: filters.classAppliedFor || '',
+        startDate: filters.fromDate || '',
+        endDate: filters.toDate || '',
+        caste: filters.caste || '',
+        annual: filters.annual || '',
+        gender: filters.gender || '',
+        special: filters.special || '',
+        state: filters.state || '',
+        district: filters.district || '',
+        localarea: filters.localarea || '',
+        contact: filters.contact || '',
+        applicationNumber: filters.applicationNumber || '',
+        paymentStatus: filters.paymentStatus || '',
+        email: filters.search.includes('@') ? filters.search : '',
+        year: filters.year || '',
       };
 
       // Add cdFilters if they exist
@@ -400,23 +407,23 @@ const ApplicationManagementTable: React.FC = () => {
             'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       if (response.data.success && response.data.data) {
         const { filename, excel_base64 } = response.data.data;
-        
+
         const binaryString = atob(excel_base64);
         const bytes = new Uint8Array(binaryString.length);
-        
+
         for (let i = 0; i < binaryString.length; i++) {
           bytes[i] = binaryString.charCodeAt(i);
         }
-        
-        const blob = new Blob([bytes], { 
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+
+        const blob = new Blob([bytes], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         });
-        
+
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -430,10 +437,9 @@ const ApplicationManagementTable: React.FC = () => {
       } else {
         throw new Error(response.data.message || 'Failed to generate Excel file');
       }
-      
     } catch (error: any) {
       console.error('Error downloading Excel:', error);
-      
+
       if (error.response?.status === 404) {
         toast.error('No data found to export', { id: 'download-excel' });
       } else if (error.response?.status === 500) {
@@ -450,12 +456,12 @@ const ApplicationManagementTable: React.FC = () => {
 
   // Handle filter change from sidebar
   const handleFilterChange = (newFilters: Partial<Filters>, newCdFilters?: CdFilters) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       ...newFilters,
-      page: 0
+      page: 0,
     }));
-    
+
     if (newCdFilters) {
       setCdFilters(newCdFilters);
     }
@@ -540,7 +546,7 @@ const ApplicationManagementTable: React.FC = () => {
               <div className="w-full sm:w-48">
                 <Select
                   options={yearOptions}
-                  value={yearOptions.find(option => option.value === filters.year)}
+                  value={yearOptions.find((option) => option.value === filters.year)}
                   onChange={handleYearChange}
                   placeholder="Select Year"
                   isClearable
@@ -571,10 +577,14 @@ const ApplicationManagementTable: React.FC = () => {
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
                 disabled={loading2}
               >
-                {loading2 ? 'Downloading...' :
-                  <><BsDownload className="w-4 h-4" />
-                  <span>Download</span></>
-                }
+                {loading2 ? (
+                  'Downloading...'
+                ) : (
+                  <>
+                    <BsDownload className="w-4 h-4" />
+                    <span>Download</span>
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -588,53 +598,43 @@ const ApplicationManagementTable: React.FC = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="w-16 py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th className="w-12 py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         S.NO
                       </th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
+                      <th className="w-28 py-3 px-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Actions
+                      </th>
+                       <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
                         Created On
                       </th>
-                      <th 
-                        className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px] cursor-pointer select-none"
-                        onClick={() => handleSort('applicant_name')}
-                      >
-                        <div className="flex items-center space-x-1">
-                          <span>Applicant Name</span>
+
+                      <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[180px]">
+                        <div
+                          className="flex items-center space-x-1 cursor-pointer select-none"
+                          onClick={() => handleSort('applicant_name')}
+                        >
+                          <span>Candidate Details</span>
                           {getSortIcon('applicant_name')}
                         </div>
                       </th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
-                        Candidate Pic
-                      </th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[140px]">
-                        Signature
+                      <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
+                        Sign
                       </th>
                       <th
-                        className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer select-none min-w-[100px]"
+                        className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[100px] cursor-pointer select-none"
                         onClick={() => handleSort('roll_no')}
                       >
                         <div className="flex items-center space-x-1">
                           <span>Roll No</span>
                           {getSortIcon('roll_no')}
                         </div>
-                      </th>                      
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
-                        Academic Name
                       </th>
-                      <th 
-                        className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px] cursor-pointer select-none"
-                        onClick={() => handleSort('class_name')}
-                      >
-                        <div className="flex items-center space-x-1">
-                          <span>Class</span>
-                          {getSortIcon('class_name')}
-                        </div>
+                      <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[140px]">
+                        {user?.role === 'CustomerAdmin' ? 'Email ID' : 'Academic Name'}
                       </th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]">
-                        Payment Status
-                      </th>
-                      <th className="w-28 py-3 px-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Actions
+                     
+                      <th className="py-3 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[100px]">
+                        Payment
                       </th>
                     </tr>
                   </thead>
@@ -643,129 +643,191 @@ const ApplicationManagementTable: React.FC = () => {
                       applications.map((application, index) => {
                         const paymentStatus = getPaymentStatus(application.payment_status);
                         return (
-                          <tr key={application.id} className="hover:bg-gray-50 transition-colors duration-150">
-                            <td className="py-4 px-4 text-sm font-medium text-gray-900">
+                          <tr
+                            key={application.id}
+                            className="hover:bg-gray-50 transition-colors duration-150"
+                          >
+                            <td className="py-3 px-3 text-sm font-medium text-gray-900">
                               {filters.page * filters.rowsPerPage + index + 1}
                             </td>
-                            <td className="py-4 px-4 text-sm text-gray-600 min-w-[100px]">
-                              <div className="truncate " title={application?.created_at_formatted}>
-                                {application?.created_at_formatted || 'N/A'}
-                              </div>
-                            </td>
-                            <td className="py-4 px-4 text-sm font-medium text-gray-900 min-w-[150px]">
-                              <div className="truncate max-w-[140px]" title={application.applicant_name}>
-                                {application.applicant_name}
-                              </div>
-                            </td>
-                            <td className="py-4 px-4 min-w-[120px]">
-                              {application.candidate_pic ? (
-                                <img
-                                  src={`${apiAssetsUrl}/${application.candidate_pic}`}
-                                  alt="Candidate"
-                                  className="w-12 h-12 rounded-full object-cover border mx-auto"
-                                  onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'flex';
-                                  }}
-                                />
-                              ) : null}
-                              <div className={`w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center border mx-auto ${application.candidate_pic ? 'hidden' : 'flex'}`}>
-                                <span className="text-xs text-gray-500">No Image</span>
-                              </div>
-                            </td>
-                            <td className="py-4 px-4 min-w-[140px]">
-                              {application.candidate_signature ? (
-                                <img
-                                  src={`${apiAssetsUrl}/${application.candidate_signature}`}
-                                  alt="Signature"
-                                  className="w-20 h-10 object-contain border mx-auto"
-                                  onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'flex';
-                                  }}
-                                />
-                              ) : null}
-                              <div className={`w-20 h-10 bg-gray-200 flex items-center justify-center border rounded mx-auto ${application.candidate_signature ? 'hidden' : 'flex'}`}>
-                                <span className="text-xs text-gray-500">No Signature</span>
-                              </div>
-                            </td>
-                            
-                            <td className="py-4 px-4 text-sm text-gray-600 min-w-[100px]">
-                              <div className="truncate " title={application.roll_no}>
-                                {application.roll_no || 'N/A'}
-                              </div>
-                            </td>
-                            <td className="py-4 px-4 text-sm text-gray-600 min-w-[150px]">
-                              <Tooltip content={application.academic_name} placement="top" style="light">
-                                <div className="truncate max-w-[140px]">
-                                  {application.academic_name || 'N/A'}
-                                </div>
-                              </Tooltip>
-                            </td>
-                            <td className="py-4 px-4 text-sm text-gray-600 min-w-[120px]">
-                              <div className="truncate max-w-[110px]" title={application.class_name}>
-                                {application.class_name || 'N/A'}
-                              </div>
-                            </td>
-                            <td className="py-4 px-4 min-w-[120px]">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${paymentStatus.color}`}>
-                                {paymentStatus.text}
-                              </span>
-                            </td>
-                            <td className="py-4 px-4 text-center w-28">
-                              <div className="flex items-center justify-center space-x-2">
-                                <Tooltip content="View Details" placement="top" style='light'>
+                            <td className="py-5 px-4  border-gray-100 group-hover:border-blue-100">
+                              <div className="flex items-center justify-start space-x-2">
+                                <Tooltip content="View Details" placement="top" style="light">
                                   <button
                                     onClick={() => handleViewDetails(application)}
-                                    className="text-orange-600 hover:text-orange-800 p-2 rounded-lg hover:bg-orange-50 transition-colors"
+                                    className="p-2 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 hover:text-orange-700 transition-all duration-200 shadow-sm hover:shadow"
                                   >
-                                    <MdOutlineRemoveRedEye className="w-5 h-5" />
+                                    <MdOutlineRemoveRedEye className="w-4 h-4" />
                                   </button>
                                 </Tooltip>
-                                <Tooltip content="Edit" placement="top" style='light'>
+                                <Tooltip content="Edit" placement="top" style="light">
                                   <button
                                     onClick={() => handleEdit(application)}
-                                    className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                                    className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-all duration-200 shadow-sm hover:shadow"
                                   >
-                                    <TbEdit className="w-5 h-5" />
+                                    <TbEdit className="w-4 h-4" />
                                   </button>
                                 </Tooltip>
-
-                               <Tooltip content="Download PDF" placement="top" style="light">
+                                <Tooltip content="Download PDF" placement="top" style="light">
                                   <button
                                     onClick={() => handlePdfDownload(application.id)}
                                     disabled={downloadingId === application.id}
-                                    className={`text-red-600 p-2 rounded-lg transition-colors 
-                                      ${downloadingId === application.id
-                                        ? "opacity-60 cursor-not-allowed"
-                                        : "hover:text-red-800 hover:bg-red-50"
-                                      }`}
+                                    className={`p-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow
+                        ${
+                          downloadingId === application.id
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700'
+                        }`}
                                   >
                                     {downloadingId === application.id ? (
-                                      <TbLoader2 className="w-5 h-5 animate-spin" />
+                                      <TbLoader2 className="w-4 h-4 animate-spin" />
                                     ) : (
-                                      <TbFileTypePdf className="w-5 h-5" />
+                                      <TbFileTypePdf className="w-4 h-4" />
                                     )}
                                   </button>
                                 </Tooltip>
                               </div>
+                            </td>
+                             <td className="py-3 px-3 border-r border-gray-100 group-hover:border-blue-100 text-sm text-gray-600">
+                              <div className="truncate" title={application?.created_at_formatted}>
+                                {application?.created_at_formatted || 'N/A'}
+                              </div>
+                            </td>
+                            <td className="py-5 px-4 border-r border-gray-100 group-hover:border-blue-100">
+                              <div className="flex items-center space-x-3">
+                                <div className="relative flex-shrink-0">
+                                  {application.candidate_pic ? (
+                                    <img
+                                      src={`${apiAssetsUrl}/${application.candidate_pic}`}
+                                      alt="Candidate"
+                                      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                                      onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        e.target.nextSibling.style.display = 'flex';
+                                      }}
+                                    />
+                                  ) : null}
+                                  <div
+                                    className={`w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center border-2 border-white shadow-sm ${
+                                      application.candidate_pic ? 'hidden' : 'flex'
+                                    }`}
+                                  >
+                                    <span className="text-xs font-medium text-gray-500">
+                                      No Image
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div
+                                    className="text-sm font-semibold text-gray-800 hover:text-blue-700 cursor-pointer mb-1 transition-colors truncate"
+                                    title={application.applicant_name}
+                                    onClick={() => handleViewDetails(application)}
+                                  >
+                                    {application.applicant_name}
+                                  </div>
+                                  <div className="flex items-center">
+                                    <div className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-xs font-medium text-gray-600">
+                                      <MdClass className="w-3 h-3 mr-1.5" />
+                                      <span
+                                        className="truncate max-w-[120px]"
+                                        title={application.class_name}
+                                      >
+                                        {application.class_name || 'N/A'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3">
+                              {application.candidate_signature ? (
+                                <img
+                                  src={`${apiAssetsUrl}/${application.candidate_signature}`}
+                                  alt="Signature"
+                                  className="w-16 h-8 object-contain border mx-auto"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div
+                                className={`w-16 h-8 bg-gray-200 flex items-center justify-center border rounded mx-auto ${
+                                  application.candidate_signature ? 'hidden' : 'flex'
+                                }`}
+                              >
+                                <span className="text-xs text-gray-500">No Signature</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 text-sm text-gray-600">
+                              <div className="truncate" title={application.roll_no}>
+                                {application.roll_no || 'N/A'}
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 text-sm text-gray-600">
+                              {user?.role !== 'CustomerAdmin' ? (
+                                <Tooltip
+                                  content={application.academic_name}
+                                  placement="top"
+                                  style="light"
+                                >
+                                  <div className="truncate max-w-[130px]">
+                                    {application.academic_name || 'N/A'}
+                                  </div>
+                                </Tooltip>
+                              ) : (
+                                <Tooltip
+                                  content={application.candidate_details.father_emailid}
+                                  placement="top"
+                                  style="light"
+                                >
+                                  <div className="truncate max-w-[130px]">
+                                    {application.candidate_details.father_emailid || 'N/A'}
+                                  </div>
+                                </Tooltip>
+                              )}
+                            </td>
+                           
+                            <td className="py-3 px-3">
+                              <span
+                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${paymentStatus.color}`}
+                              >
+                                {paymentStatus.text}
+                              </span>
                             </td>
                           </tr>
                         );
                       })
                     ) : (
                       <tr>
-                        <td colSpan={9} className="py-8 text-center">
+                        <td colSpan={8} className="py-8 text-center">
                           <div className="flex flex-col items-center justify-center text-gray-500">
-                            <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <svg
+                              className="w-16 h-16 text-gray-300 mb-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1}
+                                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
                             </svg>
-                            <p className="text-lg font-medium text-gray-600 mb-2">No applications found</p>
+                            <p className="text-lg font-medium text-gray-600 mb-2">
+                              No applications found
+                            </p>
                             <p className="text-sm text-gray-500 mb-4">
-                              {filters.search || activeFiltersCount > 0 ? 'Try adjusting your search criteria' : 'No applications available'}
+                              {filters.search || activeFiltersCount > 0
+                                ? 'Try adjusting your search criteria'
+                                : 'No applications available'}
                             </p>
                             {activeFiltersCount > 0 && (
-                              <Button onClick={handleClearFilters} className="bg-blue-600 hover:bg-blue-700 text-white">
+                              <Button
+                                onClick={handleClearFilters}
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                              >
                                 Clear All Filters
                               </Button>
                             )}
@@ -804,7 +866,7 @@ const ApplicationManagementTable: React.FC = () => {
           onClearFilters={handleClearFilters}
         />
       </div>
-     
+
       {/* Application Detail Modal */}
       <ApplicationDetailModal
         isOpen={showDetailModal}
@@ -833,13 +895,6 @@ const ApplicationManagementTable: React.FC = () => {
 };
 
 export default ApplicationManagementTable;
-
-
-
-
-
-
-
 
 // import React, { useState, useEffect } from 'react';
 // import { MdOutlineRemoveRedEye, MdFilterList, MdSort } from 'react-icons/md';
@@ -991,14 +1046,14 @@ export default ApplicationManagementTable;
 //     if (filters.annual) count++;
 //     if (filters.special) count++;
 //     if (filters.localarea) count++;
-    
+
 //     // Count dynamic cdFilters
 //     Object.keys(cdFilters).forEach(key => {
 //       if (cdFilters[key] && cdFilters[key].length > 0) {
 //         count++;
 //       }
 //     });
-    
+
 //     setActiveFiltersCount(count);
 //   }, [filters, cdFilters]);
 
@@ -1065,11 +1120,11 @@ export default ApplicationManagementTable;
 //   useEffect(() => {
 //     fetchApplications();
 //   }, [
-//     filters.page, 
-//     filters.rowsPerPage, 
-//     filters.order, 
-//     filters.orderBy, 
-//     debouncedSearch, 
+//     filters.page,
+//     filters.rowsPerPage,
+//     filters.order,
+//     filters.orderBy,
+//     debouncedSearch,
 //     filters.academic_id,
 //     filters.year,
 //     filters.classAppliedFor,
@@ -1195,8 +1250,6 @@ export default ApplicationManagementTable;
 //   }
 // };
 
-
-
 //   // Handle download Excel
 //   const handleDownloadExcel = async () => {
 //     try {
@@ -1241,18 +1294,18 @@ export default ApplicationManagementTable;
 
 //       if (response.data.success && response.data.data) {
 //         const { filename, excel_base64 } = response.data.data;
-        
+
 //         const binaryString = atob(excel_base64);
 //         const bytes = new Uint8Array(binaryString.length);
-        
+
 //         for (let i = 0; i < binaryString.length; i++) {
 //           bytes[i] = binaryString.charCodeAt(i);
 //         }
-        
-//         const blob = new Blob([bytes], { 
-//           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+
+//         const blob = new Blob([bytes], {
+//           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 //         });
-        
+
 //         const url = window.URL.createObjectURL(blob);
 //         const link = document.createElement('a');
 //         link.href = url;
@@ -1266,10 +1319,10 @@ export default ApplicationManagementTable;
 //       } else {
 //         throw new Error(response.data.message || 'Failed to generate Excel file');
 //       }
-      
+
 //     } catch (error: any) {
 //       console.error('Error downloading Excel:', error);
-      
+
 //       if (error.response?.status === 404) {
 //         toast.error('No data found to export', { id: 'download-excel' });
 //       } else if (error.response?.status === 500) {
@@ -1291,7 +1344,7 @@ export default ApplicationManagementTable;
 //       ...newFilters,
 //       page: 0
 //     }));
-    
+
 //     if (newCdFilters) {
 //       setCdFilters(newCdFilters);
 //     }
@@ -1366,8 +1419,8 @@ export default ApplicationManagementTable;
 //                   placeholder="Search by name or mobile..."
 //                   value={filters.search}
 //                   onChange={(e) => handleSearch(e.target.value)}
-//                   className="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg 
-//                              bg-white focus:ring-blue-500 focus:border-blue-500 
+//                   className="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg
+//                              bg-white focus:ring-blue-500 focus:border-blue-500
 //                              placeholder-gray-400 transition-all duration-200"
 //                 />
 //               </div>
@@ -1430,7 +1483,7 @@ export default ApplicationManagementTable;
 //                       <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
 //                         Created On
 //                       </th>
-//                       <th 
+//                       <th
 //                         className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px] cursor-pointer select-none"
 //                         onClick={() => handleSort('applicant_name')}
 //                       >
@@ -1453,11 +1506,11 @@ export default ApplicationManagementTable;
 //                           <span>Roll No</span>
 //                           {getSortIcon('roll_no')}
 //                         </div>
-//                       </th>                      
+//                       </th>
 //                       <th className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
 //                         Academic Name
 //                       </th>
-//                       <th 
+//                       <th
 //                         className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px] cursor-pointer select-none"
 //                         onClick={() => handleSort('class_name')}
 //                       >
@@ -1525,7 +1578,7 @@ export default ApplicationManagementTable;
 //                                 <span className="text-xs text-gray-500">No Signature</span>
 //                               </div>
 //                             </td>
-                            
+
 //                             <td className="py-4 px-4 text-sm text-gray-600 min-w-[100px]">
 //                               <div className="truncate " title={application.roll_no}>
 //                                 {application.roll_no || 'N/A'}
@@ -1571,7 +1624,7 @@ export default ApplicationManagementTable;
 //                                   <button
 //                                     onClick={() => handlePdfDownload(application.id)}
 //                                     disabled={downloadingId === application.id}
-//                                     className={`text-red-600 p-2 rounded-lg transition-colors 
+//                                     className={`text-red-600 p-2 rounded-lg transition-colors
 //                                       ${downloadingId === application.id
 //                                         ? "opacity-60 cursor-not-allowed"
 //                                         : "hover:text-red-800 hover:bg-red-50"
@@ -1640,7 +1693,7 @@ export default ApplicationManagementTable;
 //           onClearFilters={handleClearFilters}
 //         />
 //       </div>
-     
+
 //       {/* Application Detail Modal */}
 //       <ApplicationDetailModal
 //         isOpen={showDetailModal}
@@ -1658,7 +1711,7 @@ export default ApplicationManagementTable;
 //           min-height: 42px;
 //           transition: all 0.2s;
 //         }
-        
+
 //         .react-select-container :global(.react-select__control--is-focused) {
 //           border-color: #3b82f6;
 //           box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
@@ -1669,10 +1722,6 @@ export default ApplicationManagementTable;
 // };
 
 // export default ApplicationManagementTable;
-
-
-
-
 
 // import React, { useState, useEffect } from 'react';
 // import { MdOutlineRemoveRedEye, MdFilterList, MdSort } from 'react-icons/md';

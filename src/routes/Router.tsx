@@ -72,6 +72,7 @@ import ApplyEditing from 'src/views/Editing/ApplyEditing';
 import CollegeSettingList from 'src/views/schoolServices/transportationSettings/CollegeSettingList';
 import CountryTable from 'src/views/dataManager/country/components/CountryTable';
 import ExportConfig from 'src/views/dataManager/exportConfiguration/ExportConfig';
+import CareerForm from 'src/views/frontedEditing/career/CareerForm';
 
 
 /* ***Layouts**** */
@@ -168,6 +169,7 @@ const MainRoutes = [
       { path: '/SuperAdmin/demo-accounts/add', element: <Add /> },
       { path: '/SuperAdmin/activity', element: <ActivitiesTable/>},
       { path: '/SuperAdmin/frontend-editing/home', element: <HomeEditing/>},
+      { path: '/SuperAdmin/frontend-editing/career', element: <CareerForm/>},
       { path: '/SuperAdmin/frontend-editing/Apply', element: <ApplyEditing/>},
       { path: '/SuperAdmin/frontend-editing/footer', element: <FooterEditing/>},
       { path: '/SuperAdmin/frontend-editing/popups', element: <PopupEditing />},
@@ -234,6 +236,7 @@ const MainRoutes = [
       { path: 'demo-accounts/add', element: <Add /> },
       { path: 'activity', element: <ActivitiesTable/>},
       { path: 'frontend-editing/home', element: <HomeEditing/>},
+      { path: 'frontend-editing/career', element: <CareerForm/>},
       { path: 'frontend-editing/footer', element: <FooterEditing/>},
       { path: 'frontend-editing/popups', element: <PopupEditing />},
       { path: 'school-applications/edit/:applicationId', element: <ApplicationEditPage/> },
@@ -298,6 +301,7 @@ const MainRoutes = [
       { path: 'demo-accounts/add', element: <Add /> },
       { path: 'activity', element: <ActivitiesTable/>},
       { path: 'frontend-editing/home', element: <HomeEditing/>},
+      { path: 'frontend-editing/career', element: <CareerForm/>},
       { path: 'frontend-editing/footer', element: <FooterEditing/>},
       { path: 'frontend-editing/popups', element: <PopupEditing />},
       { path: 'school-applications/edit/:applicationId', element: <ApplicationEditPage/> },
@@ -360,6 +364,7 @@ const MainRoutes = [
       { path: 'demo-accounts/add', element: <Add /> },
       { path: 'activity', element: <ActivitiesTable/>},
       { path: 'frontend-editing/home', element: <HomeEditing/>},
+      { path: 'frontend-editing/career', element: <CareerForm/>},
       { path: 'frontend-editing/footer', element: <FooterEditing/>},
       { path: 'frontend-editing/popups', element: <PopupEditing />},
       { path: 'notifications', element: <NotificationsPage/> }, 
