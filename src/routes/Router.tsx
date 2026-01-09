@@ -73,6 +73,7 @@ import CollegeSettingList from 'src/views/schoolServices/transportationSettings/
 import CountryTable from 'src/views/dataManager/country/components/CountryTable';
 import ExportConfig from 'src/views/dataManager/exportConfiguration/ExportConfig';
 import CareerForm from 'src/views/frontedEditing/career/CareerForm';
+import ApplyJobPage from 'src/views/website/components/ApplyJobPage';
 
 
 /* ***Layouts**** */
@@ -456,6 +457,7 @@ const MainRoutes = [
     },
 
     { path: '*', element: <Navigate to="/auth/404" /> },
+    { path: '/Frontend/:instituteId/job_details/:jobId', element: <ApplyJobPage/> }
   ],
 }
 
