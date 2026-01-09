@@ -1061,7 +1061,7 @@ case 'multi_data':
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
+                <div className='col-span-2'>
                   <Label htmlFor={`col-name-${column.id}`}>Column Name *</Label>
                   <TextInput
                     id={`col-name-${column.id}`}
@@ -1078,7 +1078,7 @@ case 'multi_data':
                   />
                 </div>
 
-                <div>
+                <div className='col-span-2'>
                   <Label htmlFor={`col-label-${column.id}`}>Column Label *</Label>
                   <TextInput
                     id={`col-label-${column.id}`}

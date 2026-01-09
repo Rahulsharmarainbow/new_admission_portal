@@ -1,17 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { Card, Label, TextInput, Button, Spinner, Textarea } from 'flowbite-react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
+import { 
+  Card, 
+  Label, 
+  TextInput, 
+  Button, 
+  Spinner, 
+  Modal
+} from 'flowbite-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import Loader from 'src/Frontend/Common/Loader';
+import JoditEditor from 'jodit-react';
 
-interface CareerCardData {
+interface CareerHeaderFooterData {
   id?: number;
-  card_title?: string;
-  card_description?: string;
-  card_icon?: string;
-  card_link?: string;
-  card_order?: number;
-  card_status?: boolean;
+  academic_id?: number;
+  title?: string;
+  long_description?: string;
+  banner_image?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface CareerCardSectionProps {
@@ -29,30 +37,84 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [cards, setCards] = useState<CareerCardData[]>([]);
-  const [editingCard, setEditingCard] = useState<CareerCardData | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-
+  
   // Form fields
-  const [cardTitle, setCardTitle] = useState('');
-  const [cardDescription, setCardDescription] = useState('');
-  const [cardIcon, setCardIcon] = useState<File | string | null>(null);
-  const [cardIconPreview, setCardIconPreview] = useState('');
-  const [cardLink, setCardLink] = useState('');
-  const [cardOrder, setCardOrder] = useState(0);
-  const [cardStatus, setCardStatus] = useState(true);
+  const [title, setTitle] = useState('');
+  const [longDescription, setLongDescription] = useState('');
+  const [bannerImage, setBannerImage] = useState<File | string | null>(null);
+  const [bannerPreview, setBannerPreview] = useState('');
+  const [isVideo, setIsVideo] = useState(false);
+
+  // Preview modal
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+
+  const editorRef = useRef(null);
+
+  const editorConfig = useMemo(
+    () => ({
+      readonly: false,
+      height: 400,
+      toolbarSticky: false,
+      toolbarAdaptive: false,
+      buttons: [
+        'source',
+        '|',
+        'bold',
+        'italic',
+        'underline',
+        'strikethrough',
+        '|',
+        'ul',
+        'ol',
+        '|',
+        'font',
+        'fontsize',
+        'brush',
+        'paragraph',
+        '|',
+        'image',
+        'video',
+        'table',
+        'link',
+        '|',
+        'left',
+        'center',
+        'right',
+        'justify',
+        '|',
+        'undo',
+        'redo',
+        '|',
+        'hr',
+        'eraser',
+        'copyformat',
+        'fullsize',
+      ],
+      showXPathInStatusbar: false,
+      showCharsCounter: false,
+      showWordsCounter: false,
+      uploader: { insertImageAsBase64URI: true },
+      placeholder: 'Enter career page description here...',
+      theme: 'default',
+    }),
+    [],
+  );
+
+  const handleEditorBlur = useCallback((newContent: string) => {
+    setLongDescription(newContent);
+  }, []);
 
   useEffect(() => {
-    if (selectedAcademic) getCareerCards(selectedAcademic);
+    if (selectedAcademic) getCareerHeaderFooter();
   }, [selectedAcademic]);
 
-  const getCareerCards = async (academicId: string) => {
-    if (!academicId) return;
+  const getCareerHeaderFooter = async () => {
+    if (!selectedAcademic) return;
     setLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/${user?.role}/CareerEditing/get-career-cards`,
-        { academic_id: parseInt(academicId) },
+        `${apiUrl}/${user?.role}/Career/get-card-content`,
+        { academic_id: parseInt(selectedAcademic) },
         {
           headers: {
             Authorization: `Bearer ${user?.token}`,
@@ -61,17 +123,48 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
         },
       );
 
-      if (response.data.success) {
-        setCards(response.data.data || []);
+      if (response.data?.status) {
+        setFormFields(response.data.data);
       } else {
-        toast.error(response.data.message || 'Failed to fetch career cards');
+        toast.error(response.data?.message || 'Failed to fetch career Card data');
+        resetForm();
       }
     } catch (error: any) {
-      console.error('Error fetching career cards:', error);
-      toast.error(error.response?.data?.message || 'Error fetching cards');
+      console.error('Error fetching career Card data:', error);
+      resetForm();
     } finally {
       setLoading(false);
     }
+  };
+
+  const setFormFields = (data: CareerHeaderFooterData) => {
+    setTitle(data.title || '');
+    setLongDescription(data.long_description || '');
+    
+    if (data.banner_image) {
+      setBannerImage(data.banner_image);
+      const fileUrl = `${assetUrl}/${data.banner_image}`;
+      setBannerPreview(fileUrl);
+      
+      // Check if it's a video
+      const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+      const isVideoFile = videoExtensions.some(ext => 
+        data.banner_image.toLowerCase().endsWith(ext)
+      );
+      setIsVideo(isVideoFile);
+    } else {
+      setBannerImage(null);
+      setBannerPreview('');
+      setIsVideo(false);
+    }
+  };
+
+  const resetForm = () => {
+    setTitle('');
+    setLongDescription('');
+    setBannerImage(null);
+    setBannerPreview('');
+    setIsVideo(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,7 +175,7 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
       return;
     }
 
-    if (!cardTitle || !cardDescription) {
+    if (!title || !longDescription) {
       toast.error('Please fill all required fields');
       return;
     }
@@ -93,28 +186,19 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
       const formData = new FormData();
       formData.append('academic_id', parseInt(selectedAcademic).toString());
       formData.append('s_id', user?.id?.toString() || '');
-      formData.append('card_title', cardTitle);
-      formData.append('card_description', cardDescription);
-      formData.append('card_link', cardLink);
-      formData.append('card_order', cardOrder.toString());
-      formData.append('card_status', cardStatus.toString());
-      
-      if (cardIcon instanceof File) {
-        formData.append('card_icon', cardIcon);
-      } else if (typeof cardIcon === 'string') {
-        formData.append('card_icon', cardIcon);
-      }
+      formData.append('title', title);
+      formData.append('long_description', longDescription);
 
-      if (isEditing && editingCard?.id) {
-        formData.append('card_id', editingCard.id.toString());
+      // Append banner image if it's a File
+      if (bannerImage instanceof File) {
+        formData.append('banner_image', bannerImage);
+      } else if (typeof bannerImage === 'string' && bannerImage) {
+        // If it's a string (existing file path), send it as is
+        formData.append('banner_image', bannerImage);
       }
-
-      const endpoint = isEditing 
-        ? 'update-career-card' 
-        : 'create-career-card';
 
       const response = await axios.post(
-        `${apiUrl}/${user?.role}/CareerEditing/${endpoint}`,
+        `${apiUrl}/${user?.role}/Career/update-card-content`,
         formData,
         {
           headers: {
@@ -124,86 +208,53 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
         },
       );
 
-      if (response.data.success) {
-        toast.success(`Card ${isEditing ? 'updated' : 'created'} successfully!`);
-        resetForm();
-        getCareerCards(selectedAcademic);
+      if (response.data?.status) {
+        toast.success(response.data?.message || 'Career Card updated successfully!');
+        getCareerHeaderFooter();
       } else {
-        toast.error(response.data.message || `Failed to ${isEditing ? 'update' : 'create'} card`);
+        toast.error(response.data?.message || 'Failed to update career Card');
       }
     } catch (error: any) {
-      console.error('Error saving card:', error);
-      toast.error(error.response?.data?.message || 'Error saving card');
+      console.error('Error updating career:', error);
     } finally {
       setSaving(false);
     }
   };
 
-  const editCard = (card: CareerCardData) => {
-    setEditingCard(card);
-    setIsEditing(true);
-    setCardTitle(card.card_title || '');
-    setCardDescription(card.card_description || '');
-    setCardLink(card.card_link || '');
-    setCardOrder(card.card_order || 0);
-    setCardStatus(card.card_status || true);
-    
-    if (card.card_icon) {
-      setCardIcon(card.card_icon);
-      setCardIconPreview(`${assetUrl}/${card.card_icon}`);
-    } else {
-      setCardIcon(null);
-      setCardIconPreview('');
-    }
-  };
-
-  const deleteCard = async (cardId: number) => {
-    if (!confirm('Are you sure you want to delete this card?')) return;
-
-    try {
-      const response = await axios.post(
-        `${apiUrl}/${user?.role}/CareerEditing/delete-career-card`,
-        {
-          academic_id: parseInt(selectedAcademic),
-          card_id: cardId,
-          s_id: user?.id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-          },
-        },
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setBannerImage(file);
+      
+      // Check if it's a video
+      const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
+      const isVideoFile = videoExtensions.some(ext => 
+        file.name.toLowerCase().endsWith(ext)
       );
-
-      if (response.data.success) {
-        toast.success('Card deleted successfully!');
-        getCareerCards(selectedAcademic);
+      setIsVideo(isVideoFile);
+      
+      if (isVideoFile) {
+        setBannerPreview(URL.createObjectURL(file));
       } else {
-        toast.error(response.data.message || 'Failed to delete card');
+        // For images, create preview
+        const reader = new FileReader();
+        reader.onload = () => setBannerPreview(reader.result as string);
+        reader.readAsDataURL(file);
       }
-    } catch (error: any) {
-      console.error('Error deleting card:', error);
-      toast.error(error.response?.data?.message || 'Error deleting card');
     }
   };
 
-  const resetForm = () => {
-    setEditingCard(null);
-    setIsEditing(false);
-    setCardTitle('');
-    setCardDescription('');
-    setCardIcon(null);
-    setCardIconPreview('');
-    setCardLink('');
-    setCardOrder(0);
-    setCardStatus(true);
+  const handleRemoveBanner = () => {
+    setBannerImage(null);
+    setBannerPreview('');
+    setIsVideo(false);
   };
 
   if (!selectedAcademic) {
     return (
       <Card className="p-6">
         <p className="text-gray-500 italic">
-          Please select an academic from above to manage career cards.
+          Please select an academic from above to manage career header & footer.
         </p>
       </Card>
     );
@@ -215,219 +266,118 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
         <Loader />
       ) : (
         <div className="space-y-6">
-          {/* Add/Edit Card Form */}
+          {/* Header & Footer Form */}
           <Card>
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-6">
-                {isEditing ? 'Edit Card' : 'Add New Card'}
-              </h2>
+              <h2 className="text-xl font-semibold mb-6">Career Card Management</h2>
               
               <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Title */}
                   <div>
-                    <Label htmlFor="cardTitle" className="block mb-2">
-                      Card Title *
+                    <Label htmlFor="title" className="block mb-2">
+                      Page Title *
                     </Label>
                     <TextInput
-                      id="cardTitle"
+                      id="title"
                       type="text"
-                      value={cardTitle}
-                      onChange={(e) => setCardTitle(e.target.value)}
-                      placeholder="Enter card title"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="Enter career page title"
                       required
                     />
                   </div>
 
+                  {/* Banner Image/Video */}
                   <div>
-                    <Label htmlFor="cardOrder" className="block mb-2">
-                      Display Order
+                    <Label htmlFor="bannerImage" className="block mb-2">
+                      Banner Image/Video
                     </Label>
-                    <TextInput
-                      id="cardOrder"
-                      type="number"
-                      value={cardOrder}
-                      onChange={(e) => setCardOrder(parseInt(e.target.value) || 0)}
-                      placeholder="Order number"
-                      min="0"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <Label htmlFor="cardDescription" className="block mb-2">
-                      Description *
-                    </Label>
-                    <Textarea
-                      id="cardDescription"
-                      value={cardDescription}
-                      onChange={(e) => setCardDescription(e.target.value)}
-                      placeholder="Enter card description"
-                      rows={3}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="cardLink" className="block mb-2">
-                      Link URL
-                    </Label>
-                    <TextInput
-                      id="cardLink"
-                      type="url"
-                      value={cardLink}
-                      onChange={(e) => setCardLink(e.target.value)}
-                      placeholder="https://example.com"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="cardStatus" className="block mb-2">
-                      Status
-                    </Label>
-                    <select
-                      id="cardStatus"
-                      value={cardStatus.toString()}
-                      onChange={(e) => setCardStatus(e.target.value === 'true')}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    >
-                      <option value="true">Active</option>
-                      <option value="false">Inactive</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="cardIcon" className="block mb-2">
-                      Card Icon
-                    </Label>
-                    <div className="flex items-center gap-4">
-                      {cardIconPreview && (
-                        <div className="w-16 h-16 flex items-center justify-center border border-gray-200 rounded-lg shadow-sm bg-white">
-                          <img
-                            src={cardIconPreview}
-                            alt="Icon Preview"
-                            className="w-full h-full object-contain rounded-lg"
-                          />
+                    <div className="space-y-4">
+                      {bannerPreview && (
+                        <div className="relative">
+                          <div className="border border-gray-300 rounded-lg overflow-hidden max-w-2xl">
+                            {isVideo ? (
+                              <video 
+                                src={bannerPreview} 
+                                controls 
+                                className="w-full h-auto max-h-96 object-contain"
+                              />
+                            ) : (
+                              <img
+                                src={bannerPreview}
+                                alt="Banner Preview"
+                                className="w-full h-auto max-h-96 object-contain"
+                              />
+                            )}
+                          </div>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <Button
+                              type="button"
+                              color="light"
+                              size="xs"
+                              onClick={() => setShowPreviewModal(true)}
+                            >
+                              Preview
+                            </Button>
+                            <Button
+                              type="button"
+                              color="failure"
+                              size="xs"
+                              onClick={handleRemoveBanner}
+                            >
+                              Remove
+                            </Button>
+                          </div>
                         </div>
                       )}
-                      <input
-                        id="cardIcon"
-                        type="file"
-                        accept="image/*"
-                        className="block border border-gray-300 rounded-lg p-2 text-sm"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          setCardIcon(file || null);
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onload = () => setCardIconPreview(reader.result as string);
-                            reader.readAsDataURL(file);
-                          }
-                        }}
+                      
+                      <div className="flex items-center gap-4">
+                        <input
+                          id="bannerImage"
+                          type="file"
+                          accept="image/*,video/*"
+                          onChange={handleBannerChange}
+                          className="block border border-gray-300 rounded-lg p-2 text-sm flex-1"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Long Description - Rich Text Editor */}
+                  <div>
+                    <Label htmlFor="longDescription" className="block mb-2">
+                      Page Description *
+                    </Label>
+                    <div className="border border-gray-300 rounded-lg overflow-hidden">
+                      <JoditEditor
+                        ref={editorRef}
+                        value={longDescription}
+                        config={editorConfig}
+                        onBlur={handleEditorBlur}
                       />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Recommended: 64x64 pixels</p>
                   </div>
-                </div>
 
-                <div className="flex justify-end space-x-3 pt-6 mt-6 border-t">
-                  {isEditing && (
-                    <Button
-                      type="button"
-                      color="light"
-                      onClick={resetForm}
-                      disabled={saving}
-                    >
-                      Cancel
+                  {/* Submit Button */}
+                  <div className="flex justify-end pt-4">
+                    <Button type="submit" className="min-w-[120px]" disabled={saving}>
+                      {saving ? (
+                        <>
+                          <Spinner size="sm" className="mr-2" /> Saving...
+                        </>
+                      ) : (
+                        'Save Changes'
+                      )}
                     </Button>
-                  )}
-                  <Button type="submit" className="min-w-[120px]" disabled={saving}>
-                    {saving ? (
-                      <>
-                        <Spinner size="sm" className="mr-2" /> Saving...
-                      </>
-                    ) : (
-                      isEditing ? 'Update Card' : 'Add Card'
-                    )}
-                  </Button>
+                  </div>
                 </div>
               </form>
             </div>
           </Card>
-
-          {/* Cards List */}
-          <Card>
-            <div className="p-6">
-              <h2 className="text-xl font-semibold mb-6">Existing Cards</h2>
-              
-              {cards.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  No cards found. Add your first card above.
-                </p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {cards.map((card) => (
-                    <div key={card.id} className="border rounded-lg p-4 shadow-sm">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center space-x-3">
-                          {card.card_icon && (
-                            <img
-                              src={`${assetUrl}/${card.card_icon}`}
-                              alt={card.card_title}
-                              className="w-10 h-10 object-contain"
-                            />
-                          )}
-                          <h3 className="font-medium">{card.card_title}</h3>
-                        </div>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          card.card_status 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {card.card_status ? 'Active' : 'Inactive'}
-                        </span>
-                      </div>
-                      
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                        {card.card_description}
-                      </p>
-                      
-                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                        <span>Order: {card.card_order}</span>
-                        {card.card_link && (
-                          <a 
-                            href={card.card_link} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            View Link
-                          </a>
-                        )}
-                      </div>
-                      
-                      <div className="flex space-x-2">
-                        <Button
-                          size="xs"
-                          color="light"
-                          onClick={() => editCard(card)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="xs"
-                          color="failure"
-                          onClick={() => deleteCard(card.id!)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </Card>
         </div>
       )}
+
     </div>
   );
 };

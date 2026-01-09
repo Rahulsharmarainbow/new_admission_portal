@@ -12,6 +12,7 @@ import CareerFooterSection from './tabs/CareerFooterSection';
 import CareerCardSection from './tabs/CareerCardSection';
 import CareerJobsSection from './tabs/CareerJobsSection';
 import CareerTextSection from './tabs/CareerTextSection';
+import CareerStatusManagement from './tabs/CareerStatusManagement';
 
 const CareerForm = () => {
   const { user } = useAuth();
@@ -68,14 +69,14 @@ const CareerForm = () => {
             />
           </Tabs.Item>
 
-          <Tabs.Item icon={HiOutlineNewspaper} title="Text Contain">
-            <CareerTextSection 
+          <Tabs.Item icon={HiOutlineNewspaper} title="Status">
+            <CareerStatusManagement 
               selectedAcademic={selectedAcademic} 
               user={user} 
               apiUrl={apiUrl} 
             />
           </Tabs.Item>
-        </Tabs>
+        </Tabs> 
       </div>
     </Card>
   );

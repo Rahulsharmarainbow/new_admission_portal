@@ -3,22 +3,42 @@ import { Card, Label, TextInput, Button, Spinner, Textarea } from 'flowbite-reac
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import Loader from 'src/Frontend/Common/Loader';
+import { FaPlus, FaTrash } from 'react-icons/fa';
+import { HiOutlinePlus, HiOutlineTrash } from 'react-icons/hi';
+
+// Static Font Awesome icons list
+const fontAwesomeIcons = [
+  { value: 'fa-brands fa-facebook-f', label: 'Facebook' },
+  { value: 'fa-brands fa-instagram', label: 'Instagram' },
+  { value: 'fa-brands fa-linkedin-in', label: 'LinkedIn' },
+  { value: 'fa-brands fa-x-twitter', label: 'Twitter' },
+  { value: 'fa-brands fa-youtube', label: 'YouTube' },
+  { value: 'fa-brands fa-whatsapp', label: 'WhatsApp' },
+  { value: 'fa-brands fa-telegram', label: 'Telegram' },
+  { value: 'fa-brands fa-github', label: 'GitHub' },
+  { value: 'fa-brands fa-tiktok', label: 'TikTok' },
+  { value: 'fa-brands fa-snapchat', label: 'Snapchat' },
+  { value: 'fa-solid fa-globe', label: 'Website' },
+  { value: 'fa-solid fa-envelope', label: 'Email' },
+  { value: 'fa-solid fa-phone', label: 'Phone' },
+  { value: 'fa-solid fa-map-marker-alt', label: 'Location' },
+];
+
+interface SocialIcon {
+  icon_url: string;
+  icon: string;
+}
 
 interface CareerFooterData {
-  id?: number;
-  career_header_logo?: string;
-  career_footer_logo?: string;
-  career_header_text?: string;
-  career_footer_text?: string;
-  career_contact_email?: string;
-  career_contact_phone?: string;
-  career_address?: string;
-  career_copyright?: string;
-  career_social_links?: {
-    facebook?: string;
-    twitter?: string;
-    linkedin?: string;
-    instagram?: string;
+  header: {
+    header_heading: string;
+    academic_address: string;
+    academic_logo: string;
+  };
+  footer: {
+    academic_mobile: string;
+    academic_email: string;
+    social_icon: SocialIcon[];
   };
 }
 
@@ -37,28 +57,19 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  
+
   // Header Fields
-  const [headerLogo, setHeaderLogo] = useState<File | string | null>(null);
-  const [headerLogoPreview, setHeaderLogoPreview] = useState('');
-  const [headerText, setHeaderText] = useState('');
-  
+  const [academicLogo, setAcademicLogo] = useState<File | string | null>(null);
+  const [academicLogoPreview, setAcademicLogoPreview] = useState('');
+  const [headerHeading, setHeaderHeading] = useState('');
+  const [academicAddress, setAcademicAddress] = useState('');
+
   // Footer Fields
-  const [footerLogo, setFooterLogo] = useState<File | string | null>(null);
-  const [footerLogoPreview, setFooterLogoPreview] = useState('');
-  const [footerText, setFooterText] = useState('');
-  const [copyright, setCopyright] = useState('');
-  
-  // Contact Fields
-  const [contactEmail, setContactEmail] = useState('');
-  const [contactPhone, setContactPhone] = useState('');
-  const [address, setAddress] = useState('');
-  
+  const [academicMobile, setAcademicMobile] = useState('');
+  const [academicEmail, setAcademicEmail] = useState('');
+
   // Social Media Fields
-  const [facebook, setFacebook] = useState('');
-  const [twitter, setTwitter] = useState('');
-  const [linkedin, setLinkedin] = useState('');
-  const [instagram, setInstagram] = useState('');
+  const [socialIcons, setSocialIcons] = useState<SocialIcon[]>([{ icon_url: '', icon: '' }]);
 
   useEffect(() => {
     if (selectedAcademic) getCareerFooterData(selectedAcademic);
@@ -70,17 +81,18 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
     setLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/${user?.role}/CareerEditing/get-career-footer`,
+        `${apiUrl}/SuperAdmin/Career/get-header-footer`,
         { academic_id: parseInt(academicId) },
         {
           headers: {
             Authorization: `Bearer ${user?.token}`,
             'Content-Type': 'application/json',
+            superadmin_auth_token: user?.token,
           },
         },
       );
 
-      if (response.data.success) {
+      if (response.data.status) {
         setFormFields(response.data.data);
       } else {
         toast.error(response.data.message || 'Failed to fetch career footer data');
@@ -97,48 +109,29 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
 
   const setFormFields = (data: CareerFooterData) => {
     // Header
-    if (data.career_header_logo) {
-      setHeaderLogo(data.career_header_logo);
-      setHeaderLogoPreview(`${assetUrl}/${data.career_header_logo}`);
+    if (data.header?.academic_logo) {
+      setAcademicLogo(data.header.academic_logo);
+      setAcademicLogoPreview(`${assetUrl}/${data.header.academic_logo}`);
     }
-    setHeaderText(data.career_header_text || '');
-    
+    setHeaderHeading(data.header?.header_heading || '');
+    setAcademicAddress(data.header?.academic_address || '');
+
     // Footer
-    if (data.career_footer_logo) {
-      setFooterLogo(data.career_footer_logo);
-      setFooterLogoPreview(`${assetUrl}/${data.career_footer_logo}`);
-    }
-    setFooterText(data.career_footer_text || '');
-    setCopyright(data.career_copyright || '');
-    
-    // Contact
-    setContactEmail(data.career_contact_email || '');
-    setContactPhone(data.career_contact_phone || '');
-    setAddress(data.career_address || '');
-    
+    setAcademicEmail(data.footer?.academic_email || '');
+    setAcademicMobile(data.footer?.academic_mobile || '');
+
     // Social Media
-    const social = data.career_social_links || {};
-    setFacebook(social.facebook || '');
-    setTwitter(social.twitter || '');
-    setLinkedin(social.linkedin || '');
-    setInstagram(social.instagram || '');
+    setSocialIcons(data.footer?.social_icon || [{ icon_url: '', icon: '' }]);
   };
 
   const resetForm = () => {
-    setHeaderLogo(null);
-    setHeaderLogoPreview('');
-    setHeaderText('');
-    setFooterLogo(null);
-    setFooterLogoPreview('');
-    setFooterText('');
-    setCopyright('');
-    setContactEmail('');
-    setContactPhone('');
-    setAddress('');
-    setFacebook('');
-    setTwitter('');
-    setLinkedin('');
-    setInstagram('');
+    setAcademicLogo(null);
+    setAcademicLogoPreview('');
+    setHeaderHeading('');
+    setAcademicAddress('');
+    setAcademicEmail('');
+    setAcademicMobile('');
+    setSocialIcons([{ icon_url: '', icon: '' }]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -149,76 +142,92 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
       return;
     }
 
+    // Validate social icons
+    const validSocialIcons = socialIcons.filter(
+      (icon) => icon.icon_url.trim() !== '' && icon.icon.trim() !== '',
+    );
+
+    if (validSocialIcons.length === 0) {
+      toast.error('At least one social icon with both icon class and URL is required');
+      return;
+    }
+
     setSaving(true);
 
     try {
       const formData = new FormData();
-      formData.append('academic_id', parseInt(selectedAcademic).toString());
+      formData.append('academic_id', selectedAcademic);
       formData.append('s_id', user?.id?.toString() || '');
-      
+
       // Header
-      formData.append('career_header_text', headerText);
-      if (headerLogo instanceof File) {
-        formData.append('career_header_logo', headerLogo);
-      } else if (typeof headerLogo === 'string') {
-        formData.append('career_header_logo', headerLogo);
+      formData.append('header_heading', headerHeading);
+      formData.append('academic_address', academicAddress);
+      if (academicLogo instanceof File) {
+        formData.append('academic_logo', academicLogo);
+      } else if (typeof academicLogo === 'string' && academicLogo) {
+        formData.append('academic_logo', academicLogo);
       }
-      
+
       // Footer
-      formData.append('career_footer_text', footerText);
-      formData.append('career_copyright', copyright);
-      if (footerLogo instanceof File) {
-        formData.append('career_footer_logo', footerLogo);
-      } else if (typeof footerLogo === 'string') {
-        formData.append('career_footer_logo', footerLogo);
-      }
-      
-      // Contact
-      formData.append('career_contact_email', contactEmail);
-      formData.append('career_contact_phone', contactPhone);
-      formData.append('career_address', address);
-      
+      formData.append('academic_mobile', academicMobile);
+      formData.append('academic_email', academicEmail);
+
       // Social Media
-      const socialLinks = {
-        facebook,
-        twitter,
-        linkedin,
-        instagram
-      };
-      formData.append('career_social_links', JSON.stringify(socialLinks));
+      formData.append('social_icon', JSON.stringify(validSocialIcons));
 
       const response = await axios.post(
-        `${apiUrl}/${user?.role}/CareerEditing/update-career-footer`,
+        `${apiUrl}/SuperAdmin/Career/update-header-footer`,
         formData,
         {
           headers: {
             Authorization: `Bearer ${user?.token}`,
+            superadmin_auth_token: user?.token,
             'Content-Type': 'multipart/form-data',
           },
         },
       );
 
-      if (response.data.success) {
-        toast.success('Career footer data updated successfully!');
+      if (response.data.status) {
+        toast.success('Career header & footer data updated successfully!');
         getCareerFooterData(selectedAcademic);
       } else {
-        toast.error(response.data.message || 'Failed to update career footer data');
+        toast.error(response.data.message || 'Failed to update data');
       }
     } catch (error: any) {
-      console.error('Error updating career footer data:', error);
-      toast.error(error.response?.data?.message || 'Error updating career footer data');
+      console.error('Error updating data:', error);
+      toast.error(error.response?.data?.message || 'Error updating data');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleFileChange = (setFile: any, setPreview: any) => (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setFile(file);
+      setAcademicLogo(file);
       const reader = new FileReader();
-      reader.onload = () => setPreview(reader.result as string);
+      reader.onload = () => setAcademicLogoPreview(reader.result as string);
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSocialIconChange = (index: number, field: keyof SocialIcon, value: string) => {
+    const updatedIcons = [...socialIcons];
+    updatedIcons[index] = {
+      ...updatedIcons[index],
+      [field]: value,
+    };
+    setSocialIcons(updatedIcons);
+  };
+
+  const addSocialIcon = () => {
+    setSocialIcons([...socialIcons, { icon_url: '', icon: '' }]);
+  };
+
+  const removeSocialIcon = (index: number) => {
+    if (socialIcons.length > 1) {
+      const updatedIcons = socialIcons.filter((_, i) => i !== index);
+      setSocialIcons(updatedIcons);
     }
   };
 
@@ -241,97 +250,58 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
           <div className="p-6">
             <form onSubmit={handleSubmit}>
               <h2 className="text-xl font-semibold mb-6">Career Header Editing</h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                {/* Header Logo */}
+                {/* Academic Logo */}
                 <div>
-                  <Label htmlFor="headerLogo" className="block mb-2">
-                    Career Header Logo
+                  <Label htmlFor="academicLogo" className="block mb-2">
+                    Academic Logo
                   </Label>
                   <div className="flex items-center gap-4">
-                    {headerLogoPreview && (
+                    {academicLogoPreview && (
                       <div className="w-32 h-32 flex items-center justify-center border border-gray-200 rounded-lg shadow-sm bg-white">
                         <img
-                          src={headerLogoPreview}
-                          alt="Header Logo Preview"
+                          src={academicLogoPreview}
+                          alt="Academic Logo Preview"
                           className="w-full h-full object-contain rounded-lg"
                         />
                       </div>
                     )}
                     <input
-                      id="headerLogo"
+                      id="academicLogo"
                       type="file"
                       accept="image/*"
                       className="block border border-gray-300 rounded-lg p-2 text-sm w-2/3"
-                      onChange={handleFileChange(setHeaderLogo, setHeaderLogoPreview)}
+                      onChange={handleFileChange}
                     />
                   </div>
                 </div>
 
-                {/* Header Text */}
+                {/* Header Heading */}
                 <div>
-                  <Label htmlFor="headerText" className="block mb-2">
-                    Header Text
+                  <Label htmlFor="headerHeading" className="block mb-2">
+                    Header Heading
                   </Label>
                   <TextInput
-                    id="headerText"
+                    id="headerHeading"
                     type="text"
-                    value={headerText}
-                    onChange={(e) => setHeaderText(e.target.value)}
-                    placeholder="Enter header text"
+                    value={headerHeading}
+                    onChange={(e) => setHeaderHeading(e.target.value)}
+                    placeholder="Enter header heading"
                   />
                 </div>
 
-                {/* Footer Logo */}
-                <div>
-                  <Label htmlFor="footerLogo" className="block mb-2">
-                    Career Footer Logo
-                  </Label>
-                  <div className="flex items-center gap-4">
-                    {footerLogoPreview && (
-                      <div className="w-32 h-32 flex items-center justify-center border border-gray-200 rounded-lg shadow-sm bg-white">
-                        <img
-                          src={footerLogoPreview}
-                          alt="Footer Logo Preview"
-                          className="w-full h-full object-contain rounded-lg"
-                        />
-                      </div>
-                    )}
-                    <input
-                      id="footerLogo"
-                      type="file"
-                      accept="image/*"
-                      className="block border border-gray-300 rounded-lg p-2 text-sm w-2/3"
-                      onChange={handleFileChange(setFooterLogo, setFooterLogoPreview)}
-                    />
-                  </div>
-                </div>
-
-                {/* Footer Text */}
-                <div>
-                  <Label htmlFor="footerText" className="block mb-2">
-                    Footer Text
-                  </Label>
-                  <TextInput
-                    id="footerText"
-                    type="text"
-                    value={footerText}
-                    onChange={(e) => setFooterText(e.target.value)}
-                    placeholder="Enter footer text"
-                  />
-                </div>
-
-                {/* Copyright */}
+                {/* Academic Address */}
                 <div className="md:col-span-2">
-                  <Label htmlFor="copyright" className="block mb-2">
-                    Copyright Text
+                  <Label htmlFor="academicAddress" className="block mb-2">
+                    Academic Address
                   </Label>
-                  <TextInput
-                    id="copyright"
-                    type="text"
-                    value={copyright}
-                    onChange={(e) => setCopyright(e.target.value)}
-                    placeholder="© 2025 Career Portal. All rights reserved."
+                  <Textarea
+                    id="academicAddress"
+                    value={academicAddress}
+                    onChange={(e) => setAcademicAddress(e.target.value)}
+                    placeholder="Enter academic address"
+                    rows={3}
                   />
                 </div>
               </div>
@@ -339,101 +309,106 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
               <h2 className="text-xl font-semibold mb-6">Contact Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
                 <div>
-                  <Label htmlFor="contactEmail" className="block mb-2">
-                    Contact Email
+                  <Label htmlFor="academicEmail" className="block mb-2">
+                    Academic Email
                   </Label>
                   <TextInput
-                    id="contactEmail"
+                    id="academicEmail"
                     type="email"
-                    value={contactEmail}
-                    onChange={(e) => setContactEmail(e.target.value)}
+                    value={academicEmail}
+                    onChange={(e) => setAcademicEmail(e.target.value)}
                     placeholder="career@example.com"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="contactPhone" className="block mb-2">
-                    Contact Phone
+                  <Label htmlFor="academicMobile" className="block mb-2">
+                    Academic Mobile
                   </Label>
                   <TextInput
-                    id="contactPhone"
+                    id="academicMobile"
                     type="text"
-                    value={contactPhone}
-                    onChange={(e) => setContactPhone(e.target.value)}
+                    value={academicMobile}
+                    onChange={(e) => setAcademicMobile(e.target.value)}
                     placeholder="+91 9876543210"
                   />
                 </div>
-
-                <div className="md:col-span-2">
-                  <Label htmlFor="address" className="block mb-2">
-                    Address
-                  </Label>
-                  <Textarea
-                    id="address"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Enter complete address"
-                    rows={3}
-                  />
-                </div>
               </div>
 
-              <h2 className="text-xl font-semibold mb-6">Social Media Links</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                <div>
-                  <Label htmlFor="facebook" className="block mb-2">
-                    Facebook URL
-                  </Label>
-                  <TextInput
-                    id="facebook"
-                    type="url"
-                    value={facebook}
-                    onChange={(e) => setFacebook(e.target.value)}
-                    placeholder="https://facebook.com/username"
-                  />
-                </div>
+              <h2 className="text-xl font-semibold mb-6">Social Media Icons</h2>
+              <div className="space-y-4 mb-10">
+                {socialIcons.map((icon, index) => (
+                  <div
+                    key={index}
+                    className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end p-4 border border-gray-200 rounded-lg"
+                  >
+                    {/* Icon Class Dropdown - 5 columns */}
+                    <div className="md:col-span-5">
+                      <Label htmlFor={`icon-class-${index}`} className="block mb-2">
+                        Icon Class
+                      </Label>
+                      <select
+                        id={`icon-class-${index}`}
+                        value={icon.icon}
+                        onChange={(e) => handleSocialIconChange(index, 'icon', e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Select an icon</option>
+                        {fontAwesomeIcons.map((iconOption) => (
+                          <option key={iconOption.label} value={iconOption.label}>
+                            {iconOption.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                <div>
-                  <Label htmlFor="twitter" className="block mb-2">
-                    Twitter URL
-                  </Label>
-                  <TextInput
-                    id="twitter"
-                    type="url"
-                    value={twitter}
-                    onChange={(e) => setTwitter(e.target.value)}
-                    placeholder="https://twitter.com/username"
-                  />
-                </div>
+                    {/* Icon URL Input - 5 columns */}
+                    <div className="md:col-span-5">
+                      <Label htmlFor={`icon-url-${index}`} className="block mb-2">
+                        Icon URL
+                      </Label>
+                      <TextInput
+                        id={`icon-url-${index}`}
+                        type="url"
+                        value={icon.icon_url}
+                        onChange={(e) => handleSocialIconChange(index, 'icon_url', e.target.value)}
+                        placeholder="https://facebook.com/username"
+                      />
+                    </div>
 
-                <div>
-                  <Label htmlFor="linkedin" className="block mb-2">
-                    LinkedIn URL
-                  </Label>
-                  <TextInput
-                    id="linkedin"
-                    type="url"
-                    value={linkedin}
-                    onChange={(e) => setLinkedin(e.target.value)}
-                    placeholder="https://linkedin.com/company/username"
-                  />
-                </div>
+                    {/* Action Buttons - 2 columns */}
+                    <div className="md:col-span-2 flex gap-2 justify-end">
+                      {/* Remove Button - Show for all rows except last if more than 1 row */}
+                      {socialIcons.length > 1 && (
+                        <Button
+                          type="button"
+                          color="failure"
+                          onClick={() => removeSocialIcon(index)}
+                          className="px-3 py-2"
+                          title="Remove"
+                        >
+                          <HiOutlineTrash className="h-5 w-5" />
+                        </Button>
+                      )}
 
-                <div>
-                  <Label htmlFor="instagram" className="block mb-2">
-                    Instagram URL
-                  </Label>
-                  <TextInput
-                    id="instagram"
-                    type="url"
-                    value={instagram}
-                    onChange={(e) => setInstagram(e.target.value)}
-                    placeholder="https://instagram.com/username"
-                  />
-                </div>
+                      {/* Add Button - Show only for last row */}
+                      {index === socialIcons.length - 1 && (
+                        <Button
+                          type="button"
+                          color="success"
+                          onClick={addSocialIcon}
+                          className="px-3 py-2"
+                          title="Add More"
+                        >
+                          <HiOutlinePlus className="h-5 w-5" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <div className="flex justify-end pt-4 border-t">
+              <div className="flex justify-end pt-4">
                 <Button type="submit" className="min-w-[120px]" disabled={saving}>
                   {saving ? (
                     <>

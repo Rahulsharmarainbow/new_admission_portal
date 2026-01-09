@@ -1066,6 +1066,8 @@ const handleWebsiteClick = (account: any) => {
         return 'College';
       case 3:
         return 'University';
+      case 4:
+        return 'Career';
       default:
         return 'Unknown';
     }
@@ -1080,6 +1082,8 @@ const handleWebsiteClick = (account: any) => {
         return 'green';
       case 3:
         return 'purple';
+      case 4 :
+        return 'yellow';
       default:
         return 'gray';
     }

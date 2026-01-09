@@ -1,28 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { 
   Card, 
-  Label, 
-  TextInput, 
   Button, 
-  Spinner, 
-  Textarea, 
-  Select,
-  Modal,
-  Badge,
-  ModalBody,
-  ModalHeader,
-  ModalFooter
+  TextInput, 
+  Checkbox,
+  Spinner,
+  Select
 } from 'flowbite-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import Loader from 'src/Frontend/Common/Loader';
-import { HiPlus, HiSearch, HiExclamation } from 'react-icons/hi';
+import { HiPlus, HiSearch } from 'react-icons/hi';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import { TbEdit } from 'react-icons/tb';
 import { Pagination } from 'src/Frontend/Common/Pagination';
-import Header from 'src/Frontend/Common/Header';
 import DeleteConfirmationModal from 'src/Frontend/Common/DeleteConfirmationModal';
+import AddEditJobModal from './AddEditJobModal ';
+import { useDebounce } from 'src/hook/useDebounce';
 
 interface CareerJobData {
   id: number;
@@ -35,15 +30,25 @@ interface CareerJobData {
   description: string;
   requirements: string;
   salary: string;
+  job_meta?: Record<string, number>;
   academic_name?: string;
   created_at: string;
   updated_at: string;
+  status?: number; // Added status field
 }
 
-interface CareerJobsSectionProps {
-  selectedAcademic: string;
-  user: any;
-  apiUrl: string;
+interface JobTypeConfig {
+  type_name: string;
+  data: Array<{
+    id: number;
+    name: string;
+  }>;
+}
+
+interface CareerStatus {
+  id: number;
+  name: string;
+  value: number;
 }
 
 interface Filters {
@@ -52,8 +57,14 @@ interface Filters {
   order: 'asc' | 'desc';
   orderBy: string;
   search: string;
+  status: string; // Added status filter
 }
 
+interface CareerJobsSectionProps {
+  selectedAcademic: string;
+  user: any;
+  apiUrl: string;
+}
 
 const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
   selectedAcademic,
@@ -61,24 +72,17 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
   apiUrl,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [jobs, setJobs] = useState<CareerJobData[]>([]);
   const [total, setTotal] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState<CareerJobData | null>(null);
+  const [selectedJobsForDelete, setSelectedJobsForDelete] = useState<number[]>([]);
   const [modalType, setModalType] = useState<'add' | 'edit'>('add');
   const [deleteLoading, setDeleteLoading] = useState(false);
-
-  // Form fields
-  const [jobTitle, setJobTitle] = useState('');
-  const [companyName, setCompanyName] = useState('');
-  const [jobLocation, setJobLocation] = useState('');
-  const [jobType, setJobType] = useState('Full-time');
-  const [experience, setExperience] = useState('');
-  const [description, setDescription] = useState('');
-  const [requirements, setRequirements] = useState('');
-  const [salary, setSalary] = useState('');
+  const [loadingJobDetails, setLoadingJobDetails] = useState(false);
+  const [jobTypeConfig, setJobTypeConfig] = useState<JobTypeConfig[]>([]);
+  const [careerStatuses, setCareerStatuses] = useState<CareerStatus[]>([]);
 
   // Filters
   const [filters, setFilters] = useState<Filters>({
@@ -87,33 +91,50 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
     order: 'desc',
     orderBy: 'id',
     search: '',
+    status: '', // All statuses by default
   });
+  
+  const debouncedSearch = useDebounce(filters.search, 500);
+  
   const [sort, setSort] = useState({ key: 'id', direction: 'desc' as 'asc' | 'desc' });
-
-  const jobTypes = ['Full-time', 'Part-time', 'Contract', 'Internship', 'Remote'];
 
   useEffect(() => {
     if (selectedAcademic) {
       getCareerJobs();
+      getJobTypeConfig();
+      getCareerStatuses();
     } else {
       setJobs([]);
     }
-  }, [selectedAcademic, filters.page, filters.rowsPerPage, filters.order, filters.orderBy, filters.search]);
+  }, [selectedAcademic]);
+
+  useEffect(() => {
+    if (selectedAcademic) {
+      getCareerJobs();
+    }
+  }, [filters.page, filters.rowsPerPage, filters.order, filters.orderBy, debouncedSearch, filters.status]);
 
   const getCareerJobs = async () => {
     if (!selectedAcademic) return;
     setLoading(true);
     try {
+      const requestData: any = {
+        academic_id: parseInt(selectedAcademic),
+        search: filters.search,
+        page: filters.page,
+        rowsPerPage: filters.rowsPerPage,
+        order: filters.order,
+        orderBy: filters.orderBy,
+      };
+
+      // Add status filter if selected
+      if (filters.status) {
+        requestData.status = parseInt(filters.status);
+      }
+
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Jobs/list-job`,
-        {
-          academic_id: parseInt(selectedAcademic),
-          search: filters.search,
-          page: filters.page,
-          rowsPerPage: filters.rowsPerPage,
-          order: filters.order,
-          orderBy: filters.orderBy,
-        },
+        requestData,
         {
           headers: {
             Authorization: `Bearer ${user?.token}`,
@@ -140,47 +161,65 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!selectedAcademic) {
-      toast.error('Please select an academic first');
-      return;
-    }
-
-    if (!jobTitle || !companyName || !jobLocation || !description) {
-      toast.error('Please fill all required fields');
-      return;
-    }
-
-    setSaving(true);
-
+  const getJobTypeConfig = async () => {
+    if (!selectedAcademic) return;
     try {
-      const requestData = {
-        academic_id: parseInt(selectedAcademic),
-        s_id: user?.id,
-        job_title: jobTitle,
-        company_name: companyName,
-        job_location: jobLocation,
-        job_type: jobType,
-        experience: experience,
-        description: description,
-        requirements: requirements,
-        salary: salary,
-      };
+      const response = await axios.post(
+        `${apiUrl}/${user?.role}/Jobs/get-type-config`,
+        {
+          academic_id: parseInt(selectedAcademic),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
 
+      if (response.data?.status && Array.isArray(response.data.data)) {
+        setJobTypeConfig(response.data.data);
+      }
+    } catch (error: any) {
+      console.error('Error fetching job type config:', error);
+    }
+  };
+
+  const getCareerStatuses = async () => {
+    if (!selectedAcademic) return;
+    try {
+      const response = await axios.post(
+        `${apiUrl}/SuperAdmin/Dropdown/get-career-status`,
+        {
+          academic_id: parseInt(selectedAcademic),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      if (response.data?.status && Array.isArray(response.data.data)) {
+        setCareerStatuses(response.data.data);
+      }
+    } catch (error: any) {
+      console.error('Error fetching career statuses:', error);
+    }
+  };
+
+  const handleSubmitJob = async (requestData: any) => {
+    try {
       let url;
-
       if (modalType === 'add') {
         url = `${apiUrl}/${user?.role}/Jobs/add-job`;
       } else {
-        if (!selectedJob?.id) {
-          toast.error('No job selected for editing');
-          return;
-        }
         url = `${apiUrl}/${user?.role}/Jobs/update-job`;
-        requestData['job_id'] = selectedJob.id;
       }
+
+      // Add s_id to request data
+      requestData.s_id = user?.id;
 
       const response = await axios.post(url, requestData, {
         headers: {
@@ -191,43 +230,67 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
 
       if (response.data?.status === true) {
         toast.success(`Job ${modalType === 'add' ? 'created' : 'updated'} successfully!`);
-        resetForm();
-        setShowModal(false);
         getCareerJobs();
+        return true;
       } else {
         toast.error(response.data?.message || `Failed to ${modalType} job`);
+        return false;
       }
     } catch (error: any) {
       console.error('Error saving job:', error);
-      toast.error(error.response?.data?.message || 'Error saving job');
-    } finally {
-      setSaving(false);
+      toast.error(error.response?.data?.message || `Error ${modalType === 'add' ? 'adding' : 'updating'} job`);
+      return false;
     }
   };
 
-  const editJob = (job: CareerJobData) => {
+  const editJob = async (job: CareerJobData) => {
     setSelectedJob(job);
     setModalType('edit');
-    setJobTitle(job.job_title || '');
-    setCompanyName(job.company_name || '');
-    setJobLocation(job.job_location || '');
-    setJobType(job.job_type || 'Full-time');
-    setExperience(job.experience || '');
-    setDescription(job.description || '');
-    setRequirements(job.requirements || '');
-    setSalary(job.salary || '');
+    
+    if (!job.job_meta) {
+      setLoadingJobDetails(true);
+      try {
+        const response = await axios.post(
+          `${apiUrl}/${user?.role}/Jobs/get-job-details`,
+          {
+            job_id: job.id,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${user?.token}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+
+        if (response.data?.status && response.data.data) {
+          setSelectedJob(prev => prev ? {
+            ...prev,
+            ...response.data.data
+          } : null);
+        }
+      } catch (error) {
+        console.error('Error loading job details:', error);
+      } finally {
+        setLoadingJobDetails(false);
+      }
+    }
+    
     setShowModal(true);
   };
 
   const deleteJob = async () => {
-    if (!selectedJob?.id) return;
+    if (selectedJobsForDelete.length === 0) {
+      toast.error('Please select at least one job to delete');
+      return;
+    }
     
     setDeleteLoading(true);
     try {
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Jobs/delete-job`,
         {
-          ids: [selectedJob.id],
+          ids: selectedJobsForDelete,
           s_id: user?.id,
         },
         {
@@ -239,12 +302,12 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
       );
 
       if (response.data?.status === true) {
-        toast.success('Job deleted successfully!');
+        toast.success(`${selectedJobsForDelete.length} job(s) deleted successfully!`);
         setShowDeleteModal(false);
-        setSelectedJob(null);
+        setSelectedJobsForDelete([]);
         getCareerJobs();
       } else {
-        toast.error(response.data?.message || 'Failed to delete job');
+        toast.error(response.data?.message || 'Failed to delete job(s)');
       }
     } catch (error: any) {
       console.error('Error deleting job:', error);
@@ -254,27 +317,36 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
     }
   };
 
-  const resetForm = () => {
-    setSelectedJob(null);
-    setJobTitle('');
-    setCompanyName('');
-    setJobLocation('');
-    setJobType('Full-time');
-    setExperience('');
-    setDescription('');
-    setRequirements('');
-    setSalary('');
-  };
-
   const handleAddClick = () => {
-    resetForm();
+    setSelectedJob(null);
     setModalType('add');
     setShowModal(true);
   };
 
-  const handleDeleteClick = (job: CareerJobData) => {
-    setSelectedJob(job);
+  const handleDeleteClick = () => {
+    if (selectedJobsForDelete.length === 0) {
+      toast.error('Please select at least one job to delete');
+      return;
+    }
     setShowDeleteModal(true);
+  };
+
+  const handleSelectJob = (jobId: number) => {
+    setSelectedJobsForDelete(prev => {
+      if (prev.includes(jobId)) {
+        return prev.filter(id => id !== jobId);
+      } else {
+        return [...prev, jobId];
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedJobsForDelete.length === jobs.length) {
+      setSelectedJobsForDelete([]);
+    } else {
+      setSelectedJobsForDelete(jobs.map(job => job.id));
+    }
   };
 
   const handleSort = (key: string) => {
@@ -314,7 +386,14 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
     }));
   };
 
-  // Format date
+  const handleStatusFilter = (statusValue: string) => {
+    setFilters(prev => ({
+      ...prev,
+      status: statusValue,
+      page: 0,
+    }));
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
       day: '2-digit',
@@ -323,6 +402,30 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const getStatusBadgeColor = (statusValue?: number) => {
+    if (!statusValue) return 'gray';
+    switch (statusValue) {
+      case 1: return 'green'; // Active
+      case 2: return 'yellow'; // Draft
+      case 3: return 'red'; // Closed
+      default: return 'gray';
+    }
+  };
+
+  const getStatusName = (statusValue?: number) => {
+    if (!statusValue) return 'Unknown';
+    const status = careerStatuses.find(s => s.value === statusValue);
+    return status ? status.name : 'Unknown';
+  };
+
+  // Get dropdown value name by ID
+  const getDropdownValueName = (typeName: string, id: number) => {
+    const config = jobTypeConfig.find(item => item.type_name === typeName);
+    if (!config) return '';
+    const option = config.data.find(opt => opt.id === id);
+    return option ? option.name : '';
   };
 
   if (!selectedAcademic) {
@@ -350,24 +453,54 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
 
   return (
     <>
-      {/* Main Content with Blur Effect when Modal is Open */}
-      <div className={`transition-all duration-300 ${showModal || showDeleteModal ? 'blur-sm pointer-events-none' : ''}`}>
-        <div className="bg-white rounded-lg shadow-md relative overflow-x-auto">
-          {/* Table Header with Search and Add Button */}
+      {/* Main Content */}
+      <div className="bg-white rounded-lg shadow-md relative overflow-x-auto">
+        {/* Table Header with Filters and Add Button */}
+        <div className={`transition-all duration-300 ${showModal || showDeleteModal ? 'blur-sm pointer-events-none' : ''}`}>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 pb-4">
-            {/* Search Input - Left side */}
-            <div className="relative w-full sm:w-64">
-              <TextInput
-                type="text"
-                placeholder="Search jobs..."
-                value={filters.search}
-                onChange={(e) => handleSearch(e.target.value)}
-                icon={HiSearch}
-                className="w-full"
-              />
+            {/* Left side: Search and Filters */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <div className="relative w-full sm:w-64">
+                <TextInput
+                  type="text"
+                  placeholder="Search jobs..."
+                  value={filters.search}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  icon={HiSearch}
+                  className="w-full"
+                />
+              </div>
+              
+              {/* Status Filter Dropdown */}
+              <div className="w-full sm:w-48">
+                <Select
+                  value={filters.status}
+                  onChange={(e) => handleStatusFilter(e.target.value)}
+                  className="w-full"
+                >
+                  <option value="">All Statuses</option>
+                  {careerStatuses.map((status) => (
+                    <option key={status.id} value={status.value}>
+                      {status.name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              
+              {/* Delete Selected Button (if any selected) */}
+              {selectedJobsForDelete.length > 0 && (
+                <Button
+                  color="failure"
+                  onClick={handleDeleteClick}
+                  className="whitespace-nowrap"
+                >
+                  <MdDeleteForever className="mr-2 h-5 w-5" />
+                  Delete Selected ({selectedJobsForDelete.length})
+                </Button>
+              )}
             </div>
 
-            {/* Add Button - Right side */}
+            {/* Right side: Add Button */}
             <Button
               onClick={handleAddClick}
               className="bg-blue-600 hover:bg-blue-700 focus:ring-blue-300 whitespace-nowrap w-full sm:w-auto mt-4 sm:mt-0"
@@ -389,6 +522,15 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th
+                      scope="col"
+                      className="w-12 px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      <Checkbox
+                        checked={jobs.length > 0 && selectedJobsForDelete.length === jobs.length}
+                        onChange={handleSelectAll}
+                      />
+                    </th>
                     <th
                       scope="col"
                       className="w-20 px-8 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
@@ -416,24 +558,12 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                         Company {getSortIcon('company_name')}
                       </div>
                     </th>
-                    <th
+                    {/* <th
                       scope="col"
-                      className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
-                      onClick={() => handleSort('job_location')}
+                      className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      <div className="flex items-center justify-center">
-                        Location {getSortIcon('job_location')}
-                      </div>
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
-                      onClick={() => handleSort('job_type')}
-                    >
-                      <div className="flex items-center justify-center">
-                        Type {getSortIcon('job_type')}
-                      </div>
-                    </th>
+                      Status
+                    </th> */}
                     <th
                       scope="col"
                       className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
@@ -456,33 +586,26 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                   {jobs.length > 0 ? (
                     jobs.map((job, index) => (
                       <tr key={job.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-4 text-center">
+                          <Checkbox
+                            checked={selectedJobsForDelete.includes(job.id)}
+                            onChange={() => handleSelectJob(job.id)}
+                          />
+                        </td>
                         <td className="px-8 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {filters.page * filters.rowsPerPage + index + 1}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">
                           <div className="font-medium">{job.job_title}</div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {job.experience || 'Not specified'}
-                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                           {job.company_name}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                          {job.job_location}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <Badge 
-                            color={
-                              job.job_type === 'Full-time' ? 'success' : 
-                              job.job_type === 'Part-time' ? 'warning' :
-                              job.job_type === 'Remote' ? 'purple' : 'info'
-                            } 
-                            className="text-xs"
-                          >
-                            {job.job_type}
-                          </Badge>
-                        </td>
+                        {/* <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getStatusBadgeColor(job.status)}-100 text-${getStatusBadgeColor(job.status)}-800`}>
+                            {getStatusName(job.status)}
+                          </span>
+                        </td> */}
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                           {formatDate(job.created_at)}
                         </td>
@@ -500,7 +623,10 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                             {/* Delete Button */}
                             <button
                               className="text-red-500 hover:text-red-700 p-1 transition-colors duration-200 rounded-lg hover:bg-red-50"
-                              onClick={() => handleDeleteClick(job)}
+                              onClick={() => {
+                                setSelectedJobsForDelete([job.id]);
+                                setShowDeleteModal(true);
+                              }}
                               title="Delete Job"
                             >
                               <MdDeleteForever size={18} />
@@ -528,8 +654,8 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                           </svg>
                           <p className="text-lg font-medium text-gray-600 mb-2">No jobs found</p>
                           <p className="text-sm text-gray-500 mb-4">
-                            {filters.search
-                              ? 'Try adjusting your search criteria'
+                            {filters.search || filters.status
+                              ? 'Try adjusting your search or filter criteria'
                               : 'Get started by adding your first job'}
                           </p>
                           <Button onClick={handleAddClick} color="blue" className="flex items-center gap-2">
@@ -545,172 +671,45 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
             </div>
           </div>
 
-          {/* Custom Pagination */}
+          {/* Pagination */}
           {jobs.length > 0 && (
-            <Pagination
-              currentPage={filters.page + 1}
-              totalPages={Math.ceil(total / filters.rowsPerPage)}
-              totalItems={total}
-              rowsPerPage={filters.rowsPerPage}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleRowsPerPageChange}
-            />
+            <div className="mt-6 p-4 border-t border-gray-200">
+              <Pagination
+                currentPage={filters.page + 1}
+                totalPages={Math.ceil(total / filters.rowsPerPage)}
+                totalItems={total}
+                rowsPerPage={filters.rowsPerPage}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={handleRowsPerPageChange}
+              />
+            </div>
           )}
         </div>
       </div>
 
       {/* Add/Edit Job Modal */}
-      <Modal show={showModal} onClose={() => setShowModal(false)} size="2xl" className='overscroll-x-auto'>
-        <ModalHeader>
-          {modalType === 'add' ? 'Add New Job' : 'Edit Job'}
-        </ModalHeader>
-        <form onSubmit={handleSubmit}>
-          <ModalBody>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="jobTitle" className="block mb-2">
-                  Job Title *
-                </Label>
-                <TextInput
-                  id="jobTitle"
-                  type="text"
-                  value={jobTitle}
-                  onChange={(e) => setJobTitle(e.target.value)}
-                  placeholder="e.g., Software Engineer"
-                  required
-                />
-              </div>
+      <AddEditJobModal
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleSubmitJob}
+        modalType={modalType}
+        selectedJob={selectedJob}
+        jobTypeConfig={jobTypeConfig}
+        loadingJobDetails={loadingJobDetails}
+        academicId={selectedAcademic}
+        careerStatuses={careerStatuses} // Pass career statuses to modal
+      />
 
-              <div>
-                <Label htmlFor="companyName" className="block mb-2">
-                  Company Name *
-                </Label>
-                <TextInput
-                  id="companyName"
-                  type="text"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="e.g., Tech Solutions Inc."
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="jobLocation" className="block mb-2">
-                  Job Location *
-                </Label>
-                <TextInput
-                  id="jobLocation"
-                  type="text"
-                  value={jobLocation}
-                  onChange={(e) => setJobLocation(e.target.value)}
-                  placeholder="e.g., New Delhi, India"
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="jobType" className="block mb-2">
-                  Job Type
-                </Label>
-                <Select
-                  id="jobType"
-                  value={jobType}
-                  onChange={(e) => setJobType(e.target.value)}
-                >
-                  {jobTypes.map((type) => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="experience" className="block mb-2">
-                  Experience Required
-                </Label>
-                <TextInput
-                  id="experience"
-                  type="text"
-                  value={experience}
-                  onChange={(e) => setExperience(e.target.value)}
-                  placeholder="e.g., 2-4 years"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="salary" className="block mb-2">
-                  Salary Range
-                </Label>
-                <TextInput
-                  id="salary"
-                  type="text"
-                  value={salary}
-                  onChange={(e) => setSalary(e.target.value)}
-                  placeholder="e.g., ₹6-8 LPA"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <Label htmlFor="requirements" className="block mb-2">
-                  Requirements
-                </Label>
-                <Textarea
-                  id="requirements"
-                  value={requirements}
-                  onChange={(e) => setRequirements(e.target.value)}
-                  placeholder="Enter job requirements..."
-                  rows={3}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <Label htmlFor="description" className="block mb-2">
-                  Job Description *
-                </Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter detailed job description..."
-                  rows={5}
-                  required
-                />
-              </div>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              type="button"
-              color="light"
-              onClick={() => setShowModal(false)}
-              disabled={saving}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" color="primary" disabled={saving}>
-              {saving ? (
-                <>
-                  <Spinner size="sm" className="mr-2" />
-                  {modalType === 'add' ? 'Adding...' : 'Updating...'}
-                </>
-              ) : (
-                modalType === 'add' ? 'Add Job' : 'Update Job'
-              )}
-            </Button>
-          </ModalFooter>
-        </form>
-      </Modal>
-
-      {/* Custom Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => {
           setShowDeleteModal(false);
-          setSelectedJob(null);
+          setSelectedJobsForDelete([]);
         }}
         onConfirm={deleteJob}
-        title="Delete Job"
-        message={`Are you sure you want to delete "${selectedJob?.job_title}"? This action cannot be undone.`}
+        title={`Delete ${selectedJobsForDelete.length > 1 ? 'Jobs' : 'Job'}`}
+        message={`Are you sure you want to delete ${selectedJobsForDelete.length} selected job(s)? This action cannot be undone.`}
         loading={deleteLoading}
       />
     </>
