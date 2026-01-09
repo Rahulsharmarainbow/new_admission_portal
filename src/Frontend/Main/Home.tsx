@@ -8,6 +8,7 @@ import Loader from '../Common/Loader';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import NotFound from './NotFound';
+import CareerApply from 'src/views/website/components/CareerApply';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 const assetUrl = import.meta.env.VITE_ASSET_URL;
@@ -17,6 +18,7 @@ const Home = () => {
   const [institute, setInstitute] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+ 
 
   if (!institute_id || institute_id === ':institute_id') {
     institute_id = window.location.hostname; // use domain as fallback
@@ -125,7 +127,6 @@ const Home = () => {
 
   // Transform API data to match component structure
   const transformApiData = (data) => {
-    console.log("hhhhhhhhhhhhhhhhhhhh",data)
     const homeLines = data.home_other_lines || [];
     const titleLine =  homeLines[0] ||  {};
     const subtitleLine =  homeLines[1] || {};
@@ -178,9 +179,10 @@ const Home = () => {
   };
 
   const transformedData = transformApiData(institute);
-  const { examInfo, alert, cards ,homePageTabs } = transformedData;
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+  const { examInfo, alert, cards ,homePageTabs, academic_type } = transformedData;
+  console.log("institute data",institute);
+ if(academic_type == 4) {
+ return <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header
         baseUrl={institute.baseUrl}
         institute_id={institute.unique_code}
@@ -474,7 +476,11 @@ const Home = () => {
 
       <Footer footerData={institute.footer} baseUrl={institute.baseUrl} />
     </div>
-  );
+ }
+ else{
+ return <CareerApply institute={institute.academic_id} />
+ };
+
 };
 
 export default Home;
