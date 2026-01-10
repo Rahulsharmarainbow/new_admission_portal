@@ -465,7 +465,8 @@ const MainRoutes = [
     },
 
     { path: '*', element: <Navigate to="/auth/404" /> },
-    { path: '/Frontend/:instituteId/job_details/:jobId', element: <ApplyJobPage/> }
+    { path: '/Frontend/:instituteId/job_details/:jobId', element: <ApplyJobPage/> },
+     { path: '/job_details/:jobId', element: <ApplyJobPage/> }
   ],
 }
 
@@ -487,6 +488,7 @@ export const CustomDomainRoutes = [
       { path: "/Hall-ticket", element: <HallTicket /> },
       { path: "/Form-view", element: <FormView /> },
       { path: "/Confirmation", element: <Confirmation /> },
+       { path: '/job_details/:jobId', element: <ApplyJobPage/> }, 
       { path: "*", element: <Navigate to="/" /> },
     ],
   },
