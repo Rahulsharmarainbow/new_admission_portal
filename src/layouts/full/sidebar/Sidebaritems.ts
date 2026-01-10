@@ -66,6 +66,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               url: '/SuperAdmin/college-applications',
               isPro: false,
             },
+            {
+              name: 'Career Applications',
+              id: uniqueId(),
+              url: '/SuperAdmin/career-applications',
+              isPro: false,
+            },
           ],
         },
         {
@@ -368,9 +374,15 @@ const SidebarContent: Record<number, MenuItem[]> = {
               isPro: false,
             },
             {
-              name: 'College Applications',
+              name: 'Career Applications',
               id: uniqueId(),
               url: '/SupportAdmin/college-applications',
+              isPro: false,
+            },
+            {
+              name: 'College Applications',
+              id: uniqueId(),
+              url: '/SupportAdmin/career-applications',
               isPro: false,
             },
           ],
@@ -590,6 +602,11 @@ const SidebarContent: Record<number, MenuItem[]> = {
         {
           name: 'College Applications',
           url: '/CustomerAdmin/college-applications',
+          icon: 'solar:pie-chart-line-duotone',
+        },
+        {
+          name: 'Career Applications',
+          url: '/CustomerAdmin/career-applications',
           icon: 'solar:pie-chart-line-duotone',
         },
         {

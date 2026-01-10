@@ -1249,6 +1249,8 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
   const [showApiKey, setShowApiKey] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showSecretKey, setShowSecretKey] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
+  const [showSecretKey2, setShowSecretKey2] = useState(false);
   const [showRazorpaySecretKey, setShowRazorpaySecretKey] = useState(false);
   const [showSmtpPassword, setShowSmtpPassword] = useState(false);
   const [showRazorpayApiKey, setShowRazorpayApiKey] = useState(false);
@@ -1315,13 +1317,6 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
     console.log('Email template changed:', newContent);
     updateFormData({ emailTemplate: newContent });
   }, [updateFormData]);
-
-  // Debug effect
-  useEffect(() => {
-    console.log('ThirdPartyApiSetup - Current paymentEnabled:', formData.paymentEnabled);
-    console.log('Current Payment Type:', formData.payment_type);
-    console.log('Current Payment Status:', formData.payment_status);
-  }, [formData.paymentEnabled, formData.payment_type, formData.payment_status]);
 
   const handleCheckboxChange = (field: keyof FormData, value: boolean) => {
     console.log(`Checkbox ${field}:`, value);
@@ -1453,8 +1448,6 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
       </div>
     );
   };
-
-  console.log('Form Data:', formData);
 
   return (
     <div className="space-y-6">
@@ -1936,6 +1929,77 @@ const ThirdPartyApiSetup: React.FC<ThirdPartyApiSetupProps> = ({
                 onChange={(value) => handleInputChange('smsSecretkey', value)}
                 showPassword={showSecretKey}
                 setShowPassword={setShowSecretKey}
+              />
+            </div>
+          </div>
+        )}
+      </Card>
+
+      <Card>
+        <div className="flex items-center mb-4">
+          <Checkbox
+            id="wasabi_status"
+            checked={formData.wasabi_status}
+            onChange={(e) => handleCheckboxChange('wasabi_status', e.target.checked)}
+            className="mr-2"
+          />
+          <Label htmlFor="wasabi_status" className="font-semibold text-gray-900 dark:text-white cursor-pointer">
+            Enable Wasabi Service
+          </Label>
+        </div>
+
+        {formData.wasabi_status && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="smsTemplate" className="mb-2 block">
+                Region <span className="text-red-600">*</span>
+              </Label>
+              <TextInput
+                id="region"
+                value={formData.region || ''}
+                onChange={(e) => handleInputChange('region', e.target.value)}
+                color={errors.region ? "failure" : "gray"}
+                helperText={errors.region}
+                required
+                className="w-full"
+              />
+            </div>
+            <div>
+              <Label htmlFor="endpoint" className="mb-2 block">Endpoint</Label>
+              <TextInput
+                id="endpoint"
+                value={formData.endpoint || ''}
+                onChange={(e) => handleInputChange('endpoint', e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <Label htmlFor="bucket_name" className="mb-2 block">Buket Name</Label>
+              <TextInput
+                id="bucket_name"
+                value={formData.bucket_name || ''}
+                onChange={(e) => handleInputChange('bucket_name', e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <Label htmlFor="wasabi_api_key" className="mb-2 block">Wasabi Api Key</Label>
+              <PasswordInput
+                id="wasabi_api_key"
+                value={formData.wasabi_api_key || ''}
+                onChange={(value) => handleInputChange('wasabi_api_key', value)}
+                showPassword={showPassword2}
+                setShowPassword={setShowPassword2}
+              />
+            </div>
+            <div>
+              <Label htmlFor="wasabi_secret_key" className="mb-2 block">Wasabi Secret Key</Label>
+              <PasswordInput
+                id="wasabi_secret_key"
+                value={formData.wasabi_secret_key || ''}
+                onChange={(value) => handleInputChange('wasabi_secret_key', value)}
+                showPassword={showSecretKey2}
+                setShowPassword={setShowSecretKey2}
               />
             </div>
           </div>

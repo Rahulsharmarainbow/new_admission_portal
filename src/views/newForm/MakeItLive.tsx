@@ -129,6 +129,13 @@ const MakeItLive: React.FC = () => {
     send_email_status: '',
     platform_fee: '',
 
+    wasabi_status: "",
+  region: "",
+  endpoint: "",
+  bucket_name: "",
+  wasabi_api_key: "",
+  wasabi_secret_key: "",
+
     // Templates
     whatsappTemplate: '',
     smsTemplate: '',
@@ -312,13 +319,11 @@ const MakeItLive: React.FC = () => {
     const credentials = data.credentials;
     const template = data.template;
 
-    console.log('Raw API Data:', { academic, credentials, template });
-
     // Parse contact information
     let technicalContact = { name: '', email: '', phone: '', location: '' };
     let billingContact = { name: '', email: '', phone: '', location: '' };
     let additionalContact = { name: '', email: '', phone: '', location: '' };
-
+    
     try {
       if (academic.technical_contact) {
         technicalContact = JSON.parse(academic.technical_contact);
@@ -333,6 +338,7 @@ const MakeItLive: React.FC = () => {
       console.error('Error parsing contact data:', e);
     }
 
+        const sendEmailStatus = credentials?.send_email_status?.toString() || '0';
     console.log('Parsed Contacts:', { technicalContact, billingContact, additionalContact });
 
     const updates: Partial<FormDataType> = {
@@ -402,6 +408,13 @@ const MakeItLive: React.FC = () => {
       paymentEnabled: credentials?.payment_status,
       send_email_status: sendEmailStatus, 
       platform_fee: credentials?.platform_fee,
+
+      wasabi_status: credentials?.wasabi_status || '',
+      region: credentials?.region || '',
+      endpoint: credentials?.endpoint,
+      bucket_name: credentials?.bucket_name, 
+      wasabi_api_key: credentials?.wasabi_api_key,
+      wasabi_secret_key: credentials?.wasabi_secret_key,
       // Permissions
       isDropdownEnabled: Boolean(credentials?.email_status),
       isTemplatesVisible: Boolean(credentials?.whatsapp_status),

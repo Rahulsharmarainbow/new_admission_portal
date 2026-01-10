@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Button, TextInput, Modal, Label, Spinner, Badge, ModalHeader, ModalBody } from 'flowbite-react';
+import { Button, TextInput, Modal, Label, Spinner, Badge, ModalHeader, ModalBody, Select } from 'flowbite-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
-import { HiPlus, HiSearch, HiOutlineRefresh } from 'react-icons/hi';
+import { HiPlus, HiSearch } from 'react-icons/hi';
 import { TbEdit } from 'react-icons/tb';
 import { MdDeleteForever } from 'react-icons/md';
 import Loader from 'src/Frontend/Common/Loader';
@@ -15,6 +15,7 @@ interface CareerStatus {
   academic_id: number;
   name: string;
   value: number;
+  type: number; // 0: career status, 1: job status
 }
 
 interface CareerStatusListResponse {
@@ -32,11 +33,10 @@ interface DeleteConfirmationModalProps {
   loading?: boolean;
 }
 
-
 interface CareerStatusModalProps {
   show: boolean;
   onClose: () => void;
-  onSubmit: (data: { name: string; value: number }) => void;
+  onSubmit: (data: { name: string; value: number; type: number }) => void;
   isEditing: boolean;
   initialData?: CareerStatus;
   loading: boolean;
@@ -52,29 +52,51 @@ const CareerStatusModal: React.FC<CareerStatusModalProps> = ({
 }) => {
   const [name, setName] = useState('');
   const [value, setValue] = useState<number>(1);
+  const [type, setType] = useState<number>(0); // Default: Career Status
 
   useEffect(() => {
     if (initialData) {
       setName(initialData.name);
       setValue(initialData.value);
+      setType(initialData.type || 0);
     } else {
       setName('');
       setValue(1);
+      setType(0);
     }
   }, [initialData, show]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ name, value });
+    onSubmit({ name, value, type });
+  };
+
+  const getTypeName = (typeValue: number): string => {
+    return typeValue === 0 ? 'Career Status' : 'Job Status';
   };
 
   return (
     <Modal show={show} onClose={onClose} size="md">
       <ModalHeader>
-        {isEditing ? 'Edit Career Status' : 'Add Career Status'}
+        {isEditing ? 'Edit Status' : 'Add Status'}
       </ModalHeader>
       <ModalBody>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="type" className="block mb-2">
+              Status Type <span className="text-red-500">*</span>
+            </Label>
+            <Select
+              id="type"
+              value={type}
+              onChange={(e) => setType(parseInt(e.target.value))}
+              required
+            >
+              <option value={0}>Career Status</option>
+              <option value={1}>Job Status</option>
+            </Select>
+          </div>
+
           <div>
             <Label htmlFor="name" className="block mb-2">
               Status Name <span className="text-red-500">*</span>
@@ -83,14 +105,14 @@ const CareerStatusModal: React.FC<CareerStatusModalProps> = ({
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Active, Closed, Draft"
+              placeholder={type === 0 ? "e.g., Active, Closed" : "e.g., Open, In Progress"}
               required
             />
           </div>
 
           <div>
             <Label htmlFor="value" className="block mb-2">
-              Status Value <span className="text-red-500">*</span>
+              Priority Value <span className="text-red-500">*</span>
             </Label>
             <TextInput
               id="value"
@@ -101,6 +123,9 @@ const CareerStatusModal: React.FC<CareerStatusModalProps> = ({
               required
               min="1"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Lower values have higher priority (1 is highest)
+            </p>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
@@ -138,6 +163,7 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
   const [loading, setLoading] = useState(false);
   const [statuses, setStatuses] = useState<CareerStatus[]>([]);
   const [total, setTotal] = useState(0);
+  const [typeFilter, setTypeFilter] = useState<string>(''); // '0', '1', or ''
   
   const [filters, setFilters] = useState({
     search: '',
@@ -167,7 +193,7 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
       setStatuses([]);
       setTotal(0);
     }
-  }, [selectedAcademic, filters.page, debouncedSearch, filters.order, filters.orderBy]);
+  }, [selectedAcademic, filters.page, debouncedSearch, filters.order, filters.orderBy, typeFilter]);
 
   useEffect(() => {
     setSelectedIds([]);
@@ -179,16 +205,23 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
     
     setLoading(true);
     try {
+      const requestData: any = {
+        search: debouncedSearch,
+        page: filters.page,
+        rowsPerPage: filters.rowsPerPage,
+        order: filters.order,
+        orderBy: filters.orderBy,
+        academic_id: parseInt(selectedAcademic),
+      };
+
+      // Add type filter if selected
+      if (typeFilter !== '') {
+        requestData.type = parseInt(typeFilter);
+      }
+
       const response = await axios.post<CareerStatusListResponse>(
         `${apiUrl}/SuperAdmin/CareerStatus/list-status`,
-        {
-          search: debouncedSearch,
-          page: filters.page,
-          rowsPerPage: filters.rowsPerPage,
-          order: filters.order,
-          orderBy: filters.orderBy,
-          academic_id: parseInt(selectedAcademic),
-        },
+        requestData,
         {
           headers: {
             Authorization: `Bearer ${user?.token}`,
@@ -201,12 +234,12 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
         setStatuses(response.data.data);
         setTotal(response.data.total);
       } else {
-        toast.error('Failed to fetch career statuses');
+        toast.error('Failed to fetch statuses');
         setStatuses([]);
         setTotal(0);
       }
     } catch (error: any) {
-      console.error('Error fetching career statuses:', error);
+      console.error('Error fetching statuses:', error);
       toast.error(error.response?.data?.message || 'Error fetching data');
       setStatuses([]);
       setTotal(0);
@@ -217,6 +250,11 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
 
   const handleSearch = (value: string) => {
     setFilters(prev => ({ ...prev, search: value, page: 0 }));
+  };
+
+  const handleTypeFilter = (typeValue: string) => {
+    setTypeFilter(typeValue);
+    setFilters(prev => ({ ...prev, page: 0 }));
   };
 
   const handlePageChange = (page: number) => {
@@ -257,7 +295,7 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
     setModalOpen(true);
   };
 
-  const handleModalSubmit = async (data: { name: string; value: number }) => {
+  const handleModalSubmit = async (data: { name: string; value: number; type: number }) => {
     if (!selectedAcademic) {
       toast.error('Please select an academic first');
       return;
@@ -276,12 +314,14 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
             academic_id: parseInt(selectedAcademic),
             name: data.name,
             value: data.value,
+            type: data.type, // Add type field
           }
         : {
             s_id: user?.id,
             academic_id: parseInt(selectedAcademic),
             name: data.name,
             value: data.value,
+            type: data.type, // Add type field
           };
 
       const response = await axios.post(
@@ -370,11 +410,29 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
     }
   };
 
+  const getTypeBadgeColor = (typeValue: number) => {
+    return typeValue === 0 ? 'blue' : 'purple';
+  };
+
+  const getTypeName = (typeValue: number): string => {
+    return typeValue === 0 ? 'Career Status' : 'Job Status';
+  };
+
+  const getTypeBadge = (typeValue: number) => {
+    const color = getTypeBadgeColor(typeValue);
+    const name = getTypeName(typeValue);
+    return (
+      <Badge color={color} className="px-2 py-1 text-xs">
+        {name}
+      </Badge>
+    );
+  };
+
   if (!selectedAcademic) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
         <p className="text-gray-500 italic">
-          Please select an academic from above to manage career statuses.
+          Please select an academic from above to manage statuses.
         </p>
       </div>
     );
@@ -417,20 +475,33 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
         <div className="bg-white rounded-lg shadow-md relative overflow-x-auto">
           {/* Table Header - Search and Actions */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 pb-4">
-            {/* Search Input - Left side */}
-            <div className="relative w-full sm:w-64">
-              <TextInput
-                type="text"
-                placeholder="Search statuses..."
-                value={filters.search}
-                onChange={(e) => handleSearch(e.target.value)}
-                icon={HiSearch}
-                className="w-full"
-              />
-            </div>
-
-            {/* Action Buttons - Right side */}
-            <div className="flex flex-wrap gap-2">
+            {/* Left side: Search and Filters */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <div className="relative w-full sm:w-64">
+                <TextInput
+                  type="text"
+                  placeholder="Search statuses..."
+                  value={filters.search}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  icon={HiSearch}
+                  className="w-full"
+                />
+              </div>
+              
+              {/* Type Filter Dropdown */}
+              <div className="w-full sm:w-48">
+                <Select
+                  value={typeFilter}
+                  onChange={(e) => handleTypeFilter(e.target.value)}
+                  className="w-full"
+                >
+                  <option value="">All Types</option>
+                  <option value="0">Career Status</option>
+                  <option value="1">Job Status</option>
+                </Select>
+              </div>
+              
+              {/* Delete Selected Button (if any selected) */}
               {selectedIds.length > 0 && (
                 <Button
                   color="failure"
@@ -442,16 +513,17 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
                   Delete Selected ({selectedIds.length})
                 </Button>
               )}
-              
-              <Button
-                color="blue"
-                onClick={handleAddStatus}
-                className="flex items-center gap-2"
-              >
-                <HiPlus className="h-4 w-4" />
-                Add Status
-              </Button>
             </div>
+
+            {/* Right side: Add Button */}
+            <Button
+              color="blue"
+              onClick={handleAddStatus}
+              className="flex items-center gap-2"
+            >
+              <HiPlus className="h-4 w-4" />
+              Add Status
+            </Button>
           </div>
 
           {/* Table Container with Loader */}
@@ -466,19 +538,31 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th scope="col" className="w-20 px-8 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="w-16 px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       <input
                         type="checkbox"
                         checked={selectAll}
                         onChange={handleSelectAll}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer mx-auto"
                       />
                     </th>
                     <th
                       scope="col"
-                      className="w-20 px-8 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider select-none"
+                      className="w-16 px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider select-none"
                     >
-                        S.NO 
+                      S.NO
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
+                      onClick={() => handleSort('type')}
+                    >
+                      <div className="flex items-center justify-center">
+                        Type 
+                        <span className="ml-1">
+                          {getSortIcon('type')}
+                        </span>
+                      </div>
                     </th>
                     <th
                       scope="col"
@@ -486,7 +570,10 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
                       onClick={() => handleSort('name')}
                     >
                       <div className="flex items-center justify-center">
-                        Status Name {getSortIcon('name')}
+                        Status Name 
+                        <span className="ml-1">
+                          {getSortIcon('name')}
+                        </span>
                       </div>
                     </th>
                     <th
@@ -495,12 +582,15 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
                       onClick={() => handleSort('value')}
                     >
                       <div className="flex items-center justify-center">
-                        Priority Value {getSortIcon('value')}
+                        Priority Value
+                        <span className="ml-1">
+                          {getSortIcon('value')}
+                        </span>
                       </div>
                     </th>
                     <th
                       scope="col"
-                      className="w-32 px-8 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="w-32 px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
                       Actions
                     </th>
@@ -511,32 +601,44 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
                   {statuses.length > 0 ? (
                     statuses.map((status, index) => (
                       <tr key={status.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-8 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
                           <input
                             type="checkbox"
                             checked={selectedIds.includes(status.id)}
                             onChange={() => handleSelectItem(status.id)}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer mx-auto"
                           />
                         </td>
-                        <td className="px-8 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">
                           {filters.page * filters.rowsPerPage + index + 1}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">
-                          <Badge color="gray" className="px-3 py-1">
-                            {status.name}
-                          </Badge>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <div className="flex justify-center">
+                            {getTypeBadge(status.type)}
+                          </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-                          <Badge color={status.value === 1 ? "success" : "gray"} className="px-3 py-1">
-                            {status.value}
-                          </Badge>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <div className="flex justify-center">
+                            <Badge color="gray" className="px-3 py-1 justify-center">
+                              {status.name}
+                            </Badge>
+                          </div>
                         </td>
-                        <td className="px-8 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex items-center space-x-3">
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <div className="flex justify-center">
+                            <Badge 
+                              color={status.value === 1 ? "success" : (status.value === 2 ? "warning" : "gray")} 
+                              className="px-3 py-1 justify-center"
+                            >
+                              {status.value}
+                            </Badge>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <div className="flex items-center justify-center space-x-2">
                             {/* Edit Button */}
                             <button
-                              className="text-blue-500 hover:text-blue-700 p-1 transition-colors duration-200 rounded-lg hover:bg-blue-50"
+                              className="text-blue-500 hover:text-blue-700 p-1.5 transition-colors duration-200 rounded-lg hover:bg-blue-50"
                               onClick={() => handleEditStatus(status)}
                               title="Edit Status"
                             >
@@ -545,7 +647,7 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
 
                             {/* Delete Button */}
                             <button
-                              className="text-red-500 hover:text-red-700 p-1 transition-colors duration-200 rounded-lg hover:bg-red-50"
+                              className="text-red-500 hover:text-red-700 p-1.5 transition-colors duration-200 rounded-lg hover:bg-red-50"
                               onClick={() => handleDeleteClick(status)}
                               title="Delete Status"
                             >
@@ -557,7 +659,7 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center">
+                      <td colSpan={6} className="px-6 py-12 text-center">
                         <div className="flex flex-col items-center justify-center text-gray-500">
                           <svg
                             className="w-16 h-16 text-gray-300 mb-4"
@@ -574,8 +676,8 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
                           </svg>
                           <p className="text-lg font-medium text-gray-600 mb-2">No statuses found</p>
                           <p className="text-sm text-gray-500 mb-4">
-                            {filters.search
-                              ? 'Try adjusting your search criteria'
+                            {filters.search || typeFilter
+                              ? 'Try adjusting your search or filter criteria'
                               : 'Get started by adding your first status'}
                           </p>
                           <Button onClick={handleAddStatus} color="blue" className="flex items-center gap-2">

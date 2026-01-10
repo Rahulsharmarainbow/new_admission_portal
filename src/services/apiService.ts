@@ -130,6 +130,14 @@ export const updateAcademicData = async (formData: FormData, id: string, userId:
     formDataToSend.append('payment_status', formData.paymentEnabled ? "1" : "0");
     formDataToSend.append('send_email_status', formData.send_email_status);
     formDataToSend.append('platform_fee', formData.platform_fee);
+
+    // Payment
+    formDataToSend.append('region', formData.region);
+    formDataToSend.append('endpoint', formData.endpoint);
+    formDataToSend.append('bucket_name', formData.bucket_name);
+    formDataToSend.append('wasabi_status', formData.wasabi_status ? "1" : "0");
+    formDataToSend.append('wasabi_api_key', formData.wasabi_api_key);
+    formDataToSend.append('wasabi_secret_key', formData.wasabi_secret_key);
     
     // Permissions
     formDataToSend.append('hallticket_generate_permission', formData.switchState ? "1" : "0");

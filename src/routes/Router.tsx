@@ -74,6 +74,7 @@ import CountryTable from 'src/views/dataManager/country/components/CountryTable'
 import ExportConfig from 'src/views/dataManager/exportConfiguration/ExportConfig';
 import CareerForm from 'src/views/frontedEditing/career/CareerForm';
 import ApplyJobPage from 'src/views/website/components/ApplyJobPage';
+import CareerManagementTable from 'src/views/applicationForms/careerApplication/CareerManagementTable';
 
 
 /* ***Layouts**** */
@@ -165,6 +166,7 @@ const MainRoutes = [
       { path: '/SuperAdmin/transaction', element: <TransactionManagementTable/> },
       { path: '/SuperAdmin/school-applications', element: <ApplicationManagementTable/> },
       { path: '/SuperAdmin/college-applications', element: <CollegeApplicationManagementTable/> },
+      { path: '/SuperAdmin/career-applications', element: <CareerManagementTable /> },
       { path: '/SuperAdmin/school-data', element: <SchoolDataExport/> },
       { path: '/SuperAdmin/college-data', element: <CollegeDataExport/> },
       { path: '/SuperAdmin/demo-accounts/add', element: <Add /> },
@@ -177,6 +179,7 @@ const MainRoutes = [
       { path: 'notifications', element: <NotificationsPage/> },
       { path: '/SuperAdmin/school-applications/edit/:applicationId', element: <ApplicationEditPage/> },
       { path: '/SuperAdmin/college-applications/edit/:applicationId', element: <ApplicationEditPage/> },
+      { path: '/SuperAdmin/career-applications/edit/:applicationId', element: <ApplicationEditPage/> },
       { path: '/SuperAdmin/application-details/:applicationId', element: <ApplicationDetailsPage/> },
       { path: '/SuperAdmin/data-manager/export-configuration', element: <ExportConfig/> },
       { path: '*', element: <Navigate to="/auth/404" /> },
@@ -232,6 +235,7 @@ const MainRoutes = [
       { path: 'transaction', element: <TransactionManagementTable/> },
       { path: 'school-applications', element: <ApplicationManagementTable/> },
       { path: 'college-applications', element: <CollegeApplicationManagementTable/> },
+      { path: 'career-applications', element: <CareerManagementTable /> },
       { path: 'school-data', element: <SchoolDataExport/> },
       { path: 'college-data', element: <CollegeDataExport/> },
       { path: 'demo-accounts/add', element: <Add /> },
@@ -242,6 +246,7 @@ const MainRoutes = [
       { path: 'frontend-editing/popups', element: <PopupEditing />},
       { path: 'school-applications/edit/:applicationId', element: <ApplicationEditPage/> },
       { path: 'college-applications/edit/:applicationId', element: <ApplicationEditPage/> },
+      { path: 'career-applications/edit/:applicationId', element: <ApplicationEditPage/> },
       { path: 'application-details/:applicationId', element: <ApplicationDetailsPage/> },
        { path: 'notifications', element: <NotificationsPage/> },
        { path: 'data-manager/export-configuration', element: <ExportConfig/> },
@@ -297,6 +302,7 @@ const MainRoutes = [
       { path: 'transaction', element: <TransactionManagementTable/> },
       { path: 'school-applications', element: <ApplicationManagementTable/> },
       { path: 'college-applications', element: <CollegeApplicationManagementTable/> },
+      { path: 'career-applications', element: <CareerManagementTable /> },
       { path: 'school-data', element: <SchoolDataExport/> },
       { path: 'college-data', element: <CollegeDataExport/> },
       { path: 'demo-accounts/add', element: <Add /> },
@@ -307,6 +313,7 @@ const MainRoutes = [
       { path: 'frontend-editing/popups', element: <PopupEditing />},
       { path: 'school-applications/edit/:applicationId', element: <ApplicationEditPage/> },
       { path: 'college-applications/edit/:applicationId', element: <ApplicationEditPage/> },
+      { path: 'career-applications/edit/:applicationId', element: <ApplicationEditPage/> },
       { path: 'application-details/:applicationId', element: <ApplicationDetailsPage/> },
        { path: 'notifications', element: <NotificationsPage/> },
       { path: '*', element: <Navigate to="/auth/404" /> },
@@ -360,6 +367,7 @@ const MainRoutes = [
       { path: 'transaction', element: <TransactionManagementTable/> },
       { path: 'school-applications', element: <ApplicationManagementTable/> },
       { path: 'college-applications', element: <CollegeApplicationManagementTable/> },
+      { path: 'career-applications', element: <CareerManagementTable /> },
       { path: 'school-data', element: <SchoolDataExport/> },
       { path: 'college-data', element: <CollegeDataExport/> },
       { path: 'demo-accounts/add', element: <Add /> },

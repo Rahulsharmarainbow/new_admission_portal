@@ -7,6 +7,7 @@ const OrganizationSelect = ({ formData, setFormData, loading }) => {
     { value: "1", label: "School" },
     { value: "2", label: "College" },
     { value: "3", label: "University" },
+    { value: "4", label: "Career" },
   ];
 
   // Handle change

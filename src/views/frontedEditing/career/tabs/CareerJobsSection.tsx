@@ -5,7 +5,8 @@ import {
   TextInput, 
   Checkbox,
   Spinner,
-  Select
+  Select,
+  Badge
 } from 'flowbite-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
@@ -14,6 +15,7 @@ import { HiPlus, HiSearch } from 'react-icons/hi';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import { TbEdit } from 'react-icons/tb';
+import { TbLoader2 } from 'react-icons/tb';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import DeleteConfirmationModal from 'src/Frontend/Common/DeleteConfirmationModal';
 import AddEditJobModal from './AddEditJobModal ';
@@ -34,7 +36,7 @@ interface CareerJobData {
   academic_name?: string;
   created_at: string;
   updated_at: string;
-  status?: number; // Added status field
+  status?: number;
 }
 
 interface JobTypeConfig {
@@ -57,7 +59,7 @@ interface Filters {
   order: 'asc' | 'desc';
   orderBy: string;
   search: string;
-  status: string; // Added status filter
+  status: string;
 }
 
 interface CareerJobsSectionProps {
@@ -83,6 +85,8 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
   const [loadingJobDetails, setLoadingJobDetails] = useState(false);
   const [jobTypeConfig, setJobTypeConfig] = useState<JobTypeConfig[]>([]);
   const [careerStatuses, setCareerStatuses] = useState<CareerStatus[]>([]);
+  const [bulkStatus, setBulkStatus] = useState<string>('');
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
 
   // Filters
   const [filters, setFilters] = useState<Filters>({
@@ -91,7 +95,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
     order: 'desc',
     orderBy: 'id',
     search: '',
-    status: '', // All statuses by default
+    status: '',
   });
   
   const debouncedSearch = useDebounce(filters.search, 500);
@@ -127,7 +131,6 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
         orderBy: filters.orderBy,
       };
 
-      // Add status filter if selected
       if (filters.status) {
         requestData.status = parseInt(filters.status);
       }
@@ -168,6 +171,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
         `${apiUrl}/${user?.role}/Jobs/get-type-config`,
         {
           academic_id: parseInt(selectedAcademic),
+          status: 1,
         },
         {
           headers: {
@@ -192,6 +196,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
         `${apiUrl}/SuperAdmin/Dropdown/get-career-status`,
         {
           academic_id: parseInt(selectedAcademic),
+          type: 1,
         },
         {
           headers: {
@@ -218,7 +223,6 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
         url = `${apiUrl}/${user?.role}/Jobs/update-job`;
       }
 
-      // Add s_id to request data
       requestData.s_id = user?.id;
 
       const response = await axios.post(url, requestData, {
@@ -305,6 +309,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
         toast.success(`${selectedJobsForDelete.length} job(s) deleted successfully!`);
         setShowDeleteModal(false);
         setSelectedJobsForDelete([]);
+        setBulkStatus('');
         getCareerJobs();
       } else {
         toast.error(response.data?.message || 'Failed to delete job(s)');
@@ -314,6 +319,47 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
       toast.error(error.response?.data?.message || 'Error deleting job');
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  const handleBulkStatusUpdate = async () => {
+    if (!bulkStatus || selectedJobsForDelete.length === 0) {
+      toast.error('Please select jobs and status');
+      return;
+    }
+
+    setIsBulkUpdating(true);
+    try {
+      const requestBody = {
+        ids: selectedJobsForDelete,
+        status: parseInt(bulkStatus),
+        s_id: user?.id,
+      };
+
+      const response = await axios.post(
+        `${apiUrl}/${user?.role}/Jobs/change-job-status`,
+        requestBody,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      if (response.data?.status === true) {
+        toast.success(`Status updated for ${selectedJobsForDelete.length} job(s)`);
+        setSelectedJobsForDelete([]);
+        setBulkStatus('');
+        getCareerJobs();
+      } else {
+        toast.error(response.data?.message || 'Failed to update status');
+      }
+    } catch (error: any) {
+      console.error('Error updating bulk status:', error);
+      toast.error(error.response?.data?.message || 'Error updating status');
+    } finally {
+      setIsBulkUpdating(false);
     }
   };
 
@@ -344,6 +390,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
   const handleSelectAll = () => {
     if (selectedJobsForDelete.length === jobs.length) {
       setSelectedJobsForDelete([]);
+      setBulkStatus('');
     } else {
       setSelectedJobsForDelete(jobs.map(job => job.id));
     }
@@ -407,9 +454,9 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
   const getStatusBadgeColor = (statusValue?: number) => {
     if (!statusValue) return 'gray';
     switch (statusValue) {
-      case 1: return 'green'; // Active
-      case 2: return 'yellow'; // Draft
-      case 3: return 'red'; // Closed
+      case 1: return 'success';
+      case 2: return 'warning';
+      case 3: return 'failure';
       default: return 'gray';
     }
   };
@@ -420,12 +467,16 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
     return status ? status.name : 'Unknown';
   };
 
-  // Get dropdown value name by ID
   const getDropdownValueName = (typeName: string, id: number) => {
     const config = jobTypeConfig.find(item => item.type_name === typeName);
     if (!config) return '';
     const option = config.data.find(opt => opt.id === id);
     return option ? option.name : '';
+  };
+
+  const clearSelection = () => {
+    setSelectedJobsForDelete([]);
+    setBulkStatus('');
   };
 
   if (!selectedAcademic) {
@@ -457,9 +508,11 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
       <div className="bg-white rounded-lg shadow-md relative overflow-x-auto">
         {/* Table Header with Filters and Add Button */}
         <div className={`transition-all duration-300 ${showModal || showDeleteModal ? 'blur-sm pointer-events-none' : ''}`}>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 pb-4">
-            {/* Left side: Search and Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <div className="flex flex-col gap-4 p-6 pb-4">
+            {/* Top Row: Search and Add Button */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              {/* Left side: Search */}
+              <div className="flex flex-col sm:flex-row gap-4 w-full items-start sm:items-center">
               <div className="relative w-full sm:w-64">
                 <TextInput
                   type="text"
@@ -470,8 +523,8 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                   className="w-full"
                 />
               </div>
-              
-              {/* Status Filter Dropdown */}
+
+              {/* Status Filter */}
               <div className="w-full sm:w-48">
                 <Select
                   value={filters.status}
@@ -486,28 +539,83 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                   ))}
                 </Select>
               </div>
-              
-              {/* Delete Selected Button (if any selected) */}
-              {selectedJobsForDelete.length > 0 && (
-                <Button
-                  color="failure"
-                  onClick={handleDeleteClick}
-                  className="whitespace-nowrap"
-                >
-                  <MdDeleteForever className="mr-2 h-5 w-5" />
-                  Delete Selected ({selectedJobsForDelete.length})
-                </Button>
-              )}
+              </div>
+
+              {/* Right side: Add Button */}
+              <Button
+                onClick={handleAddClick}
+                className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap w-full sm:w-auto"
+              >
+                <HiPlus className="mr-2 h-5 w-5" />
+                Add Job
+              </Button>
             </div>
 
-            {/* Right side: Add Button */}
-            <Button
-              onClick={handleAddClick}
-              className="bg-blue-600 hover:bg-blue-700 focus:ring-blue-300 whitespace-nowrap w-full sm:w-auto mt-4 sm:mt-0"
-            >
-              <HiPlus className="mr-2 h-5 w-5" />
-              Add Job
-            </Button>
+            {/* Bottom Row: Filters and Bulk Actions */}
+            <div className="flex flex-col sm:flex-row gap-4">            
+              {/* Bulk Actions Section */}
+              {selectedJobsForDelete.length > 0 && (
+                <div className="flex flex-col sm:flex-row gap-4 flex-1 items-start sm:items-center">
+                  <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg">
+                    <span className="text-sm font-medium text-blue-700">
+                      {selectedJobsForDelete.length} job(s) selected
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                    <div className="w-full sm:w-48">
+                      <Select
+                        value={bulkStatus}
+                        onChange={(e) => setBulkStatus(e.target.value)}
+                        className="w-full"
+                      >
+                        <option value="">Select Status</option>
+                        {careerStatuses.map((status) => (
+                          <option key={status.id} value={status.value}>
+                            {status.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleBulkStatusUpdate}
+                        disabled={!bulkStatus || isBulkUpdating}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        {isBulkUpdating ? (
+                          <>
+                            <TbLoader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Updating...
+                          </>
+                        ) : (
+                          'Update Status'
+                        )}
+                      </Button>
+
+                      <Button
+                        color="failure"
+                        onClick={handleDeleteClick}
+                        disabled={isBulkUpdating}
+                        className="flex items-center gap-2"
+                      >
+                        <MdDeleteForever className="h-4 w-4" />
+                        Delete
+                      </Button>
+
+                      <Button
+                        color="alternative"
+                        onClick={clearSelection}
+                        className="hover:bg-gray-200"
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Table Container with Loader */}
@@ -529,6 +637,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                       <Checkbox
                         checked={jobs.length > 0 && selectedJobsForDelete.length === jobs.length}
                         onChange={handleSelectAll}
+                        disabled={loading}
                       />
                     </th>
                     <th
@@ -558,12 +667,15 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                         Company {getSortIcon('company_name')}
                       </div>
                     </th>
-                    {/* <th
+                    <th
                       scope="col"
-                      className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
+                      onClick={() => handleSort('status')}
                     >
-                      Status
-                    </th> */}
+                      <div className="flex items-center justify-center">
+                        Status {getSortIcon('status')}
+                      </div>
+                    </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
@@ -575,7 +687,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                     </th>
                     <th
                       scope="col"
-                      className="w-32 px-8 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="w-32 px-8 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
                       Actions
                     </th>
@@ -585,7 +697,10 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                 <tbody className="bg-white divide-y divide-gray-200">
                   {jobs.length > 0 ? (
                     jobs.map((job, index) => (
-                      <tr key={job.id} className="hover:bg-gray-50 transition-colors">
+                      <tr 
+                        key={job.id} 
+                        className={`hover:bg-gray-50 transition-colors ${selectedJobsForDelete.includes(job.id) ? 'bg-blue-50' : ''}`}
+                      >
                         <td className="px-4 py-4 text-center">
                           <Checkbox
                             checked={selectedJobsForDelete.includes(job.id)}
@@ -596,38 +711,45 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
                           {filters.page * filters.rowsPerPage + index + 1}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">
-                          <div className="font-medium">{job.job_title}</div>
+                          <div className="font-medium truncate max-w-[200px]" title={job.job_title}>
+                            {job.job_title}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                          {job.company_name}
+                          <div className="truncate max-w-[150px]" title={job.company_name}>
+                            {job.company_name}
+                          </div>
                         </td>
-                        {/* <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getStatusBadgeColor(job.status)}-100 text-${getStatusBadgeColor(job.status)}-800`}>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <Badge 
+                            color={getStatusBadgeColor(job.status)} 
+                            className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                          >
                             {getStatusName(job.status)}
-                          </span>
-                        </td> */}
+                          </Badge>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                           {formatDate(job.created_at)}
                         </td>
-                        <td className="px-8 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex items-center space-x-3">
-                            {/* Edit Button */}
+                        <td className="px-8 py-4 whitespace-nowrap text-center">
+                          <div className="flex items-center justify-center space-x-3">
                             <button
-                              className="text-blue-500 hover:text-blue-700 p-1 transition-colors duration-200 rounded-lg hover:bg-blue-50"
+                              className="text-blue-500 hover:text-blue-700 p-1.5 transition-colors duration-200 rounded-lg hover:bg-blue-50"
                               onClick={() => editJob(job)}
                               title="Edit Job"
+                              disabled={selectedJobsForDelete.length > 0}
                             >
                               <TbEdit size={18} />
                             </button>
 
-                            {/* Delete Button */}
                             <button
-                              className="text-red-500 hover:text-red-700 p-1 transition-colors duration-200 rounded-lg hover:bg-red-50"
+                              className="text-red-500 hover:text-red-700 p-1.5 transition-colors duration-200 rounded-lg hover:bg-red-50"
                               onClick={() => {
                                 setSelectedJobsForDelete([job.id]);
                                 setShowDeleteModal(true);
                               }}
                               title="Delete Job"
+                              disabled={selectedJobsForDelete.length > 0}
                             >
                               <MdDeleteForever size={18} />
                             </button>
@@ -697,7 +819,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
         jobTypeConfig={jobTypeConfig}
         loadingJobDetails={loadingJobDetails}
         academicId={selectedAcademic}
-        careerStatuses={careerStatuses} // Pass career statuses to modal
+        careerStatuses={careerStatuses}
       />
 
       {/* Delete Confirmation Modal */}
@@ -706,6 +828,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
         onClose={() => {
           setShowDeleteModal(false);
           setSelectedJobsForDelete([]);
+          setBulkStatus('');
         }}
         onConfirm={deleteJob}
         title={`Delete ${selectedJobsForDelete.length > 1 ? 'Jobs' : 'Job'}`}

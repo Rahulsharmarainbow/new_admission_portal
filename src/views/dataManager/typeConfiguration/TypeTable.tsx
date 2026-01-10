@@ -777,6 +777,12 @@ const TypeTable: React.FC = () => {
                   </th>
                   <th
                     scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider select-none"
+                  >
+                    <div className="flex items-center">Filter Status</div>
+                  </th>
+                  <th
+                    scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
                     onClick={() => handleSort('created_at')}
                   >
@@ -800,6 +806,11 @@ const TypeTable: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         <Badge color="blue" className="text-xs">
                           {item.type}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <Badge color={item.filter_status == 1 ? 'green' : 'red'} className="text-xs">
+                          {item.filter_status == 1 ? 'YES' : 'NO'}
                         </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

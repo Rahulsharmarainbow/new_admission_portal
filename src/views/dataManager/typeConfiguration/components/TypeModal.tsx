@@ -210,7 +210,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, TextInput, Label, ModalHeader, ModalBody, ModalFooter } from 'flowbite-react';
+import { Button, Modal, TextInput, Label, ModalHeader, ModalBody, ModalFooter, ToggleSwitch } from 'flowbite-react';
 import axios from 'axios';
 import { useAuth } from 'src/hook/useAuth';
 import toast from 'react-hot-toast';
@@ -223,6 +223,7 @@ interface TypeItem {
   type: string;
   created_at: string;
   updated_at: string;
+  filter_status: boolean; 
 }
 
 interface TypeModalProps {
@@ -244,6 +245,7 @@ const TypeModal: React.FC<TypeModalProps> = ({
   const [typeName, setTypeName] = useState('');
   const [selectedAcademic, setSelectedAcademic] = useState<number>();
   const [loading, setLoading] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<boolean>(true);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -253,9 +255,11 @@ const TypeModal: React.FC<TypeModalProps> = ({
       if (type === 'edit' && selectedItem) {
         setTypeName(selectedItem.type || '');
         setSelectedAcademic(selectedItem.academic_id || 0);
+        setFilterStatus(selectedItem.filter_status !== undefined ? selectedItem.filter_status : true); // नया line
       } else {
         setTypeName('');
         setSelectedAcademic(0);
+        setFilterStatus(true); 
       }
     }
   }, [isOpen, selectedItem, type]);
@@ -263,6 +267,10 @@ const TypeModal: React.FC<TypeModalProps> = ({
   // Handle academic change
   const handleAcademicChange = (academicId: number) => {
     setSelectedAcademic(academicId);
+  };
+
+    const handleToggleChange = (checked: boolean) => {
+    setFilterStatus(checked);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -294,6 +302,7 @@ const TypeModal: React.FC<TypeModalProps> = ({
         requestBody = {
           academic_id: selectedAcademic,
           type: typeName.trim(),
+          filter_status: filterStatus ? 1 : 0,
           s_id: user?.id
         };
       } else {
@@ -306,6 +315,7 @@ const TypeModal: React.FC<TypeModalProps> = ({
           id: selectedItem.id,
           academic_id: selectedAcademic,
           type: typeName.trim(),
+          filter_status: filterStatus ? 1 : 0,
           s_id: user?.id
         };
       }
@@ -330,6 +340,7 @@ const TypeModal: React.FC<TypeModalProps> = ({
     setTypeName('');
     setSelectedAcademic(0);
     onClose();
+    setFilterStatus(true);
   };
 
   return (
@@ -364,6 +375,20 @@ const TypeModal: React.FC<TypeModalProps> = ({
                 onChange={(e) => setTypeName(e.target.value)}
                 placeholder="Enter type name"
                 required
+                disabled={loading}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="filterStatus" className="mb-2 block text-sm font-medium text-gray-700">
+                  Filter Status
+                </Label>
+              </div>
+              <ToggleSwitch
+                checked={filterStatus}
+                onChange={handleToggleChange}
+                label=""
                 disabled={loading}
               />
             </div>

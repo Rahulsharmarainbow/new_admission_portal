@@ -696,6 +696,7 @@ const AcademicInformation: React.FC<AcademicInformationProps> = ({
               <option value="1">School</option>
               <option value="2">College</option>
               <option value="3">University</option>
+              <option value="4">Career</option>
             </Select>
             {errors.selectType && (
               <p className="mt-1 text-sm text-red-600">{errors.selectType}</p>
