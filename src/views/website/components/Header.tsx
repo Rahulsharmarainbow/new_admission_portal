@@ -155,7 +155,7 @@ const Header: React.FC<HeaderProps> = ({
                 </h1>
               </Link>
 
-              {address && <span className="text-xl text-slate-500 truncate mt-1">{address}</span>}
+              {address && <span className="text-md text-slate-500 truncate mt-1">{address}</span>}
             </div>
           </div>
 
