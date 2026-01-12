@@ -18,6 +18,9 @@ interface FormStepProps {
   onFileChange: (name: string, file: File, previewUrl: string, fieldConfig?: any) => void;
   formRefs: React.MutableRefObject<{ [key: string]: any }>;
   type: string;
+  onMultiDataChange: (name: string, value: any, fieldConfig?: any) => void;
+  onRemoveMultiDataEntry: (name: string, value: any, fieldConfig?: any) => void;
+  onAddMultiDataEntry: (name: string, value: any, fieldConfig?: any) => void;
 }
 
 const FormStep: React.FC<FormStepProps> = ({
@@ -34,6 +37,9 @@ const FormStep: React.FC<FormStepProps> = ({
   onFileChange,
   formRefs,
   type,
+  onMultiDataChange,
+  onRemoveMultiDataEntry,
+  onAddMultiDataEntry
 }) => {
   // ... (sab existing functions same rahenge - handleFileUpload, handleAadhaarVisibility, getPreviewBoxStyle, openDesktopCamera, handleCameraCapture)
   const handleFileUpload = (
@@ -66,6 +72,9 @@ const FormStep: React.FC<FormStepProps> = ({
       input.type = isVisible ? 'text' : 'password';
     });
   };
+
+  // Handler functions for multi_data
+
 
   // Resolution parse & dynamic styles
   const getPreviewBoxStyle = (resolution?: string) => {
@@ -135,6 +144,268 @@ const FormStep: React.FC<FormStepProps> = ({
           </div>
         );
 
+        
+     case 'multi_data':
+  const maxEntries = child.max_rows || 10;
+  const currentEntries = Array.isArray(formData[child.name]) ? formData[child.name] : [{}];
+  
+  return (
+    <div className="space-y-4">
+     
+      {/* Table container */}
+      <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 border border-gray-200 multi_data">
+            {/* Table header - column labels */}
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="p-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-12">
+                  #
+                </th>
+                {child.columns.map((column: any) => (
+                  <th 
+                    key={column.name} 
+                    scope="col" 
+                    className="p-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                  >
+                    <div className="flex items-center gap-1">
+                      {column.label}
+                      {column.required == 1 && <span className="text-red-500">*</span>}
+                    </div>
+                  </th>
+                ))}
+                <th scope="col" className="p-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-20">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            
+            {/* Table body - entries */}
+            <tbody className="bg-white divide-y divide-gray-200">
+              {currentEntries.length > 0 ? (
+                currentEntries.map((entry: any, index: number) => (
+                  <tr 
+                    key={index} 
+                    className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
+                  >
+                    {/* Row number */}
+                    <td className="pl-2">
+                      <div className="flex items-center">
+                        <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                          <span className="text-xs font-semibold text-blue-600">{index + 1}</span>
+                        </div>
+                      </div>
+                    </td>
+                    
+                    {/* Data columns */}
+                    {child.columns.map((column: any) => {
+                      const fieldName = `${child.name}[${index}][${column.name}]`;
+                      const fieldValue = entry?.[column.name] || '';
+                      
+                      // Common input props
+                      const fieldCommonProps = {
+                        id: fieldName,
+                        name: fieldName,
+                        value: fieldValue,
+                        disabled: fieldConfig?.disabled || false,
+                        onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => 
+                          onMultiDataChange(child.name, index, column.name, e.target.value),
+                        className: `w-full px-3 py-1.5   focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 ${
+                          errors[fieldName] ? 'border-red-500' : 'border-gray-300'
+                        }`
+                      };
+                      
+                      return (
+                        <td key={column.name} className="">
+                          {(() => {
+                            switch (column.type) {
+                              case 'text':
+                              case 'email':
+                              case 'number':
+                                return (
+                                  <input
+                                    {...fieldCommonProps}
+                                    type={column.type}
+                                    // placeholder={column.placeholder || column.label}
+                                    className={`${fieldCommonProps.className} text-sm`}
+                                  />
+                                );
+                                
+                              case 'select':
+                                const selectOptions = column.options || [];
+                                return (
+                                  <div className="relative">
+                                    <select
+                                      {...fieldCommonProps}
+                                      className={`${fieldCommonProps.className} text-sm appearance-none bg-white`}
+                                    >
+                                      <option value="">Select</option>
+                                      {selectOptions.map((option: any) => (
+                                        <option key={option.value} value={option.value}>
+                                          {option.text}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                      </svg>
+                                    </div>
+                                  </div>
+                                );
+                                
+                              case 'date':
+                                // Calculate max/min dates if specified
+                                const getMaxDate = () => {
+                                  if (column.max_date) {
+                                    const today = new Date();
+                                    const maxDate = new Date(
+                                      today.getFullYear() - column.max_date,
+                                      today.getMonth(),
+                                      today.getDate(),
+                                    );
+                                    return maxDate.toISOString().split('T')[0];
+                                  }
+                                  return undefined;
+                                };
+                                
+                                const getMinDate = () => {
+                                  if (column.min_date) {
+                                    const today = new Date();
+                                    const minDate = new Date(
+                                      today.getFullYear() - column.min_date,
+                                      today.getMonth(),
+                                      today.getDate(),
+                                    );
+                                    return minDate.toISOString().split('T')[0];
+                                  }
+                                  return undefined;
+                                };
+                                
+                                return (
+                                  <input
+                                    {...fieldCommonProps}
+                                    type="date"
+                                    max={getMaxDate()}
+                                    min={getMinDate()}
+                                    
+                                    className={`${fieldCommonProps.className} text-sm`}
+                                  />
+                                );
+                                
+                              case 'textarea':
+                                return (
+                                  <textarea
+                                    {...fieldCommonProps}
+                                    placeholder={column.placeholder || column.label}
+                                    rows={2}
+                                    className={`${fieldCommonProps.className} text-sm resize-none`}
+                                  />
+                                );
+                                
+                              default:
+                                return (
+                                  <input
+                                    {...fieldCommonProps}
+                                    type="text"
+                                    placeholder={column.placeholder || column.label}
+                                    className={`${fieldCommonProps.className} text-sm`}
+                                  />
+                                );
+                            }
+                          })()}
+                          
+                          {/* Error message */}
+                          {errors[fieldName] && (
+                            <p className="text-red-500 text-xs mt-1 absolute">{errors[fieldName]}</p>
+                          )}
+                        </td>
+                      );
+                    })}
+                    
+                    {/* Actions column */}
+                   <td className="pl-2">
+                    <div className="flex items-center gap-1">
+                      {/* Remove button - circular with trash icon */}
+                      {currentEntries.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => onRemoveMultiDataEntry(child.name, index)}
+                          className="p-1.5 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50 transition-all"
+                          title="Delete this row"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span className="sr-only">Remove row</span>
+                        </button>
+                      )}
+                      
+                      {/* Add button - show only on last row OR if only 1 record */}
+                      {(index === currentEntries.length - 1 || currentEntries.length === 1) && (
+                        <button
+                          type="button"
+                          onClick={() => onAddMultiDataEntry(child.name, child.columns)}
+                          disabled={currentEntries.length >= maxEntries}
+                          className={`relative p-1.5 rounded-full transition-all ${
+                            currentEntries.length >= maxEntries
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-green-100 text-green-600 hover:bg-green-200 hover:shadow-sm'
+                          }`}
+                          title="Add new row after this"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                          <span className="sr-only">Add row</span>
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={child.columns.length + 2} className="px-4 py-6 text-center">
+                    <div className="flex flex-col items-center justify-center text-gray-500">
+                      <svg className="w-12 h-12 mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      <p className="text-sm italic">No entries yet. Click "Add Row" to start.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Footer with summary */}
+        {currentEntries.length > 0 && (
+          <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
+            <div className="flex justify-between items-center text-xs text-gray-600">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span>Showing {currentEntries.length} row{currentEntries.length !== 1 ? 's' : ''}</span>
+              </div>
+              {currentEntries.length >= maxEntries && (
+                <span className="text-red-500 font-medium">
+                  Maximum limit reached ({maxEntries} rows)
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Field-level error */}
+      {errors[child.name] && (
+        <p className="text-red-500 text-xs mt-1">{errors[child.name]}</p>
+      )}
+    </div>
+  );
       case 'checkbox':
         return (
           <div className="flex flex-col space-y-2">

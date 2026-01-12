@@ -333,3 +333,8 @@
 .fee-tables th {
     font-size: 14px;
 }
+
+
+.multi_data td,.multi_data th {
+    border: 1px solid #e3dcdc;
+}

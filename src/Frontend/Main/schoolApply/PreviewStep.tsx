@@ -194,6 +194,158 @@ const PreviewStep: React.FC<PreviewStepProps> = ({
           );
         }
 
+      case 'multi_data':
+          const multiDataValue = formData[child.name];
+
+          if (!multiDataValue || !Array.isArray(multiDataValue) || multiDataValue.length === 0) {
+            return <span className="text-gray-500 text-sm md:text-base italic">No entries provided</span>;
+          }
+
+          return (
+            <div className="space-y-4">
+              <div className="space-y-2">
+              
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <span className="bg-gray-100 px-2 py-1 rounded">
+                    {multiDataValue.length} {multiDataValue.length === 1 ? 'entry' : 'entries'}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Table container with responsive design */}
+              <div className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full divide-y divide-gray-200">
+                    {/* Table header */}
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                          S.No
+                        </th>
+                        {child.columns.map((column: any) => (
+                          <th 
+                            key={column.name} 
+                            scope="col" 
+                            className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                          >
+                            <div className="flex items-center gap-1">
+                              {column.label}
+                              {column.required == 1 && <span className="text-red-500">*</span>}
+                            </div>
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    
+                    {/* Table body */}
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {multiDataValue.map((entry: any, index: number) => (
+                        <tr 
+                          key={index} 
+                          className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
+                        >
+                          {/* Row number */}
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                <span className="text-xs font-semibold text-blue-600">{index + 1}</span>
+                              </div>
+                            </div>
+                          </td>
+                          
+                          {/* Data columns */}
+                          {child.columns.map((column: any) => {
+                            const value = entry[column.name];
+                            
+                            // Format value
+                            let displayValue = value || (
+                              <span className="text-gray-400 italic">Not provided</span>
+                            );
+                            let cellClass = "py-3 px-4 text-sm";
+                            
+                            if (value) {
+                              if (column.type === 'email') {
+                                displayValue = (
+                                  <a 
+                                    href={`mailto:${value}`} 
+                                    className="text-blue-600 hover:text-blue-800 hover:underline break-all inline-flex items-center gap-1"
+                                  >
+                                    {value}
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                  </a>
+                                );
+                              } else if (column.type === 'date') {
+                                try {
+                                  displayValue = new Date(value).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  });
+                                } catch (e) {
+                                  displayValue = value;
+                                }
+                              } else if (column.type === 'url') {
+                                displayValue = (
+                                  <a 
+                                    href={value} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 hover:underline break-all inline-flex items-center gap-1"
+                                  >
+                                    {value}
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                  </a>
+                                );
+                              } else if (column.type === 'phone') {
+                                displayValue = (
+                                  <a 
+                                    href={`tel:${value}`}
+                                    className="text-gray-800 hover:text-blue-600 hover:underline"
+                                  >
+                                    {value}
+                                  </a>
+                                );
+                              }
+                            }
+                            
+                            return (
+                              <td 
+                                key={column.name} 
+                                className={`${cellClass} ${!value ? 'text-gray-400' : 'text-gray-900'}`}
+                              >
+                                <div className="break-words max-w-xs lg:max-w-md">
+                                  {displayValue}
+                                </div>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {/* Table footer with summary */}
+                <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
+                  <div className="flex items-center justify-between text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      <span>Showing {multiDataValue.length} {multiDataValue.length === 1 ? 'entry' : 'entries'}</span>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Last updated: {new Date().toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
       case 'radio':
         const radioValue = formData[child.name];
         let radioDisplayText = 'Not provided';

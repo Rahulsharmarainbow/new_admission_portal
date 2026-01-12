@@ -368,7 +368,99 @@ const handleFileChange = useCallback(
             if (!fileData[child.name]) {
               newErrors[child.name] = child.validation_message || `${child.label} is required`;
             }
-          } else {
+          }
+         else if (child.type === 'multi_data') {
+  
+  // const entries = formData[child.name]??;
+    const entries = Array.isArray(formData[child.name]) ? formData[child.name] : [{}];
+
+  
+  // Check if entries exist
+  if (entries && Array.isArray(entries)) {
+    console.log('Multi-data entries:', entries);
+    
+    // Get all required columns from this multi_data field
+    const requiredColumns = child.columns.filter((column: any) => column.required == 1);
+    
+    // Check if multi_data field itself is required and has no entries
+    if (child.required == 1 && entries.length === 0) {
+      newErrors[child.name] = child.validation_message || `At least one entry is required for ${child.label}`;
+    }
+    
+    // Validate each required column across all entries
+    requiredColumns.forEach((column: any) => {
+      entries.forEach((entry: any, entryIndex: number) => {
+        const fieldName = `${child.name}[${entryIndex}][${column.name}]`;
+        const value = entry?.[column.name];
+        
+        // Check if required column has value
+        if (!value && value !== 0 && value !== false) {
+          newErrors[fieldName] = column.validation_message || `${column.label} is required in entry ${entryIndex + 1}`;
+        } 
+        // Validate based on column type if value exists
+        else if (value && value.toString().trim() !== '') {
+          if (column.type === 'email' || column.validation === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+              newErrors[fieldName] = `Invalid email address in entry ${entryIndex + 1}`;
+            }
+          } else if (column.type === 'number' || column.validation === 'number') {
+            if (isNaN(Number(value))) {
+              newErrors[fieldName] = `Invalid number in entry ${entryIndex + 1}`;
+            }
+          } else if (column.validation === 'mobile') {
+            const phoneRegex = /^\d{10}$/;
+            if (!phoneRegex.test(value.toString())) {
+              newErrors[fieldName] = `Phone number must be 10 digits in entry ${entryIndex + 1}`;
+            }
+          } else if (column.type === 'date' && value) {
+            const inputDate = new Date(value);
+            const today = new Date();
+
+            if (isNaN(inputDate.getTime())) {
+              newErrors[fieldName] = `Invalid date format in entry ${entryIndex + 1}`;
+            } else if (column.max_date) {
+              const maxAllowedDate = new Date(
+                today.getFullYear() - column.max_date,
+                today.getMonth(),
+                today.getDate(),
+              );
+              if (inputDate > maxAllowedDate) {
+                newErrors[fieldName] = `Age must be at most ${column.max_date} years in entry ${entryIndex + 1}`;
+              }
+            }
+          }
+        }
+      });
+    });
+    
+    // Also validate all columns (not just required ones) for data type validation
+    child.columns.forEach((column: any) => {
+      entries.forEach((entry: any, entryIndex: number) => {
+        const fieldName = `${child.name}[${entryIndex}][${column.name}]`;
+        const value = entry?.[column.name];
+        
+        // Only validate data type if value exists (for non-required fields too)
+        if (value && value.toString().trim() !== '') {
+          if (column.type === 'email' || column.validation === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+              newErrors[fieldName] = `Invalid email address in entry ${entryIndex + 1}`;
+            }
+          } else if (column.type === 'number' || column.validation === 'number') {
+            if (isNaN(Number(value))) {
+              newErrors[fieldName] = `Invalid number in entry ${entryIndex + 1}`;
+            }
+          }
+        }
+      });
+    });
+  } else if (child.required == 1) {
+    // If multi_data field is required but no entries array exists
+    newErrors[child.name] = child.validation_message || `${child.label} is required`;
+  }
+} 
+          else {
             if (child.name === 'adharCard') {
               let aadhaarCard = '';
               let hasError = false;
@@ -438,6 +530,82 @@ const handleFileChange = useCallback(
     },
     [formData, fileData, required_child],
   );
+
+  /* Multi data start*/
+  const onAddMultiDataEntry = (fieldName: string, columns: any[]) => {
+    const currentData = formData[fieldName] || [{}];
+    const newEntry: any = {};
+    
+    // Initialize empty values for each column
+    columns.forEach((column: any) => {
+      newEntry[column.name] = '';
+    });
+    
+    setFormData({
+      ...formData,
+      [fieldName]: [...currentData, newEntry]
+    });
+  };
+  
+  const onRemoveMultiDataEntry = (fieldName: string, index: number) => {
+    const currentData = formData[fieldName] || [];
+    const newData = currentData.filter((_: any, i: number) => i !== index);
+    
+    setFormData({
+      ...formData,
+      [fieldName]: newData
+    });
+  };
+  
+  const onMultiDataChange = (
+    fieldName: string, 
+    entryIndex: number, 
+    columnName: string, 
+    value: string
+  ) => {
+    const currentData = formData[fieldName] || [];
+    const updatedData = [...currentData];
+    
+    if (!updatedData[entryIndex]) {
+      updatedData[entryIndex] = {};
+    }
+    
+    updatedData[entryIndex][columnName] = value;
+    
+    setFormData({
+      ...formData,
+      [fieldName]: updatedData
+    });
+  };
+  
+  // Update your validation logic to handle multi_data
+  const validateMultiDataField = (fieldName: string, columns: any[], value: any[]) => {
+    const errors: string[] = [];
+    
+    if (!value || value.length === 0) {
+      return null; // No validation if empty (unless required field)
+    }
+    
+    value.forEach((entry, index) => {
+      columns.forEach(column => {
+        const entryValue = entry[column.name];
+        if (column.required == 1 && (!entryValue || entryValue.trim() === '')) {
+          errors.push(`Entry ${index + 1}: ${column.label} is required`);
+        }
+        
+        // Add other validations (email, etc.)
+        if (column.type === 'email' && entryValue && entryValue.trim() !== '') {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(entryValue)) {
+            errors.push(`Entry ${index + 1}: Please enter a valid email address`);
+          }
+        }
+      });
+    });
+    
+    return errors.length > 0 ? errors.join(', ') : null;
+  };
+  /* Multi Data end */
 
   const handleBack = useCallback(() => {
     setActiveStep((prev) => prev - 1);
@@ -639,6 +807,9 @@ const handleFileChange = useCallback(
             onAadhaarChange={handleAadhaarChange}
             onFileChange={handleFileChange}
             type={type}
+            onMultiDataChange={onMultiDataChange}
+            onRemoveMultiDataEntry={onRemoveMultiDataEntry}
+            onAddMultiDataEntry={onAddMultiDataEntry}
           />
         );
          case 1:

@@ -241,32 +241,131 @@ const ApplicationDetailsPage: React.FC = () => {
   };
 
   // Render field value based on field type
-  const renderFieldValue = (field: FormField) => {
-    const value = getDisplayValue(field.name);
+  // Add this helper function near the top of your component
+const isMultiDataObject = (value: any): boolean => {
+  if (!value || typeof value !== 'object') return false;
+  try {
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    return Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'object';
+  } catch {
+    return false;
+  }
+};
+
+const renderMultiDataField = (value: any, field: FormField) => {
+  try {
+    const multiData = typeof value === 'string' ? JSON.parse(value) : value;
     
-    if (field.type === 'file_button') {
-      const filePath = candidateDetails?.[field.name];
-      if (!filePath) return 'No file uploaded';
-      
+    if (!Array.isArray(multiData) || multiData.length === 0) {
       return (
-        <div className="mt-2">
-          <img
-            src={getImageUrl(filePath, field.name, 'No+Image')}
-            alt={field.label || 'Uploaded file'}
-            className="w-full h-48 object-contain border rounded-lg bg-gray-50"
-            onError={() => handleImageError(field.name)}
-          />
-          {/* <p className="text-sm text-gray-500 mt-2 text-center truncate">{filePath}</p> */}
-        </div>
+        <div className="text-gray-400 italic text-sm">No entries provided</div>
       );
     }
-    
+
+    // Try to get column names from the first object
+    const firstItem = multiData[0];
+    const columns = Object.keys(firstItem).map(key => ({
+      name: key,
+      label: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    }));
+
     return (
-      <div className="min-h-[24px] py-1 px-3 bg-gray-50 rounded-lg border border-gray-200">
-        {value}
+      <div className="mt-2 w-full">
+        
+        
+        {/* Full width table - always visible */}
+        <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th 
+                    scope="col" 
+                    className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-12"
+                  >
+                    #
+                  </th>
+                  {columns.map(col => (
+                    <th 
+                      key={col.name} 
+                      scope="col" 
+                      className="py-3 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                    >
+                      {col.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {multiData.map((item: any, index: number) => (
+                  <tr 
+                    key={index} 
+                    className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
+                  >
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center mx-auto">
+                        <span className="text-xs font-semibold text-blue-600">{index + 1}</span>
+                      </div>
+                    </td>
+                    {columns.map(col => (
+                      <td 
+                        key={col.name} 
+                        className="py-3 px-4 text-sm text-gray-900"
+                      >
+                        <div className="max-w-xs break-words">
+                          {item[col.name] || (
+                            <span className="text-gray-400 italic">—</span>
+                          )}
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     );
-  };
+  } catch (error) {
+    console.error('Error rendering multi-data field:', error);
+    return (
+      <div className="text-red-500 text-sm">Error displaying data</div>
+    );
+  }
+};
+
+// Update the renderFieldValue function to handle multi-data
+const renderFieldValue = (field: FormField) => {
+  const value = getDisplayValue(field.name);
+  
+  if (field.type === 'file_button') {
+    const filePath = candidateDetails?.[field.name];
+    if (!filePath) return 'No file uploaded';
+    
+    return (
+      <div className="mt-2">
+        <img
+          src={getImageUrl(filePath, field.name, 'No+Image')}
+          alt={field.label || 'Uploaded file'}
+          className="w-full h-48 object-contain border rounded-lg bg-gray-50"
+          onError={() => handleImageError(field.name)}
+        />
+      </div>
+    );
+  }
+  
+  // Handle multi-data fields
+  if (isMultiDataObject(value)) {
+    return renderMultiDataField(value, field);
+  }
+  
+  return (
+    <div className="min-h-[24px] py-1 px-3 bg-gray-50 rounded-lg border border-gray-200">
+      {value || 'NA'}
+    </div>
+  );
+};
 
   if (loading) {
     return (
@@ -358,21 +457,55 @@ const ApplicationDetailsPage: React.FC = () => {
                 </h2> */}
                 
                 {/* Regular form fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className={`
+                  grid gap-6 
+                  ${fields.some(field => field.type === 'multi_data') 
+                    ? 'grid-cols-1'  // If any field is multi_data, use single column
+                    : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}  // Otherwise use multi-column
+                `}>
                   {fields
                     .filter(field => field.type !== 'file_button')
                     .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
-                    .map(field => (
-                    <div key={`${field.id}-${field.name}`} className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        {field.label}
-                        {field.required === 1 && <span className="text-red-500 ml-1">*</span>}
-                      </label>
-                      <div className="text-gray-900">
-                        {renderFieldValue(field)}
-                      </div>
-                    </div>
-                  ))}
+                    .map(field => {
+                      // If field type is 'heading', render as header with full width
+                      if (field.type === 'heading') {
+                        return (
+                          <div 
+                            key={`${field.id}-${field.name}`} 
+                            className="col-span-full"
+                          >
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2 pb-2 ">
+                              {field.content || field.label}
+                            </h3>
+                           
+                          </div>
+                        );
+                      }
+                      
+                      // Regular fields
+                      const isMultiDataField = field.type === 'multi_data';
+                      
+                      return (
+                        <div 
+                          key={`${field.id}-${field.name}`} 
+                          className={`space-y-2 ${
+                            isMultiDataField ? 'col-span-full' : ''
+                          }`}
+                        >
+                          
+                            {!isMultiDataField && (
+                              <label className="block text-sm font-medium text-gray-700">
+                                {field.label}
+                                {field.required === 1 && <span className="text-red-500 ml-1">*</span>}
+                              </label>
+                            )}
+                                              
+                          <div className="text-gray-900">
+                            {renderFieldValue(field)}
+                          </div>
+                        </div>
+                      );
+                    })}
                 </div>
 
                 {/* File upload fields for this box */}
