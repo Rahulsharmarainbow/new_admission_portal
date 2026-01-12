@@ -15,7 +15,8 @@ export const BaseSidebarContent = () => {
     // academic_type: 1 → School
     1: ['College Services','College Applications'],
     2: ['School Services','School Applications'],
-    3: ['School Services','School Applications']
+    3: ['School Services','School Applications'],
+    4: ['School Services','School Applications','College Applications','College Services','Transaction']
   };
 
  let academicMenus = [];

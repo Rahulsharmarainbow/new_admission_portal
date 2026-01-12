@@ -1,274 +1,22 @@
-
-// import React from "react";
-
-// const Footer: React.FC = () => {
-//   return (
-//      <footer className="bg-white border-t border-slate-200 mt-auto">
-//      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-//        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12">
-//          {/* Company info */}
-//          <div className="flex items-start gap-4 flex-1">
-//            <div className="relative">
-//              <div className="w-14 h-14 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
-//               <span className="text-white font-bold text-lg">FS</span>
-//              </div>
-//           </div>
-//           <div className="space-y-1">
-//              <h3 className="text-lg font-bold text-slate-900">
-//               Flying Stars Careers
-//             </h3>
-//              <p className="text-sm text-slate-600">
-//                123, Sample Street, Jabalpur
-//                <br />
-//              Madhya Pradesh, India
-//              </p>
-//              <p className="text-sm text-slate-600">9006514584</p>
-//              <p className="text-sm">
-//                <a
-//                  href="mailto:careers@flyingstars.com"
-//                 className="text-indigo-600 hover:text-indigo-700 font-medium underline decoration-slate-300 hover:decoration-indigo-300"
-//               >
-//                  careers@flyingstars.com
-//                </a>
-//              </p>
-//            </div>
-//         </div>
-
-//        {/* Social links */}
-//          <div className="flex flex-col items-end gap-3">
-//            <p className="text-sm text-slate-600 font-medium">Connect with us</p>
-//            <div className="flex items-center gap-2">
-//             <a
-//               href="https://linkedin.com"
-//               target="_blank"
-//               rel="noopener noreferrer"
-//               className="w-10 h-10 bg-slate-100 hover:bg-indigo-600 text-slate-600 hover:text-white rounded-xl flex items-center justify-center transition-all duration-200 hover:shadow-md"
-//               aria-label="LinkedIn"
-//             >
-//               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-//                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z" />
-//               </svg>
-//             </a>
-//             <a
-//               href="https://instagram.com"
-//               target="_blank"
-//               rel="noopener noreferrer"
-//               className="w-10 h-10 bg-slate-100 hover:bg-pink-500 text-slate-600 hover:text-white rounded-xl flex items-center justify-center transition-all duration-200 hover:shadow-md"
-//               aria-label="Instagram"
-//             >
-//               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-//                 <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.621 5.367 11.988 11.988 11.988s11.988-5.367 11.988-11.988C23.999 5.367 17.638 0 12.017 0zm0 18.285c-4.487 0-8.129-3.642-8.129-8.129 0-4.487 3.642-8.13 8.129-8.13s8.13 3.643 8.13 8.13c0 4.487-3.643 8.129-8.13 8.129zm0-15.428c-3.324 0-6.029 2.704-6.029 6.029s2.705 6.03 6.029 6.03 6.03-2.705 6.03-6.03-2.705-6.029-6.03-6.029zm6.546 8.59c0 .484-.392.876-.876.876s-.876-.392-.876-.876.392-.876.876-.876.876.392.876.876zm-5.67 0c0 .484-.392.876-.876.876s-.876-.392-.876-.876.392-.876.876-.876.876.392.876.876z" />
-//               </svg>
-//             </a>
-//             <a
-//               href="https://facebook.com"
-//               target="_blank"
-//               rel="noopener noreferrer"
-//               className="w-10 h-10 bg-slate-100 hover:bg-blue-600 text-slate-600 hover:text-white rounded-xl flex items-center justify-center transition-all duration-200 hover:shadow-md"
-//               aria-label="Facebook"
-//             >
-//               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-//                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-//               </svg>
-//             </a>
-//           </div>
-//           <p className="text-xs text-slate-500 text-right">
-//             © {new Date().getFullYear()} Flying Stars. All rights reserved.
-//           </p>
-//         </div>
-//       </div>
-//     </div>
-//   </footer>
-//   );
-// };
-
-// export default Footer;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // src/pages/Footer.tsx
-// import React from 'react';
-// import { Link } from 'react-router';
-// import { IconMail, IconPhone } from '@tabler/icons-react';
-// import { TbWorldLatitude } from 'react-icons/tb';
-
-// interface FooterProps {
-//   footerData?: any;
-//   baseUrl?: string;
-//   instituteName?: string;
-//   institute?: any;
-// }
-
-// const Footer: React.FC<FooterProps> = ({
-//   footerData,
-//   baseUrl = '',
-//   instituteName = 'Career Portal',
-//   institute,
-// }) => {
-//   // Extract data from API response structure
-//   const academicName = institute?.footer?.academic_name || institute?.header?.academic_name || instituteName;
-//   const academicEmail = institute?.footer?.academic_email || '';
-//   const academicAddress = institute?.footer?.academic_address || '';
-//   const academicWebsite = institute?.website || '';
-
-//   const contactInfo = {
-//     title: 'Contact Information',
-//     sections: {
-//       instituteInfo: {
-//         title: academicName,
-//         content: academicAddress,
-//         email: academicEmail,
-//         website: academicWebsite,
-//       },
-//       careerSupport: {
-//         title: 'Career Support',
-//         email: 'career@example.com',
-//         phone: '+91 9876543210',
-//       },
-//       generalEnquiries: {
-//         title: 'General Enquiries',
-//         email: 'info@example.com',
-//         phone: '+91 1234567890',
-//       },
-//     },
-//   };
-
-//   return (
-//     <footer className="bg-white border-t border-slate-200 mt-auto">
-//       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-28 py-10">
-        
-       
-
-        
-//         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12">
-//           {/* Company info */}
-//           <div className="flex items-start gap-4 flex-1">
-//             <div className="relative">
-//               <div className="w-14 h-14 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
-//                 <span className="text-white font-bold text-lg">
-//                   {academicName.charAt(0).toUpperCase()}
-//                 </span>
-//               </div>
-//             </div>
-//             <div className="space-y-1">
-//               <h3 className="text-lg font-bold text-slate-900">
-//                 {academicName} Careers
-//               </h3>
-//               {academicAddress && (
-//                 <p className="text-sm text-slate-600">
-//                   {academicAddress}
-//                 </p>
-//               )}
-//               {academicEmail && (
-//                 <p className="text-sm">
-//                   <a
-//                     href={`mailto:${academicEmail}`}
-//                     className="text-indigo-600 hover:text-indigo-700 font-medium underline decoration-slate-300 hover:decoration-indigo-300"
-//                   >
-//                     {academicEmail}
-//                   </a>
-//                 </p>
-//               )}
-//             </div>
-//           </div>
-
-//           {/* Social links */}
-//           <div className="flex flex-col items-end gap-3">
-//             <p className="text-sm text-slate-600 font-medium">Connect with us</p>
-//             <div className="flex items-center gap-2">
-//               <a
-//                 href="https://linkedin.com"
-//                 target="_blank"
-//                 rel="noopener noreferrer"
-//                 className="w-10 h-10 bg-slate-100 hover:bg-indigo-600 text-slate-600 hover:text-white rounded-xl flex items-center justify-center transition-all duration-200 hover:shadow-md"
-//                 aria-label="LinkedIn"
-//               >
-//                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-//                   <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z" />
-//                 </svg>
-//               </a>
-//               <a
-//                 href="https://instagram.com"
-//                 target="_blank"
-//                 rel="noopener noreferrer"
-//                 className="w-10 h-10 bg-slate-100 hover:bg-pink-500 text-slate-600 hover:text-white rounded-xl flex items-center justify-center transition-all duration-200 hover:shadow-md"
-//                 aria-label="Instagram"
-//               >
-//                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-//                   <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.621 5.367 11.988 11.988 11.988s11.988-5.367 11.988-11.988C23.999 5.367 17.638 0 12.017 0zm0 18.285c-4.487 0-8.129-3.642-8.129-8.129c0-4.487 3.642-8.13 8.129-8.13s8.13 3.643 8.13 8.13c0 4.487-3.643 8.129-8.13 8.129zm0-15.428c-3.324 0-6.029 2.704-6.029 6.029s2.705 6.03 6.029 6.03 6.03-2.705 6.03-6.03-2.705-6.029-6.03-6.029zm6.546 8.59c0 .484-.392.876-.876.876s-.876-.392-.876-.876.392-.876.876-.876.876.392.876.876zm-5.67 0c0 .484-.392.876-.876.876s-.876-.392-.876-.876.392-.876.876-.876.876.392.876.876z" />
-//                 </svg>
-//               </a>
-//               <a
-//                 href="https://facebook.com"
-//                 target="_blank"
-//                 rel="noopener noreferrer"
-//                 className="w-10 h-10 bg-slate-100 hover:bg-blue-600 text-slate-600 hover:text-white rounded-xl flex items-center justify-center transition-all duration-200 hover:shadow-md"
-//                 aria-label="Facebook"
-//               >
-//                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-//                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-//                 </svg>
-//               </a>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Bottom Footer */}
-//         <div className="border-t border-gray-300 pt-6 mt-8">
-//           <div className="flex flex-col sm:flex-row justify-between items-center">
-//             <p className="text-gray-600 text-xs sm:text-sm mb-4 sm:mb-0 font-medium text-center sm:text-left">
-//               © {new Date().getFullYear()} {academicName}. All Rights Reserved.
-//             </p>
-
-//             <div className="flex items-center gap-4 text-xs sm:text-sm">
-//               <Link
-//                 to={`${baseUrl}/privacy`}
-//                 className="text-gray-600 hover:text-gray-900 transition duration-200"
-//               >
-//                 Privacy Policy
-//               </Link>
-//               <span className="text-gray-400">|</span>
-//               <Link
-//                 to={`${baseUrl}/terms`}
-//                 className="text-gray-600 hover:text-gray-900 transition duration-200"
-//               >
-//                 Terms of Service
-//               </Link>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </footer>
-//   );
-// };
-
-// export default Footer;
-
-
-
-
-
-
-
-
-
-
-// Footer.tsx
 import React from 'react';
 import { Link } from 'react-router';
+import {
+  IconBrandFacebook,
+  IconBrandInstagram,
+  IconBrandLinkedin,
+  IconBrandTwitter,
+  IconBrandYoutube,
+  IconBrandWhatsapp,
+  IconBrandTelegram,
+  IconBrandGithub,
+  IconBrandTiktok,
+  IconWorld,
+  IconMail,
+  IconPhone,
+  IconMapPin,
+  IconCopyright,
+  IconChevronRight
+} from '@tabler/icons-react';
 
 const assetUrl = import.meta.env.VITE_ASSET_URL || 'https://admissionportalbackend.testingscrew.com/public';
 
@@ -285,147 +33,284 @@ const Footer: React.FC<FooterProps> = ({
   institute,
   footerData,
 }) => {
-  // Get logo from institute data (same as Header)
+  // Helper function to safely get values
   const getLogoUrl = (logoPath?: string) => {
     if (!logoPath) return null;
     return logoPath.startsWith('http') ? logoPath : `${assetUrl}/${logoPath}`;
   };
 
-  // Get institute data safely
-  const getInstituteLogo = () => {
-    if (!institute || !institute.header) return '';
-    return institute.header.academic_logo || '';
-  };
+  // Extract data with fallbacks
+  const instituteHeader = institute?.header || {};
+  const footerInfo = footerData || {};
+  
+  const logoUrl = getLogoUrl(instituteHeader.academic_logo);
+  const academicName = instituteName || instituteHeader.academic_name || 'Career Portal';
+  const academicAddress = footerInfo.academic_address || '';
+  const academicEmail = footerInfo.academic_email || '';
+  const academicMobile = footerInfo.academic_mobile || '';
+  const academic_description = footerInfo.academic_description || '';
+  const academicWebsite = footerInfo?.academic_website || '';
+  
+  // Process social links safely
+  const socialLinks = React.useMemo(() => {
+    if (!footerInfo.social_icon) return [];
+    try {
+      return Array.isArray(footerInfo.social_icon) 
+        ? footerInfo.social_icon 
+        : JSON.parse(footerInfo.social_icon || '[]');
+    } catch (error) {
+      console.error('Error parsing social icons:', error);
+      return [];
+    }
+  }, [footerInfo.social_icon]);
 
-  const getInstituteAddress = () => {
-    if (!footerData) return '';
-    return footerData.academic_address || '';
-  };
+  // Quick links for footer
+  const quickLinks = [
+    { name: 'Home', path: `${baseUrl}/` },
+    { name: 'About Us', path: `${baseUrl}/about` },
+    { name: 'Careers', path: `${baseUrl}/careers` },
+    { name: 'Contact', path: `${baseUrl}/contact` },
+  ];
 
-  const getInstituteEmail = () => {
-    if (!footerData) return '';
-    return footerData.academic_email || '';
-  };
+  const policyLinks = [
+    { name: 'Privacy Policy', path: `${baseUrl}/privacy` },
+    { name: 'Terms of Service', path: `${baseUrl}/terms` },
+    { name: 'Cookie Policy', path: `${baseUrl}/cookies` },
+  ];
 
-  const logoUrl = getLogoUrl(getInstituteLogo());
-  const academicAddress = getInstituteAddress();
-  const academicEmail = getInstituteEmail();
-  const academicName = instituteName || institute?.header?.academic_name || 'Career Portal';
+  // Icon mapping configuration
+  const iconConfig = {
+    'Facebook': {
+      bgColor: 'group-hover:bg-blue-600',
+      icon: IconBrandFacebook,
+      gradient: 'from-blue-500 to-blue-700'
+    },
+    'Instagram': {
+      bgColor: 'group-hover:bg-gradient-to-r group-hover:from-pink-500 group-hover:via-red-500 group-hover:to-yellow-500',
+      icon: IconBrandInstagram,
+      gradient: 'from-pink-500 via-red-500 to-yellow-500'
+    },
+    'LinkedIn': {
+      bgColor: 'group-hover:bg-blue-700',
+      icon: IconBrandLinkedin,
+      gradient: 'from-blue-600 to-blue-800'
+    },
+    'Twitter': {
+      bgColor: 'group-hover:bg-sky-500',
+      icon: IconBrandTwitter,
+      gradient: 'from-sky-400 to-sky-600'
+    },
+    'YouTube': {
+      bgColor: 'group-hover:bg-red-600',
+      icon: IconBrandYoutube,
+      gradient: 'from-red-500 to-red-700'
+    },
+    'WhatsApp': {
+      bgColor: 'group-hover:bg-emerald-500',
+      icon: IconBrandWhatsapp,
+      gradient: 'from-emerald-400 to-emerald-600'
+    },
+    'Telegram': {
+      bgColor: 'group-hover:bg-blue-500',
+      icon: IconBrandTelegram,
+      gradient: 'from-blue-400 to-blue-600'
+    },
+    'GitHub': {
+      bgColor: 'group-hover:bg-gray-800',
+      icon: IconBrandGithub,
+      gradient: 'from-gray-700 to-gray-900'
+    },
+    'TikTok': {
+      bgColor: 'group-hover:bg-black',
+      icon: IconBrandTiktok,
+      gradient: 'from-gray-800 to-black'
+    },
+    'Website': {
+      bgColor: 'group-hover:bg-purple-600',
+      icon: IconWorld,
+      gradient: 'from-purple-500 to-purple-700'
+    },
+    'Email': {
+      bgColor: 'group-hover:bg-red-500',
+      icon: IconMail,
+      gradient: 'from-red-400 to-red-600'
+    },
+    'Phone': {
+      bgColor: 'group-hover:bg-green-500',
+      icon: IconPhone,
+      gradient: 'from-green-400 to-green-600'
+    },
+    'Location': {
+      bgColor: 'group-hover:bg-orange-500',
+      icon: IconMapPin,
+      gradient: 'from-orange-400 to-orange-600'
+    }
+  };
 
   return (
-    <footer className="bg-white border-t border-slate-200 mt-auto">
-      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-28 py-10">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12">
-          {/* Company info */}
-          <div className="flex items-start gap-4 flex-1">
-            <div className="relative">
-              {logoUrl ? (
-                <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg border-2 border-orange-500 overflow-hidden">
-                  <img
-                    src={logoUrl}
-                    alt={`${academicName} Logo`}
-                    className="h-10 w-10 object-contain"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/en/thumb/5/5f/National_University_of_Study_and_Research_in_Law%2C_Ranchi_Logo.png/220px-National_University_of_Study_and_Research_in_Law%2C_Ranchi_Logo.png';
-                    }}
-                  />
+    <footer className="bg-gradient-to-b from-white to-slate-50 border-t border-slate-200 mt-20">
+      {/* Main Footer Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-5">
+          
+          {/* Brand Column */}
+          <div className="lg:col-span-1">
+            <div className="flex flex-col space-y-6">
+              {/* Logo Section */}
+              <Link to={baseUrl} className="group">
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <div className="absolute -inset-2 bg-gradient-to-r from-orange-400 to-purple-500 rounded-2xl opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"></div>
+                    {logoUrl ? (
+                      <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg border-2 border-orange-500 overflow-hidden relative z-10">
+                        <img
+                          src={logoUrl}
+                          alt={`${academicName} Logo`}
+                          className="h-12 w-12 object-contain p-1"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg relative z-10 group-hover:scale-105 transition-transform duration-300">
+                        <span className="text-white font-bold text-xl">
+                          {academicName.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                      {academicName}
+                    </h2>
+                    {/* <p className="text-sm text-slate-600 mt-1">Career Portal</p> */}
+                  </div>
                 </div>
-              ) : (
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-lg">
-                    {academicName.charAt(0).toUpperCase()}
-                  </span>
+              </Link>
+
+              {/* Description */}
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {academic_description}
+              </p>
+
+              {/* Social Media Links */}
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-slate-700">Follow Us</p>
+                <div className="flex flex-wrap gap-2">
+                  {socialLinks.slice(0, 6).map((social, index) => {
+                    const config = iconConfig[social.icon] || iconConfig.Website;
+                    const IconComponent = config.icon;
+                    
+                    return (
+                      <a
+                        key={index}
+                        href={social.icon_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`group relative w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg ${config.bgColor}`}
+                        aria-label={social.icon}
+                        title={social.icon}
+                      >
+                        <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${config.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
+                        <IconComponent className="w-5 h-5 text-slate-600 group-hover:text-white relative z-10 transition-colors duration-300" />
+                      </a>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-lg font-bold text-slate-900">
-                {academicName} Careers
-              </h3>
-              {academicAddress && (
-                <p className="text-sm text-slate-600">
-                  {academicAddress}
-                </p>
-              )}
-              {academicEmail && (
-                <p className="text-sm">
-                  <a
-                    href={`mailto:${academicEmail}`}
-                    className="text-indigo-600 hover:text-indigo-700 font-medium underline decoration-slate-300 hover:decoration-indigo-300"
-                  >
-                    {academicEmail}
-                  </a>
-                </p>
-              )}
+              </div>
             </div>
           </div>
 
-          {/* Social links */}
-          <div className="flex flex-col items-end gap-3">
-            <p className="text-sm text-slate-600 font-medium">Connect with us</p>
-            <div className="flex items-center gap-2">
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-slate-100 hover:bg-indigo-600 text-slate-600 hover:text-white rounded-xl flex items-center justify-center transition-all duration-200 hover:shadow-md"
-                aria-label="LinkedIn"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z" />
-                </svg>
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-slate-100 hover:bg-pink-500 text-slate-600 hover:text-white rounded-xl flex items-center justify-center transition-all duration-200 hover:shadow-md"
-                aria-label="Instagram"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.621 5.367 11.988 11.988 11.988s11.988-5.367 11.988-11.988C23.999 5.367 17.638 0 12.017 0zm0 18.285c-4.487 0-8.129-3.642-8.129-8.129c0-4.487 3.642-8.13 8.129-8.13s8.13 3.643 8.13 8.13c0 4.487-3.643 8.129-8.13 8.129zm0-15.428c-3.324 0-6.029 2.704-6.029 6.029s2.705 6.03 6.029 6.03 6.03-2.705 6.03-6.03-2.705-6.029-6.03-6.029zm6.546 8.59c0 .484-.392.876-.876.876s-.876-.392-.876-.876.392-.876.876-.876.876.392.876.876zm-5.67 0c0 .484-.392.876-.876.876s-.876-.392-.876-.876.392-.876.876-.876.876.392.876.876z" />
-                </svg>
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-slate-100 hover:bg-blue-600 text-slate-600 hover:text-white rounded-xl flex items-center justify-center transition-all duration-200 hover:shadow-md"
-                aria-label="Facebook"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-              </a>
+        
+
+          {/* Contact Info Column */}
+          <div className="lg:col-span-2">
+            <h3 className="text-lg font-semibold text-slate-900 mb-6 relative inline-block">
+              Contact Information
+              <span className="absolute -bottom-2 left-0 w-8 h-1 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full"></span>
+            </h3>
+            
+            <div className="space-y-6">
+              {/* Address */}
+              {academicAddress && (
+                <div className="flex items-start space-x-3 group cursor-default">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-orange-50 to-pink-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <IconMapPin className="w-5 h-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">Address</p>
+                    <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                      {academicAddress}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Email & Phone Row */}
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:gap-20">
+                {academicEmail && (
+                  <div className="flex items-start space-x-3 group">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-red-50 to-pink-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <IconMail className="w-5 h-5 text-red-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">Email</p>
+                      <a
+                        href={`mailto:${academicEmail}`}
+                        className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors inline-block mt-1"
+                      >
+                        {academicEmail}
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {academicMobile && (
+                  <div className="flex items-start space-x-3 group">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <IconPhone className="w-5 h-5 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">Phone</p>
+                      <a
+                        href={`tel:${academicMobile.replace(/\D/g, '')}`}
+                        className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors inline-block mt-1"
+                      >
+                        {academicMobile}
+                      </a>
+                    </div>
+                  </div>
+                )}
+              
+
+              {/* Website */}
+              {academicWebsite && (
+                <div className="flex items-start space-x-3 group">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <IconWorld className="w-5 h-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">Website</p>
+                    <a
+                      href={academicWebsite.startsWith('http') ? academicWebsite : `https://${academicWebsite}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors inline-block mt-1"
+                    >
+                      {academicWebsite.replace(/^https?:\/\//, '')}
+                    </a>
+                  </div>
+                </div>
+              )}
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Bottom Footer */}
-        {/* <div className="border-t border-gray-300 pt-6 mt-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center">
-            <p className="text-gray-600 text-xs sm:text-sm mb-4 sm:mb-0 font-medium text-center sm:text-left">
-              © {new Date().getFullYear()} {academicName}. All Rights Reserved.
-            </p>
-
-            <div className="flex items-center gap-4 text-xs sm:text-sm">
-              <Link
-                to={`${baseUrl}/privacy`}
-                className="text-gray-600 hover:text-gray-900 transition duration-200"
-              >
-                Privacy Policy
-              </Link>
-              <span className="text-gray-400">|</span>
-              <Link
-                to={`${baseUrl}/terms`}
-                className="text-gray-600 hover:text-gray-900 transition duration-200"
-              >
-                Terms of Service
-              </Link>
-            </div>
-          </div>
-        </div> */}
       </div>
+
+   
     </footer>
   );
 };

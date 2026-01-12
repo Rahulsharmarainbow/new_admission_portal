@@ -88,7 +88,7 @@ type JobRequirementsCache = {
 };
 
 const CareerApply: React.FC = () => {
-  const { institute_id } = useParams();
+  let { institute_id } = useParams();
   const location = useLocation();
   const searchInputRef = useRef<HTMLInputElement>(null);
   
@@ -123,6 +123,9 @@ const CareerApply: React.FC = () => {
     const fetchCareerData = async () => {
       try {
         
+         if (!institute_id || institute_id === ':institute_id') {
+          institute_id = window.location.hostname; // use domain as fallback
+        }
         if (!institute_id) {
           setError('Institute code not found. Please check the URL or provide ?code=YOUR_CODE parameter.');
           toast.error('Institute code not found');
