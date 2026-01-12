@@ -842,59 +842,78 @@ console.log('applications',previewModal)
 
       {/* Preview Modal */}
 {previewModal.isOpen && (
-  <Modal
-    show={previewModal.isOpen}
-    onClose={() => setPreviewModal({ 
-      isOpen: false, 
-      name: '',
-      url: '', 
-      filename: '', 
-      type: '',
-      documents: []
-    })}
-    size='previewModal.isMaximized ? "lg" : "6xl"'
-    className={`${previewModal.isMaximized ? '!h-screen !w-screen !max-h-screen !max-w-screen !m-0 !p-0' : ''}`}
-    position="center"
-  >
-    {/* Modal Header - Fixed with proper positioning */}
-    <ModalHeader className={`border-b bg-white sticky top-0 z-10 ${previewModal.isMaximized ? 'px-6 py-4' : ''}`}>
-      <div className="flex justify-between items-center w-full">
-        <div className="flex items-center space-x-3">
-          <h3 className="text-lg font-semibold text-gray-900 truncate max-w-md">
-            Documents Preview - {previewModal.name}
+  <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
+    
+    {/* MODAL CONTAINER */}
+    <div
+      className={`
+        bg-white flex flex-col transition-all duration-300
+        ${previewModal.isMaximized
+          ? 'w-screen h-screen rounded-none'
+          : 'w-[90vw] max-w-6xl h-[85vh] rounded-xl'
+        }
+      `}
+    >
+      {/* HEADER */}
+      <div className="flex items-center justify-between px-6 py-4 border-b bg-white">
+        <div className="flex items-center gap-3">
+          <h3 className="font-semibold text-lg truncate max-w-md">
+            Documents Preview – {previewModal.name}
           </h3>
+
           {previewModal.filename && (
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+            <span className="text-xs bg-gray-100 px-2 py-1 rounded">
               {previewModal.filename.split('.').pop()?.toUpperCase()}
             </span>
           )}
         </div>
-        <div className="flex items-center space-x-2">
-          {/* Maximize/Minimize Button */}
+
+        <div className="flex gap-2">
+          {/* MAX / MIN */}
           <button
-            onClick={() => setPreviewModal(prev => ({ ...prev, isMaximized: !prev.isMaximized }))}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            title={previewModal.isMaximized ? "Minimize" : "Maximize"}
+            onClick={() =>
+              setPreviewModal(p => ({
+                ...p,
+                isMaximized: !p.isMaximized,
+              }))
+            }
+            className="p-2 rounded hover:bg-gray-100"
+            title={previewModal.isMaximized ? 'Minimize' : 'Maximize'}
           >
-            {previewModal.isMaximized ? (
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H5v4M15 19h4v-4" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
-              </svg>
-            )}
+            {previewModal.isMaximized ? '🗗' : '🗖'}
           </button>
-        
+
+          {/* CLOSE */}
+          <button
+            onClick={() =>
+              setPreviewModal({
+                isOpen: false,
+                isMaximized: false,
+                isLoading: false,
+                name: '',
+                url: '',
+                filename: '',
+                type: '',
+                documents: [],
+              })
+            }
+            className="p-2 rounded-full hover:bg-red-100 text-red-600"
+          >
+            ✕
+          </button>
         </div>
       </div>
-    </ModalHeader>
-    
-    {/* Modal Body - Full height with loading state */}
-    <ModalBody className="p-0 flex flex-col h-full w-full overflow-hidden bg-gray-50">
-      {/* Loading Overlay */}
+
+      {/* BODY */}
+      <div className="flex-1 relative overflow-hidden bg-gray-50">
+        {previewModal.isLoading && (
+          <div className="absolute inset-0 bg-white/80 z-10 flex items-center justify-center">
+            <div className="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+          </div>
+        )}
+
+        <div className="h-full w-full overflow-auto p-4">
+          {/* Loading Overlay */}
       {previewModal.isLoading && (
         <div className="absolute inset-0 bg-white bg-opacity-80 z-20 flex items-center justify-center">
           <div className="text-center">
@@ -1015,7 +1034,7 @@ console.log('applications',previewModal)
                     src={`https://docs.google.com/gview?url=${encodeURIComponent(
                       previewModal.url
                     )}&embedded=true`}
-                    className="w-full h-[60vh]"
+                    className="w-full h-[75vh]"
                     title="PDF Preview"
                     onLoad={() => setPreviewModal(prev => ({ ...prev, isLoading: false }))}
                     onError={() => setPreviewModal(prev => ({ ...prev, isLoading: false }))}
@@ -1028,7 +1047,7 @@ console.log('applications',previewModal)
           {/* 3️⃣ OFFICE FILE PREVIEW */}
           if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext)) {
             return (
-              <div className="flex flex-col h-[70vh] w-full">
+              <div className="flex flex-col h-full w-full">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-sm text-gray-600">
                     Office Document • {previewModal.filename}
@@ -1176,9 +1195,12 @@ console.log('applications',previewModal)
           </div>
         )}
       </div>
-    </ModalBody>
-  </Modal>
+        </div>
+      </div>
+    </div>
+  </div>
 )}
+
     </>
   );
 };

@@ -7,14 +7,12 @@ import {
   HiOutlineNewspaper,
 } from 'react-icons/hi';
 import { useAuth } from 'src/hook/useAuth';
-import AllAcademicsDropdown from 'src/Frontend/Common/AllAcademicsDropdown';
 import CareerFooterSection from './tabs/CareerFooterSection';
 import CareerCardSection from './tabs/CareerCardSection';
 import CareerJobsSection from './tabs/CareerJobsSection';
-import CareerTextSection from './tabs/CareerTextSection';
 import CareerStatusManagement from './tabs/CareerStatusManagement';
 import CareerDropdown from 'src/Frontend/Common/CareerDropdown';
-import TransportationSettingsList from 'src/views/schoolServices/transportationSettings/TransportationSettingsList';
+import TransportationSettingsTab from './tabs/TransportationSettingsTable';
 
 const CareerForm = () => {
   const { user } = useAuth();
@@ -79,7 +77,8 @@ const CareerForm = () => {
             />
           </Tabs.Item>
           <Tabs.Item icon={HiOutlineNewspaper} title="Settings">
-            <TransportationSettingsList 
+            <TransportationSettingsTab
+            selectedAcademic={selectedAcademic} 
             />
           </Tabs.Item>
         </Tabs> 
