@@ -538,7 +538,9 @@ console.log('applications',previewModal)
               </div>
 
               {/* Status Dropdown */}
-              <div className="w-full sm:w-48">
+              {
+                selectedApplications.length === 0 && (
+                  <div className="w-full sm:w-48">
                 <Select
                   options={statusOptions}
                   value={statusOptions.find((option) => option.value === filters.status)}
@@ -549,6 +551,8 @@ console.log('applications',previewModal)
                   classNamePrefix="react-select"
                 />
               </div>
+                )
+              }
 
               {/* Bulk Status Update Section */}
               {selectedApplications.length > 0 && (

@@ -1,6 +1,6 @@
 // src/pages/CareerApply.tsx
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams, useLocation, Link } from 'react-router';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -89,8 +89,8 @@ type JobRequirementsCache = {
 
 const CareerApply: React.FC = () => {
   const { institute_id } = useParams();
-  const navigate = useNavigate();
   const location = useLocation();
+  const searchInputRef = useRef<HTMLInputElement>(null);
   
   // State for career data
   const [careerData, setCareerData] = useState<CareerData | null>(null);
@@ -108,9 +108,6 @@ const CareerApply: React.FC = () => {
   const [filters, setFilters] = useState<FilterType[]>([]);
   const [activeFilters, setActiveFilters] = useState<FilterState>({});
   const [selectedFilters, setSelectedFilters] = useState<number[]>([]);
-  
-  // State for job requirements
-  const [jobRequirementsCache, setJobRequirementsCache] = useState<JobRequirementsCache>({});
   const [loadingRequirements, setLoadingRequirements] = useState<Set<number>>(new Set());
   const [expandedRequirements, setExpandedRequirements] = useState<Set<number>>(new Set());
   
@@ -148,9 +145,6 @@ const CareerApply: React.FC = () => {
             setJobs(response.data.jobs);
             setFilteredJobs(response.data.jobs);
             setTotalJobs(response.data.jobs.length);
-            
-            // Fetch requirements for first few jobs
-            fetchRequirementsForJobs(response.data.jobs.slice(0, 5));
           }
           
           if (response.data.filters && Array.isArray(response.data.filters)) {
@@ -180,54 +174,6 @@ const CareerApply: React.FC = () => {
     fetchCareerData();
   }, [institute_id, location.pathname, location.search]);
 
-  // Fetch job requirements from API
-  const fetchJobRequirements = async (jobId: number): Promise<string[]> => {
-    try {
-      // Check cache first
-      if (jobRequirementsCache[jobId]) {
-        return jobRequirementsCache[jobId];
-      }
-
-      setLoadingRequirements(prev => new Set(prev).add(jobId));
-
-      const response = await axios.post<{
-        status: boolean;
-        data: JobDetails;
-      }>(
-        `${apiUrl}/PublicCareer/get-job-details`,
-        { job_id: jobId },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-
-      if (response.data?.status === true && response.data.data?.requirements) {
-        const requirements = response.data.data.requirements.slice(0, 4); // Limit to 4
-        // Update cache
-        setJobRequirementsCache(prev => ({
-          ...prev,
-          [jobId]: requirements
-        }));
-        return requirements;
-      }
-      
-      return [];
-    } catch (err: any) {
-      console.error(`Error fetching requirements for job ${jobId}:`, err);
-      return [];
-    } finally {
-      setLoadingRequirements(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(jobId);
-        return newSet;
-      });
-    }
-  };
-
-  // Fetch requirements for multiple jobs
-  const fetchRequirementsForJobs = async (jobs: Job[]) => {
-    const requirementsPromises = jobs.map(job => fetchJobRequirements(job.id));
-    await Promise.all(requirementsPromises);
-  };
-
   // Function to fetch filtered jobs from API
   const fetchFilteredJobs = async (filtersToApply: number[], searchText: string, pageNum: number, reset = false) => {
     try {
@@ -254,12 +200,8 @@ const CareerApply: React.FC = () => {
       if (response.data?.status === true) {
         if (reset) {
           setFilteredJobs(response.data.data);
-          // Fetch requirements for new jobs
-          fetchRequirementsForJobs(response.data.data.slice(0, 5));
         } else {
           setFilteredJobs(prev => [...prev, ...response.data.data]);
-          // Fetch requirements for newly loaded jobs
-          fetchRequirementsForJobs(response.data.data);
         }
         setTotalJobs(response.data.total);
         setHasMore(response.data.data.length === rowsPerPage);
@@ -325,45 +267,6 @@ const CareerApply: React.FC = () => {
     fetchFilteredJobs(selectedFilters, search, nextPage, false);
   };
 
-  const handleApplyClick = async (job: Job) => {
-    try {
-      // Fetch job details to get baseUrl
-      const response = await axios.post<{
-        status: boolean;
-        data: JobDetails & { baseUrl?: string };
-      }>(
-        `${apiUrl}/PublicCareer/get-job-details`,
-        { job_id: job.id },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-
-      if (response.data?.status === true && response.data.data?.baseUrl) {
-        const fullBaseUrl = response.data.data.baseUrl;
-        // Navigate to external URL with job details path
-        const externalUrl = `${fullBaseUrl}/job_details/${job.id}`;
-        console.log('Navigating to external URL:', externalUrl);
-        
-        // Store institute data in sessionStorage for the external page
-        if (careerData) {
-          sessionStorage.setItem('institute_data', JSON.stringify({
-            header: careerData.header,
-            footer: careerData.footer,
-            website: careerData.website,
-            unique_code: institute_id
-          }));
-        }
-        
-        window.location.href = externalUrl;
-        return;
-      }
-    } catch (err) {
-      console.error('Error fetching job details for navigation:', err);
-    }
-    
-    // Fallback to default route
-    navigate(`/Frontend/${institute_id}/job_details/${job.id}`);
-  };
-
   // Clear all filters
   const clearAllFilters = () => {
     const resetFilters: FilterState = {};
@@ -391,7 +294,7 @@ const CareerApply: React.FC = () => {
   // Set page title and favicon
   useEffect(() => {
     if (careerData) {
-      document.title = `${careerData.header.academic_name} - Careers`;
+      document.title = `${careerData.header.academic_name}`;
       
       const setFavicon = (faviconUrl: string) => {
         const existingLinks = document.querySelectorAll('link[rel*="icon"]');
@@ -404,9 +307,9 @@ const CareerApply: React.FC = () => {
         document.head.appendChild(link);
       };
 
-      const faviconUrl = careerData.header?.academic_logo
-        ? `${assetUrl}/${careerData.header.academic_logo}`
-        : '/favicon.ico';
+      const faviconUrl = careerData.header?.favicon
+        ? `${assetUrl}/${careerData.header.favicon}`
+        : '';
       
       setFavicon(faviconUrl);
     }
@@ -493,29 +396,8 @@ const CareerApply: React.FC = () => {
     });
   };
 
-  // Helper function to get job requirements (with lazy loading)
-  const getJobRequirements = (job: Job) => {
-    // Return cached requirements if available
-    if (jobRequirementsCache[job.id]) {
-      return jobRequirementsCache[job.id];
-    }
-    
-    // If not cached but we haven't started loading yet, trigger load
-    if (!loadingRequirements.has(job.id)) {
-      // Load in background
-      fetchJobRequirements(job.id);
-    }
-    
-    // Return empty array while loading
-    return [];
-  };
-
   if (loading) {
     return <Loader/>;
-  }
-
-  if (error || !careerData) {
-    return <NotFound/>;
   }
 
   // Get dynamic banner content
@@ -532,7 +414,7 @@ const CareerApply: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Helmet>
-        <title>{careerData.header.academic_name} - Careers</title>
+        <title>{careerData.header.academic_name}</title>
         <meta name="description" content="Explore career opportunities and join our team" />
       </Helmet>
 
@@ -540,9 +422,9 @@ const CareerApply: React.FC = () => {
         instituteName={careerData.header.academic_name}
         logo={careerData.header.academic_logo}
         address={careerData.footer.academic_address}
-        baseUrl={`/${institute_id || ''}`}
+        baseUrl={careerData.baseUrl}
         institute_id={institute_id}
-        primaryWebsiteUrl={careerData.website || 'https://example.com'}
+        primaryWebsiteUrl={careerData.website || ''}
       />
 
       {/* HERO BANNER */}
@@ -594,73 +476,54 @@ const CareerApply: React.FC = () => {
         </div>
       </section>
 
-      {/* Job Search */}
-      <section className="bg-white border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-4">
+           {/* Job Search - IMPROVED SECTION */}
+      <section className="border-b border-slate-200 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="space-y-6">
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
               <div>
-                <h2 className="text-xl lg:text-2xl font-bold text-slate-900">
-                  Search jobs
+                <h2 className="text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
+                  Find Your Dream Job
                 </h2>
-                <p className="text-sm text-slate-600 mt-1">
-                  Type a role, skill, location, or keyword to see matching jobs instantly.
-                </p>
-              </div>
-              <div className="text-sm text-slate-600">
-                Total Positions: <span className="font-bold text-indigo-600">{totalJobs}</span>
               </div>
             </div>
 
-            {/* Live search input */}
-            <div className="relative">
-              <svg
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by role, skill, company, location..."
-                className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm placeholder-slate-500"
-                disabled={isSearching}
-              />
-              {isSearching && (
-                <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
-                </div>
-              )}
-            </div>
-
-            <div className="text-sm text-slate-600 flex items-center justify-between">
-              <span>
-                Showing{" "}
-                <span className="font-semibold text-slate-900">
-                  {filteredJobs.length}
-                </span>{" "}
-                {search.trim() || selectedFilters.length > 0 ? 'filtered' : 'open'} positions
-              </span>
-              {hasActiveFilters() && (
-                <button
-                  onClick={clearAllFilters}
-                  className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1"
+            {/* Live search input - FIXED */}
+            <div className="relative max-w-3xl">
+              <div className="relative">
+                <svg
+                  className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-blue-400 pointer-events-none z-10"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Clear all filters
-                </button>
-              )}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={search}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+                  placeholder="Search by job title, company, location, or skills..."
+                  className="w-full pl-14 pr-12 py-4 border-2 border-blue-300 bg-white/95 backdrop-blur-sm rounded-2xl focus:ring-4 focus:ring-blue-500/30 focus:border-blue-400 focus:outline-none transition-all duration-300 text-lg text-gray-800 placeholder-gray-500 shadow-xl hover:shadow-2xl hover:border-blue-400"
+                />
+                {search && (
+                  <button
+                    onClick={() => setSearch('')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    type="button"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -714,7 +577,7 @@ const CareerApply: React.FC = () => {
                 <>
                   {filteredJobs.map((job) => {
                     const jobMetaDetails = getJobMetaDetails(job);
-                    const requirements = getJobRequirements(job);
+                    const requirements = job.requirements;
                     const isLoadingReq = loadingRequirements.has(job.id);
                     
                     return (
@@ -820,8 +683,10 @@ const CareerApply: React.FC = () => {
                             </div>
 
                             <div className="flex flex-col sm:flex-row gap-2 mt-4 lg:mt-0 lg:w-auto">
+                              <Link
+                                to={`${careerData.baseUrl}/job_details/${job.id}`} 
+                                >
                               <button
-                                onClick={() => handleApplyClick(job)}
                                 className="flex-1 lg:flex-none px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
                               >
                                 Apply now
@@ -829,6 +694,7 @@ const CareerApply: React.FC = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                 </svg>
                               </button>
+                              </Link>
                             </div>
                           </div>
                         </div>
@@ -978,7 +844,7 @@ const CareerApply: React.FC = () => {
       {/* Footer Component */}
       <Footer 
         footerData={careerData.footer} 
-        baseUrl={`/${institute_id || ''}`}
+        baseUrl={careerData.baseUrl}
         instituteName={careerData.header.academic_name}
         institute={careerData}
       />

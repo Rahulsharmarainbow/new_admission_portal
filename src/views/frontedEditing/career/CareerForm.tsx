@@ -13,6 +13,8 @@ import CareerCardSection from './tabs/CareerCardSection';
 import CareerJobsSection from './tabs/CareerJobsSection';
 import CareerTextSection from './tabs/CareerTextSection';
 import CareerStatusManagement from './tabs/CareerStatusManagement';
+import CareerDropdown from 'src/Frontend/Common/CareerDropdown';
+import TransportationSettingsList from 'src/views/schoolServices/transportationSettings/TransportationSettingsList';
 
 const CareerForm = () => {
   const { user } = useAuth();
@@ -34,7 +36,7 @@ const CareerForm = () => {
           {/* Academic Dropdown (Global for all tabs) */}
           <div className="w-64">
             {user && user?.role !== 'CustomerAdmin' && (
-              <AllAcademicsDropdown
+              <CareerDropdown 
                 value={selectedAcademic}
                 onChange={handleAcademicSelect}
                 label="First Select Academic"
@@ -74,6 +76,10 @@ const CareerForm = () => {
               selectedAcademic={selectedAcademic} 
               user={user} 
               apiUrl={apiUrl} 
+            />
+          </Tabs.Item>
+          <Tabs.Item icon={HiOutlineNewspaper} title="Settings">
+            <TransportationSettingsList 
             />
           </Tabs.Item>
         </Tabs> 

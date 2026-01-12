@@ -1766,22 +1766,6 @@ const SuccessPopup: React.FC<{
               Your application for <span className="font-semibold text-emerald-700">{jobTitle}</span> at <span className="font-semibold">{companyName}</span> has been submitted successfully.
             </p>
 
-            {/* Contact Info */}
-            <div className="mb-6">
-              <p className="text-sm text-slate-600 mb-2">
-                Have questions? Contact our HR team:
-              </p>
-              <a
-                href={`mailto:${hrEmail}`}
-                className="inline-flex items-center gap-2 text-emerald-600 font-semibold hover:text-emerald-700"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                {hrEmail}
-              </a>
-            </div>
-
             {/* Action Buttons */}
             <div className="flex flex-col gap-3">
               <button
@@ -1877,6 +1861,29 @@ export const ApplyJobPage: React.FC = () => {
     };
   };
 
+    useEffect(() => {
+      if (institute) {
+        document.title = `${institute.header.academic_name}`;
+        
+        const setFavicon = (faviconUrl: string) => {
+          const existingLinks = document.querySelectorAll('link[rel*="icon"]');
+          existingLinks.forEach(link => link.remove());
+  
+          const link = document.createElement('link');
+          link.rel = 'icon';
+          link.type = 'image/x-icon';
+          link.href = faviconUrl;
+          document.head.appendChild(link);
+        };
+  
+        const faviconUrl = institute.header?.favicon
+          ? `${assetUrl}/${institute.header.favicon}`
+          : '';
+        
+        setFavicon(faviconUrl);
+      }
+    }, [institute]);
+
   // Fetch institute data
   useEffect(() => {
     const fetchInstituteData = async () => {
@@ -1891,7 +1898,8 @@ export const ApplyJobPage: React.FC = () => {
             unique_code: parsedData.unique_code || '',
             header: parsedData.header,
             footer: parsedData.footer,
-            website: parsedData.website
+            website: parsedData.website,
+            baseUrl: parsedData.baseUrl
           });
           setInstituteLoading(false);
           return;
@@ -2727,10 +2735,6 @@ export const ApplyJobPage: React.FC = () => {
     return institute?.footer?.academic_address || '';
   };
 
-  const getInstituteWebsiteUrl = () => {
-    return institute?.website || 'https://example.com';
-  };
-
   const getInstituteName = () => {
     if (institute?.header?.academic_name) {
       return institute.header.academic_name;
@@ -2946,7 +2950,7 @@ export const ApplyJobPage: React.FC = () => {
       </div>
     );
   }
-console.log('institute iddd',instituteId )
+console.log('institute iddd',institute )
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
@@ -2955,9 +2959,9 @@ console.log('institute iddd',instituteId )
         logo={getInstituteLogo()}
         address={getInstituteAddress()}
         instituteName={getInstituteName()}
-        baseUrl={`/${instituteId || ''}`}
+        baseUrl={jobDetails?.baseUrl}
         institute_id={instituteId}
-        primaryWebsiteUrl={getInstituteWebsiteUrl()}
+        primaryWebsiteUrl={institute?.website}
       />
       {/* Main Content */}
       <main className="flex-1 bg-gradient-to-br from-slate-50 via-white to-slate-100 py-8 px-4 sm:py-12 sm:px-6 lg:px-8">
@@ -3195,7 +3199,7 @@ console.log('institute iddd',instituteId )
 
       {/* Dynamic Footer */}
       <Footer
-        baseUrl={`/${instituteId || ''}`}
+        baseUrl={jobDetails?.baseUrl}
         instituteName={getInstituteName()}
         institute={institute}
         footerData={institute?.footer}
@@ -3215,15 +3219,3 @@ console.log('institute iddd',instituteId )
 };
 
 export default ApplyJobPage;
-
-
-
-
-
-
-
-
-
-
-
-

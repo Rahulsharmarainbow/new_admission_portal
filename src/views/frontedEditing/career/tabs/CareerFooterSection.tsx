@@ -5,6 +5,7 @@ import axios from 'axios';
 import Loader from 'src/Frontend/Common/Loader';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import { HiOutlinePlus, HiOutlineTrash } from 'react-icons/hi';
+import { set } from 'lodash';
 
 // Static Font Awesome icons list
 const fontAwesomeIcons = [
@@ -61,8 +62,11 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
   // Header Fields
   const [academicLogo, setAcademicLogo] = useState<File | string | null>(null);
   const [academicLogoPreview, setAcademicLogoPreview] = useState('');
+  const [academicIcon, setAcademicIcon] = useState<File | string | null>(null);
+  const [academicIconPreview, setAcademicIconPreview] = useState('');
   const [headerHeading, setHeaderHeading] = useState('');
   const [academicAddress, setAcademicAddress] = useState('');
+  const [buttonUrl, setButtonUrl] = useState('');
 
   // Footer Fields
   const [academicMobile, setAcademicMobile] = useState('');
@@ -111,7 +115,10 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
     // Header
     if (data.header?.academic_logo) {
       setAcademicLogo(data.header.academic_logo);
+      setAcademicIcon(data.header.favicon);
       setAcademicLogoPreview(`${assetUrl}/${data.header.academic_logo}`);
+      setAcademicIconPreview(`${assetUrl}/${data.header.favicon}`);
+      setButtonUrl(`${data.header.academic_website}`);
     }
     setHeaderHeading(data.header?.header_heading || '');
     setAcademicAddress(data.header?.academic_address || '');
@@ -162,10 +169,17 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
       // Header
       formData.append('header_heading', headerHeading);
       formData.append('academic_address', academicAddress);
+      formData.append('academic_website', buttonUrl);
       if (academicLogo instanceof File) {
         formData.append('academic_logo', academicLogo);
       } else if (typeof academicLogo === 'string' && academicLogo) {
         formData.append('academic_logo', academicLogo);
+      }
+
+      if (academicIcon instanceof File) {
+        formData.append('favicon', academicIcon);
+      } else if (typeof academicIcon === 'string' && academicIcon) {
+        formData.append('favicon', academicIcon);
       }
 
       // Footer
@@ -207,6 +221,16 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
       setAcademicLogo(file);
       const reader = new FileReader();
       reader.onload = () => setAcademicLogoPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleIconChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setAcademicIcon(file);
+      const reader = new FileReader();
+      reader.onload = () => setAcademicIconPreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
@@ -277,6 +301,30 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
                   </div>
                 </div>
 
+                <div>
+                  <Label htmlFor="academicLogo" className="block mb-2">
+                    Academic Icon
+                  </Label>
+                  <div className="flex items-center gap-4">
+                    {academicIconPreview && (
+                      <div className="w-32 h-32 flex items-center justify-center border border-gray-200 rounded-lg shadow-sm bg-white">
+                        <img
+                          src={academicIconPreview}
+                          alt="Academic Logo Preview"
+                          className="w-full h-full object-contain rounded-lg"
+                        />
+                      </div>
+                    )}
+                    <input
+                      id="academicIcon"
+                      type="file"
+                      accept="image/*"
+                      className="block border border-gray-300 rounded-lg p-2 text-sm w-2/3"
+                      onChange={handleIconChange}
+                    />
+                  </div>
+                </div>
+
                 {/* Header Heading */}
                 <div>
                   <Label htmlFor="headerHeading" className="block mb-2">
@@ -290,6 +338,20 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
                     placeholder="Enter header heading"
                   />
                 </div>
+
+               <div>
+                 <Label htmlFor="academic_website" className="block mb-2">
+  Button URL
+</Label>
+<TextInput
+  id="academic_website"
+  type="url"
+  value={buttonUrl}
+  onChange={(e) => setButtonUrl(e.target.value)}
+  placeholder="https://example.com/apply"
+/>
+               </div>
+
 
                 {/* Academic Address */}
                 <div className="md:col-span-2">

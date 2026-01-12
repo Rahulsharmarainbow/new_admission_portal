@@ -139,8 +139,8 @@ const MainRoutes = [
       { path: "/SuperAdmin/Demo", element: <Demo/> },
       { path: "/SuperAdmin/fees", element: <Fees/> },
       { path: "/SuperAdmin/admin/add/:type", element: <UserForm /> },
-     { path: "/SuperAdmin/admin/edit/:type/:id", element: <UserForm /> },
-     { path: '/SuperAdmin/data-manager/country', element: <CountryTable/> },
+      { path: "/SuperAdmin/admin/edit/:type/:id", element: <UserForm /> },
+      { path: '/SuperAdmin/data-manager/country', element: <CountryTable/> },
       { path: '/SuperAdmin/data-manager/State', element: <StateTable/> },
       { path: '/SuperAdmin/data-manager/District', element: <CasteTable/> },      // data manager ki District ka component
       { path: '/SuperAdmin/data-manager/type-of-connection', element: <DataManagerPage/> },
