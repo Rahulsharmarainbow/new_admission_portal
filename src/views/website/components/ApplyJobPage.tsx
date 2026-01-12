@@ -2963,7 +2963,7 @@ console.log('institute iddd',instituteId )
       <main className="flex-1 bg-gradient-to-br from-slate-50 via-white to-slate-100 py-8 px-4 sm:py-12 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* 50-50 Split Layout */}
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-1">
             {/* Left Column - Job Description (50%) */}
             <div className="lg:w-1/2">
               <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 sm:p-8 h-full">
@@ -3088,27 +3088,27 @@ console.log('institute iddd',instituteId )
             <div className="lg:w-1/2">
               <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 sm:p-8 sticky top-6">
                 {/* Form Header */}
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+                <div className="text-center">
+                  {/* <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
                     Apply for this Job
-                  </h2>
-                  <p className="text-slate-600 mb-6">
+                  </h2> */}
+                  {/* <p className="text-slate-600 mb-6">
                     Fill in your details to submit your application
                   </p>
                   <div className="w-full bg-slate-100 rounded-full h-2">
                     <div className="bg-emerald-600 h-2 rounded-full w-3/4"></div>
-                  </div>
+                  </div> */}
                 </div>
 
                 {/* Form Title */}
-                <div className="mb-8">
+                {/* <div className="mb-8">
                   <h3 className="text-lg font-bold text-slate-900 mb-1">User Profile</h3>
                   <p className="text-sm text-slate-600">Complete your profile information</p>
-                </div>
+                </div> */}
 
                 {/* Application Form Title */}
                 <div className="border-b border-slate-200 pb-4 mb-6">
-                  <h3 className="text-xl font-bold text-slate-900">Application Form</h3>
+                  <h3 className="text-xl font-bold text-slate-900">Apply Now</h3>
                 </div>
 
                 {/* Dynamic Form */}
