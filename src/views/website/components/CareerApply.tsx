@@ -180,7 +180,10 @@ const CareerApply: React.FC = () => {
   // Function to fetch filtered jobs from API
   const fetchFilteredJobs = async (filtersToApply: number[], searchText: string, pageNum: number, reset = false) => {
     try {
-      if (!institute_id) return;
+      // if (!institute_id) return;
+       if (!institute_id || institute_id === ':institute_id') {
+          institute_id = window.location.hostname; // use domain as fallback
+        }
 
       setIsSearching(true);
       
