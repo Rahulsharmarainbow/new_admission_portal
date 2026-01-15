@@ -8,6 +8,9 @@ import Header from './Header';
 import Footer from './Footer';
 import Loader from 'src/Frontend/Common/Loader';
 import NotFound from 'src/Frontend/Main/NotFound';
+import { FaSearch, FaTimes } from 'react-icons/fa';
+import { BsSearch } from 'react-icons/bs';
+import { ArrowRightIcon } from 'flowbite-react';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://admissionportalbackend.testingscrew.com/public/api';
 const assetUrl = import.meta.env.VITE_ASSET_URL || 'https://admissionportalbackend.testingscrew.com/public';
@@ -23,6 +26,7 @@ type FilterType = {
 };
 
 type Job = {
+  slug: any;
   id: number;
   job_title: string;
   company_name: string;
@@ -58,6 +62,10 @@ type CareerData = {
     academic_logo: string;
   };
   banner: {
+    search_text_color: string;
+    search_color: any;
+    banner_text_color: string;
+    banner_color: any;
     title: string;
     long_description: string;
     banner_image: string;
@@ -245,9 +253,8 @@ const CareerApply: React.FC = () => {
     });
   };
 
-  // Handle search with debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
+  const handleSearch = () => {
+        const timer = setTimeout(() => {
       if (search.trim() !== '') {
         // Reset page on search
         setPage(0);
@@ -263,7 +270,7 @@ const CareerApply: React.FC = () => {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [search, selectedFilters]);
+  }
 
   // Handle load more
   const handleLoadMore = () => {
@@ -434,10 +441,10 @@ const CareerApply: React.FC = () => {
       />
 
       {/* HERO BANNER */}
-      <section className="py-6 md:py-8">
+      {/* <section className="py-6 md:py-8">
         <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 overflow-hidden rounded-3xl shadow-2xl">
-            {/* LEFT TEXT BLOCK */}
+
             <div className="bg-gradient-to-r from-orange-500 via-amber-450 to-yellow-300 text-white p-8 md:p-12 flex flex-col justify-center space-y-5">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight text-white">
                 {careerData.banner.title || 'Build Your Career With Us'}
@@ -453,7 +460,7 @@ const CareerApply: React.FC = () => {
               </div>
             </div>
 
-            {/* RIGHT IMAGE/VIDEO BLOCK */}
+
             <div className="w-full h-full relative">
               {bannerContent.isVideo ? (
                 <video
@@ -480,60 +487,204 @@ const CareerApply: React.FC = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
+
+      <section className="py-6 md:py-8">
+  <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 overflow-hidden rounded-3xl shadow-2xl">
+      {/* LEFT TEXT BLOCK */}
+      <div 
+        className="text-white p-8 md:p-12 flex flex-col justify-center space-y-5"
+        style={{
+          background: careerData.banner?.banner_color 
+            ? careerData.banner.banner_color.includes('gradient')
+              ? careerData.banner.banner_color
+              : `linear-gradient(135deg, ${careerData.banner.banner_color} 0%, ${careerData.banner.banner_color}99 50%, ${careerData.banner.banner_color}66 100%)`
+            : 'linear-gradient(135deg, #f97316 0%, #fb923c 50%, #fbbf24 100%)'
+        }}
+      >
+        <h2 
+          className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight"
+          style={{ 
+            color: careerData.banner?.banner_text_color || '#ffffff' 
+          }}
+        >
+          {careerData.banner?.title || 'Build Your Career With Us'}
+        </h2>
+
+        <div 
+          className="text-sm md:text-base max-w-xl space-y-3"
+          style={{ 
+            color: careerData.banner?.banner_color || 'rgba(255, 255, 255, 0.9)' 
+          }}
+        >
+          <div 
+            className="prose prose-invert max-w-none"
+            dangerouslySetInnerHTML={{ 
+              __html: careerData.banner?.long_description || ` `
+            }}
+            style={{ 
+              color: careerData.banner?.banner_text_color || 'rgba(255, 255, 255, 0.9)' 
+            }}
+          />
+        </div>
+      </div>
+
+      {/* RIGHT IMAGE/VIDEO BLOCK */}
+      <div className="w-full h-full relative">
+        {bannerContent.isVideo ? (
+          <video
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg"
+          >
+            <source src={bannerContent.bannerImage} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        ) : (
+          <img
+            src={bannerContent.bannerImage}
+            alt={`${careerData.header.academic_name} career opportunities`}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg";
+            }}
+          />
+        )}
+      </div>
+    </div>
+  </div>
+</section>
 
            {/* Job Search - IMPROVED SECTION */}
-      <section className="border-b border-slate-200 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="space-y-6">
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-              <div>
-                <h2 className="text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
-                  Find Your Dream Job
-                </h2>
-              </div>
-            </div>
-
-            {/* Live search input - FIXED */}
-            <div className="relative max-w-3xl">
-              <div className="relative">
-                <svg
-                  className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-blue-400 pointer-events-none z-10"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2.5}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={search}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
-                  placeholder="Search by job title, company, location, or skills..."
-                  className="w-full pl-14 pr-12 py-4 border-2 border-blue-300 bg-white/95 backdrop-blur-sm rounded-2xl focus:ring-4 focus:ring-blue-500/30 focus:border-blue-400 focus:outline-none transition-all duration-300 text-lg text-gray-800 placeholder-gray-500 shadow-xl hover:shadow-2xl hover:border-blue-400"
-                />
-                {search && (
-                  <button
-                    onClick={() => setSearch('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                    type="button"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
+      <section 
+  className="border-b border-slate-200"
+  style={{
+    background: careerData.banner?.search_color 
+      ? careerData.banner.search_color.includes('gradient')
+        ? careerData.banner.search_color
+        : `linear-gradient(135deg, ${careerData.banner.search_color} 0%, ${careerData.banner.search_color}99 50%, ${careerData.banner.search_color}66 100%)`
+      : 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #1e40af 100%)'
+  }}
+>
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div>
+          <h2 
+            className="text-3xl lg:text-4xl font-extrabold tracking-tight"
+            style={{ color: careerData.banner?.search_text_color || '#ffffff' }}
+          >
+            Find Your Dream Job
+          </h2>
         </div>
-      </section>
+      </div>
+
+      {/* Live search input - FIXED */}
+      <div className="relative max-w-xl">
+        <div className="relative">
+          {/* Search icon inside input */}
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+            <svg 
+              className="w-6 h-6" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+              style={{ color: '#6b7280' }}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+          
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={search}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+            placeholder="Search by job title, company, location, or skills..."
+            className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 bg-white rounded-full focus:ring-3 focus:ring-blue-500/20 focus:border-blue-400 focus:outline-none transition-all duration-300 text-base text-gray-800 placeholder-gray-500 shadow-lg"
+            style={{
+              borderColor: careerData.banner?.search_color || '#d1d5db',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+              fontFamily: "'Inter', sans-serif"
+            }}
+          />
+          
+          {search && (
+            <button
+              // onClick={() => setSearch('')}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+              type="button"
+              style={{ backgroundColor: 'transparent' }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+          
+          {/* Search button on right side (like in image) */}
+          <button
+            type="button"
+            onClick={() => handleSearch()}
+            className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2 px-4 py-4 rounded-full font-medium transition-all duration-300 hover:shadow-md"
+            style={{
+              backgroundColor: careerData.banner?.search_color || '#3b82f6',
+              color: careerData.banner?.search_text_color || '#ffffff',
+              fontFamily: "'Inter', sans-serif"
+            }}
+          >
+            <ArrowRightIcon />
+          </button>
+        </div>
+        
+        {/* Optional: Filter chips like in image */}
+        {/* <div className="flex flex-wrap gap-2 mt-3">
+          <button
+            type="button"
+            className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium transition-all hover:bg-white/30"
+            style={{ color: careerData.banner?.search_text_color || '#ffffff' }}
+            onClick={() => setSearch('Software Engineer')}
+          >
+            Software Engineer
+          </button>
+          <button
+            type="button"
+            className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium transition-all hover:bg-white/30"
+            style={{ color: careerData.banner?.search_text_color || '#ffffff' }}
+            onClick={() => setSearch('Remote')}
+          >
+            Remote
+          </button>
+          <button
+            type="button"
+            className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium transition-all hover:bg-white/30"
+            style={{ color: careerData.banner?.search_text_color || '#ffffff' }}
+            onClick={() => setSearch('Marketing')}
+          >
+            Marketing
+          </button>
+          <button
+            type="button"
+            className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium transition-all hover:bg-white/30"
+            style={{ color: careerData.banner?.search_text_color || '#ffffff' }}
+            onClick={() => setSearch('Finance')}
+          >
+            Finance
+          </button>
+        </div> */}
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* Job Listings + Filters */}
       <main className="flex-1 py-8">
@@ -690,7 +841,7 @@ const CareerApply: React.FC = () => {
 
                             <div className="flex flex-col sm:flex-row gap-2 mt-4 lg:mt-0 lg:w-auto">
                               <Link
-                                to={`${careerData.baseUrl}/job_details/${job.id}`} 
+                                to={`${careerData.baseUrl}/job_details/${job.slug}`} 
                                 >
                               <button
                                 className="flex-1 lg:flex-none px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"

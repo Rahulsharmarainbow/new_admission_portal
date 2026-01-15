@@ -6,7 +6,7 @@ import { useDebounce } from 'src/hook/useDebounce';
 import { Pagination } from 'src/Frontend/Common/Pagination';
 import { BsFillSearchHeartFill } from 'react-icons/bs';
 import { HiChevronDown } from 'react-icons/hi';
-import { FiFileText, FiUserCheck, FiUsers, FiClock, FiCheckCircle, FiUserX } from 'react-icons/fi';
+import { FiFileText, FiUserCheck, FiUsers, FiClock, FiCheckCircle, FiUserX, FiActivity } from 'react-icons/fi';
 import { MdOutlineContentPasteSearch } from 'react-icons/md';
 
 // Images import
@@ -37,18 +37,16 @@ export interface CareerApplication {
   created_at: string;
 }
 
-export interface CareerDashboardCounts {
-  active_application: number;
-  draft_application: number;
-  close_application: number;
-  applied_application: number;
-  shortlisted_application: number;
-  interview_application: number;
+export interface CountItem {
+  id: number;
+  name: string;
+  value: number;
+  count: number;
 }
 
 export interface CareerDashboardResponse {
   status: boolean;
-  counts: CareerDashboardCounts;
+  counts: CountItem[];
   total_applications: number;
   recent_applications: CareerApplication[];
 }
@@ -90,17 +88,92 @@ const CareerCard: React.FC<CareerCardProps> = ({
         <span className="text-sm text-white text-opacity-90 font-medium">
           {title}
         </span>
-        <p className="text-xs text-white text-opacity-80 mt-1">{subtitle}</p>
+        {/* <p className="text-xs text-white text-opacity-80 mt-1">{subtitle}</p> */}
       </div>
     </div>
   );
 };
 
+// Function to get icon based on status name
+const getStatusIcon = (statusName: string) => {
+  switch (statusName.toLowerCase()) {
+    case 'total':
+      return <FiActivity className="w-6 h-6 text-white" />;
+    case 'applied':
+      return <FiFileText className="w-6 h-6 text-white" />;
+    case 'shortlisted':
+      return <FiCheckCircle className="w-6 h-6 text-white" />;
+    case 'interview':
+      return <MdOutlineContentPasteSearch className="w-6 h-6 text-white" />;
+    case 'offer':
+      return <FiUserCheck className="w-6 h-6 text-white" />;
+    case 'hired':
+      return <FiUsers className="w-6 h-6 text-white" />;
+    case 'rejected':
+      return <FiUserX className="w-6 h-6 text-white" />;
+    case 'active':
+      return <FiUserCheck className="w-6 h-6 text-white" />;
+    case 'close':
+      return <FiUserX className="w-6 h-6 text-white" />;
+    case 'draft':
+      return <FiClock className="w-6 h-6 text-white" />;
+    default:
+      return <FiUsers className="w-6 h-6 text-white" />;
+  }
+};
+
+// Function to get image based on index
+const getStatusImage = (index: number) => {
+  const images = [img1, img2, img3];
+  return images[index % images.length];
+};
+
+// Function to get subtitle based on status
+const getStatusSubtitle = (statusName: string) => {
+  switch (statusName.toLowerCase()) {
+    case 'total':
+      return 'All career applications';
+    case 'applied':
+      return 'Submitted applications';
+    case 'shortlisted':
+      return 'Shortlisted candidates';
+    case 'interview':
+      return 'Candidates in interview process';
+    case 'offer':
+      return 'Job offers made';
+    case 'hired':
+      return 'Successfully hired candidates';
+    case 'rejected':
+      return 'Rejected applications';
+    case 'active':
+      return 'Currently active applications';
+    case 'close':
+      return 'Closed applications';
+    case 'draft':
+      return 'Draft applications';
+    default:
+      return 'Career applications';
+  }
+};
+
+// Color palette for cards
+const colorPalette = [
+  '#0085db', // Blue - Total
+  '#0085db', // Teal
+  '#0085db', // Purple
+  '#0085db', // Red
+  '#0085db', // Orange
+  '#0085db', // Green
+  '#0085db', // Yellow
+  '#0085db', // Pink
+  '#0085db', // Sea Green
+];
+
 const CareerDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [dashboardData, setDashboardData] = useState<CareerDashboardResponse | null>(null);
   const [filters, setFilters] = useState<CareerDashboardFilters>({
     page: 0,
     rowsPerPage: 10,
@@ -162,7 +235,7 @@ const CareerDashboard = () => {
     navigate(`/${user.role}/career-applications`, {
       state: {
         filters: {
-          status: statusType,
+          status: statusType === 'total' ? 'all' : statusType,
           academic_id: filters.academic_id,
           year: filters.year
         }
@@ -199,7 +272,7 @@ const CareerDashboard = () => {
     
     const link = document.createElement('a');
     link.href = resumeUrl;
-    link.download = `${applicantName}_Resume.pdf`;
+    link.download = `${applicantName.replace(/\s+/g, '_')}_Resume.pdf`;
     link.target = '_blank';
     document.body.appendChild(link);
     link.click();
@@ -208,7 +281,11 @@ const CareerDashboard = () => {
 
   // Handle View Application
   const handleViewApplication = (application: any) => {
-    navigate(`/${user.role}/career-applications`);
+    navigate(`/${user.role}/career-applications`, {
+      state: {
+        applicationId: application.reference_id
+      }
+    });
   };
 
   // Loading state
@@ -249,76 +326,35 @@ const CareerDashboard = () => {
         </div>
       </div>
 
-      {/* Statistics Cards - Row 1 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      {/* Statistics Cards - Total Applications First, then Dynamic from API */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+        {/* Total Applications Card - First */}
         <CareerCard
+          key="total"
           title="Total Applications"
           value={dashboardData?.total_applications || 0}
-          icon={<FiUsers className="w-6 h-6 text-white" />}
-          bgColor="#0085db"
+          icon={getStatusIcon('total')}
+          bgColor={colorPalette[0]}
           image={img2}
-          subtitle="All career applications"
-          onClick={() => handleCardClick('all')}
+          subtitle={getStatusSubtitle('total')}
+          onClick={() => handleCardClick('total')}
           isClickable={true}
         />
-
-        <CareerCard
-          title="Active Applications"
-          value={dashboardData?.counts?.active_application || 0}
-          icon={<FiUserCheck className="w-6 h-6 text-white" />}
-          bgColor="#0085db"
-          image={img1}
-          subtitle="Currently active applications"
-          onClick={() => handleCardClick('active')}
-          isClickable={true}
-        />
-
-        <CareerCard
-          title="Applied"
-          value={dashboardData?.counts?.applied_application || 0}
-          icon={<FiFileText className="w-6 h-6 text-white" />}
-          bgColor="#0085db"
-          image={img3}
-          subtitle="Submitted applications"
-          onClick={() => handleCardClick('applied')}
-          isClickable={true}
-        />
-      </div>
-
-      {/* Statistics Cards - Row 2 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        <CareerCard
-          title="Shortlisted"
-          value={dashboardData?.counts?.shortlisted_application || 0}
-          icon={<FiCheckCircle className="w-6 h-6 text-white" />}
-          bgColor="#0085db"
-          image={img1}
-          subtitle="Shortlisted candidates"
-          onClick={() => handleCardClick('shortlisted')}
-          isClickable={true}
-        />
-
-        <CareerCard
-          title="Interview Stage"
-          value={dashboardData?.counts?.interview_application || 0}
-          icon={<MdOutlineContentPasteSearch className="w-6 h-6 text-white" />}
-          bgColor="#0085db"
-          image={img2}
-          subtitle="Candidates in interview process"
-          onClick={() => handleCardClick('interview')}
-          isClickable={true}
-        />
-
-        <CareerCard
-          title="Closed"
-          value={dashboardData?.counts?.close_application || 0}
-          icon={<FiUserX className="w-6 h-6 text-white" />}
-          bgColor="#0085db"
-          image={img3}
-          subtitle="Closed applications"
-          onClick={() => handleCardClick('closed')}
-          isClickable={true}
-        />
+        
+        {/* Dynamic Status Cards from API */}
+        {dashboardData?.counts?.map((countItem, index) => (
+          <CareerCard
+            key={countItem.id}
+            title={countItem.name}
+            value={countItem.count}
+            icon={getStatusIcon(countItem.name)}
+            bgColor={colorPalette[(index + 1) % colorPalette.length]}
+            image={getStatusImage(index + 1)}
+            subtitle={getStatusSubtitle(countItem.name)}
+            onClick={() => handleCardClick(countItem.name.toLowerCase())}
+            isClickable={true}
+          />
+        ))}
       </div>
 
       {/* Recent Applications Table */}
@@ -327,7 +363,7 @@ const CareerDashboard = () => {
           <div>
             <h5 className="text-lg font-semibold text-gray-900">Recent Career Applications</h5>
             <h6 className="text-sm text-gray-600">
-              Latest submitted applications
+              Latest submitted applications ({dashboardData?.recent_applications?.length || 0})
             </h6>
           </div>
           <div className="relative w-full lg:w-auto">
@@ -381,19 +417,19 @@ const CareerDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {dashboardData?.recent_applications?.map((app: any, index: number) => (
+                  {dashboardData?.recent_applications?.map((app, index) => (
                     <tr
                       key={app.reference_id}
                       className="hover:bg-gray-50 transition-colors duration-150"
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {(filters.page || 0) * (filters.rowsPerPage || 10) + index + 1}
+                        {index + 1}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span
                           className="text-blue-600 font-medium hover:text-blue-800 hover:underline cursor-pointer"
                           onClick={() => handleViewApplication(app)}
-                          title="Click to view all application"
+                          title="Click to view application"
                         >
                           {app.reference_id}
                         </span>
@@ -429,9 +465,9 @@ const CareerDashboard = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
                           onClick={() => handleViewApplication(app)}
-                          className="text-blue-600 hover:text-blue-900 mr-4"
+                          className="text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50 transition-colors"
                         >
-                          View
+                          View Details
                         </button>
                       </td>
                     </tr>

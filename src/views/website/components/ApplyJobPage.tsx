@@ -44,6 +44,8 @@ type FormSection = {
 };
 
 type JobDetails = {
+  resume_size(arg0: string, resume_size: any): unknown;
+  success_message: string;
   job_id: number;
   job_title: string;
   company_name: string;
@@ -114,8 +116,8 @@ const SuccessPopup: React.FC<{
   referenceId?: string;
   jobTitle: string;
   companyName: string;
-  hrEmail: string;
-}> = ({ isOpen, onClose, referenceId, jobTitle, companyName, hrEmail }) => {
+  message: string;
+}> = ({ isOpen, onClose, referenceId, jobTitle, companyName, message }) => {
   if (!isOpen) return null;
 
   return (
@@ -151,7 +153,8 @@ const SuccessPopup: React.FC<{
 
             {/* Message */}
             <p className="text-slate-600 mb-6">
-              Your application for <span className="font-semibold text-emerald-700">{jobTitle}</span> at <span className="font-semibold">{companyName}</span> has been submitted successfully.
+              {/* Your application for <span className="font-semibold text-emerald-700">{jobTitle}</span> at <span className="font-semibold">{companyName}</span> has been submitted successfully. */}
+              {message || 'Your application has been submitted successfully.'}
             </p>
 
             {/* Action Buttons */}
@@ -180,7 +183,6 @@ export const ApplyJobPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { instituteId, jobId, baseUrl } = useParams();
-  
   // Debug logging
   console.log('ApplyJobPage useParams:', { instituteId, jobId, baseUrl });
   console.log('Current URL:', location.pathname);
@@ -210,44 +212,44 @@ export const ApplyJobPage: React.FC = () => {
   const [uploadConfig, setUploadConfig] = useState(FILE_UPLOAD_CONFIG);
 
   // Function to validate file based on field
-  const validateFile = (file: File, fieldName: string, fieldConfig?: FormField['fileConfig']) => {
-    const maxSize = (fieldConfig?.maxSize || uploadConfig.maxSize);
-    const allowedTypes = (fieldConfig?.allowedTypes || uploadConfig.allowedTypes);
-    const maxSizeInBytes = maxSize * 1024 * 1024;
+  // const validateFile = (file: File, fieldName: string, fieldConfig?: FormField['fileConfig']) => {
+  //   const maxSize = (fieldConfig?.maxSize || uploadConfig.maxSize);
+  //   const allowedTypes = (fieldConfig?.allowedTypes || uploadConfig.allowedTypes);
+  //   const maxSizeInBytes = maxSize * 1024 * 1024;
 
-    if (file.size > maxSizeInBytes) {
-      return {
-        isValid: false,
-        message: `File size should be less than ${maxSize}MB`
-      };
-    }
+  //   if (file.size > maxSizeInBytes) {
+  //     return {
+  //       isValid: false,
+  //       message: `File size should be less than ${maxSize}MB`
+  //     };
+  //   }
 
-    const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
-    const fileType = file.type.toLowerCase();
+  //   const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+  //   const fileType = file.type.toLowerCase();
 
-    const isTypeValid = allowedTypes.some(type =>
-      fileExtension === type.toLowerCase() ||
-      fileType.includes(type.toLowerCase())
-    );
+  //   const isTypeValid = allowedTypes.some(type =>
+  //     fileExtension === type.toLowerCase() ||
+  //     fileType.includes(type.toLowerCase())
+  //   );
 
-    const isMimeTypeValid = FILE_UPLOAD_CONFIG.allowedMimeTypes.some(mimeType =>
-      fileType.includes(mimeType.split('/')[1]?.toLowerCase() || '') ||
-      fileType === mimeType
-    );
+  //   const isMimeTypeValid = FILE_UPLOAD_CONFIG.allowedMimeTypes.some(mimeType =>
+  //     fileType.includes(mimeType.split('/')[1]?.toLowerCase() || '') ||
+  //     fileType === mimeType
+  //   );
 
-    if (!isTypeValid && !isMimeTypeValid) {
-      const allowedTypesStr = allowedTypes.map(t => t.toUpperCase()).join(', ');
-      return {
-        isValid: false,
-        message: `Please upload only ${allowedTypesStr} files`
-      };
-    }
+  //   if (!isTypeValid && !isMimeTypeValid) {
+  //     const allowedTypesStr = allowedTypes.map(t => t.toUpperCase()).join(', ');
+  //     return {
+  //       isValid: false,
+  //       message: `Please upload only ${allowedTypesStr} files`
+  //     };
+  //   }
 
-    return {
-      isValid: true,
-      message: ''
-    };
-  };
+  //   return {
+  //     isValid: true,
+  //     message: ''
+  //   };
+  // };
 
     useEffect(() => {
       if (institute) {
@@ -292,7 +294,7 @@ export const ApplyJobPage: React.FC = () => {
         }>(
           `${apiUrl}/PublicCareer/get-job-details`,
           {
-            job_id: parseInt(jobId)
+            slug : jobId
           },
           {
             headers: {
@@ -389,45 +391,118 @@ export const ApplyJobPage: React.FC = () => {
     }
   };
 
-  // Handle file input changes
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string, fieldConfig?: FormField['fileConfig']) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+ console.log('resume size  ::::', jobDetails?.resume_size);
 
-      const validation = validateFile(file, fieldName, fieldConfig);
-      if (!validation.isValid) {
-        toast.error(validation.message);
-        return;
-      }
-
-      setFormData(prev => ({ ...prev, [fieldName]: file }));
-      toast.success(`${fieldName.replace(/_/g, ' ')} uploaded successfully`);
+// File validation function with resume size check
+const validateFile = (file: File, fieldName: string, fieldConfig?: FormField['fileConfig']) => {
+  let isValid = true;
+  let message = '';
+  
+  // Get max file size from jobDetails.resume_size (in MB) or use default
+  const maxSizeMB = jobDetails.resume_size || 10; // Default to 10MB if not set
+  const maxSizeBytes = maxSizeMB * 1024 * 1024; // Convert MB to bytes
+  
+  // Check file size
+  if (file.size > maxSizeBytes) {
+    isValid = false;
+    message = `File size exceeds maximum limit of ${maxSizeMB}MB. Please upload a smaller file.`;
+    return { isValid, message };
+  }
+  
+  // Check file type based on field name or custom config
+  if (fieldName === 'resume') {
+    // Resume specific validation
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain'
+    ];
+    
+    const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt'];
+    
+    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+    
+    if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+      isValid = false;
+      message = `Invalid file type for resume. Please upload PDF, DOC, DOCX, or TXT files only.`;
     }
-  };
-
-  // Handle drag and drop for files
-  const handleDragOver = (e: React.DragEvent, fieldName: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormField['fileConfig']) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-
-      const validation = validateFile(file, fieldName, fieldConfig);
-      if (!validation.isValid) {
-        toast.error(validation.message);
-        return;
-      }
-
-      setFormData(prev => ({ ...prev, [fieldName]: file }));
-      toast.success(`${fieldName.replace(/_/g, ' ')} uploaded successfully`);
+  }
+  
+  // Custom validation from fieldConfig if provided
+  if (fieldConfig) {
+    if (fieldConfig.allowedTypes && !fieldConfig.allowedTypes.includes(file.type)) {
+      isValid = false;
+      message = fieldConfig.errorMessage || `Invalid file type. Allowed types: ${fieldConfig.allowedTypes.join(', ')}`;
     }
-  };
+    
+    if (fieldConfig.maxSize && file.size > fieldConfig.maxSize) {
+      isValid = false;
+      message = fieldConfig.errorMessage || `File size exceeds ${fieldConfig.maxSize / (1024*1024)}MB limit.`;
+    }
+  }
+  
+  return { isValid, message };
+};
+
+// Handle file input changes with resume size validation
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string, fieldConfig?: FormField['fileConfig']) => {
+  if (e.target.files && e.target.files[0]) {
+    const file = e.target.files[0];
+
+    // Log file info for debugging
+    console.log('File selected:', {
+      name: file.name,
+      size: file.size,
+      sizeMB: (file.size / (1024 * 1024)).toFixed(2) + 'MB',
+      type: file.type,
+      maxAllowedMB: jobDetails.resume_size || 10
+    });
+
+    const validation = validateFile(file, fieldName, fieldConfig);
+    if (!validation.isValid) {
+      toast.error(validation.message);
+      e.target.value = ''; // Clear the file input
+      return;
+    }
+
+    setFormData(prev => ({ ...prev, [fieldName]: file }));
+    toast.success(`${fieldName.replace(/_/g, ' ')} uploaded successfully (${(file.size / (1024 * 1024)).toFixed(2)}MB)`);
+  }
+};
+
+// Handle drag and drop for files with resume size validation
+const handleDragOver = (e: React.DragEvent, fieldName: string) => {
+  e.preventDefault();
+  e.stopPropagation();
+};
+
+const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormField['fileConfig']) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    const file = e.dataTransfer.files[0];
+
+    // Log file info for debugging
+    console.log('File dropped:', {
+      name: file.name,
+      size: file.size,
+      sizeMB: (file.size / (1024 * 1024)).toFixed(2) + 'MB',
+      type: file.type,
+      maxAllowedMB: jobDetails.resume_size || 10
+    });
+
+    const validation = validateFile(file, fieldName, fieldConfig);
+    if (!validation.isValid) {
+      toast.error(validation.message);
+      return;
+    }
+
+    setFormData(prev => ({ ...prev, [fieldName]: file }));
+    toast.success(`${fieldName.replace(/_/g, ' ')} uploaded successfully (${(file.size / (1024 * 1024)).toFixed(2)}MB)`);
+  }
+};
 
   // Validate form field based on validation rules
   const validateField = (field: FormField, value: any): string => {
@@ -1506,14 +1581,6 @@ console.log('institute iddd',institute )
                       </>
                     )}
                   </button>
-
-                  {/* Application tips */}
-                  {/* <div className="text-center pt-4 border-t border-slate-200">
-                    <p className="text-xs text-slate-500">
-                      Your application will be reviewed within 48 hours. We'll
-                      contact you via email for next steps.
-                    </p>
-                  </div> */}
                 </form>
               </div>
             </div>
@@ -1536,7 +1603,7 @@ console.log('institute iddd',institute )
         referenceId={referenceId}
         jobTitle={jobDetails.job_title}
         companyName={jobDetails.company_name}
-        hrEmail={getHRContactEmail()}
+        message={jobDetails.success_message}
       />
     </div>
   );
