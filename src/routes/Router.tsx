@@ -75,6 +75,8 @@ import ExportConfig from 'src/views/dataManager/exportConfiguration/ExportConfig
 import CareerForm from 'src/views/frontedEditing/career/CareerForm';
 import ApplyJobPage from 'src/views/website/components/ApplyJobPage';
 import CareerManagementTable from 'src/views/applicationForms/careerApplication/CareerManagementTable';
+import { userInfo } from 'os';
+import CareerDashboard from 'src/views/dashboards/CareerDashboard';
 
 
 /* ***Layouts**** */
@@ -92,11 +94,11 @@ const Solar = Loadable(lazy(() => import("../views/icons/Solar")));
 const SamplePage = Loadable(lazy(() => import('../views/sample-page/SamplePage')));
 const Error = Loadable(lazy(() => import('../views/auth/error/Error')));
 const Register = Loadable(lazy(() => import('../views/auth/register/Register')));
-
+let academic_type;
 // Role Based Redirect Component
 const RoleBasedRedirect: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
-
+   academic_type = user.academic_type
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
@@ -261,7 +263,7 @@ const MainRoutes = [
       </ProtectedRoute>
     ),
     children: [
-       { path: 'dashboard', element: <Dashboard /> },
+      { path: 'dashboard', element:  <Dashboard /> },
       { path: 'demo-accounts', element: <DemoAccounts /> },
       { path: 'demo-accounts/add', element: <AddEditAccount /> },
       { path: 'demo-accounts/edit/:id', element: <AddEditAccount /> },

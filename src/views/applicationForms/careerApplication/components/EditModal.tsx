@@ -60,7 +60,6 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, application, onU
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    toast.loading('Please wait...'); return;
     e.preventDefault();
     if (!application?.id) return;
 

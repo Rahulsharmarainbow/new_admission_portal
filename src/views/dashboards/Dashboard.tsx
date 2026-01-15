@@ -16,6 +16,7 @@ import img3 from '../../../public/Images/top-warning-shape.png';
 import { useNavigate } from 'react-router';
 import { useDashboardFilters } from 'src/hook/DashboardFilterContext';
 import { useAllAcademics } from 'src/hook/useAllAcademics';
+import CareerDashboard from './CareerDashboard';
 
 interface ApplicationCardProps {
   title: string;
@@ -150,7 +151,7 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    if(user?.academic_type !== 4)fetchDashboardData();
   }, [
     filters.page,
     filters.rowsPerPage,
@@ -366,6 +367,11 @@ const Dashboard = () => {
       toast.error('Application ID not found');
     }
   };
+
+  // Career dashboard
+  if (user && user?.academic_type === 4) {
+    return <CareerDashboard />;
+  }
 
   // Loading state
   if (loading && !dashboardData) {

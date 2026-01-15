@@ -220,7 +220,7 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
       }
 
       const response = await axios.post<CareerStatusListResponse>(
-        `${apiUrl}/SuperAdmin/CareerStatus/list-status`,
+        `${apiUrl}/${user?.role}/CareerStatus/list-status`,
         requestData,
         {
           headers: {
@@ -304,8 +304,8 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
     setModalLoading(true);
     try {
       const endpoint = editingStatus 
-        ? `${apiUrl}/SuperAdmin/CareerStatus/update-status`
-        : `${apiUrl}/SuperAdmin/CareerStatus/add-status`;
+        ? `${apiUrl}/${user?.role}/CareerStatus/update-status`
+        : `${apiUrl}/${user?.role}/CareerStatus/add-status`;
 
       const payload = editingStatus
         ? {
@@ -363,7 +363,7 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
     try {
       const ids = selectedDeleteItems.map(item => item.id);
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/CareerStatus/delete-status`,
+        `${apiUrl}/${user?.role}/CareerStatus/delete-status`,
         {
           s_id: user?.id,
           ids,

@@ -693,15 +693,14 @@ const SidebarContent: Record<number, MenuItem[]> = {
               id: uniqueId(),
               url: '/CustomerAdmin/frontend-editing/home',
               isPro: false,
-            },
-            // {
-            //   name: 'Apply Page',
-            //   id: uniqueId(),
-            //   url: '/ApplyEditing/get',
-            //   isPro: false,
-            // }, 
+            }, 
           ],
         },
+            {
+              name: 'Career Management',
+              icon: 'solar:monitor-line-duotone',
+              url: '/CustomerAdmin/frontend-editing/career',
+            }, 
         { name: 'Activity', url: '/CustomerAdmin/activity', icon: 'solar:clock-circle-line-duotone' },
 
          {

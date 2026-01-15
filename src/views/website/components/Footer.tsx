@@ -18,7 +18,7 @@ import {
   IconChevronRight
 } from '@tabler/icons-react';
 
-const assetUrl = import.meta.env.VITE_ASSET_URL || 'https://admissionportalbackend.testingscrew.com/public';
+const assetUrl = import.meta.env.VITE_ASSET_URL || '';
 
 interface FooterProps {
   baseUrl?: string;
@@ -249,10 +249,10 @@ const Footer: React.FC<FooterProps> = ({
               )}
 
               {/* Email & Phone Row */}
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:gap-20">
+              <div className="ml-2 grid grid-cols-1 md:grid-cols-8 lg:gap-10">
                 {academicEmail && (
-                  <div className="flex items-start space-x-3 group">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-red-50 to-pink-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <div className="flex items-start space-x-3 group col-span-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-orange-50 to-pink-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <IconMail className="w-5 h-5 text-red-500" />
                     </div>
                     <div>
@@ -268,7 +268,7 @@ const Footer: React.FC<FooterProps> = ({
                 )}
 
                 {academicMobile && (
-                  <div className="flex items-start space-x-3 group">
+                  <div className="flex items-start space-x-3 group col-span-2">
                     <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <IconPhone className="w-5 h-5 text-green-500" />
                     </div>
@@ -287,7 +287,7 @@ const Footer: React.FC<FooterProps> = ({
 
               {/* Website */}
               {academicWebsite && (
-                <div className="flex items-start space-x-3 group">
+                <div className="flex items-start space-x-3 group col-span-3">
                   <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     <IconWorld className="w-5 h-5 text-purple-500" />
                   </div>

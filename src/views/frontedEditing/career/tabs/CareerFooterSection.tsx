@@ -85,7 +85,7 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
     setLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Career/get-header-footer`,
+        `${apiUrl}/${user?.role}/Career/get-header-footer`,
         { academic_id: parseInt(academicId) },
         {
           headers: {
@@ -115,9 +115,9 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
     // Header
     if (data.header?.academic_logo) {
       setAcademicLogo(data.header.academic_logo);
-      setAcademicIcon(data.header.favicon);
+      setAcademicIcon(data.header.academic_favicon);
       setAcademicLogoPreview(`${assetUrl}/${data.header.academic_logo}`);
-      setAcademicIconPreview(`${assetUrl}/${data.header.favicon}`);
+      setAcademicIconPreview(`${assetUrl}/${data.header.academic_favicon}`);
       setButtonUrl(`${data.header.academic_website}`);
     }
     setHeaderHeading(data.header?.header_heading || '');
@@ -190,7 +190,7 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
       formData.append('social_icon', JSON.stringify(validSocialIcons));
 
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Career/update-header-footer`,
+        `${apiUrl}/${user?.role}/Career/update-header-footer`,
         formData,
         {
           headers: {

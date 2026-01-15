@@ -1,9 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { MdOutlineRemoveRedEye, MdFilterList, MdDownload } from 'react-icons/md';
+import React, { useState, useEffect, useRef } from 'react';
+import { MdOutlineRemoveRedEye, MdFilterList, MdDownload, MdDeleteForever } from 'react-icons/md';
 import { TbEdit, TbLoader2 } from 'react-icons/tb';
 import { BsSearch, BsFileEarmarkText } from 'react-icons/bs';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
-import { Button, Tooltip, Checkbox, ModalHeader, ModalBody, ModalFooter, Modal } from 'flowbite-react';
+import {
+  Button,
+  Tooltip,
+  Checkbox,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Modal,
+} from 'flowbite-react';
 import Select from 'react-select';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -16,6 +24,7 @@ import { useNavigate } from 'react-router';
 import CareerDropdown from 'src/Frontend/Common/CareerDropdown';
 import DetailsModal from './components/DetailsModal';
 import EditModal from './components/EditModal';
+import DeleteConfirmationModal from 'src/Frontend/Common/DeleteConfirmationModal';
 
 interface CareerApplication {
   refference_id: string;
@@ -31,14 +40,12 @@ interface CareerApplication {
     email: string;
     mobile: string;
     document: string;
-    // Add other fields from your API response
     [key: string]: any;
   };
   created_at?: string;
   applied_for?: string;
   experience?: string;
   qualification?: string;
-  // Additional documents from API
   documents?: Array<{
     id: number;
     file_path: string;
@@ -66,25 +73,43 @@ interface Filters {
 const CareerManagementTable: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Refs to track initial load and prevent duplicate calls
+  const initialLoadRef = useRef(true);
+  const statusOptionsFetchedRef = useRef(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [applications, setApplications] = useState<CareerApplication[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusOptions, setStatusOptions] = useState<StatusOption[]>([]);
-  const [filters, setFilters] = useState<Filters>({
-    page: 0,
-    rowsPerPage: 10,
-    order: 'desc',
-    orderBy: 'refference_id',
-    search: '',
-    academic_id: '',
-    status: '',
+
+  // Initialize filters with user data if CustomerAdmin
+  const [filters, setFilters] = useState<Filters>(() => {
+    const baseFilters = {
+      page: 0,
+      rowsPerPage: 10,
+      order: 'desc' as 'asc' | 'desc',
+      orderBy: 'refference_id',
+      search: '',
+      academic_id: '',
+      status: '',
+    };
+
+    // Set academic_id for CustomerAdmin from user data
+    if (user?.role === 'CustomerAdmin' && user?.academic_id) {
+      baseFilters.academic_id = user.academic_id;
+    }
+
+    return baseFilters;
   });
+
   const [total, setTotal] = useState(0);
   const [sort, setSort] = useState({ key: 'refference_id', direction: 'desc' as 'asc' | 'desc' });
   const [downloadingResumeId, setDownloadingResumeId] = useState<string | null>(null);
   const [selectedApplications, setSelectedApplications] = useState<string[]>([]);
   const [bulkStatus, setBulkStatus] = useState<string>('');
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
-  
+
   // Modals state
   const [detailsModal, setDetailsModal] = useState<{
     isOpen: boolean;
@@ -93,7 +118,7 @@ const CareerManagementTable: React.FC = () => {
     isOpen: false,
     data: null,
   });
-  
+
   const [editModal, setEditModal] = useState<{
     isOpen: boolean;
     data: CareerApplication | null;
@@ -101,7 +126,7 @@ const CareerManagementTable: React.FC = () => {
     isOpen: false,
     data: null,
   });
-  
+
   const [previewModal, setPreviewModal] = useState<{
     isOpen: boolean;
     name: string;
@@ -123,7 +148,7 @@ const CareerManagementTable: React.FC = () => {
     filename: '',
     type: '',
     documents: [],
-    isMaximized: false, 
+    isMaximized: false,
     isLoading: true,
   });
 
@@ -131,14 +156,26 @@ const CareerManagementTable: React.FC = () => {
   const apiAssetsUrl = import.meta.env.VITE_ASSET_URL;
   const debouncedSearch = useDebounce(filters.search, 500);
 
-  // Fetch status options based on academic_id
+  // Fetch status options - only once and when academic_id changes
   const fetchStatusOptions = async (academicId?: string) => {
-    if (!academicId) return;
+    // Don't fetch if already fetched for this academic_id
+    if (statusOptionsFetchedRef.current) {
+      return;
+    }
+
+    const academicIdToUse =
+      academicId || (user?.role === 'CustomerAdmin' ? user.academic_id : filters.academic_id);
+
+    if (!academicIdToUse) {
+      console.log('No academic_id available for fetching status options');
+      return;
+    }
+
     try {
       const requestBody: any = { type: 0 };
-      if (academicId) {
-        requestBody.academic_id = academicId;
-      }
+      requestBody.academic_id = academicIdToUse;
+
+      console.log('Fetching status options for academic_id:', academicIdToUse);
 
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Dropdown/get-career-status`,
@@ -152,35 +189,51 @@ const CareerManagementTable: React.FC = () => {
       );
 
       if (response.data.status && response.data.data) {
-        const statusOptionsData = response.data.data.map((option) => ({
-          value: option.value.toString(),
-          label: option.name,
+        const statusOptionsData = response.data.data.map((option: any) => ({
+          id: option.id,
+          name: option.name,
+          value: option.value,
         }));
         setStatusOptions(statusOptionsData);
+        statusOptionsFetchedRef.current = true;
+        console.log('Status options fetched:', statusOptionsData);
       }
     } catch (error) {
       console.error('Error fetching status options:', error);
-      toast.error('Failed to fetch status options');
+      // Don't show toast for CustomerAdmin if it fails
+      if (user?.role !== 'CustomerAdmin') {
+        toast.error('Failed to fetch status options');
+      }
     }
   };
 
   // Fetch career applications
   const fetchApplications = async () => {
-    if (!filters?.academic_id) {
-      setApplications([]);
+    const academicIdToUse = user?.role === 'CustomerAdmin' ? user.academic_id : filters.academic_id;
+
+    if (!academicIdToUse) {
+      console.log('No academic_id available, skipping fetch');
+      if (user?.role === 'SuperAdmin') {
+        setApplications([]);
+      }
       return;
     }
+
     setLoading(true);
     try {
       const requestBody: any = {
-        academic_id: filters.academic_id || '',
-        status: filters.status || '',
+        academic_id: academicIdToUse,
         page: filters.page,
         rowsPerPage: filters.rowsPerPage,
         order: filters.order,
         orderBy: filters.orderBy,
-        search: filters.search,
       };
+
+      // Add optional filters
+      if (filters.search) requestBody.search = filters.search;
+      if (filters.status) requestBody.status = filters.status;
+
+      console.log('Fetching applications with:', requestBody);
 
       const response = await axios.post(
         `${apiUrl}/${user?.role}/CareerApplication/get-career-application`,
@@ -202,6 +255,7 @@ const CareerManagementTable: React.FC = () => {
 
         // Reset selected applications when data changes
         setSelectedApplications([]);
+        console.log('Applications fetched:', applicationsData.length);
       }
     } catch (error) {
       console.error('Error fetching career applications:', error);
@@ -211,18 +265,56 @@ const CareerManagementTable: React.FC = () => {
     }
   };
 
-  // Fetch initial data and set default academic_id
+  // Initial setup - runs only once
   useEffect(() => {
-    const fetchInitialData = async () => {
-      // First fetch status options
-      await fetchStatusOptions();
+    const initializeData = async () => {
+      if (initialLoadRef.current) {
+        initialLoadRef.current = false;
 
-      // Then fetch applications
-      await fetchApplications();
+        console.log('Initializing data for user role:', user?.role);
+
+        // For CustomerAdmin, fetch status options immediately with user's academic_id
+        if (user?.role === 'CustomerAdmin' && user?.academic_id) {
+          await fetchStatusOptions(user.academic_id);
+        }
+
+        // Fetch applications if academic_id is available
+        if (
+          (user?.role === 'CustomerAdmin' && user?.academic_id) ||
+          (user?.role === 'SuperAdmin' && filters.academic_id)
+        ) {
+          await fetchApplications();
+        }
+      }
     };
 
-    if (filters.academic_id !== '') fetchInitialData();
-  }, [filters]);
+    initializeData();
+  }, []); // Empty dependency array - runs only once
+
+  // Fetch applications when filters change (except initial load)
+  useEffect(() => {
+    if (!initialLoadRef.current) {
+      console.log('Filters changed, fetching applications');
+      fetchApplications();
+    }
+  }, [
+    filters.page,
+    filters.rowsPerPage,
+    filters.order,
+    filters.orderBy,
+    debouncedSearch,
+    filters.academic_id,
+    filters.status,
+  ]);
+
+  // Fetch status options when academic_id changes (for SuperAdmin)
+  useEffect(() => {
+    if (user?.role === 'SuperAdmin' && filters.academic_id && !statusOptionsFetchedRef.current) {
+      console.log('Academic changed for SuperAdmin, fetching status options');
+      statusOptionsFetchedRef.current = false;
+      fetchStatusOptions(filters.academic_id);
+    }
+  }, [filters.academic_id, user?.role]);
 
   // Bulk update status
   const handleBulkStatusUpdate = async () => {
@@ -233,11 +325,6 @@ const CareerManagementTable: React.FC = () => {
 
     setIsBulkUpdating(true);
     try {
-//       const selectedIds = applications
-//         .filter((app) => selectedApplications.includes(app.id))
-//         .map((app) => app.id || parseInt(app.id))
-//         .filter((id) => !isNaN(id));
-// console.log('selectedIds',selectedApplications)
       const requestBody = {
         ids: selectedApplications,
         status: parseInt(bulkStatus),
@@ -306,48 +393,92 @@ const CareerManagementTable: React.FC = () => {
     }
   };
 
+  const deleteJob = async () => {
+    if (selectedApplications.length === 0) {
+      toast.error('Please select at least one job to delete');
+      return;
+    }
+
+    setDeleteLoading(true);
+    try {
+      const response = await axios.post(
+        `${apiUrl}/${user?.role}/CareerApplication/delete-career-application`,
+        {
+          ids: selectedApplications,
+          s_id: user?.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      if (response.data?.status === true) {
+        toast.success(
+          response.data?.message ||
+            `${selectedApplications.length} job(s) application deleted successfully!`,
+        );
+        setShowDeleteModal(false);
+        setSelectedApplications([]);
+        setBulkStatus('');
+        fetchApplications();
+      } else {
+        toast.error(response.data?.message || 'Failed to delete Application');
+      }
+    } catch (error: any) {
+      console.error('Error deleting job:', error);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    if (selectedApplications.length === 0) {
+      toast.error('Please select at least one application to delete');
+      return;
+    }
+    setShowDeleteModal(true);
+  };
+
   // Preview resume/documents
- // Preview resume/documents
-const handlePreviewResume = (application: CareerApplication) => {
-  // Check for resume in different possible locations
-  const resumeUrl =  application.resume ||  '';
-  
-  if (!resumeUrl) {
-    toast.error('No resume available for preview');
-    return;
-  }
+  const handlePreviewResume = (application: CareerApplication) => {
+    const resumeUrl = application.resume || '';
 
-  // Clean URL - remove extra slashes if needed
-  const cleanUrl = resumeUrl.replace(/\\/g, '/');
-  
-  // Determine file type
-  const filename = cleanUrl.split('/').pop() || 'resume';
-  let fileType = 'other';
-  
-  if (filename.toLowerCase().endsWith('.pdf')) fileType = 'pdf';
-  else if (filename.toLowerCase().endsWith('.doc') || filename.toLowerCase().endsWith('.docx')) 
-    fileType = 'doc';
-  else if (filename.toLowerCase().endsWith('.jpg') || 
-           filename.toLowerCase().endsWith('.jpeg') || 
-           filename.toLowerCase().endsWith('.png')) 
-    fileType = 'image';
-  
-  // Fetch additional documents if available
-  const documents = application.documents || [];
+    if (!resumeUrl) {
+      toast.error('No resume available for preview');
+      return;
+    }
 
-  setPreviewModal({
-    name: application.name,
-    isOpen: true,
-    url: cleanUrl, // Use the direct URL
-    filename: filename,
-    type: fileType,
-    documents: documents,
-    isMaximized: false,
-    isLoading: true 
-  });
-};
+    const cleanUrl = resumeUrl.replace(/\\/g, '/');
+    const filename = cleanUrl.split('/').pop() || 'resume';
+    let fileType = 'other';
 
-console.log('applications',previewModal)
+    if (filename.toLowerCase().endsWith('.pdf')) fileType = 'pdf';
+    else if (filename.toLowerCase().endsWith('.doc') || filename.toLowerCase().endsWith('.docx'))
+      fileType = 'doc';
+    else if (
+      filename.toLowerCase().endsWith('.jpg') ||
+      filename.toLowerCase().endsWith('.jpeg') ||
+      filename.toLowerCase().endsWith('.png')
+    )
+      fileType = 'image';
+
+    const documents = application.documents || [];
+
+    setPreviewModal({
+      name: application.name,
+      isOpen: true,
+      url: cleanUrl,
+      filename: filename,
+      type: fileType,
+      documents: documents,
+      isMaximized: false,
+      isLoading: true,
+    });
+  };
+
   // Handle search
   const handleSearch = (searchValue: string) => {
     setFilters((prev) => ({
@@ -357,7 +488,7 @@ console.log('applications',previewModal)
     }));
   };
 
-  // Handle academic change
+  // Handle academic change (only for SuperAdmin)
   const handleAcademicChange = (value: string) => {
     setFilters((prev) => ({
       ...prev,
@@ -365,8 +496,13 @@ console.log('applications',previewModal)
       page: 0,
     }));
 
+    // Reset status options fetched flag
+    statusOptionsFetchedRef.current = false;
+
     // Fetch status options for the selected academic
-    fetchStatusOptions(value);
+    if (value) {
+      fetchStatusOptions(value);
+    }
   };
 
   // Handle status change
@@ -414,7 +550,7 @@ console.log('applications',previewModal)
   const handleViewDetails = (application: CareerApplication) => {
     setDetailsModal({
       isOpen: true,
-      data: application
+      data: application,
     });
   };
 
@@ -422,7 +558,7 @@ console.log('applications',previewModal)
   const handleEdit = (application: CareerApplication) => {
     setEditModal({
       isOpen: true,
-      data: application
+      data: application,
     });
   };
 
@@ -434,12 +570,20 @@ console.log('applications',previewModal)
       order: 'desc',
       orderBy: 'refference_id',
       search: '',
-      academic_id: '',
+      academic_id: user?.role === 'CustomerAdmin' ? user.academic_id : '',
       status: '',
     });
     setSort({ key: 'refference_id', direction: 'desc' });
     setSelectedApplications([]);
     setBulkStatus('');
+
+    // Reset status options fetched flag
+    statusOptionsFetchedRef.current = false;
+
+    // Fetch fresh status options
+    if (user?.role === 'CustomerAdmin' && user?.academic_id) {
+      fetchStatusOptions(user.academic_id);
+    }
   };
 
   // Handle checkbox selection
@@ -460,40 +604,42 @@ console.log('applications',previewModal)
   };
 
   // Get status text and color
-  const getStatusInfo = (statusValue: string) => {
+  const getStatusInfo = (statusValue: number) => {
     const status = statusOptions.find((opt) => opt.value === statusValue);
-    if (!status) return { text: 'Unknown', color: 'bg-gray-100 text-gray-800' };
+    if (!status) {
+      // Default status if not found
+      return {
+        text: 'Unknown',
+        color: 'bg-gray-100 text-gray-800',
+      };
+    }
 
-    switch (status.value) {
+    // Convert status value to string for comparison
+    const statusStr = status.value.toString();
+
+    switch (statusStr) {
       case '4': // Applied
-        return { text: status.label, color: 'bg-blue-100 text-blue-800' };
+        return { text: status.name, color: 'bg-blue-100 text-blue-800' };
       case '5': // Shortlisted
-        return { text: status.label, color: 'bg-purple-100 text-purple-800' };
+        return { text: status.name, color: 'bg-purple-100 text-purple-800' };
       case '6': // Interview
-        return { text: status.label, color: 'bg-yellow-100 text-yellow-800' };
+        return { text: status.name, color: 'bg-yellow-100 text-yellow-800' };
       case '7': // Offer
-        return { text: status.label, color: 'bg-orange-100 text-orange-800' };
+        return { text: status.name, color: 'bg-orange-100 text-orange-800' };
       case '8': // Hired
-        return { text: status.label, color: 'bg-green-100 text-green-800' };
+        return { text: status.name, color: 'bg-green-100 text-green-800' };
       case '9': // Rejected
-        return { text: status.label, color: 'bg-red-100 text-red-800' };
+        return { text: status.name, color: 'bg-red-100 text-red-800' };
       default:
-        return { text: status.label, color: 'bg-gray-100 text-gray-800' };
+        return { text: status.name, color: 'bg-gray-100 text-gray-800' };
     }
   };
 
-  // Fetch applications when filters change
-  useEffect(() => {
-    fetchApplications();
-  }, [
-    filters.page,
-    filters.rowsPerPage,
-    filters.order,
-    filters.orderBy,
-    debouncedSearch,
-    filters.academic_id,
-    filters.status,
-  ]);
+  // Prepare status options for Select component
+  const selectStatusOptions = statusOptions.map((option) => ({
+    value: option.value.toString(),
+    label: option.name,
+  }));
 
   return (
     <>
@@ -527,40 +673,44 @@ console.log('applications',previewModal)
                 />
               </div>
 
-              <div className="w-full sm:w-48">
-                <CareerDropdown
-                  value={filters.academic_id}
-                  onChange={handleAcademicChange}
-                  placeholder="Select career..."
-                  includeAllOption={true}
-                  label=""
-                />
-              </div>
+              {/* Academic Dropdown - Only for SuperAdmin */}
+              {user?.role === 'SuperAdmin' && (
+                <div className="w-full sm:w-48">
+                  <CareerDropdown
+                    value={filters.academic_id}
+                    onChange={handleAcademicChange}
+                    placeholder="Select career..."
+                    includeAllOption={true}
+                    label=""
+                  />
+                </div>
+              )}
 
-              {/* Status Dropdown */}
-              {
-                selectedApplications.length === 0 && (
-                  <div className="w-full sm:w-48">
-                <Select
-                  options={statusOptions}
-                  value={statusOptions.find((option) => option.value === filters.status)}
-                  onChange={handleStatusChange}
-                  placeholder="Select Status"
-                  isClearable
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                />
-              </div>
-                )
-              }
+              {/* Status Dropdown - Only show when no bulk selection */}
+              {selectedApplications.length === 0 && (
+                <div className="w-full sm:w-48">
+                  <Select
+                    options={selectStatusOptions}
+                    value={selectStatusOptions.find((option) => option.value === filters.status)}
+                    onChange={handleStatusChange}
+                    placeholder="Select Status"
+                    isClearable
+                    className="react-select-container"
+                    classNamePrefix="react-select"
+                    isDisabled={!filters.academic_id && user?.role === 'SuperAdmin'}
+                  />
+                </div>
+              )}
 
               {/* Bulk Status Update Section */}
               {selectedApplications.length > 0 && (
                 <div className="flex items-center gap-2">
                   <div className="w-48">
                     <Select
-                      options={statusOptions}
-                      value={statusOptions.find((option) => option.value.toString() === bulkStatus)}
+                      options={selectStatusOptions}
+                      value={selectStatusOptions.find(
+                        (option) => option.value.toString() === bulkStatus,
+                      )}
                       onChange={(selectedOption) => setBulkStatus(selectedOption?.value || '')}
                       placeholder="Update Status"
                       className="react-select-container"
@@ -580,6 +730,15 @@ console.log('applications',previewModal)
                     ) : (
                       'Update'
                     )}
+                  </Button>
+                  <Button
+                    color="failure"
+                    onClick={handleDeleteClick}
+                    disabled={isBulkUpdating}
+                    className="flex items-center gap-2"
+                  >
+                    <MdDeleteForever className="h-4 w-4" />
+                    Delete
                   </Button>
                   <Button
                     onClick={() => setSelectedApplications([])}
@@ -640,7 +799,7 @@ console.log('applications',previewModal)
                         onClick={() => handleSort('email')}
                       >
                         <div className="flex items-center space-x-1">
-                          <span>Contect</span>
+                          <span>Contact</span>
                           {getSortIcon('email')}
                         </div>
                       </th>
@@ -652,12 +811,14 @@ console.log('applications',previewModal)
                   <tbody className="bg-white divide-y divide-gray-200">
                     {applications.length > 0 ? (
                       applications.map((application, index) => {
-                        const statusInfo = getStatusInfo(application.status.toString());
-                        const isSelected = selectedApplications.includes(application.id?.toString() || '');
+                        const statusInfo = getStatusInfo(application.status);
+                        const isSelected = selectedApplications.includes(
+                          application.id?.toString() || '',
+                        );
 
                         return (
                           <tr
-                            key={application.id}
+                            key={application.id || index}
                             className={`hover:bg-gray-50 transition-colors duration-150 ${
                               isSelected ? 'bg-blue-50' : ''
                             }`}
@@ -694,7 +855,8 @@ console.log('applications',previewModal)
                                     <TbEdit className="w-4 h-4" />
                                   </button>
                                 </Tooltip>
-                                {(application.resume || application.candidate_details?.document) && (
+                                {(application.resume ||
+                                  application.candidate_details?.document) && (
                                   <>
                                     <Tooltip content="Preview Resume" placement="top" style="light">
                                       <button
@@ -711,7 +873,9 @@ console.log('applications',previewModal)
                                     >
                                       <button
                                         onClick={() => handleDownloadResume(application)}
-                                        disabled={downloadingResumeId === application.id?.toString()}
+                                        disabled={
+                                          downloadingResumeId === application.id?.toString()
+                                        }
                                         className={`p-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow
                                           ${
                                             downloadingResumeId === application.id?.toString()
@@ -731,7 +895,7 @@ console.log('applications',previewModal)
                               </div>
                             </td>
                             <td className="py-3 px-3 text-sm text-gray-600">
-                              {application.refference_id}
+                              {application.refference_id || 'N/A'}
                             </td>
                             <td className="py-3 px-3">
                               <div className="flex flex-col">
@@ -784,14 +948,18 @@ console.log('applications',previewModal)
                               />
                             </svg>
                             <p className="text-lg font-medium text-gray-600 mb-2">
-                              No career applications found
+                              {user?.role === 'SuperAdmin' && !filters.academic_id
+                                ? 'Please select a career to view applications'
+                                : 'No career applications found'}
                             </p>
                             <p className="text-sm text-gray-500 mb-4">
-                              {filters.search || filters.status || filters.academic_id
+                              {filters.search ||
+                              filters.status ||
+                              (user?.role === 'SuperAdmin' && filters.academic_id)
                                 ? 'Try adjusting your search criteria'
-                                : 'No applications available'}
+                                : 'No applications available for the selected filters'}
                             </p>
-                            {(filters.search || filters.status || filters.academic_id) && (
+                            {(filters.search || filters.status) && (
                               <Button
                                 onClick={handleClearFilters}
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -841,366 +1009,440 @@ console.log('applications',previewModal)
       />
 
       {/* Preview Modal */}
-{previewModal.isOpen && (
-  <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
-    
-    {/* MODAL CONTAINER */}
-    <div
-      className={`
-        bg-white flex flex-col transition-all duration-300
-        ${previewModal.isMaximized
-          ? 'w-screen h-screen rounded-none'
-          : 'w-[90vw] max-w-6xl h-[85vh] rounded-xl'
-        }
-      `}
-    >
-      {/* HEADER */}
-      <div className="flex items-center justify-between px-6 py-4 border-b bg-white">
-        <div className="flex items-center gap-3">
-          <h3 className="font-semibold text-lg truncate max-w-md">
-            Documents Preview – {previewModal.name}
-          </h3>
-
-          {previewModal.filename && (
-            <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-              {previewModal.filename.split('.').pop()?.toUpperCase()}
-            </span>
-          )}
-        </div>
-
-        <div className="flex gap-2">
-          {/* MAX / MIN */}
-          <button
-            onClick={() =>
-              setPreviewModal(p => ({
-                ...p,
-                isMaximized: !p.isMaximized,
-              }))
-            }
-            className="p-2 rounded hover:bg-gray-100"
-            title={previewModal.isMaximized ? 'Minimize' : 'Maximize'}
+      {previewModal.isOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
+          {/* MODAL CONTAINER */}
+          <div
+            className={`
+              bg-white flex flex-col transition-all duration-300
+              ${
+                previewModal.isMaximized
+                  ? 'w-screen h-screen rounded-none'
+                  : 'w-[90vw] max-w-6xl h-[85vh] rounded-xl'
+              }
+            `}
           >
-            {previewModal.isMaximized ? '🗗' : '🗖'}
-          </button>
+            {/* HEADER */}
+            <div className="flex items-center justify-between px-6 py-4 border-b bg-white">
+              <div className="flex items-center gap-3">
+                <h3 className="font-semibold text-lg truncate max-w-md">
+                  Documents Preview – {previewModal.name}
+                </h3>
 
-          {/* CLOSE */}
-          <button
-            onClick={() =>
-              setPreviewModal({
-                isOpen: false,
-                isMaximized: false,
-                isLoading: false,
-                name: '',
-                url: '',
-                filename: '',
-                type: '',
-                documents: [],
-              })
-            }
-            className="p-2 rounded-full hover:bg-red-100 text-red-600"
-          >
-            ✕
-          </button>
-        </div>
-      </div>
-
-      {/* BODY */}
-      <div className="flex-1 relative overflow-hidden bg-gray-50">
-        {previewModal.isLoading && (
-          <div className="absolute inset-0 bg-white/80 z-10 flex items-center justify-center">
-            <div className="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-          </div>
-        )}
-
-        <div className="h-full w-full overflow-auto p-4">
-          {/* Loading Overlay */}
-      {previewModal.isLoading && (
-        <div className="absolute inset-0 bg-white bg-opacity-80 z-20 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-            <p className="text-gray-600">Loading document...</p>
-          </div>
-        </div>
-      )}
-      
-      <div className="flex-1 overflow-auto p-4">
-        {previewModal.url ? (() => {
-          const getFileExtension = (url: string) => {
-            return url.split('.').pop()?.toLowerCase() || '';
-          };
-
-          const ext = getFileExtension(previewModal.url);
-
-          {/* 1️⃣ IMAGE PREVIEW */}
-          if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) {
-            return (
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="relative group h-full w-full flex items-center justify-center">
-                  {previewModal.isLoading ? (
-                    <div className="flex items-center justify-center h-full">
-                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-                    </div>
-                  ) : (
-                    <>
-                      <img
-                        src={previewModal.url}
-                        alt={previewModal.filename}
-                        className="max-h-full max-w-full object-contain rounded-lg shadow-lg border border-gray-200"
-                        onLoad={() => setPreviewModal(prev => ({ ...prev, isLoading: false }))}
-                        onError={() => setPreviewModal(prev => ({ ...prev, isLoading: false }))}
-                      />
-                      {/* Image Zoom Controls */}
-                      <div className="absolute bottom-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => window.open(previewModal.url, '_blank')}
-                          className="bg-white text-gray-700 p-2 rounded-lg shadow-md hover:shadow-lg transition-shadow"
-                          title="Open image in new tab"
-                        >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => {
-                            const link = document.createElement('a');
-                            link.href = previewModal.url;
-                            link.download = previewModal.filename;
-                            document.body.appendChild(link);
-                            link.click();
-                            link.remove();
-                          }}
-                          className="bg-white text-gray-700 p-2 rounded-lg shadow-md hover:shadow-lg transition-shadow"
-                          title="Download image"
-                        >
-                          <MdDownload className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-                {!previewModal.isLoading && (
-                  <p className="mt-4 text-sm text-gray-500 text-center">
-                    {previewModal.filename} • {ext.toUpperCase()}
-                  </p>
+                {previewModal.filename && (
+                  <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                    {previewModal.filename.split('.').pop()?.toUpperCase()}
+                  </span>
                 )}
               </div>
-            );
-          }
 
-          {/* 2️⃣ PDF PREVIEW */}
-          if (ext === 'pdf') {
-            return (
-              <div className="flex flex-col h-full">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm text-gray-600">
-                    PDF Document • {previewModal.filename}
-                  </span>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => window.open(previewModal.url, '_blank')}
-                      className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
-                    >
-                      <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                      Open in new tab
-                    </button>
-                    <button
-                      onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = previewModal.url;
-                        link.download = previewModal.filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        link.remove();
-                      }}
-                      className="text-sm text-green-600 hover:text-green-800 flex items-center"
-                    >
-                      <MdDownload className="w-4 h-4 mr-1" />
-                      Download
-                    </button>
-                  </div>
-                </div>
-                <div className="flex-1 border rounded-lg shadow-inner overflow-hidden bg-white relative">
-                  {previewModal.isLoading && (
-                    <div className="absolute inset-0 bg-white flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-2"></div>
-                        <p className="text-sm text-gray-600">Loading PDF...</p>
-                      </div>
-                    </div>
-                  )}
-                  <iframe
-                    src={`https://docs.google.com/gview?url=${encodeURIComponent(
-                      previewModal.url
-                    )}&embedded=true`}
-                    className="w-full h-[75vh]"
-                    title="PDF Preview"
-                    onLoad={() => setPreviewModal(prev => ({ ...prev, isLoading: false }))}
-                    onError={() => setPreviewModal(prev => ({ ...prev, isLoading: false }))}
-                  />
-                </div>
-              </div>
-            );
-          }
-
-          {/* 3️⃣ OFFICE FILE PREVIEW */}
-          if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext)) {
-            return (
-              <div className="flex flex-col h-full w-full">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm text-gray-600">
-                    Office Document • {previewModal.filename}
-                  </span>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => window.open(previewModal.url, '_blank')}
-                      className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
-                    >
-                      <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                      Open in new tab
-                    </button>
-                    <button
-                      onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = previewModal.url;
-                        link.download = previewModal.filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        link.remove();
-                      }}
-                      className="text-sm text-green-600 hover:text-green-800 flex items-center"
-                    >
-                      <MdDownload className="w-4 h-4 mr-1" />
-                      Download
-                    </button>
-                  </div>
-                </div>
-                <div className="flex-1 border rounded-lg shadow-inner overflow-hidden bg-white relative">
-                  {previewModal.isLoading && (
-                    <div className="absolute inset-0 bg-white flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-2"></div>
-                        <p className="text-sm text-gray-600">Loading document...</p>
-                      </div>
-                    </div>
-                  )}
-                  <iframe
-                    src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
-                      previewModal.url
-                    )}`}
-                    className="w-full h-full"
-                    title="Office Document Preview"
-                    onLoad={() => setPreviewModal(prev => ({ ...prev, isLoading: false }))}
-                    onError={() => setPreviewModal(prev => ({ ...prev, isLoading: false }))}
-                  />
-                </div>
-              </div>
-            );
-          }
-
-          {/* 4️⃣ TEXT FILE PREVIEW */}
-          if (['txt', 'csv', 'json', 'xml', 'html', 'css', 'js'].includes(ext)) {
-            return (
-              <div className="flex flex-col h-full">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm text-gray-600">
-                    Text File • {previewModal.filename}
-                  </span>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => window.open(previewModal.url, '_blank')}
-                      className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
-                    >
-                      Open in new tab
-                    </button>
-                    <button
-                      onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = previewModal.url;
-                        link.download = previewModal.filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        link.remove();
-                      }}
-                      className="text-sm text-green-600 hover:text-green-800 flex items-center"
-                    >
-                      <MdDownload className="w-4 h-4 mr-1" />
-                      Download
-                    </button>
-                  </div>
-                </div>
-                <div className="flex-1 border rounded-lg p-4 overflow-auto bg-gray-50 font-mono text-sm relative">
-                  {previewModal.isLoading ? (
-                    <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-2"></div>
-                        <p className="text-sm text-gray-600">Loading text content...</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <pre className="whitespace-pre-wrap">
-                      Loading text content...
-                    </pre>
-                  )}
-                </div>
-              </div>
-            );
-          }
-
-          {/* 5️⃣ UNSUPPORTED FILE */}
-          return (
-            <div className="flex flex-col items-center justify-center py-12 h-full">
-              <BsFileEarmarkText className="w-20 h-20 text-gray-300 mb-4" />
-              <p className="text-gray-600 mb-2 font-medium">
-                File type not supported for preview
-              </p>
-              <p className="text-sm text-gray-500 mb-6">
-                {previewModal.filename} • {ext.toUpperCase() || 'UNKNOWN'}
-              </p>
-              <div className="flex space-x-4">
+              <div className="flex gap-2">
+                {/* MAX / MIN */}
                 <button
-                  onClick={() => window.open(previewModal.url, '_blank')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
+                  onClick={() =>
+                    setPreviewModal((p) => ({
+                      ...p,
+                      isMaximized: !p.isMaximized,
+                    }))
+                  }
+                  className="p-2 rounded hover:bg-gray-100"
+                  title={previewModal.isMaximized ? 'Minimize' : 'Maximize'}
                 >
-                  <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                  Open File
+                  {previewModal.isMaximized ? '🗗' : '🗖'}
                 </button>
+
+                {/* CLOSE */}
                 <button
-                  onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = previewModal.url;
-                    link.download = previewModal.filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
-                  }}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
+                  onClick={() =>
+                    setPreviewModal({
+                      isOpen: false,
+                      isMaximized: false,
+                      isLoading: false,
+                      name: '',
+                      url: '',
+                      filename: '',
+                      type: '',
+                      documents: [],
+                    })
+                  }
+                  className="p-2 rounded-full hover:bg-red-100 text-red-600"
                 >
-                  <MdDownload className="w-4 h-4 mr-2" />
-                  Download
+                  ✕
                 </button>
               </div>
             </div>
-          );
-        })() : (
-          <div className="flex flex-col items-center justify-center py-10 h-full">
-            <BsFileEarmarkText className="w-16 h-16 text-gray-300 mb-4" />
-            <p className="text-gray-600 mb-2">No document available</p>
-            <p className="text-sm text-gray-500">The document URL is empty or invalid</p>
-          </div>
-        )}
-      </div>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
 
+            {/* BODY */}
+            <div className="flex-1 relative overflow-hidden bg-gray-50">
+              {previewModal.isLoading && (
+                <div className="absolute inset-0 bg-white/80 z-10 flex items-center justify-center">
+                  <div className="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                </div>
+              )}
+
+              <div className="h-full w-full overflow-auto p-4">
+                {/* Loading Overlay */}
+                {previewModal.isLoading && (
+                  <div className="absolute inset-0 bg-white bg-opacity-80 z-20 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+                      <p className="text-gray-600">Loading document...</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex-1 overflow-auto p-4">
+                  {previewModal.url ? (
+                    (() => {
+                      const getFileExtension = (url: string) => {
+                        return url.split('.').pop()?.toLowerCase() || '';
+                      };
+
+                      const ext = getFileExtension(previewModal.url);
+
+                      {
+                        /* 1️⃣ IMAGE PREVIEW */
+                      }
+                      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) {
+                        return (
+                          <div className="flex flex-col items-center justify-center h-full">
+                            <div className="relative group h-full w-full flex items-center justify-center">
+                              {previewModal.isLoading ? (
+                                <div className="flex items-center justify-center h-full">
+                                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                                </div>
+                              ) : (
+                                <>
+                                  <img
+                                    src={previewModal.url}
+                                    alt={previewModal.filename}
+                                    className="max-h-full max-w-full object-contain rounded-lg shadow-lg border border-gray-200"
+                                    onLoad={() =>
+                                      setPreviewModal((prev) => ({ ...prev, isLoading: false }))
+                                    }
+                                    onError={() =>
+                                      setPreviewModal((prev) => ({ ...prev, isLoading: false }))
+                                    }
+                                  />
+                                  {/* Image Zoom Controls */}
+                                  <div className="absolute bottom-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                      onClick={() => window.open(previewModal.url, '_blank')}
+                                      className="bg-white text-gray-700 p-2 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                                      title="Open image in new tab"
+                                    >
+                                      <svg
+                                        className="w-4 h-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                        />
+                                      </svg>
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        const link = document.createElement('a');
+                                        link.href = previewModal.url;
+                                        link.download = previewModal.filename;
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        link.remove();
+                                      }}
+                                      className="bg-white text-gray-700 p-2 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                                      title="Download image"
+                                    >
+                                      <MdDownload className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                            {!previewModal.isLoading && (
+                              <p className="mt-4 text-sm text-gray-500 text-center">
+                                {previewModal.filename} • {ext.toUpperCase()}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      }
+
+                      {
+                        /* 2️⃣ PDF PREVIEW */
+                      }
+                      if (ext === 'pdf') {
+                        return (
+                          <div className="flex flex-col h-full">
+                            <div className="flex justify-between items-center mb-4">
+                              <span className="text-sm text-gray-600">
+                                PDF Document • {previewModal.filename}
+                              </span>
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={() => window.open(previewModal.url, '_blank')}
+                                  className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                                >
+                                  <svg
+                                    className="w-4 h-4 mr-1"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                    />
+                                  </svg>
+                                  Open in new tab
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    const link = document.createElement('a');
+                                    link.href = previewModal.url;
+                                    link.download = previewModal.filename;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    link.remove();
+                                  }}
+                                  className="text-sm text-green-600 hover:text-green-800 flex items-center"
+                                >
+                                  <MdDownload className="w-4 h-4 mr-1" />
+                                  Download
+                                </button>
+                              </div>
+                            </div>
+                            <div className="flex-1 border rounded-lg shadow-inner overflow-hidden bg-white relative">
+                              {previewModal.isLoading && (
+                                <div className="absolute inset-0 bg-white flex items-center justify-center">
+                                  <div className="text-center">
+                                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-2"></div>
+                                    <p className="text-sm text-gray-600">Loading PDF...</p>
+                                  </div>
+                                </div>
+                              )}
+                              <iframe
+                                src={`https://docs.google.com/gview?url=${encodeURIComponent(
+                                  previewModal.url,
+                                )}&embedded=true`}
+                                className="w-full h-[75vh]"
+                                title="PDF Preview"
+                                onLoad={() =>
+                                  setPreviewModal((prev) => ({ ...prev, isLoading: false }))
+                                }
+                                onError={() =>
+                                  setPreviewModal((prev) => ({ ...prev, isLoading: false }))
+                                }
+                              />
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      {
+                        /* 3️⃣ OFFICE FILE PREVIEW */
+                      }
+                      if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext)) {
+                        return (
+                          <div className="flex flex-col h-full w-full">
+                            <div className="flex justify-between items-center mb-4">
+                              <span className="text-sm text-gray-600">
+                                Office Document • {previewModal.filename}
+                              </span>
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={() => window.open(previewModal.url, '_blank')}
+                                  className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                                >
+                                  <svg
+                                    className="w-4 h-4 mr-1"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                    />
+                                  </svg>
+                                  Open in new tab
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    const link = document.createElement('a');
+                                    link.href = previewModal.url;
+                                    link.download = previewModal.filename;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    link.remove();
+                                  }}
+                                  className="text-sm text-green-600 hover:text-green-800 flex items-center"
+                                >
+                                  <MdDownload className="w-4 h-4 mr-1" />
+                                  Download
+                                </button>
+                              </div>
+                            </div>
+                            <div className="flex-1 border rounded-lg shadow-inner overflow-hidden bg-white relative">
+                              {previewModal.isLoading && (
+                                <div className="absolute inset-0 bg-white flex items-center justify-center">
+                                  <div className="text-center">
+                                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-2"></div>
+                                    <p className="text-sm text-gray-600">Loading document...</p>
+                                  </div>
+                                </div>
+                              )}
+                              <iframe
+                                src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
+                                  previewModal.url,
+                                )}`}
+                                className="w-full h-full"
+                                title="Office Document Preview"
+                                onLoad={() =>
+                                  setPreviewModal((prev) => ({ ...prev, isLoading: false }))
+                                }
+                                onError={() =>
+                                  setPreviewModal((prev) => ({ ...prev, isLoading: false }))
+                                }
+                              />
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      {
+                        /* 4️⃣ TEXT FILE PREVIEW */
+                      }
+                      if (['txt', 'csv', 'json', 'xml', 'html', 'css', 'js'].includes(ext)) {
+                        return (
+                          <div className="flex flex-col h-full">
+                            <div className="flex justify-between items-center mb-4">
+                              <span className="text-sm text-gray-600">
+                                Text File • {previewModal.filename}
+                              </span>
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={() => window.open(previewModal.url, '_blank')}
+                                  className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                                >
+                                  Open in new tab
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    const link = document.createElement('a');
+                                    link.href = previewModal.url;
+                                    link.download = previewModal.filename;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    link.remove();
+                                  }}
+                                  className="text-sm text-green-600 hover:text-green-800 flex items-center"
+                                >
+                                  <MdDownload className="w-4 h-4 mr-1" />
+                                  Download
+                                </button>
+                              </div>
+                            </div>
+                            <div className="flex-1 border rounded-lg p-4 overflow-auto bg-gray-50 font-mono text-sm relative">
+                              {previewModal.isLoading ? (
+                                <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center">
+                                  <div className="text-center">
+                                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-2"></div>
+                                    <p className="text-sm text-gray-600">Loading text content...</p>
+                                  </div>
+                                </div>
+                              ) : (
+                                <pre className="whitespace-pre-wrap">Loading text content...</pre>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      {
+                        /* 5️⃣ UNSUPPORTED FILE */
+                      }
+                      return (
+                        <div className="flex flex-col items-center justify-center py-12 h-full">
+                          <BsFileEarmarkText className="w-20 h-20 text-gray-300 mb-4" />
+                          <p className="text-gray-600 mb-2 font-medium">
+                            File type not supported for preview
+                          </p>
+                          <p className="text-sm text-gray-500 mb-6">
+                            {previewModal.filename} • {ext.toUpperCase() || 'UNKNOWN'}
+                          </p>
+                          <div className="flex space-x-4">
+                            <button
+                              onClick={() => window.open(previewModal.url, '_blank')}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
+                            >
+                              <svg
+                                className="w-4 h-4 mr-2"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                />
+                              </svg>
+                              Open File
+                            </button>
+                            <button
+                              onClick={() => {
+                                const link = document.createElement('a');
+                                link.href = previewModal.url;
+                                link.download = previewModal.filename;
+                                document.body.appendChild(link);
+                                link.click();
+                                link.remove();
+                              }}
+                              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
+                            >
+                              <MdDownload className="w-4 h-4 mr-2" />
+                              Download
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-10 h-full">
+                      <BsFileEarmarkText className="w-16 h-16 text-gray-300 mb-4" />
+                      <p className="text-gray-600 mb-2">No document available</p>
+                      <p className="text-sm text-gray-500">The document URL is empty or invalid</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedApplications([]);
+          setBulkStatus('');
+        }}
+        onConfirm={deleteJob}
+        title={`Delete ${selectedApplications.length > 1 ? 'Applications' : 'Application'}`}
+        message={`Are you sure you want to delete ${selectedApplications.length} selected applicaion(s)? This action cannot be undone.`}
+        loading={deleteLoading}
+      />
     </>
   );
 };
