@@ -304,103 +304,93 @@ const CareerManagementTable: React.FC = () => {
 
   // Handle Excel download
   const handleDownloadExcel = async () => {
-    const academicIdToUse = user?.role === 'CustomerAdmin' ? user.academic_id : filters.academic_id;
+  const academicIdToUse = user?.role === 'CustomerAdmin' ? user.academic_id : filters.academic_id;
 
-    if (!academicIdToUse) {
-      toast.error('Please select an academic first');
-      return;
+  if (!academicIdToUse) {
+    toast.error('Please select an academic first');
+    return;
+  }
+
+  setDownloadLoading(true);
+  try {
+    const requestBody: any = {
+      academic_id: academicIdToUse,
+      s_id: user?.id || '',
+      jobs: filters.jobs || '',
+      refference_id: filters.refference_id || '',
+      job_title: filters.job_title || '',
+      experience: filters.experience || '',
+      qualification: filters.qualification || '',
+      status: filters.status || '',
+      search: filters.search || '',
+    };
+
+    // Add cdFilters if any exist
+    if (Object.keys(cdFilters).length > 0) {
+      requestBody.cdFilters = cdFilters;
     }
 
-    setDownloadLoading(true);
-    try {
-      const requestBody: any = {
-        academic_id: academicIdToUse,
-        s_id: user?.id || '',
-        jobs: filters.jobs || '',
-        refference_id: filters.refference_id || '',
-        job_title: filters.job_title || '',
-        experience: filters.experience || '',
-        qualification: filters.qualification || '',
-        status: filters.status || '',
-        search: filters.search || '',
-      };
+    console.log('Downloading Excel with:', requestBody);
 
-      // Add cdFilters if any exist
-      if (Object.keys(cdFilters).length > 0) {
-        requestBody.cdFilters = cdFilters;
+    const response = await axios.post(
+      `${apiUrl}/${user?.role}/CareerApplication/download-career-application`,
+      requestBody,
+      {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    if (response.data?.success && response.data?.data) {
+      const { filename, excel_base64 } = response.data.data;
+
+      // Decode base64 string to binary
+      const binaryString = atob(excel_base64);
+      const bytes = new Uint8Array(binaryString.length);
+
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
       }
 
-      console.log('Downloading Excel with:', requestBody);
-
-      const response = await axios.post(
-        `${apiUrl}/${user?.role}/CareerApplication/download-career-application`,
-        requestBody,
-        {
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-            'Content-Type': 'application/json',
-          },
-          responseType: 'blob',
-        },
-      );
-
-      // Create blob and download
-      const blob = new Blob([response.data.excel_base64], {
+      // Create blob from bytes
+      const blob = new Blob([bytes], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
-      
+
+      // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      
-      // Get filename from content-disposition header or use default
-      const contentDisposition = response.headers['content-disposition'];
-      let filename = response.data.filename || 'career-applications.xlsx';
-      
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
-        if (filenameMatch && filenameMatch[1]) {
-          filename = filenameMatch[1];
-        }
-      }
-      
-      link.setAttribute('download', filename);
+      link.setAttribute('download', filename || 'career-applications.xlsx');
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
 
       toast.success('Excel file downloaded successfully!');
-    } catch (error: any) {
-      console.error('Error downloading Excel:', error);
-
-      if (error.response?.status === 404) {
-        toast.error('No data found to export');
-      } else if (error.response?.status === 500) {
-        toast.error('Server error while generating Excel file');
-      } else if (error.response?.data?.message) {
-        // Try to read error message from blob
-        if (error.response.data instanceof Blob) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            try {
-              const errorData = JSON.parse(reader.result as string);
-              toast.error(errorData.message || 'Failed to download Excel file');
-            } catch {
-              toast.error('Failed to download Excel file');
-            }
-          };
-          reader.readAsText(error.response.data);
-        } else {
-          toast.error(error.response.data.message);
-        }
-      } else {
-        toast.error('Failed to download Excel file');
-      }
-    } finally {
-      setDownloadLoading(false);
+    } else {
+      throw new Error(response.data?.message || 'Failed to generate Excel file');
     }
-  };
+  } catch (error: any) {
+    console.error('Error downloading Excel:', error);
+
+    if (error.response?.status === 404) {
+      toast.error('No data found to export');
+    } else if (error.response?.status === 500) {
+      toast.error('Server error while generating Excel file');
+    } else if (error.response?.data?.message) {
+      toast.error(error.response.data.message);
+    } else if (error.message) {
+      toast.error(error.message);
+    } else {
+      toast.error('Failed to download Excel file');
+    }
+  } finally {
+    setDownloadLoading(false);
+  }
+};
 
   // Initial setup - runs only once
   useEffect(() => {
