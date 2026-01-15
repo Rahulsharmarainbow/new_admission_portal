@@ -7,10 +7,6 @@ import {
   Button,
   Tooltip,
   Checkbox,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Modal,
 } from 'flowbite-react';
 import Select from 'react-select';
 import axios from 'axios';
@@ -25,6 +21,7 @@ import CareerDropdown from 'src/Frontend/Common/CareerDropdown';
 import DetailsModal from './components/DetailsModal';
 import EditModal from './components/EditModal';
 import DeleteConfirmationModal from 'src/Frontend/Common/DeleteConfirmationModal';
+import CareerFilterSidebar from './components/CareerFilterSidebar';
 
 interface CareerApplication {
   refference_id: string;
@@ -61,6 +58,9 @@ interface StatusOption {
 }
 
 interface Filters {
+  refference_id: any;
+  jobs: any;
+  reference_id: any;
   page: number;
   rowsPerPage: number;
   order: 'asc' | 'desc';
@@ -68,6 +68,13 @@ interface Filters {
   search: string;
   academic_id: string;
   status: string;
+  job_title: string;
+  experience: string;
+  qualification: string;
+}
+
+interface CdFilters {
+  [key: string]: string | string[];
 }
 
 const CareerManagementTable: React.FC = () => {
@@ -81,10 +88,13 @@ const CareerManagementTable: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [applications, setApplications] = useState<CareerApplication[]>([]);
   const [loading, setLoading] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [statusOptions, setStatusOptions] = useState<StatusOption[]>([]);
+  const [showFilterSidebar, setShowFilterSidebar] = useState(false);
+  const [cdFilters, setCdFilters] = useState<CdFilters>({});
 
-  // Initialize filters with user data if CustomerAdmin
-  const [filters, setFilters] = useState<Filters>(() => {
+  // Initialize filters
+  const [filters, setFilters] = useState<Filters>(() => {    
     const baseFilters = {
       page: 0,
       rowsPerPage: 10,
@@ -93,11 +103,16 @@ const CareerManagementTable: React.FC = () => {
       search: '',
       academic_id: '',
       status: '',
+      jobs: '',
+      refference_id: '',
+      job_title: '',
+      experience: '',
+      qualification: '',
     };
 
     // Set academic_id for CustomerAdmin from user data
     if (user?.role === 'CustomerAdmin' && user?.academic_id) {
-      baseFilters.academic_id = user.academic_id;
+      baseFilters.academic_id = user.academic_id.toString();
     }
 
     return baseFilters;
@@ -155,6 +170,18 @@ const CareerManagementTable: React.FC = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
   const apiAssetsUrl = import.meta.env.VITE_ASSET_URL;
   const debouncedSearch = useDebounce(filters.search, 500);
+
+  // Calculate active filters count
+  const activeFiltersCount = [
+    filters.academic_id,
+    filters.status,
+    filters.refference_id,
+    filters.jobs,
+    filters.job_title,
+    filters.experience,
+    filters.qualification,
+    ...Object.values(cdFilters).filter(value => value && value.toString().trim() !== '')
+  ].filter(value => value && value.toString().trim() !== '').length;
 
   // Fetch status options - only once and when academic_id changes
   const fetchStatusOptions = async (academicId?: string) => {
@@ -232,6 +259,16 @@ const CareerManagementTable: React.FC = () => {
       // Add optional filters
       if (filters.search) requestBody.search = filters.search;
       if (filters.status) requestBody.status = filters.status;
+      if (filters.jobs) requestBody.jobs = filters.jobs;
+      if (filters.refference_id) requestBody.refference_id = filters.refference_id;
+      if (filters.job_title) requestBody.job_title = filters.job_title;
+      if (filters.experience) requestBody.experience = filters.experience;
+      if (filters.qualification) requestBody.qualification = filters.qualification;
+
+      // Add cdFilters if any exist
+      if (Object.keys(cdFilters).length > 0) {
+        requestBody.cdFilters = cdFilters;
+      }
 
       console.log('Fetching applications with:', requestBody);
 
@@ -262,6 +299,106 @@ const CareerManagementTable: React.FC = () => {
       toast.error('Failed to fetch career applications');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle Excel download
+  const handleDownloadExcel = async () => {
+    const academicIdToUse = user?.role === 'CustomerAdmin' ? user.academic_id : filters.academic_id;
+
+    if (!academicIdToUse) {
+      toast.error('Please select an academic first');
+      return;
+    }
+
+    setDownloadLoading(true);
+    try {
+      const requestBody: any = {
+        academic_id: academicIdToUse,
+        s_id: user?.id || '',
+        jobs: filters.jobs || '',
+        refference_id: filters.refference_id || '',
+        job_title: filters.job_title || '',
+        experience: filters.experience || '',
+        qualification: filters.qualification || '',
+        status: filters.status || '',
+        search: filters.search || '',
+      };
+
+      // Add cdFilters if any exist
+      if (Object.keys(cdFilters).length > 0) {
+        requestBody.cdFilters = cdFilters;
+      }
+
+      console.log('Downloading Excel with:', requestBody);
+
+      const response = await axios.post(
+        `${apiUrl}/${user?.role}/CareerApplication/download-career-application`,
+        requestBody,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            'Content-Type': 'application/json',
+          },
+          responseType: 'blob',
+        },
+      );
+
+      // Create blob and download
+      const blob = new Blob([response.data.excel_base64], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Get filename from content-disposition header or use default
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = response.data.filename || 'career-applications.xlsx';
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success('Excel file downloaded successfully!');
+    } catch (error: any) {
+      console.error('Error downloading Excel:', error);
+
+      if (error.response?.status === 404) {
+        toast.error('No data found to export');
+      } else if (error.response?.status === 500) {
+        toast.error('Server error while generating Excel file');
+      } else if (error.response?.data?.message) {
+        // Try to read error message from blob
+        if (error.response.data instanceof Blob) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const errorData = JSON.parse(reader.result as string);
+              toast.error(errorData.message || 'Failed to download Excel file');
+            } catch {
+              toast.error('Failed to download Excel file');
+            }
+          };
+          reader.readAsText(error.response.data);
+        } else {
+          toast.error(error.response.data.message);
+        }
+      } else {
+        toast.error('Failed to download Excel file');
+      }
+    } finally {
+      setDownloadLoading(false);
     }
   };
 
@@ -305,6 +442,12 @@ const CareerManagementTable: React.FC = () => {
     debouncedSearch,
     filters.academic_id,
     filters.status,
+    filters.jobs,
+    filters.refference_id,
+    filters.job_title,
+    filters.experience,
+    filters.qualification,
+    cdFilters,
   ]);
 
   // Fetch status options when academic_id changes (for SuperAdmin)
@@ -393,9 +536,10 @@ const CareerManagementTable: React.FC = () => {
     }
   };
 
+  // Delete applications
   const deleteJob = async () => {
     if (selectedApplications.length === 0) {
-      toast.error('Please select at least one job to delete');
+      toast.error('Please select at least one application to delete');
       return;
     }
 
@@ -418,14 +562,14 @@ const CareerManagementTable: React.FC = () => {
       if (response.data?.status === true) {
         toast.success(
           response.data?.message ||
-            `${selectedApplications.length} job(s) application deleted successfully!`,
+            `${selectedApplications.length} application(s) deleted successfully!`,
         );
         setShowDeleteModal(false);
         setSelectedApplications([]);
         setBulkStatus('');
         fetchApplications();
       } else {
-        toast.error(response.data?.message || 'Failed to delete Application');
+        toast.error(response.data?.message || 'Failed to delete application');
       }
     } catch (error: any) {
       console.error('Error deleting job:', error);
@@ -514,6 +658,52 @@ const CareerManagementTable: React.FC = () => {
     }));
   };
 
+  // Handle filter change from sidebar
+  const handleFilterChange = (newFilters: Partial<Filters>, newCdFilters?: CdFilters) => {
+    setFilters((prev) => ({
+      ...prev,
+      ...newFilters,
+      page: 0,
+    }));
+    
+    if (newCdFilters) {
+      setCdFilters(newCdFilters);
+    }
+  };
+
+  // Clear all filters
+  const handleClearFilters = () => {
+    const currentYear = new Date().getFullYear().toString();
+    
+    setFilters({
+      page: 0,
+      rowsPerPage: 10,
+      order: 'desc',
+      orderBy: 'refference_id',
+      search: '',
+      academic_id: user?.role === 'CustomerAdmin' ? user.academic_id.toString() : '',
+      status: '',
+      jobs: '',
+      refference_id: '',
+      job_title: '',
+      experience: '',
+      qualification: '',
+    });
+    
+    setCdFilters({});
+    setSort({ key: 'refference_id', direction: 'desc' });
+    setSelectedApplications([]);
+    setBulkStatus('');
+
+    // Reset status options fetched flag
+    statusOptionsFetchedRef.current = false;
+
+    // Fetch fresh status options
+    if (user?.role === 'CustomerAdmin' && user?.academic_id) {
+      fetchStatusOptions(user.academic_id);
+    }
+  };
+
   // Handle sort
   const handleSort = (key: string) => {
     const direction = sort.key === key && sort.direction === 'asc' ? 'desc' : 'asc';
@@ -560,30 +750,6 @@ const CareerManagementTable: React.FC = () => {
       isOpen: true,
       data: application,
     });
-  };
-
-  // Clear all filters
-  const handleClearFilters = () => {
-    setFilters({
-      page: 0,
-      rowsPerPage: 10,
-      order: 'desc',
-      orderBy: 'refference_id',
-      search: '',
-      academic_id: user?.role === 'CustomerAdmin' ? user.academic_id : '',
-      status: '',
-    });
-    setSort({ key: 'refference_id', direction: 'desc' });
-    setSelectedApplications([]);
-    setBulkStatus('');
-
-    // Reset status options fetched flag
-    statusOptionsFetchedRef.current = false;
-
-    // Fetch fresh status options
-    if (user?.role === 'CustomerAdmin' && user?.academic_id) {
-      fetchStatusOptions(user.academic_id);
-    }
   };
 
   // Handle checkbox selection
@@ -640,6 +806,16 @@ const CareerManagementTable: React.FC = () => {
     value: option.value.toString(),
     label: option.name,
   }));
+
+  // Get year options for filter
+  const getYearOptions = (): string[] => {
+    const currentYear = new Date().getFullYear();
+    const years: string[] = [];
+    for (let y = currentYear; y >= currentYear - 5; y--) {
+      years.push(y.toString());
+    }
+    return years;
+  };
 
   return (
     <>
@@ -748,6 +924,39 @@ const CareerManagementTable: React.FC = () => {
                   </Button>
                 </div>
               )}
+            </div>
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              {/* Filter Button with Badge */}
+              <Button
+                onClick={() => setShowFilterSidebar(!showFilterSidebar)}
+                className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 relative p-3 hover:text-blue-600"
+              >
+                <MdFilterList className="w-5 h-5" />
+                {activeFiltersCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </Button>
+
+              {/* Download Button */}
+              <Button
+                onClick={handleDownloadExcel}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={downloadLoading || !filters.academic_id}
+              >
+                {downloadLoading ? (
+                  <>
+                    <TbLoader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Downloading...
+                  </>
+                ) : (
+                  <>
+                    <MdDownload className="w-4 h-4" />
+                    <span>Download Excel</span>
+                  </>
+                )}
+              </Button>
             </div>
           </div>
 
@@ -959,7 +1168,7 @@ const CareerManagementTable: React.FC = () => {
                                 ? 'Try adjusting your search criteria'
                                 : 'No applications available for the selected filters'}
                             </p>
-                            {(filters.search || filters.status) && (
+                            {(filters.search || filters.status || activeFiltersCount > 0) && (
                               <Button
                                 onClick={handleClearFilters}
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -992,6 +1201,17 @@ const CareerManagementTable: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Filter Sidebar */}
+      <CareerFilterSidebar
+        isOpen={showFilterSidebar}
+        onClose={() => setShowFilterSidebar(false)}
+        filters={filters}
+        cdFilters={cdFilters}
+        onFilterChange={handleFilterChange}
+        onClearFilters={handleClearFilters}
+        yearOptions={getYearOptions()}
+      />
 
       {/* Details Modal */}
       <DetailsModal
@@ -1430,6 +1650,7 @@ const CareerManagementTable: React.FC = () => {
           </div>
         </div>
       )}
+      
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
@@ -1440,7 +1661,7 @@ const CareerManagementTable: React.FC = () => {
         }}
         onConfirm={deleteJob}
         title={`Delete ${selectedApplications.length > 1 ? 'Applications' : 'Application'}`}
-        message={`Are you sure you want to delete ${selectedApplications.length} selected applicaion(s)? This action cannot be undone.`}
+        message={`Are you sure you want to delete ${selectedApplications.length} selected application(s)? This action cannot be undone.`}
         loading={deleteLoading}
       />
     </>

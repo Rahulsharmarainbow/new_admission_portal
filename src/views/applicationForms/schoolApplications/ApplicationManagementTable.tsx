@@ -368,91 +368,91 @@ const ApplicationManagementTable: React.FC = () => {
   };
 
   // Handle download Excel
-  const handleDownloadExcel = async () => {
-    try {
-      setLoading2(true);
+    const handleDownloadExcel = async () => {
+      try {
+        setLoading2(true);
 
-      const requestBody: any = {
-        academic_id: filters.academic_id || '',
-        s_id: user?.id || '',
-        classAppliedFor: filters.classAppliedFor || '',
-        startDate: filters.fromDate || '',
-        endDate: filters.toDate || '',
-        caste: filters.caste || '',
-        annual: filters.annual || '',
-        gender: filters.gender || '',
-        special: filters.special || '',
-        state: filters.state || '',
-        district: filters.district || '',
-        localarea: filters.localarea || '',
-        contact: filters.contact || '',
-        applicationNumber: filters.applicationNumber || '',
-        paymentStatus: filters.paymentStatus || '',
-        email: filters.search.includes('@') ? filters.search : '',
-        year: filters.year || '',
-      };
+        const requestBody: any = {
+          academic_id: filters.academic_id || '',
+          s_id: user?.id || '',
+          classAppliedFor: filters.classAppliedFor || '',
+          startDate: filters.fromDate || '',
+          endDate: filters.toDate || '',
+          caste: filters.caste || '',
+          annual: filters.annual || '',
+          gender: filters.gender || '',
+          special: filters.special || '',
+          state: filters.state || '',
+          district: filters.district || '',
+          localarea: filters.localarea || '',
+          contact: filters.contact || '',
+          applicationNumber: filters.applicationNumber || '',
+          paymentStatus: filters.paymentStatus || '',
+          email: filters.search.includes('@') ? filters.search : '',
+          year: filters.year || '',
+        };
 
-      // Add cdFilters if they exist
-      if (Object.keys(cdFilters).length > 0) {
-        requestBody.cdFilters = cdFilters;
-      }
-
-      const response = await axios.post(
-        `${apiUrl}/${user?.role}/Applications/Export-school-Applications`,
-        requestBody,
-        {
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-            accept: '/',
-            'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-
-      if (response.data.success && response.data.data) {
-        const { filename, excel_base64 } = response.data.data;
-
-        const binaryString = atob(excel_base64);
-        const bytes = new Uint8Array(binaryString.length);
-
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
+        // Add cdFilters if they exist
+        if (Object.keys(cdFilters).length > 0) {
+          requestBody.cdFilters = cdFilters;
         }
 
-        const blob = new Blob([bytes], {
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        });
+        const response = await axios.post(
+          `${apiUrl}/${user?.role}/Applications/Export-school-Applications`,
+          requestBody,
+          {
+            headers: {
+              Authorization: `Bearer ${user?.token}`,
+              accept: '/',
+              'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
+              'Content-Type': 'application/json',
+            },
+          },
+        );
 
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', filename || 'school-applications.xlsx');
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+        if (response.data.success && response.data.data) {
+          const { filename, excel_base64 } = response.data.data;
 
-        toast.success('Excel file downloaded successfully!', { id: 'download-excel' });
-      } else {
-        throw new Error(response.data.message || 'Failed to generate Excel file');
+          const binaryString = atob(excel_base64);
+          const bytes = new Uint8Array(binaryString.length);
+
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+
+          const blob = new Blob([bytes], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          });
+
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', filename || 'school-applications.xlsx');
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(url);
+
+          toast.success('Excel file downloaded successfully!', { id: 'download-excel' });
+        } else {
+          throw new Error(response.data.message || 'Failed to generate Excel file');
+        }
+      } catch (error: any) {
+        console.error('Error downloading Excel:', error);
+
+        if (error.response?.status === 404) {
+          toast.error('No data found to export', { id: 'download-excel' });
+        } else if (error.response?.status === 500) {
+          toast.error('Server error while generating Excel file', { id: 'download-excel' });
+        } else if (error.response?.data?.message) {
+          toast.error(error.response.data.message, { id: 'download-excel' });
+        } else {
+          toast.error('Failed to download Excel file', { id: 'download-excel' });
+        }
+      } finally {
+        setLoading2(false);
       }
-    } catch (error: any) {
-      console.error('Error downloading Excel:', error);
-
-      if (error.response?.status === 404) {
-        toast.error('No data found to export', { id: 'download-excel' });
-      } else if (error.response?.status === 500) {
-        toast.error('Server error while generating Excel file', { id: 'download-excel' });
-      } else if (error.response?.data?.message) {
-        toast.error(error.response.data.message, { id: 'download-excel' });
-      } else {
-        toast.error('Failed to download Excel file', { id: 'download-excel' });
-      }
-    } finally {
-      setLoading2(false);
-    }
-  };
+    };
 
   // Handle filter change from sidebar
   const handleFilterChange = (newFilters: Partial<Filters>, newCdFilters?: CdFilters) => {
