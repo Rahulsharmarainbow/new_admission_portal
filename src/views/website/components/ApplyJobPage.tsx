@@ -267,7 +267,7 @@ export const ApplyJobPage: React.FC = () => {
 
   useEffect(() => {
     if (institute) {
-      document.title = `${institute.header.academic_name}`;
+      document.title = `${jobId}`;
 
       const setFavicon = (faviconUrl: string) => {
         const existingLinks = document.querySelectorAll('link[rel*="icon"]');
