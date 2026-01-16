@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from 'flowbite-react';
-import { MdClose } from 'react-icons/md';
+import { MdClose, MdDownload } from 'react-icons/md';
 import { CareerApplication } from './CareerManagementTable';
+import { TbLoader2 } from 'react-icons/tb';
+import toast from 'react-hot-toast';
+import { set } from 'lodash';
 
 interface DetailsModalProps {
   isOpen: boolean;
@@ -11,6 +14,38 @@ interface DetailsModalProps {
 
 const DetailsModal: React.FC<DetailsModalProps> = ({ isOpen, onClose, application }) => {
   if (!isOpen || !application) return null;
+  const [downloadLoading, setDownloadLoading] = useState(false);
+
+    const handleDownloadResume = async (application: CareerApplication) => {
+      const resumeUrl = application.candidate_details?.document || application.resume;
+      if (!resumeUrl) {
+        toast.error('No resume available for download');
+        return;
+      }
+  
+      try { 
+        setDownloadLoading(true); 
+        const fullUrl = `${resumeUrl}`;
+        const response = await fetch(fullUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const filename = resumeUrl.split('/').pop() || 'resume.pdf';
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+  
+        toast.success('Resume downloaded successfully');
+      } catch (error) {
+        console.error('Error downloading resume:', error);
+        toast.error('Failed to download resume');
+      } finally {
+        setDownloadLoading(false);
+      }
+    };
 
   return (
     <div className="fixed inset-0 backdrop-blur-md bg-white/10 bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -109,11 +144,28 @@ const DetailsModal: React.FC<DetailsModalProps> = ({ isOpen, onClose, applicatio
                   <div>
                     <label className="block text-sm font-medium text-gray-500">Resume</label>
                     {application.resume || application.candidate_details?.document ? (
-                      <div className="mt-1 min-w-5">
-                        <span className="text-sm max-w-full text-blue-600 hover:text-blue-800 cursor-pointer">
-                          {application.resume}
-                        </span>
-                      </div>
+                      // <div className="mt-1 min-w-5">
+                      //   <span className="text-sm max-w-full text-blue-600 hover:text-blue-800 cursor-pointer">
+                      //     {application.resume}
+                      //   </span>
+                      // </div>
+                      <Button
+                                      onClick={() => handleDownloadResume(application)}
+                                      className="flex items-center mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+                                      disabled={downloadLoading}
+                                    >
+                                      {downloadLoading ? (
+                                        <>
+                                          <TbLoader2 className="w-4 h-4 mr-2 animate-spin" />
+                                          Downloading...
+                                        </>
+                                      ) : (
+                                        <>
+                                          <MdDownload className="w-4 h-4" />
+                                          <span>Download</span>
+                                        </>
+                                      )}
+                                    </Button>
                     ) : (
                       <p className="mt-1 text-sm text-gray-500">No document uploaded</p>
                     )}

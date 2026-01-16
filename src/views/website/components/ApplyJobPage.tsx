@@ -1,24 +1,25 @@
-
-import { useState, useRef, useEffect } from "react";
-import { useSearchParams, useNavigate, useLocation, useParams } from "react-router";
+import { useState, useRef, useEffect } from 'react';
+import { useSearchParams, useNavigate, useLocation, useParams } from 'react-router';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import Header from "./Header";
-import Footer from "./Footer";
+import Header from './Header';
+import Footer from './Footer';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'https://admissionportalbackend.testingscrew.com/public/api';
-const assetUrl = import.meta.env.VITE_ASSET_URL || 'https://admissionportalbackend.testingscrew.com/public';
+const apiUrl =
+  import.meta.env.VITE_API_URL || 'https://admissionportalbackend.testingscrew.com/public/api';
+const assetUrl =
+  import.meta.env.VITE_ASSET_URL || 'https://admissionportalbackend.testingscrew.com/public';
 
 // Configuration for file uploads
 const FILE_UPLOAD_CONFIG = {
   maxSize: 5, // MB - configurable
-  allowedTypes: ["pdf", "doc", "docx"], // configurable
+  allowedTypes: ['pdf', 'doc', 'docx'], // configurable
   maxSizeInBytes: 5 * 1024 * 1024, // 5MB in bytes
   allowedMimeTypes: [
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-  ]
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ],
 };
 
 type FormField = {
@@ -133,7 +134,12 @@ const SuccessPopup: React.FC<{
             className="absolute right-4 top-4 text-slate-400 hover:text-slate-600"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
 
@@ -141,15 +147,23 @@ const SuccessPopup: React.FC<{
           <div className="p-8 text-center">
             {/* Success Icon */}
             <div className="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-emerald-100 mb-6">
-              <svg className="h-12 w-12 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="h-12 w-12 text-emerald-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             </div>
 
             {/* Title */}
-            <h3 className="text-2xl font-bold text-slate-900 mb-2">
-              Application Submitted! 🎉
-            </h3>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">Application Submitted! 🎉</h3>
 
             {/* Message */}
             <p className="text-slate-600 mb-6">
@@ -186,7 +200,7 @@ export const ApplyJobPage: React.FC = () => {
   // Debug logging
   console.log('ApplyJobPage useParams:', { instituteId, jobId, baseUrl });
   console.log('Current URL:', location.pathname);
-  
+
   const [jobDetails, setJobDetails] = useState<JobDetails | null>(null);
   const [institute, setInstitute] = useState<InstituteData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -251,28 +265,26 @@ export const ApplyJobPage: React.FC = () => {
   //   };
   // };
 
-    useEffect(() => {
-      if (institute) {
-        document.title = `${institute.header.academic_name}`;
-        
-        const setFavicon = (faviconUrl: string) => {
-          const existingLinks = document.querySelectorAll('link[rel*="icon"]');
-          existingLinks.forEach(link => link.remove());
-  
-          const link = document.createElement('link');
-          link.rel = 'icon';
-          link.type = 'image/x-icon';
-          link.href = faviconUrl;
-          document.head.appendChild(link);
-        };
-  
-        const faviconUrl = institute.header?.favicon
-          ? `${assetUrl}/${institute.header.favicon}`
-          : '';
-        
-        setFavicon(faviconUrl);
-      }
-    }, [institute]);
+  useEffect(() => {
+    if (institute) {
+      document.title = `${institute.header.academic_name}`;
+
+      const setFavicon = (faviconUrl: string) => {
+        const existingLinks = document.querySelectorAll('link[rel*="icon"]');
+        existingLinks.forEach((link) => link.remove());
+
+        const link = document.createElement('link');
+        link.rel = 'icon';
+        link.type = 'image/x-icon';
+        link.href = faviconUrl;
+        document.head.appendChild(link);
+      };
+
+      const faviconUrl = institute.header?.favicon ? `${assetUrl}/${institute.header.favicon}` : '';
+
+      setFavicon(faviconUrl);
+    }
+  }, [institute]);
 
   // Fetch job details from API
   useEffect(() => {
@@ -294,13 +306,13 @@ export const ApplyJobPage: React.FC = () => {
         }>(
           `${apiUrl}/PublicCareer/get-job-details`,
           {
-            slug : jobId
+            slug: jobId,
           },
           {
             headers: {
               'Content-Type': 'application/json',
             },
-          }
+          },
         );
 
         console.log('Job Details API Response:', response.data);
@@ -360,7 +372,8 @@ export const ApplyJobPage: React.FC = () => {
         }
       } catch (err: any) {
         console.error('Error fetching job details:', err);
-        const errorMessage = err.response?.data?.message || err.message || 'Failed to load job details';
+        const errorMessage =
+          err.response?.data?.message || err.message || 'Failed to load job details';
         setError(errorMessage);
         toast.error(errorMessage);
       } finally {
@@ -375,134 +388,154 @@ export const ApplyJobPage: React.FC = () => {
 
   // Handle dynamic form input changes
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const { name, value, type } = e.target;
 
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
+      setFormData((prev) => ({ ...prev, [name]: checked }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
 
     if (formErrors[name]) {
-      setFormErrors(prev => ({ ...prev, [name]: '' }));
+      setFormErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
- console.log('resume size  ::::', jobDetails?.resume_size);
+  console.log('resume size  ::::', jobDetails?.resume_size);
 
-// File validation function with resume size check
-const validateFile = (file: File, fieldName: string, fieldConfig?: FormField['fileConfig']) => {
-  let isValid = true;
-  let message = '';
-  
-  // Get max file size from jobDetails.resume_size (in MB) or use default
-  const maxSizeMB = jobDetails.resume_size || 10; // Default to 10MB if not set
-  const maxSizeBytes = maxSizeMB * 1024 * 1024; // Convert MB to bytes
-  
-  // Check file size
-  if (file.size > maxSizeBytes) {
-    isValid = false;
-    message = `File size exceeds maximum limit of ${maxSizeMB}MB. Please upload a smaller file.`;
+  // File validation function with resume size check
+  const validateFile = (file: File, fieldName: string, fieldConfig?: FormField['fileConfig']) => {
+    let isValid = true;
+    let message = '';
+    const maxSizeMB = jobDetails.resume_size || 15; 
+    const maxSizeBytes = maxSizeMB * 1024 * 1024; 
+
+    // Check file size
+    if (file.size > maxSizeBytes) {
+      isValid = false;
+      message = `File size exceeds maximum limit of ${maxSizeMB}MB. Please upload a smaller file.`;
+      return { isValid, message };
+    }
+
+    // Check file type based on field name or custom config
+    if (fieldName === 'resume') {
+      // Resume specific validation
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain',
+      ];
+
+      const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt'];
+
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+
+      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+        isValid = false;
+        message = `Invalid file type for resume. Please upload PDF, DOC, DOCX, or TXT files only.`;
+      }
+    }
+
+    // Custom validation from fieldConfig if provided
+    if (fieldConfig) {
+      if (fieldConfig.allowedTypes && !fieldConfig.allowedTypes.includes(file.type)) {
+        isValid = false;
+        message =
+          fieldConfig.errorMessage ||
+          `Invalid file type. Allowed types: ${fieldConfig.allowedTypes.join(', ')}`;
+      }
+
+      if (fieldConfig.maxSize && file.size > fieldConfig.maxSize) {
+        isValid = false;
+        message =
+          fieldConfig.errorMessage ||
+          `File size exceeds ${fieldConfig.maxSize / (1024 * 1024)}MB limit.`;
+      }
+    }
+
     return { isValid, message };
-  }
-  
-  // Check file type based on field name or custom config
-  if (fieldName === 'resume') {
-    // Resume specific validation
-    const allowedTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain'
-    ];
-    
-    const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt'];
-    
-    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
-    
-    if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
-      isValid = false;
-      message = `Invalid file type for resume. Please upload PDF, DOC, DOCX, or TXT files only.`;
+  };
+
+  // Handle file input changes with resume size validation
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: string,
+    fieldConfig?: FormField['fileConfig'],
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+
+      // Log file info for debugging
+      console.log('File selected:', {
+        name: file.name,
+        size: file.size,
+        sizeMB: (file.size / (1024 * 1024)).toFixed(2) + 'MB',
+        type: file.type,
+        maxAllowedMB: jobDetails.resume_size || 10,
+      });
+
+      const validation = validateFile(file, fieldName, fieldConfig);
+      if (!validation.isValid) {
+        toast.error(validation.message);
+        e.target.value = ''; // Clear the file input
+        return;
+      }
+
+      setFormData((prev) => ({ ...prev, [fieldName]: file }));
+      toast.success(
+        `${fieldName.replace(/_/g, ' ')} uploaded successfully (${(
+          file.size /
+          (1024 * 1024)
+        ).toFixed(2)}MB)`,
+      );
     }
-  }
-  
-  // Custom validation from fieldConfig if provided
-  if (fieldConfig) {
-    if (fieldConfig.allowedTypes && !fieldConfig.allowedTypes.includes(file.type)) {
-      isValid = false;
-      message = fieldConfig.errorMessage || `Invalid file type. Allowed types: ${fieldConfig.allowedTypes.join(', ')}`;
+  };
+
+  // Handle drag and drop for files with resume size validation
+  const handleDragOver = (e: React.DragEvent, fieldName: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (
+    e: React.DragEvent,
+    fieldName: string,
+    fieldConfig?: FormField['fileConfig'],
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+
+      // Log file info for debugging
+      console.log('File dropped:', {
+        name: file.name,
+        size: file.size,
+        sizeMB: (file.size / (1024 * 1024)).toFixed(2) + 'MB',
+        type: file.type,
+        maxAllowedMB: jobDetails.resume_size || 10,
+      });
+
+      const validation = validateFile(file, fieldName, fieldConfig);
+      if (!validation.isValid) {
+        toast.error(validation.message);
+        return;
+      }
+
+      setFormData((prev) => ({ ...prev, [fieldName]: file }));
+      toast.success(
+        `${fieldName.replace(/_/g, ' ')} uploaded successfully (${(
+          file.size /
+          (1024 * 1024)
+        ).toFixed(2)}MB)`,
+      );
     }
-    
-    if (fieldConfig.maxSize && file.size > fieldConfig.maxSize) {
-      isValid = false;
-      message = fieldConfig.errorMessage || `File size exceeds ${fieldConfig.maxSize / (1024*1024)}MB limit.`;
-    }
-  }
-  
-  return { isValid, message };
-};
-
-// Handle file input changes with resume size validation
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string, fieldConfig?: FormField['fileConfig']) => {
-  if (e.target.files && e.target.files[0]) {
-    const file = e.target.files[0];
-
-    // Log file info for debugging
-    console.log('File selected:', {
-      name: file.name,
-      size: file.size,
-      sizeMB: (file.size / (1024 * 1024)).toFixed(2) + 'MB',
-      type: file.type,
-      maxAllowedMB: jobDetails.resume_size || 10
-    });
-
-    const validation = validateFile(file, fieldName, fieldConfig);
-    if (!validation.isValid) {
-      toast.error(validation.message);
-      e.target.value = ''; // Clear the file input
-      return;
-    }
-
-    setFormData(prev => ({ ...prev, [fieldName]: file }));
-    toast.success(`${fieldName.replace(/_/g, ' ')} uploaded successfully (${(file.size / (1024 * 1024)).toFixed(2)}MB)`);
-  }
-};
-
-// Handle drag and drop for files with resume size validation
-const handleDragOver = (e: React.DragEvent, fieldName: string) => {
-  e.preventDefault();
-  e.stopPropagation();
-};
-
-const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormField['fileConfig']) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-    const file = e.dataTransfer.files[0];
-
-    // Log file info for debugging
-    console.log('File dropped:', {
-      name: file.name,
-      size: file.size,
-      sizeMB: (file.size / (1024 * 1024)).toFixed(2) + 'MB',
-      type: file.type,
-      maxAllowedMB: jobDetails.resume_size || 10
-    });
-
-    const validation = validateFile(file, fieldName, fieldConfig);
-    if (!validation.isValid) {
-      toast.error(validation.message);
-      return;
-    }
-
-    setFormData(prev => ({ ...prev, [fieldName]: file }));
-    toast.success(`${fieldName.replace(/_/g, ' ')} uploaded successfully (${(file.size / (1024 * 1024)).toFixed(2)}MB)`);
-  }
-};
+  };
 
   // Validate form field based on validation rules
   const validateField = (field: FormField, value: any): string => {
@@ -562,10 +595,10 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
         { name: 'name', label: 'Name', required: true, type: 'text' },
         { name: 'email', label: 'Email', required: true, type: 'email', validation: 'email' },
         { name: 'mobile', label: 'Mobile', required: true, type: 'tel', validation: 'mobile' },
-        { name: 'resume', label: 'Resume', required: true, type: 'file' }
+        { name: 'resume', label: 'Resume', required: true, type: 'file' },
       ];
 
-      defaultFields.forEach(field => {
+      defaultFields.forEach((field) => {
         const value = formData[field.name];
         if (field.required && !value) {
           errors[field.name] = `${field.label} is required`;
@@ -594,12 +627,12 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
     e.preventDefault();
 
     if (!jobDetails) {
-      toast.error("Job information is not available. Please try again.");
+      toast.error('Job information is not available. Please try again.');
       return;
     }
 
     if (!validateForm()) {
-      toast.error("Please fix the errors in the form");
+      toast.error('Please fix the errors in the form');
       return;
     }
 
@@ -611,7 +644,7 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
       formDataToSend.append('academic_id', jobDetails.academic_id.toString());
       formDataToSend.append('job_id', jobId || '');
 
-      Object.keys(formData).forEach(key => {
+      Object.keys(formData).forEach((key) => {
         const value = formData[key];
 
         if (value instanceof File) {
@@ -627,16 +660,12 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
         application_id?: number;
         reference_id?: string;
         job_id?: number;
-      }>(
-        `${apiUrl}/PublicCareer/add-career-application`,
-        formDataToSend,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'Accept': 'application/json'
-          },
-        }
-      );
+      }>(`${apiUrl}/PublicCareer/add-career-application`, formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Accept: 'application/json',
+        },
+      });
 
       console.log('Submit Application Response:', response.data);
 
@@ -678,7 +707,6 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
         }
         setFormData(resetFormData);
         setFormErrors({});
-
       } else {
         toast.error(response.data?.message || 'Failed to submit application');
       }
@@ -686,8 +714,8 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
       console.error('Submission error:', error);
       toast.error(
         error.response?.data?.message ||
-        error.response?.data?.error ||
-        "There was an error submitting your application. Please try again."
+          error.response?.data?.error ||
+          'There was an error submitting your application. Please try again.',
       );
     } finally {
       setIsSubmitting(false);
@@ -720,8 +748,9 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
               required={field.required === 1}
               value={formData[field.name] || ''}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3.5 border ${error ? 'border-red-300' : 'border-slate-300'
-                } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400`}
+              className={`w-full px-4 py-3.5 border ${
+                error ? 'border-red-300' : 'border-slate-300'
+              } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400`}
               placeholder={field.placeholder}
             />
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
@@ -740,8 +769,9 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
               value={formData[field.name] || ''}
               onChange={handleInputChange}
               rows={4}
-              className={`w-full px-4 py-3.5 border ${error ? 'border-red-300' : 'border-slate-300'
-                } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400 resize-none`}
+              className={`w-full px-4 py-3.5 border ${
+                error ? 'border-red-300' : 'border-slate-300'
+              } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400 resize-none`}
               placeholder={field.placeholder}
             />
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
@@ -760,8 +790,9 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
               required={field.required === 1}
               value={formData[field.name] || ''}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3.5 border ${error ? 'border-red-300' : 'border-slate-300'
-                } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400 bg-white`}
+              className={`w-full px-4 py-3.5 border ${
+                error ? 'border-red-300' : 'border-slate-300'
+              } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400 bg-white`}
             >
               <option value="">Select {field.label}</option>
               {field.options?.map((option, index) => (
@@ -776,9 +807,9 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
 
       case 'file':
       case 'file_button':
-        const fieldMaxSize = (field.fileConfig?.maxSize || uploadConfig.maxSize);
-        const fieldAllowedTypes = (field.fileConfig?.allowedTypes || uploadConfig.allowedTypes);
-        const allowedTypesStr = fieldAllowedTypes.map(t => t.toUpperCase()).join(', ');
+        const fieldMaxSize = field.fileConfig?.maxSize || uploadConfig.maxSize;
+        const fieldAllowedTypes = field.fileConfig?.allowedTypes || uploadConfig.allowedTypes;
+        const allowedTypesStr = fieldAllowedTypes.map((t) => t.toUpperCase()).join(', ');
 
         return (
           <div key={field.name}>
@@ -791,38 +822,41 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
               onDrop={(e) => handleDrop(e, field.name, field.fileConfig)}
             >
               <input
-                ref={el => fileInputRefs.current[field.name] = el}
+                ref={(el) => (fileInputRefs.current[field.name] = el)}
                 type="file"
                 name={field.name}
-                accept={fieldAllowedTypes.map(t => `.${t.toLowerCase()}`).join(',')}
+                accept={fieldAllowedTypes.map((t) => `.${t.toLowerCase()}`).join(',')}
                 required={field.required === 1}
                 onChange={(e) => handleFileChange(e, field.name, field.fileConfig)}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
               <div
-                className={`flex items-center justify-between px-6 py-5 border-2 ${formData[field.name]
-                    ? "border-emerald-500 bg-emerald-50"
+                className={`flex items-center justify-between px-6 py-5 border-2 ${
+                  formData[field.name]
+                    ? 'border-emerald-500 bg-emerald-50'
                     : error
-                      ? "border-red-300 bg-red-50"
-                      : "border-dashed border-slate-300"
-                  } rounded-2xl hover:border-emerald-400 transition-all cursor-pointer bg-slate-50 hover:bg-emerald-50`}
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-dashed border-slate-300'
+                } rounded-2xl hover:border-emerald-400 transition-all cursor-pointer bg-slate-50 hover:bg-emerald-50`}
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className={`p-3 rounded-xl ${formData[field.name]
-                        ? "bg-emerald-100"
+                    className={`p-3 rounded-xl ${
+                      formData[field.name]
+                        ? 'bg-emerald-100'
                         : error
-                          ? "bg-red-100"
-                          : "bg-slate-100"
-                      }`}
+                        ? 'bg-red-100'
+                        : 'bg-slate-100'
+                    }`}
                   >
                     <svg
-                      className={`w-5 h-5 ${formData[field.name]
-                          ? "text-emerald-600"
+                      className={`w-5 h-5 ${
+                        formData[field.name]
+                          ? 'text-emerald-600'
                           : error
-                            ? "text-red-600"
-                            : "text-slate-500"
-                        }`}
+                          ? 'text-red-600'
+                          : 'text-slate-500'
+                      }`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -839,12 +873,12 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
                     <p className="font-semibold text-slate-900 text-sm">
                       {formData[field.name] instanceof File
                         ? formData[field.name].name
-                        : field.placeholder || "Choose File"}
+                        : field.placeholder || 'Choose File'}
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
                       {formData[field.name] instanceof File
                         ? `Uploaded (${(formData[field.name].size / 1024 / 1024).toFixed(2)} MB)`
-                        : "No file chosen"}
+                        : 'No file chosen'}
                     </p>
                   </div>
                 </div>
@@ -894,8 +928,9 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
               required={field.required === 1}
               value={formData[field.name] || ''}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3.5 border ${error ? 'border-red-300' : 'border-slate-300'
-                } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400`}
+              className={`w-full px-4 py-3.5 border ${
+                error ? 'border-red-300' : 'border-slate-300'
+              } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400`}
               placeholder={field.placeholder}
             />
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
@@ -906,7 +941,11 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
 
   // Render dynamic form sections
   const renderDynamicForm = () => {
-    if (!jobDetails?.result || !Array.isArray(jobDetails.result) || jobDetails.result.length === 0) {
+    if (
+      !jobDetails?.result ||
+      !Array.isArray(jobDetails.result) ||
+      jobDetails.result.length === 0
+    ) {
       // Fallback to default form
       return (
         <div className="space-y-6">
@@ -921,8 +960,9 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
                 required
                 value={formData.name || ''}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3.5 border ${formErrors.name ? 'border-red-300' : 'border-slate-300'
-                  } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400`}
+                className={`w-full px-4 py-3.5 border ${
+                  formErrors.name ? 'border-red-300' : 'border-slate-300'
+                } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400`}
                 placeholder="Your full name"
               />
               {formErrors.name && <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>}
@@ -938,8 +978,9 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
                 required
                 value={formData.email || ''}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3.5 border ${formErrors.email ? 'border-red-300' : 'border-slate-300'
-                  } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400`}
+                className={`w-full px-4 py-3.5 border ${
+                  formErrors.email ? 'border-red-300' : 'border-slate-300'
+                } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400`}
                 placeholder="your.email@example.com"
               />
               {formErrors.email && <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>}
@@ -957,17 +998,18 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
                 required
                 value={formData.mobile || ''}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3.5 border ${formErrors.mobile ? 'border-red-300' : 'border-slate-300'
-                  } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400`}
+                className={`w-full px-4 py-3.5 border ${
+                  formErrors.mobile ? 'border-red-300' : 'border-slate-300'
+                } rounded-2xl focus:ring-3 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm placeholder-slate-500 hover:border-slate-400`}
                 placeholder="Your phone number"
               />
-              {formErrors.mobile && <p className="mt-1 text-sm text-red-600">{formErrors.mobile}</p>}
+              {formErrors.mobile && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.mobile}</p>
+              )}
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Experience
-              </label>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Experience</label>
               <input
                 type="text"
                 name="experience"
@@ -980,9 +1022,7 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-900 mb-2">
-              Address
-            </label>
+            <label className="block text-sm font-semibold text-slate-900 mb-2">Address</label>
             <textarea
               name="address"
               value={formData.address || ''}
@@ -1003,38 +1043,41 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
               onDrop={(e) => handleDrop(e, 'resume')}
             >
               <input
-                ref={el => fileInputRefs.current['resume'] = el}
+                ref={(el) => (fileInputRefs.current['resume'] = el)}
                 type="file"
                 name="resume"
-                accept={uploadConfig.allowedTypes.map(t => `.${t.toLowerCase()}`).join(',')}
+                accept={uploadConfig.allowedTypes.map((t) => `.${t.toLowerCase()}`).join(',')}
                 required
                 onChange={(e) => handleFileChange(e, 'resume')}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
               <div
-                className={`flex items-center justify-between px-6 py-5 border-2 ${formData['resume']
-                    ? "border-emerald-500 bg-emerald-50"
+                className={`flex items-center justify-between px-6 py-5 border-2 ${
+                  formData['resume']
+                    ? 'border-emerald-500 bg-emerald-50'
                     : formErrors['resume']
-                      ? "border-red-300 bg-red-50"
-                      : "border-dashed border-slate-300"
-                  } rounded-2xl hover:border-emerald-400 transition-all cursor-pointer bg-slate-50 hover:bg-emerald-50`}
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-dashed border-slate-300'
+                } rounded-2xl hover:border-emerald-400 transition-all cursor-pointer bg-slate-50 hover:bg-emerald-50`}
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className={`p-3 rounded-xl ${formData['resume']
-                        ? "bg-emerald-100"
+                    className={`p-3 rounded-xl ${
+                      formData['resume']
+                        ? 'bg-emerald-100'
                         : formErrors['resume']
-                          ? "bg-red-100"
-                          : "bg-slate-100"
-                      }`}
+                        ? 'bg-red-100'
+                        : 'bg-slate-100'
+                    }`}
                   >
                     <svg
-                      className={`w-5 h-5 ${formData['resume']
-                          ? "text-emerald-600"
+                      className={`w-5 h-5 ${
+                        formData['resume']
+                          ? 'text-emerald-600'
                           : formErrors['resume']
-                            ? "text-red-600"
-                            : "text-slate-500"
-                        }`}
+                          ? 'text-red-600'
+                          : 'text-slate-500'
+                      }`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1051,12 +1094,12 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
                     <p className="font-semibold text-slate-900 text-sm">
                       {formData['resume'] instanceof File
                         ? formData['resume'].name
-                        : "Choose Resume"}
+                        : 'Choose Resume'}
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
                       {formData['resume'] instanceof File
                         ? `Uploaded (${(formData['resume'].size / 1024 / 1024).toFixed(2)} MB)`
-                        : "No file chosen"}
+                        : 'No file chosen'}
                     </p>
                   </div>
                 </div>
@@ -1070,15 +1113,16 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
               </div>
             </div>
             <p className="text-xs text-slate-500 mt-2">
-              {uploadConfig.allowedTypes.map(t => t.toUpperCase()).join(', ')} (Max {uploadConfig.maxSize}MB)
+              {uploadConfig.allowedTypes.map((t) => t.toUpperCase()).join(', ')} (Max{' '}
+              {uploadConfig.maxSize}MB)
             </p>
-            {formErrors['resume'] && <p className="mt-1 text-sm text-red-600">{formErrors['resume']}</p>}
+            {formErrors['resume'] && (
+              <p className="mt-1 text-sm text-red-600">{formErrors['resume']}</p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-900 mb-2">
-              Cover Letter
-            </label>
+            <label className="block text-sm font-semibold text-slate-900 mb-2">Cover Letter</label>
             <textarea
               name="cover_letter"
               value={formData.cover_letter || ''}
@@ -1102,11 +1146,11 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
           return (
             <div
               key={sectionIndex}
-              className={`grid grid-cols-1 ${section.width === '100%' ? 'lg:grid-cols-1' :
-                  'lg:grid-cols-2'
-                } gap-${section.gap || 4}`}
+              className={`grid grid-cols-1 ${
+                section.width === '100%' ? 'lg:grid-cols-1' : 'lg:grid-cols-2'
+              } gap-${section.gap || 4}`}
               style={{
-                justifyContent: section.justify || 'start'
+                justifyContent: section.justify || 'start',
               }}
             >
               {section.children.map((field: FormField) => (
@@ -1154,7 +1198,8 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
 
     const companyName = jobDetails?.company_name || '';
     if (companyName) {
-      const domain = companyName.toLowerCase()
+      const domain = companyName
+        .toLowerCase()
         .replace(/[^\w\s]/g, '')
         .replace(/\s+/g, '');
       return `careers@${domain}.com`;
@@ -1188,8 +1233,18 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
         <ul className="space-y-2">
           {jobDetails.requirements.map((req, index) => (
             <li key={index} className="flex items-start gap-2">
-              <svg className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <span className="text-slate-700">{req}</span>
             </li>
@@ -1211,8 +1266,18 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
         <ul className="space-y-2">
           {jobDetails.responsibilities.map((resp, index) => (
             <li key={index} className="flex items-start gap-2">
-              <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              <svg
+                className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
               </svg>
               <span className="text-slate-700">{resp}</span>
             </li>
@@ -1229,29 +1294,44 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
     const jobLocation = getJobLocation();
     if (jobLocation) {
       metadata.push({
-        label: "Location",
+        label: 'Location',
         value: jobLocation,
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+            />
           </svg>
-        )
+        ),
       });
     }
 
     // Get job type from institute data if available
-    const currentJob = institute?.jobs?.find(job => job.id === parseInt(jobId || '0'));
+    const currentJob = institute?.jobs?.find((job) => job.id === parseInt(jobId || '0'));
     const jobType = currentJob?.job_meta_names?.['Job Type'] || jobDetails?.job_type;
     if (jobType) {
       metadata.push({
-        label: "Job Type",
+        label: 'Job Type',
         value: jobType,
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+            />
           </svg>
-        )
+        ),
       });
     }
 
@@ -1259,37 +1339,52 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
     const experience = currentJob?.job_meta_names?.Experience || jobDetails?.experience;
     if (experience) {
       metadata.push({
-        label: "Experience",
+        label: 'Experience',
         value: experience,
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
-        )
+        ),
       });
     }
 
     if (jobDetails?.salary) {
       metadata.push({
-        label: "Salary",
+        label: 'Salary',
         value: jobDetails.salary,
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
-        )
+        ),
       });
     }
 
     if (jobDetails?.deadline) {
       metadata.push({
-        label: "Deadline",
+        label: 'Deadline',
         value: new Date(jobDetails.deadline).toLocaleDateString('en-IN'),
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
           </svg>
-        )
+        ),
       });
     }
 
@@ -1300,10 +1395,11 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
         <h3 className="text-lg font-bold text-slate-900 mb-3">Job Details</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {metadata.map((item, index) => (
-            <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
-              <div className="text-slate-500">
-                {item.icon}
-              </div>
+            <div
+              key={index}
+              className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200"
+            >
+              <div className="text-slate-500">{item.icon}</div>
               <div>
                 <p className="text-xs text-slate-500">{item.label}</p>
                 <p className="font-semibold text-slate-900">{item.value}</p>
@@ -1333,12 +1429,24 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center p-8">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-8 h-8 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
           <h3 className="text-xl font-bold text-slate-900 mb-2">Job Not Found</h3>
-          <p className="text-slate-600 mb-6">{error || 'The job you are looking for does not exist.'}</p>
+          <p className="text-slate-600 mb-6">
+            {error || 'The job you are looking for does not exist.'}
+          </p>
           <button
             onClick={() => navigate(-1)}
             className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
@@ -1349,7 +1457,7 @@ const handleDrop = (e: React.DragEvent, fieldName: string, fieldConfig?: FormFie
       </div>
     );
   }
-console.log('institute iddd',institute )
+  console.log('institute iddd', institute);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
@@ -1381,9 +1489,24 @@ console.log('institute iddd',institute )
                     <span className="font-semibold text-lg">{jobDetails.company_name}</span>
                     <span className="text-slate-400">•</span>
                     <span className="flex items-center gap-1">
-                      <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        className="w-5 h-5 text-slate-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
                       {getJobLocation() || 'Remote'}
                     </span>
@@ -1392,10 +1515,14 @@ console.log('institute iddd',institute )
                   {/* Job Metadata */}
                   <div className="grid grid-cols-2 gap-4 mb-8">
                     {(() => {
-                      const currentJob = institute?.jobs?.find(job => job.id === parseInt(jobId || '0'));
-                      const jobType = currentJob?.job_meta_names?.['Job Type'] || jobDetails.job_type;
-                      const experience = currentJob?.job_meta_names?.Experience || jobDetails.experience;
-                      
+                      const currentJob = institute?.jobs?.find(
+                        (job) => job.id === parseInt(jobId || '0'),
+                      );
+                      const jobType =
+                        currentJob?.job_meta_names?.['Job Type'] || jobDetails.job_type;
+                      const experience =
+                        currentJob?.job_meta_names?.Experience || jobDetails.experience;
+
                       return (
                         <>
                           {jobType && (
@@ -1437,12 +1564,16 @@ console.log('institute iddd',institute )
                   </h2>
                   {jobDetails.description ? (
                     <div
-                      className="prose prose-slate max-w-none"
+                      className="prose prose-slate max-w-none 
+             [&_ul]:list-disc [&_ul]:!ml-6 [&_ul]:mb-4 
+             [&_ol]:list-decimal [&_ol]:!ml-6 [&_ol]:mb-4 
+             [&_li]:mb-2 [&_p]:mb-4"
                       dangerouslySetInnerHTML={{ __html: jobDetails.description }}
                     />
                   ) : (
                     <p className="text-slate-700 mb-6">
-                      We are looking for an experienced professional with strong expertise in development.
+                      We are looking for an experienced professional with strong expertise in
+                      development.
                     </p>
                   )}
                 </div>
@@ -1458,9 +1589,7 @@ console.log('institute iddd',institute )
 
                 {/* Contact Information */}
                 <div className="bg-gradient-to-r from-emerald-50 to-slate-50 border border-emerald-100 rounded-2xl p-6 mt-8">
-                  <h4 className="font-bold text-slate-900 mb-2">
-                    📧 Need Help?
-                  </h4>
+                  <h4 className="font-bold text-slate-900 mb-2">📧 Need Help?</h4>
                   <p className="text-sm text-slate-600 mb-3">
                     Have questions about this role? Contact our HR team
                   </p>
@@ -1468,12 +1597,7 @@ console.log('institute iddd',institute )
                     href={`mailto:${getHRContactEmail()}`}
                     className="inline-flex items-center gap-2 text-emerald-600 font-semibold hover:text-emerald-700"
                   >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -1527,18 +1651,12 @@ console.log('institute iddd',institute )
                       className="mt-1 w-4 h-4 text-emerald-600 bg-white border-slate-300 rounded focus:ring-emerald-500"
                     />
                     <label htmlFor="terms" className="text-sm text-slate-700">
-                      I agree to the{" "}
-                      <a
-                        href="#"
-                        className="text-emerald-600 font-semibold hover:text-emerald-700"
-                      >
+                      I agree to the{' '}
+                      <a href="#" className="text-emerald-600 font-semibold hover:text-emerald-700">
                         Terms of Service
-                      </a>{" "}
-                      and{" "}
-                      <a
-                        href="#"
-                        className="text-emerald-600 font-semibold hover:text-emerald-700"
-                      >
+                      </a>{' '}
+                      and{' '}
+                      <a href="#" className="text-emerald-600 font-semibold hover:text-emerald-700">
                         Privacy Policy
                       </a>
                       . I confirm that the information provided is accurate.
@@ -1549,8 +1667,9 @@ console.log('institute iddd',institute )
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold py-4 px-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-3 border border-emerald-500/30 ${isSubmitting ? "opacity-75 cursor-not-allowed" : ""
-                      }`}
+                    className={`w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold py-4 px-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-3 border border-emerald-500/30 ${
+                      isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+                    }`}
                   >
                     {isSubmitting ? (
                       <>
@@ -1576,9 +1695,7 @@ console.log('institute iddd',institute )
                         Submitting...
                       </>
                     ) : (
-                      <>
-                        SUBMIT APPLICATION
-                      </>
+                      <>SUBMIT APPLICATION</>
                     )}
                   </button>
                 </form>
