@@ -195,7 +195,7 @@ const CareerFilterSidebar: React.FC<SchoolFilterSidebarProps> = ({
     const labelMap: { [key: string]: string } = {
       blood_group: 'Blood Group',
       local_area: 'Local Area',
-      jobs: 'jobs',
+      job_id: 'job_id',
       gender: 'Gender',
       income: 'Annual Income',
       caste: 'Caste',
@@ -299,15 +299,15 @@ const CareerFilterSidebar: React.FC<SchoolFilterSidebarProps> = ({
             </div>
           )}
 
-          {/* jobs Dropdown - Dynamic */}
+          {/* job_id Dropdown - Dynamic */}
           <div>
-            <Label htmlFor="jobs" className="block mb-2 text-sm font-medium text-gray-700">
+            <Label htmlFor="job_id" className="block mb-2 text-sm font-medium text-gray-700">
               Jobs
             </Label>
             <Select
               options={jobListOptions}
-              value={jobListOptions?.find(option => option.value === filters.jobs)}
-              onChange={(option) => handleSelectChange('jobs', option)}
+              value={jobListOptions?.find(option => option.value === filters.job_id)}
+              onChange={(option) => handleSelectChange('job_id', option)}
               placeholder="Select job..."
               isClearable
               className="react-select-container"

@@ -66,13 +66,16 @@ interface CareerJobsSectionProps {
   selectedAcademic: string;
   user: any;
   apiUrl: string;
+  dashboardFilters: any;
 }
 
 const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
   selectedAcademic,
   user,
   apiUrl,
+  dashboardFilters
 }) => {
+  console.log('selectedAcademic', selectedAcademic);
   const [loading, setLoading] = useState(false);
   const [jobs, setJobs] = useState<CareerJobData[]>([]);
   const [total, setTotal] = useState(0);
@@ -95,7 +98,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
     order: 'desc',
     orderBy: 'id',
     search: '',
-    status: '',
+    status: dashboardFilters?.status || '',
   });
   
   const debouncedSearch = useDebounce(filters.search, 500);
@@ -193,7 +196,7 @@ const CareerJobsSection: React.FC<CareerJobsSectionProps> = ({
     if (!selectedAcademic) return;
     try {
       const response = await axios.post(
-        `${apiUrl}/SuperAdmin/Dropdown/get-career-status`,
+        `${apiUrl}/${user?.role}/Dropdown/get-career-status`,
         {
           academic_id: parseInt(selectedAcademic),
           type: 1,

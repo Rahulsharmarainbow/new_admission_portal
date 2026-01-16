@@ -157,17 +157,7 @@ const getStatusSubtitle = (statusName: string) => {
 };
 
 // Color palette for cards
-const colorPalette = [
-  '#0085db', // Blue - Total
-  '#0085db', // Teal
-  '#0085db', // Purple
-  '#0085db', // Red
-  '#0085db', // Orange
-  '#0085db', // Green
-  '#0085db', // Yellow
-  '#0085db', // Pink
-  '#0085db', // Sea Green
-];
+const colorPalette = ['#0085db'];
 
 const CareerDashboard = () => {
   const { user } = useAuth();
@@ -231,13 +221,22 @@ const CareerDashboard = () => {
   const yearOptions = getYearOptions(5);
 
   // Handle Card Clicks
-  const handleCardClick = (statusType: string) => {
+  const handleCardClick = (card: any) => {
     navigate(`/${user.role}/career-applications`, {
       state: {
         filters: {
-          status: statusType === 'total' ? 'all' : statusType,
-          academic_id: filters.academic_id,
-          year: filters.year
+          status: card?.value?.toString(),
+          id: card.id,
+        }
+      }
+    });
+  };
+  const handleCardClick2 = (card: any) => {
+    navigate(`/${user.role}/frontend-editing/career`, {
+      state: {
+        filters: {
+          status: card.value,
+          id: card.id,
         }
       }
     });
@@ -300,13 +299,12 @@ const CareerDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div>
+      {/* <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+         <div>
           <h1 className="text-2xl font-bold text-gray-900">Career Dashboard</h1>
           <p className="text-gray-600">Manage and track career applications</p>
         </div>
         
-        {/* Year Filter */}
         <div className="relative w-full md:w-auto">
           <select
             value={filters.year}
@@ -324,39 +322,60 @@ const CareerDashboard = () => {
             <HiChevronDown className="w-4 h-4" />
           </div>
         </div>
-      </div>
+      </div>  */}
 
       {/* Statistics Cards - Total Applications First, then Dynamic from API */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
-        {/* Total Applications Card - First */}
-        <CareerCard
-          key="total"
-          title="Total Applications"
-          value={dashboardData?.total_applications || 0}
-          icon={getStatusIcon('total')}
-          bgColor={colorPalette[0]}
-          image={img2}
-          subtitle={getStatusSubtitle('total')}
-          onClick={() => handleCardClick('total')}
-          isClickable={true}
-        />
-        
-        {/* Dynamic Status Cards from API */}
-        {dashboardData?.counts?.map((countItem, index) => (
-          <CareerCard
-            key={countItem.id}
-            title={countItem.name}
-            value={countItem.count}
-            icon={getStatusIcon(countItem.name)}
-            bgColor={colorPalette[(index + 1) % colorPalette.length]}
-            image={getStatusImage(index + 1)}
-            subtitle={getStatusSubtitle(countItem.name)}
-            onClick={() => handleCardClick(countItem.name.toLowerCase())}
-            isClickable={true}
-          />
-        ))}
-      </div>
+      <div className="mb-8">
+  <h1 className="text-lg font-bold text-gray-900 mb-4">Career Application Statistics</h1>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {/* Total Applications Card - First */}
+    <CareerCard
+      key="total"
+      title="Total Applications"
+      value={dashboardData?.total_applications || 0}
+      icon={getStatusIcon('total')}
+      bgColor={colorPalette[0]}
+      image={img2}
+      subtitle={getStatusSubtitle('total')}
+      onClick={() => handleCardClick('total')}
+      isClickable={true}
+    />
+    
+    {/* Dynamic Status Cards from API */}
+    {dashboardData?.career_status?.map((countItem, index) => (
+      <CareerCard
+        key={countItem.id}
+        title={countItem.name}
+        value={countItem.count}
+        icon={getStatusIcon(countItem.name)}
+        bgColor={colorPalette[(index + 1) % colorPalette.length]}
+        image={getStatusImage(index + 1)}
+        subtitle={getStatusSubtitle(countItem.name)}
+        onClick={() => handleCardClick(countItem)}
+        isClickable={true}
+      />
+    ))}
+  </div>
+</div>
 
+<div className="mb-8">
+  <h1 className="text-lg font-bold text-gray-900 mb-4">Job Status</h1>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {dashboardData?.job_status?.map((countItem, index) => (
+      <CareerCard
+        key={countItem.id}
+        title={countItem.name}
+        value={countItem.count}
+        icon={getStatusIcon(countItem.name)}
+        bgColor={colorPalette[(index + 1) % colorPalette.length]}
+        image={getStatusImage(index + 1)}
+        subtitle={getStatusSubtitle(countItem.name)}
+        onClick={() => handleCardClick2(countItem)}
+        isClickable={true}
+      />
+    ))}
+  </div>
+</div>
       {/* Recent Applications Table */}
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">

@@ -368,14 +368,9 @@ export const ApplyJobPage: React.FC = () => {
           setFormData(initialFormData);
         } else {
           setError(response.data?.message || 'Job details not found');
-          toast.error(response.data?.message || 'Job details not available');
         }
       } catch (err: any) {
         console.error('Error fetching job details:', err);
-        const errorMessage =
-          err.response?.data?.message || err.message || 'Failed to load job details';
-        setError(errorMessage);
-        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -1443,7 +1438,7 @@ export const ApplyJobPage: React.FC = () => {
               />
             </svg>
           </div>
-          <h3 className="text-xl font-bold text-slate-900 mb-2">Job Not Found</h3>
+          <h3 className="text-xl font-bold text-slate-900 mb-2">Page Not Found</h3>
           <p className="text-slate-600 mb-6">
             {error || 'The job you are looking for does not exist.'}
           </p>

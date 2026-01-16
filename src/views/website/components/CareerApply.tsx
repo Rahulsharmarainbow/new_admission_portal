@@ -186,91 +186,101 @@ const CareerApply: React.FC = () => {
   }, [institute_id, location.pathname, location.search]);
 
   // Function to fetch filtered jobs from API
-  const fetchFilteredJobs = async (filtersToApply: number[], searchText: string, pageNum: number, reset = false) => {
-    try {
-      // if (!institute_id) return;
-       if (!institute_id || institute_id === ':institute_id') {
-          institute_id = window.location.hostname; // use domain as fallback
-        }
-
-      setIsSearching(true);
-      
-      const response = await axios.post<{
-        status: boolean;
-        total: number;
-        data: Job[];
-      }>(
-        `${apiUrl}/PublicCareer/get-career-jobs`,
-        {
-          unique_code: institute_id,
-          page: pageNum,
-          rowsPerPage,
-          filters: filtersToApply,
-          search: searchText
-        },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-
-      if (response.data?.status === true) {
-        if (reset) {
-          setFilteredJobs(response.data.data);
-        } else {
-          setFilteredJobs(prev => [...prev, ...response.data.data]);
-        }
-        setTotalJobs(response.data.total);
-        setHasMore(response.data.data.length === rowsPerPage);
-      }
-    } catch (err: any) {
-      console.error('Error fetching filtered jobs:', err);
-      toast.error(err.response?.data?.message || 'Failed to load jobs');
-    } finally {
-      setIsSearching(false);
-      setIsLoadingMore(false);
+// Function to fetch filtered jobs from API
+const fetchFilteredJobs = async (filtersToApply: FilterState, searchText: string, pageNum: number, reset = false) => {
+  try {
+    if (!institute_id || institute_id === ':institute_id') {
+      institute_id = window.location.hostname; // use domain as fallback
     }
-  };
+
+    setIsSearching(true);
+    
+    // Convert filters to the required format: { location: ["1", "2"], experience: ["11", "12"] }
+    const formattedFilters: { [key: string]: string[] } = {};
+    
+    Object.entries(filtersToApply).forEach(([filterType, filterIds]) => {
+      if (filterIds.length > 0) {
+        formattedFilters[filterType] = filterIds.map(id => id.toString());
+      }
+    });
+    
+    const response = await axios.post<{
+      status: boolean;
+      total: number;
+      data: Job[];
+    }>(
+      `${apiUrl}/PublicCareer/get-career-jobs`,
+      {
+        unique_code: institute_id,
+        page: pageNum,
+        rowsPerPage,
+        filters: formattedFilters, // Changed to formattedFilters
+        search: searchText
+      },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+
+    if (response.data?.status === true) {
+      if (reset) {
+        setFilteredJobs(response.data.data);
+      } else {
+        setFilteredJobs(prev => [...prev, ...response.data.data]);
+      }
+      setTotalJobs(response.data.total);
+      setHasMore(response.data.data.length === rowsPerPage);
+    }
+  } catch (err: any) {
+    console.error('Error fetching filtered jobs:', err);
+    toast.error(err.response?.data?.message || 'Failed to load jobs');
+  } finally {
+    setIsSearching(false);
+    setIsLoadingMore(false);
+  }
+};
 
   // Handle filter change
-  const handleFilterChange = (filterType: string, filterId: number) => {
-    setActiveFilters(prev => {
-      const currentFilters = prev[filterType] || [];
-      const newFilters = currentFilters.includes(filterId)
-        ? currentFilters.filter(id => id !== filterId)
-        : [...currentFilters, filterId];
-      
-      const updated = { ...prev, [filterType]: newFilters };
-      
-      // Extract all filter IDs for API call
-      const allFilterIds = Object.values(updated).flat();
-      setSelectedFilters(allFilterIds);
-      
-      // Reset page when filters change
+// Handle filter change
+const handleFilterChange = (filterType: string, filterId: number) => {
+  setActiveFilters(prev => {
+    const currentFilters = prev[filterType] || [];
+    const newFilters = currentFilters.includes(filterId)
+      ? currentFilters.filter(id => id !== filterId)
+      : [...currentFilters, filterId];
+    
+    const updated = { ...prev, [filterType]: newFilters };
+    
+    // Reset page when filters change
+    setPage(0);
+    
+    // Fetch filtered jobs with new filter structure
+    fetchFilteredJobs(updated, search, 0, true);
+    
+    return updated;
+  });
+};
+
+// Update the useEffect for search to use the new filter structure
+useEffect(() => {
+  const timer = setTimeout(() => {
+    if (search.trim() !== '') {
       setPage(0);
-      
-      // Fetch filtered jobs
-      fetchFilteredJobs(allFilterIds, search, 0, true);
-      
-      return updated;
-    });
-  };
+      fetchFilteredJobs(activeFilters, search, 0, true);
+    } else if (Object.keys(activeFilters).some(key => activeFilters[key].length > 0)) {
+      fetchFilteredJobs(activeFilters, '', 0, true);
+    } else {
+      setFilteredJobs(jobs);
+      setTotalJobs(jobs.length);
+    }
+  }, 500);
 
-  const handleSearch = () => {
-        const timer = setTimeout(() => {
-      if (search.trim() !== '') {
-        // Reset page on search
-        setPage(0);
-        fetchFilteredJobs(selectedFilters, search, 0, true);
-      } else if (selectedFilters.length > 0) {
-        // If search is cleared but filters exist
-        fetchFilteredJobs(selectedFilters, '', 0, true);
-      } else {
-        // If both search and filters are cleared, show all jobs
-        setFilteredJobs(jobs);
-        setTotalJobs(jobs.length);
-      }
-    }, 500);
+  return () => clearTimeout(timer);
+}, [activeFilters, search]);
 
-    return () => clearTimeout(timer);
-  }
+// Also update handleSearch function
+const handleSearch = () => {
+  setPage(0);
+  fetchFilteredJobs(activeFilters, search, 0, true);
+};
 
   // Handle load more
   const handleLoadMore = () => {
@@ -281,24 +291,23 @@ const CareerApply: React.FC = () => {
   };
 
   // Clear all filters
-  const clearAllFilters = () => {
-    const resetFilters: FilterState = {};
-    filters.forEach(filter => {
-      resetFilters[filter.type_name] = [];
-    });
-    setActiveFilters(resetFilters);
-    setSelectedFilters([]);
-    setSearch('');
-    setPage(0);
-    setFilteredJobs(jobs);
-    setTotalJobs(jobs.length);
-  };
+// Clear all filters
+const clearAllFilters = () => {
+  const resetFilters: FilterState = {};
+  filters.forEach(filter => {
+    resetFilters[filter.type_name] = [];
+  });
+  setActiveFilters(resetFilters);
+  setSearch('');
+  setPage(0);
+  fetchFilteredJobs(resetFilters, '', 0, true);
+};
 
   // Check if any filter is active
-  const hasActiveFilters = () => {
-    return selectedFilters.length > 0 || search.trim() !== '';
-  };
-
+// Check if any filter is active
+const hasActiveFilters = () => {
+  return Object.keys(activeFilters).some(key => activeFilters[key].length > 0) || search.trim() !== '';
+};
   // Get count of active filters for a specific type
   const getActiveFilterCount = (filterType: string) => {
     return activeFilters[filterType]?.length || 0;
@@ -575,7 +584,7 @@ const CareerApply: React.FC = () => {
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
         <div>
           <h2 
-            className="text-3xl lg:text-4xl font-extrabold tracking-tight"
+            className="text-3xl lg:text-4xl"
             style={{ color: careerData.banner?.search_text_color || '#ffffff' }}
           >
             Find Your Dream Job
@@ -614,7 +623,6 @@ const CareerApply: React.FC = () => {
             style={{
               borderColor: careerData.banner?.search_color || '#d1d5db',
               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-              fontFamily: "'Inter', sans-serif"
             }}
           />
           

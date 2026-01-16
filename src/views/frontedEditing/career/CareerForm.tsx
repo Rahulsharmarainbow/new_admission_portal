@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, Card } from 'flowbite-react';
 import {
   HiOutlineDocumentText,
@@ -13,16 +13,37 @@ import CareerJobsSection from './tabs/CareerJobsSection';
 import CareerStatusManagement from './tabs/CareerStatusManagement';
 import CareerDropdown from 'src/Frontend/Common/CareerDropdown';
 import TransportationSettingsTab from './tabs/TransportationSettingsTable';
+import { useLocation } from 'react-router';
 
 const CareerForm = () => {
   const { user } = useAuth();
+  const location = useLocation();
+  const dashboardFilters = location.state?.filters || {};
+  
+  // Check if dashboardFilters has values
+  const hasDashboardFilters = Object.keys(dashboardFilters).length > 0;
+  
+  // State for active tab - default to Jobs if filters exist
+  const [activeTab, setActiveTab] = useState<number>(hasDashboardFilters ? 2 : 0);
+
   const [selectedAcademic, setSelectedAcademic] = useState(
     user?.role === 'CustomerAdmin' ? user?.academic_id || '' : '',
   );
   const apiUrl = import.meta.env.VITE_API_URL;
 
+  useEffect(() => {
+    // If dashboard filters are present, switch to Jobs tab (index 2)
+    if (hasDashboardFilters && activeTab !== 2) {
+      setActiveTab(2);
+    }
+  }, [hasDashboardFilters, activeTab]);
+
   const handleAcademicSelect = (selectedId: string) => {
     setSelectedAcademic(selectedId);
+  };
+
+  const handleTabChange = (tabIndex: number) => {
+    setActiveTab(tabIndex);
   };
 
   return (
@@ -44,8 +65,16 @@ const CareerForm = () => {
           </div>
         </div>
         
-        <Tabs aria-label="Career Content Tabs" variant="underline">
-          <Tabs.Item active icon={HiOutlineDocumentText} title="Header & Footer">
+        <Tabs 
+          aria-label="Career Content Tabs" 
+          variant="underline"
+          onActiveTabChange={handleTabChange}
+        >
+          <Tabs.Item 
+            active={activeTab === 0}
+            icon={HiOutlineDocumentText} 
+            title="Header & Footer"
+          >
             <CareerFooterSection
               selectedAcademic={selectedAcademic} 
               user={user} 
@@ -53,7 +82,11 @@ const CareerForm = () => {
             />
           </Tabs.Item>
 
-          <Tabs.Item icon={HiOutlineTemplate} title="Card Contain">
+          <Tabs.Item 
+            active={activeTab === 1}
+            icon={HiOutlineTemplate} 
+            title="Card Contain"
+          >
             <CareerCardSection 
               selectedAcademic={selectedAcademic} 
               user={user} 
@@ -61,24 +94,38 @@ const CareerForm = () => {
             />
           </Tabs.Item>
 
-          <Tabs.Item icon={HiOutlineBriefcase} title="Jobs">
+          <Tabs.Item 
+            active={activeTab === 2}
+            icon={HiOutlineBriefcase} 
+            title="Jobs"
+          >
             <CareerJobsSection 
               selectedAcademic={selectedAcademic} 
               user={user} 
               apiUrl={apiUrl} 
+              dashboardFilters={dashboardFilters}
             />
           </Tabs.Item>
 
-          <Tabs.Item icon={HiOutlineNewspaper} title="Status">
+          <Tabs.Item 
+            active={activeTab === 3}
+            icon={HiOutlineNewspaper} 
+            title="Status"
+          >
             <CareerStatusManagement 
               selectedAcademic={selectedAcademic} 
               user={user} 
               apiUrl={apiUrl} 
             />
           </Tabs.Item>
-          <Tabs.Item icon={HiOutlineNewspaper} title="Settings">
+          
+          <Tabs.Item 
+            active={activeTab === 4}
+            icon={HiOutlineNewspaper} 
+            title="Settings"
+          >
             <TransportationSettingsTab
-            selectedAcademic={selectedAcademic} 
+              selectedAcademic={selectedAcademic} 
             />
           </Tabs.Item>
         </Tabs> 

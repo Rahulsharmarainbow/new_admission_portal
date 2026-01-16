@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MdOutlineRemoveRedEye, MdFilterList, MdDownload, MdDeleteForever } from 'react-icons/md';
+import { MdOutlineRemoveRedEye, MdFilterList, MdDownload, MdDeleteForever, MdClose } from 'react-icons/md';
 import { TbEdit, TbLoader2 } from 'react-icons/tb';
 import { BsSearch, BsFileEarmarkText } from 'react-icons/bs';
-import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
+import { FaSort, FaSortUp, FaSortDown, FaCross } from 'react-icons/fa';
 import {
   Button,
   Tooltip,
@@ -16,7 +16,7 @@ import BreadcrumbHeader from 'src/Frontend/Common/BreadcrumbHeader';
 import { useAuth } from 'src/hook/useAuth';
 import { useDebounce } from 'src/hook/useDebounce';
 import { Pagination } from 'src/Frontend/Common/Pagination';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import CareerDropdown from 'src/Frontend/Common/CareerDropdown';
 import DetailsModal from './components/DetailsModal';
 import EditModal from './components/EditModal';
@@ -59,7 +59,7 @@ interface StatusOption {
 
 interface Filters {
   refference_id: any;
-  jobs: any;
+  job_id: any;
   reference_id: any;
   page: number;
   rowsPerPage: number;
@@ -79,7 +79,8 @@ interface CdFilters {
 
 const CareerManagementTable: React.FC = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
+   const location = useLocation();
+   const dashboardFilters = location.state?.filters || {};
 
   // Refs to track initial load and prevent duplicate calls
   const initialLoadRef = useRef(true);
@@ -102,8 +103,8 @@ const CareerManagementTable: React.FC = () => {
       orderBy: 'refference_id',
       search: '',
       academic_id: '',
-      status: '',
-      jobs: '',
+      status: dashboardFilters?.status || '',
+      job_id: '',
       refference_id: '',
       job_title: '',
       experience: '',
@@ -176,7 +177,7 @@ const CareerManagementTable: React.FC = () => {
     filters.academic_id,
     filters.status,
     filters.refference_id,
-    filters.jobs,
+    filters.job_id,
     filters.job_title,
     filters.experience,
     filters.qualification,
@@ -259,7 +260,7 @@ const CareerManagementTable: React.FC = () => {
       // Add optional filters
       if (filters.search) requestBody.search = filters.search;
       if (filters.status) requestBody.status = filters.status;
-      if (filters.jobs) requestBody.jobs = filters.jobs;
+      if (filters.job_id) requestBody.job_id = filters.job_id;
       if (filters.refference_id) requestBody.refference_id = filters.refference_id;
       if (filters.job_title) requestBody.job_title = filters.job_title;
       if (filters.experience) requestBody.experience = filters.experience;
@@ -316,7 +317,7 @@ const CareerManagementTable: React.FC = () => {
     const requestBody: any = {
       academic_id: academicIdToUse,
       s_id: user?.id || '',
-      jobs: filters.jobs || '',
+      job_id: filters.job_id || '',
       refference_id: filters.refference_id || '',
       job_title: filters.job_title || '',
       experience: filters.experience || '',
@@ -416,7 +417,7 @@ const CareerManagementTable: React.FC = () => {
     };
 
     initializeData();
-  }, []); // Empty dependency array - runs only once
+  }, []); 
 
   // Fetch applications when filters change (except initial load)
   useEffect(() => {
@@ -432,7 +433,7 @@ const CareerManagementTable: React.FC = () => {
     debouncedSearch,
     filters.academic_id,
     filters.status,
-    filters.jobs,
+    filters.job_id,
     filters.refference_id,
     filters.job_title,
     filters.experience,
@@ -673,7 +674,7 @@ const CareerManagementTable: React.FC = () => {
       search: '',
       academic_id: user?.role === 'CustomerAdmin' ? user.academic_id.toString() : '',
       status: '',
-      jobs: '',
+      job_id: '',
       refference_id: '',
       job_title: '',
       experience: '',
@@ -903,14 +904,13 @@ const CareerManagementTable: React.FC = () => {
                     disabled={isBulkUpdating}
                     className="flex items-center gap-2"
                   >
-                    <MdDeleteForever className="h-4 w-4" />
-                    Delete
+                    <MdDeleteForever className="h-4 w-4 hover:text-red-600" />
                   </Button>
                   <Button
                     onClick={() => setSelectedApplications([])}
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-700"
+                    className="bg-gray-100 hover:bg-gray-200"
                   >
-                    Clear ({selectedApplications.length})
+                    <MdClose className="w-4 h-4 text-red-600" />
                   </Button>
                 </div>
               )}
@@ -943,7 +943,7 @@ const CareerManagementTable: React.FC = () => {
                 ) : (
                   <>
                     <MdDownload className="w-4 h-4" />
-                    <span>Download Excel</span>
+                    <span>Download</span>
                   </>
                 )}
               </Button>
@@ -1121,7 +1121,7 @@ const CareerManagementTable: React.FC = () => {
                             </td>
                             <td className="py-3 px-3">
                               <span
-                                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusInfo.color}`}
+                                className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium ${statusInfo.color}`}
                               >
                                 {statusInfo.text}
                               </span>
