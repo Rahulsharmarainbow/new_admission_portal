@@ -338,3 +338,16 @@
 .multi_data td,.multi_data th {
     border: 1px solid #e3dcdc;
 }
+.validation_errorI {
+  border:1px solid red
+}
+
+.validation_message {
+  position:absolute;
+    bottom: -10px;
+    left: 9px;
+    font-size: 11px;
+}
+.space-y-2.position-relative {
+    position: relative;
+}

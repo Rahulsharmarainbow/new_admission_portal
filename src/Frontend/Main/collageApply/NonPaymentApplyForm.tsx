@@ -370,96 +370,88 @@ const handleFileChange = useCallback(
             }
           }
          else if (child.type === 'multi_data') {
-  
-  // const entries = formData[child.name]??;
-    const entries = Array.isArray(formData[child.name]) ? formData[child.name] : [{}];
-
-  
-  // Check if entries exist
-  if (entries && Array.isArray(entries)) {
-    console.log('Multi-data entries:', entries);
-    
-    // Get all required columns from this multi_data field
-    const requiredColumns = child.columns.filter((column: any) => column.required == 1);
-    
-    // Check if multi_data field itself is required and has no entries
-    if (child.required == 1 && entries.length === 0) {
-      newErrors[child.name] = child.validation_message || `At least one entry is required for ${child.label}`;
-    }
-    
-    // Validate each required column across all entries
-    requiredColumns.forEach((column: any) => {
-      entries.forEach((entry: any, entryIndex: number) => {
-        const fieldName = `${child.name}[${entryIndex}][${column.name}]`;
-        const value = entry?.[column.name];
-        
-        // Check if required column has value
-        if (!value && value !== 0 && value !== false) {
-          newErrors[fieldName] = column.validation_message || `${column.label} is required in entry ${entryIndex + 1}`;
-        } 
-        // Validate based on column type if value exists
-        else if (value && value.toString().trim() !== '') {
-          if (column.type === 'email' || column.validation === 'email') {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(value)) {
-              newErrors[fieldName] = `Invalid email address in entry ${entryIndex + 1}`;
-            }
-          } else if (column.type === 'number' || column.validation === 'number') {
-            if (isNaN(Number(value))) {
-              newErrors[fieldName] = `Invalid number in entry ${entryIndex + 1}`;
-            }
-          } else if (column.validation === 'mobile') {
-            const phoneRegex = /^\d{10}$/;
-            if (!phoneRegex.test(value.toString())) {
-              newErrors[fieldName] = `Phone number must be 10 digits in entry ${entryIndex + 1}`;
-            }
-          } else if (column.type === 'date' && value) {
-            const inputDate = new Date(value);
-            const today = new Date();
-
-            if (isNaN(inputDate.getTime())) {
-              newErrors[fieldName] = `Invalid date format in entry ${entryIndex + 1}`;
-            } else if (column.max_date) {
-              const maxAllowedDate = new Date(
-                today.getFullYear() - column.max_date,
-                today.getMonth(),
-                today.getDate(),
-              );
-              if (inputDate > maxAllowedDate) {
-                newErrors[fieldName] = `Age must be at most ${column.max_date} years in entry ${entryIndex + 1}`;
+            const entries = Array.isArray(formData[child.name]) ? formData[child.name] : [{}];
+            if (entries && Array.isArray(entries)) {
+              console.log('Multi-data entries:', entries);
+              
+              // Get all required columns from this multi_data field
+              const requiredColumns = child.columns.filter((column: any) => column.required == 1);
+              
+              // Check if multi_data field itself is required and has no entries
+              if (child.required == 1 && entries.length === 0) {
+                newErrors[child.name] = child.validation_message || `At least one entry is required for ${child.label}`;
               }
+              
+              requiredColumns.forEach((column: any) => {
+                entries.forEach((entry: any, entryIndex: number) => {
+                  const fieldName = `${child.name}[${entryIndex}][${column.name}]`;
+                  const value = entry?.[column.name];
+                  
+                  // Check if required column has value
+                  if (!value && value !== 0 && value !== false) {
+                    newErrors[fieldName] = column.validation_message || `${column.label} is required in entry ${entryIndex + 1}`;
+                  } 
+                  // Validate based on column type if value exists
+                  else if (value && value.toString().trim() !== '') {
+                    if (column.type === 'email' || column.validation === 'email') {
+                      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                      if (!emailRegex.test(value)) {
+                        newErrors[fieldName] = `Invalid email address in entry ${entryIndex + 1}`;
+                      }
+                    } else if (column.type === 'number' || column.validation === 'number') {
+                      if (isNaN(Number(value))) {
+                        newErrors[fieldName] = `Invalid number in entry ${entryIndex + 1}`;
+                      }
+                    } else if (column.validation === 'mobile') {
+                      const phoneRegex = /^\d{10}$/;
+                      if (!phoneRegex.test(value.toString())) {
+                        newErrors[fieldName] = `Phone number must be 10 digits in entry ${entryIndex + 1}`;
+                      }
+                    } else if (column.type === 'date' && value) {
+                      const inputDate = new Date(value);
+                      const today = new Date();
+
+                      if (isNaN(inputDate.getTime())) {
+                        newErrors[fieldName] = `Invalid date format in entry ${entryIndex + 1}`;
+                      } else if (column.max_date) {
+                        const maxAllowedDate = new Date(
+                          today.getFullYear() - column.max_date,
+                          today.getMonth(),
+                          today.getDate(),
+                        );
+                        if (inputDate > maxAllowedDate) {
+                          newErrors[fieldName] = `Age must be at most ${column.max_date} years in entry ${entryIndex + 1}`;
+                        }
+                      }
+                    }
+                  }
+                });
+              });
+              
+              child.columns.forEach((column: any) => {
+                entries.forEach((entry: any, entryIndex: number) => {
+                  const fieldName = `${child.name}[${entryIndex}][${column.name}]`;
+                  const value = entry?.[column.name];
+                  
+                  // Only validate data type if value exists (for non-required fields too)
+                  if (value && value.toString().trim() !== '') {
+                    if (column.type === 'email' || column.validation === 'email') {
+                      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                      if (!emailRegex.test(value)) {
+                        newErrors[fieldName] = `Invalid email address in entry ${entryIndex + 1}`;
+                      }
+                    } else if (column.type === 'number' || column.validation === 'number') {
+                      if (isNaN(Number(value))) {
+                        newErrors[fieldName] = `Invalid number in entry ${entryIndex + 1}`;
+                      }
+                    }
+                  }
+                });
+              });
+            } else if (child.required == 1) {
+              newErrors[child.name] = child.validation_message || `${child.label} is required`;
             }
-          }
-        }
-      });
-    });
-    
-    // Also validate all columns (not just required ones) for data type validation
-    child.columns.forEach((column: any) => {
-      entries.forEach((entry: any, entryIndex: number) => {
-        const fieldName = `${child.name}[${entryIndex}][${column.name}]`;
-        const value = entry?.[column.name];
-        
-        // Only validate data type if value exists (for non-required fields too)
-        if (value && value.toString().trim() !== '') {
-          if (column.type === 'email' || column.validation === 'email') {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(value)) {
-              newErrors[fieldName] = `Invalid email address in entry ${entryIndex + 1}`;
-            }
-          } else if (column.type === 'number' || column.validation === 'number') {
-            if (isNaN(Number(value))) {
-              newErrors[fieldName] = `Invalid number in entry ${entryIndex + 1}`;
-            }
-          }
-        }
-      });
-    });
-  } else if (child.required == 1) {
-    // If multi_data field is required but no entries array exists
-    newErrors[child.name] = child.validation_message || `${child.label} is required`;
-  }
-} 
+          } 
           else {
             if (child.name === 'adharCard') {
               let aadhaarCard = '';
@@ -476,9 +468,8 @@ const handleFileChange = useCallback(
               if (!hasError && aadhaarCard.length === 12) {
                 delete newErrors[child.name];
               }
-            } else if (!formData[child.name] && formData[child.name] !== 0) {
-              newErrors[child.name] = child.validation_message || `${child.label} is required`;
-            } else if (child.validation === 'email') {
+            } 
+             else if (child.validation === 'email') {
               const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
               if (!emailRegex.test(formData[child.name])) {
                 newErrors[child.name] = 'Invalid email address';
@@ -504,6 +495,9 @@ const handleFileChange = useCallback(
                   newErrors[child.name] = `Age must be at most ${child.max_date} years`;
                 }
               }
+            }
+            else if (!formData[child.name] && formData[child.name] !== 0) {
+              newErrors[child.name] = child.validation_message || `${child.label} is required`;
             }
           }
         });
@@ -562,20 +556,38 @@ const handleFileChange = useCallback(
     entryIndex: number, 
     columnName: string, 
     value: string
-  ) => {
-    const currentData = formData[fieldName] || [];
-    const updatedData = [...currentData];
+    ) => {
+      const currentData = formData[fieldName] || [];
+      const updatedData = [...currentData];
+      
+      if (!updatedData[entryIndex]) {
+        updatedData[entryIndex] = {};
+      }
+      
+      updatedData[entryIndex][columnName] = value;
+      
+      setFormData({
+        ...formData,
+        [fieldName]: updatedData
+      });
+      const errorKey = `${fieldName}[${entryIndex}][${columnName}]`;
     
-    if (!updatedData[entryIndex]) {
-      updatedData[entryIndex] = {};
+    // Clear the specific error for this field/entry/column combination
+    if (errors[errorKey]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[errorKey]; // Remove this specific error
+        return newErrors;
+      });
     }
-    
-    updatedData[entryIndex][columnName] = value;
-    
-    setFormData({
-      ...formData,
-      [fieldName]: updatedData
-    });
+
+    // Also check and clear any general field-level error
+    if (errors[fieldName]) {
+      setErrors((prev) => ({
+        ...prev,
+        [fieldName]: '',
+      }));
+    }
   };
   
   // Update your validation logic to handle multi_data
@@ -699,7 +711,6 @@ const handleFileChange = useCallback(
 
     if (activeStep === 1) {
       setLoading(true);
-      console.log('formData', fileData);
       try {
           const response = await axios.post(`${apiUrl}/frontend/college-save-first-step-data`, {
             c_id: cdata.c_id,

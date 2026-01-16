@@ -327,6 +327,7 @@ const SidebarContent: Record<number, MenuItem[]> = {
           ],
         },
         { name: 'Activity', url: '/SuperAdmin/activity', icon: 'solar:clock-circle-line-duotone' },
+        { name: 'Error Logs', url: '/SuperAdmin/log', icon: 'solar:shield-warning-outline' },
         {
           name: 'Transaction',
           url: '/SuperAdmin/transaction',

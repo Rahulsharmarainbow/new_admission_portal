@@ -77,6 +77,7 @@ import ApplyJobPage from 'src/views/website/components/ApplyJobPage';
 import CareerManagementTable from 'src/views/applicationForms/careerApplication/CareerManagementTable';
 import { userInfo } from 'os';
 import CareerDashboard from 'src/views/dashboards/CareerDashboard';
+import ErrorTable from 'src/views/errorLog/ErrorTable';
 
 
 /* ***Layouts**** */
@@ -173,6 +174,7 @@ const MainRoutes = [
       { path: '/SuperAdmin/college-data', element: <CollegeDataExport/> },
       { path: '/SuperAdmin/demo-accounts/add', element: <Add /> },
       { path: '/SuperAdmin/activity', element: <ActivitiesTable/>},
+      { path: '/SuperAdmin/log', element: <ErrorTable/>},
       { path: '/SuperAdmin/frontend-editing/home', element: <HomeEditing/>},
       { path: '/SuperAdmin/frontend-editing/career', element: <CareerForm/>},
       { path: '/SuperAdmin/frontend-editing/Apply', element: <ApplyEditing/>},

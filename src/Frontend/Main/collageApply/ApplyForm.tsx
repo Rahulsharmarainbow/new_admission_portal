@@ -57,7 +57,70 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   // API URL
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  // Check validation function
+  const onAddMultiDataEntry = (fieldName: string, columns: any[]) => {
+    const currentData = formData[fieldName] || [{}];
+    const newEntry: any = {};
+    
+    // Initialize empty values for each column
+    columns.forEach((column: any) => {
+      newEntry[column.name] = '';
+    });
+    
+    setFormData({
+      ...formData,
+      [fieldName]: [...currentData, newEntry]
+    });
+  };
+  
+  const onRemoveMultiDataEntry = (fieldName: string, index: number) => {
+    const currentData = formData[fieldName] || [];
+    const newData = currentData.filter((_: any, i: number) => i !== index);
+    
+    setFormData({
+      ...formData,
+      [fieldName]: newData
+    });
+  };
+  
+  const onMultiDataChange = (
+    fieldName: string, 
+    entryIndex: number, 
+    columnName: string, 
+    value: string
+    ) => {
+      const currentData = formData[fieldName] || [];
+      const updatedData = [...currentData];
+      
+      if (!updatedData[entryIndex]) {
+        updatedData[entryIndex] = {};
+      }
+      
+      updatedData[entryIndex][columnName] = value;
+      
+      setFormData({
+        ...formData,
+        [fieldName]: updatedData
+      });
+      const errorKey = `${fieldName}[${entryIndex}][${columnName}]`;
+    
+    // Clear the specific error for this field/entry/column combination
+    if (errors[errorKey]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[errorKey]; // Remove this specific error
+        return newErrors;
+      });
+    }
+
+    // Also check and clear any general field-level error
+    if (errors[fieldName]) {
+      setErrors((prev) => ({
+        ...prev,
+        [fieldName]: '',
+      }));
+    }
+  };
+
   const checkValidation = useCallback(
     (name: string, type: string, validation: string, validation_message: string) => {
       if (type === 'file_button') {
@@ -347,83 +410,171 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   );
 
   const validateStep = useCallback(
-    (step: number) => {
-      const newErrors: { [key: string]: string } = {};
-
-      if (step === 0) {
-        required_child.forEach((child) => {
-          if (child.type === 'file_button') {
-            if (!fileData[child.name]) {
-              newErrors[child.name] = child.validation_message || `${child.label} is required`;
-            }
-          } else {
-            if (child.name === 'adharCard') {
-              let aadhaarCard = '';
-              let hasError = false;
-              for (let i = 0; i < 12; i++) {
-                const digit = formData[`adharCard_${i}`];
-                if (!digit) {
-                  newErrors[child.name] = 'All Aadhaar card digits are required';
-                  hasError = true;
-                  break;
-                }
-                aadhaarCard += digit;
-              }
-              if (!hasError && aadhaarCard.length === 12) {
-                delete newErrors[child.name];
-              }
-            } else if (!formData[child.name] && formData[child.name] !== 0) {
-              newErrors[child.name] = child.validation_message || `${child.label} is required`;
-            } else if (child.validation === 'email') {
-              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-              if (!emailRegex.test(formData[child.name])) {
-                newErrors[child.name] = 'Invalid email address';
-              }
-            } else if (child.validation === 'mobile') {
-              const phoneRegex = /^\d{10}$/;
-              if (!phoneRegex.test(formData[child.name])) {
-                newErrors[child.name] = 'Phone number must be 10 digits';
-              }
-            } else if (child.type === 'date' && formData[child.name]) {
-              const inputDate = new Date(formData[child.name]);
-              const today = new Date();
-
-              if (isNaN(inputDate.getTime())) {
-                newErrors[child.name] = 'Invalid date format';
-              } else if (child.max_date) {
-                const maxAllowedDate = new Date(
-                  today.getFullYear() - child.max_date,
-                  today.getMonth(),
-                  today.getDate(),
-                );
-                if (inputDate > maxAllowedDate) {
-                  newErrors[child.name] = `Age must be at most ${child.max_date} years`;
-                }
+      (step: number) => {
+        const newErrors: { [key: string]: string } = {};
+  
+        if (step === 0) {
+          required_child.forEach((child) => {
+            if (child.type === 'file_button') {
+              if (!fileData[child.name]) {
+                newErrors[child.name] = child.validation_message || `${child.label} is required`;
               }
             }
+           else if (child.type === 'multi_data') {
+              const entries = Array.isArray(formData[child.name]) ? formData[child.name] : [{}];
+              if (entries && Array.isArray(entries)) {
+                console.log('Multi-data entries:', entries);
+                
+                // Get all required columns from this multi_data field
+                const requiredColumns = child.columns.filter((column: any) => column.required == 1);
+                
+                // Check if multi_data field itself is required and has no entries
+                if (child.required == 1 && entries.length === 0) {
+                  newErrors[child.name] = child.validation_message || `At least one entry is required for ${child.label}`;
+                }
+                
+                requiredColumns.forEach((column: any) => {
+                  entries.forEach((entry: any, entryIndex: number) => {
+                    const fieldName = `${child.name}[${entryIndex}][${column.name}]`;
+                    const value = entry?.[column.name];
+                    
+                    // Check if required column has value
+                    if (!value && value !== 0 && value !== false) {
+                      newErrors[fieldName] = column.validation_message || `${column.label} is required in entry ${entryIndex + 1}`;
+                    } 
+                    // Validate based on column type if value exists
+                    else if (value && value.toString().trim() !== '') {
+                      if (column.type === 'email' || column.validation === 'email') {
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(value)) {
+                          newErrors[fieldName] = `Invalid email address in entry ${entryIndex + 1}`;
+                        }
+                      } else if (column.type === 'number' || column.validation === 'number') {
+                        if (isNaN(Number(value))) {
+                          newErrors[fieldName] = `Invalid number in entry ${entryIndex + 1}`;
+                        }
+                      } else if (column.validation === 'mobile') {
+                        const phoneRegex = /^\d{10}$/;
+                        if (!phoneRegex.test(value.toString())) {
+                          newErrors[fieldName] = `Phone number must be 10 digits in entry ${entryIndex + 1}`;
+                        }
+                      } else if (column.type === 'date' && value) {
+                        const inputDate = new Date(value);
+                        const today = new Date();
+  
+                        if (isNaN(inputDate.getTime())) {
+                          newErrors[fieldName] = `Invalid date format in entry ${entryIndex + 1}`;
+                        } else if (column.max_date) {
+                          const maxAllowedDate = new Date(
+                            today.getFullYear() - column.max_date,
+                            today.getMonth(),
+                            today.getDate(),
+                          );
+                          if (inputDate > maxAllowedDate) {
+                            newErrors[fieldName] = `Age must be at most ${column.max_date} years in entry ${entryIndex + 1}`;
+                          }
+                        }
+                      }
+                    }
+                  });
+                });
+                
+                child.columns.forEach((column: any) => {
+                  entries.forEach((entry: any, entryIndex: number) => {
+                    const fieldName = `${child.name}[${entryIndex}][${column.name}]`;
+                    const value = entry?.[column.name];
+                    
+                    // Only validate data type if value exists (for non-required fields too)
+                    if (value && value.toString().trim() !== '') {
+                      if (column.type === 'email' || column.validation === 'email') {
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(value)) {
+                          newErrors[fieldName] = `Invalid email address in entry ${entryIndex + 1}`;
+                        }
+                      } else if (column.type === 'number' || column.validation === 'number') {
+                        if (isNaN(Number(value))) {
+                          newErrors[fieldName] = `Invalid number in entry ${entryIndex + 1}`;
+                        }
+                      }
+                    }
+                  });
+                });
+              } else if (child.required == 1) {
+                newErrors[child.name] = child.validation_message || `${child.label} is required`;
+              }
+            } 
+            else {
+              if (child.name === 'adharCard') {
+                let aadhaarCard = '';
+                let hasError = false;
+                for (let i = 0; i < 12; i++) {
+                  const digit = formData[`adharCard_${i}`];
+                  if (!digit) {
+                    newErrors[child.name] = 'All Aadhaar card digits are required';
+                    hasError = true;
+                    break;
+                  }
+                  aadhaarCard += digit;
+                }
+                if (!hasError && aadhaarCard.length === 12) {
+                  delete newErrors[child.name];
+                }
+              } 
+               else if (child.validation === 'email') {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(formData[child.name])) {
+                  newErrors[child.name] = 'Invalid email address';
+                }
+              } else if (child.validation === 'mobile') {
+                const phoneRegex = /^\d{10}$/;
+                if (!phoneRegex.test(formData[child.name])) {
+                  newErrors[child.name] = 'Phone number must be 10 digits';
+                }
+              } else if (child.type === 'date' && formData[child.name]) {
+                const inputDate = new Date(formData[child.name]);
+                const today = new Date();
+  
+                if (isNaN(inputDate.getTime())) {
+                  newErrors[child.name] = 'Invalid date format';
+                } else if (child.max_date) {
+                  const maxAllowedDate = new Date(
+                    today.getFullYear() - child.max_date,
+                    today.getMonth(),
+                    today.getDate(),
+                  );
+                  if (inputDate > maxAllowedDate) {
+                    newErrors[child.name] = `Age must be at most ${child.max_date} years`;
+                  }
+                }
+              }
+              else if (!formData[child.name] && formData[child.name] !== 0) {
+                newErrors[child.name] = child.validation_message || `${child.label} is required`;
+              }
+            }
+          });
+  
+          // Special validation for SC/ST categories
+          const selectedCategory = formData.s_category;
+          if (
+            (selectedCategory === 'SC' || selectedCategory === 'ST') &&
+            !fileData['caste_certificate']
+          ) {
+            newErrors['caste_certificate'] = 'Caste certificate preview is required';
           }
-        });
-
-        const selectedCategory = formData.s_category;
-        if (
-          (selectedCategory === 'SC' || selectedCategory === 'ST') &&
-          !fileData['caste_certificate']
-        ) {
-          newErrors['caste_certificate'] = 'Caste certificate preview is required';
         }
-      }
-
-      const filteredErrors = Object.fromEntries(
-        Object.entries(newErrors).filter(([_, value]) => value !== ''),
-      );
-
-      console.log('Validation errors:', filteredErrors);
-      setErrors(filteredErrors);
-      validationErrors.current = filteredErrors;
-      return Object.keys(filteredErrors).length === 0;
-    },
-    [formData, fileData, required_child],
-  );
+  
+        // Filter out empty error messages
+        const filteredErrors = Object.fromEntries(
+          Object.entries(newErrors).filter(([_, value]) => value !== ''),
+        );
+  
+        console.log('Validation errors:', filteredErrors);
+        setErrors(filteredErrors);
+        validationErrors.current = filteredErrors;
+        return Object.keys(filteredErrors).length === 0;
+      },
+      [formData, fileData, required_child],
+    );
 
   const handleBack = useCallback(() => {
     setActiveStep((prev) => prev - 1);
@@ -665,6 +816,9 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
             onAadhaarChange={handleAadhaarChange}
             onFileChange={handleFileChange}
             type={type}
+            onMultiDataChange={onMultiDataChange}
+            onRemoveMultiDataEntry={onRemoveMultiDataEntry}
+            onAddMultiDataEntry={onAddMultiDataEntry}
           />
         );
       case 1:

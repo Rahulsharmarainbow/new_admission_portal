@@ -583,9 +583,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
               if (!hasError && aadhaarCard.length === 12) {
                 delete newErrors[child.name];
               }
-            } else if (!formData[child.name] && formData[child.name] !== 0) {
-              newErrors[child.name] = child.validation_message || `${child.label} is required`;
-            } else if (child.validation === 'email') {
+            }  else if (child.validation === 'email') {
               const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
               if (!emailRegex.test(formData[child.name])) {
                 newErrors[child.name] = 'Invalid email address';
@@ -611,6 +609,9 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
                   newErrors[child.name] = `Age must be at most ${child.max_date} years`;
                 }
               }
+            }
+            else if (!formData[child.name] && formData[child.name] !== 0) {
+              newErrors[child.name] = child.validation_message || `${child.label} is required`;
             }
           }
         });
@@ -677,6 +678,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
         amount: paymentData.total_payable_fee * 100,
         academic_id: academic_id,
         receipt: `receipt_${formData.application_id}`,
+        application_id:formData.application_id
       });
 
       const order = response.data;
@@ -689,6 +691,10 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
         name: header.name,
         description: 'School Application Fee',
         order_id: order.id,
+        // notes: {
+        //     email: "babluparmar@gmail.com",  // ✅ Passes to Razorpay system
+        //     application_id: formData.application_id
+        // },
         handler: async (paymentResponse: any) => {
           try {
             const verifyResponse = await axios.post(
