@@ -185,8 +185,6 @@ const CareerApply: React.FC = () => {
     fetchCareerData();
   }, [institute_id, location.pathname, location.search]);
 
-  // Function to fetch filtered jobs from API
-// Function to fetch filtered jobs from API
 const fetchFilteredJobs = async (filtersToApply: FilterState, searchText: string, pageNum: number, reset = false) => {
   try {
     if (!institute_id || institute_id === ':institute_id') {

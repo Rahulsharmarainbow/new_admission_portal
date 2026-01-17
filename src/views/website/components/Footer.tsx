@@ -249,7 +249,7 @@ const Footer: React.FC<FooterProps> = ({
               )}
 
               {/* Email & Phone Row */}
-              <div className="ml-2 grid grid-cols-1 md:grid-cols-8 lg:gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-8 lg:gap-10">
                 {academicEmail && (
                   <div className="flex items-start space-x-3 group col-span-3">
                     <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-orange-50 to-pink-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">

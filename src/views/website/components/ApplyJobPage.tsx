@@ -402,84 +402,97 @@ export const ApplyJobPage: React.FC = () => {
   console.log('resume size  ::::', jobDetails?.resume_size);
 
   // File validation function with resume size check
-  const validateFile = (file: File, fieldName: string, max_size?: number) => {
-    let isValid = true;
-    let message = '';
-    const maxSizeMB = max_size || 5;
-    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+const validateFile = (file: File, max_size?: number, allowed_types?: string) => {
+  let isValid = true;
+  let message = '';
+  
+  // Use max_length from field config (not max_size)
+  const maxSizeMB = max_size || 5;
+  const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
-    // Check file size
-    if (file.size > maxSizeBytes) {
+  // Check file size
+  if (file.size > maxSizeBytes) {
+    isValid = false;
+    message = `File size exceeds maximum limit of ${maxSizeMB}MB. Please upload a smaller file.`;
+    return { isValid, message };
+  }
+
+  // Get file extension
+  const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+
+  // Check if allowed_types is provided
+  if (allowed_types) {
+    // Split and prepare allowed extensions
+    const allowedExtensions = allowed_types
+      .split(',')
+      .map((t) => `.${t.trim().toLowerCase()}`);
+
+    console.log('Allowed extensions:', allowedExtensions);
+    console.log('File extension:', fileExtension);
+    console.log('File type:', file.type);
+
+    // Check if file extension matches allowed extensions
+    const hasValidExtension = allowedExtensions.some(ext => 
+      fileExtension === ext.toLowerCase()
+    );
+
+    // Also check MIME types for common formats
+    const mimeTypeMap: Record<string, string[]> = {
+      '.pdf': ['application/pdf'],
+      '.doc': ['application/msword'],
+      '.docx': ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+      '.txt': ['text/plain'],
+    };
+
+    // Get allowed MIME types for the allowed extensions
+    const allowedMimeTypes = allowedExtensions.flatMap(ext => 
+      mimeTypeMap[ext.toLowerCase()] || []
+    );
+
+    // Check if file is valid by either extension or MIME type
+    const hasValidMimeType = allowedMimeTypes.includes(file.type.toLowerCase());
+    
+    if (!hasValidExtension && !hasValidMimeType) {
       isValid = false;
-      message = `File size exceeds maximum limit of ${maxSizeMB}MB. Please upload a smaller file.`;
+      message = `Invalid file type. Allowed types: ${allowed_types}.`;
       return { isValid, message };
     }
+  }
 
-    // Check file type based on field name or custom config
-    if (fieldName === 'resume') {
-      // Resume specific validation
-      const allowedTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'text/plain',
-      ];
-
-      const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt'];
-
-      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
-
-      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
-        isValid = false;
-        message = `Invalid file type for resume. Please upload PDF, DOC, DOCX, or TXT files only.`;
-      }
-    }
-
-    // Custom validation from fieldConfig if provided
-    // if (fieldConfig) {
-    //   if (fieldConfig.allowedTypes && !fieldConfig.allowedTypes.includes(file.type)) {
-    //     isValid = false;
-    //     message =
-    //       fieldConfig.errorMessage ||
-    //       `Invalid file type. Allowed types: ${fieldConfig.allowedTypes.join(', ')}`;
-    //   }
-
-    //   if (fieldConfig.maxSize && file.size > fieldConfig.maxSize) {
-    //     isValid = false;
-    //     message =
-    //       fieldConfig.errorMessage ||
-    //       `File size exceeds ${fieldConfig.maxSize / (1024 * 1024)}MB limit.`;
-    //   }
-    // }
-
-    return { isValid, message };
-  };
+  // If no allowed_types specified, accept all files (as long as size is valid)
+  return { isValid, message };
+};
 
   // Handle file input changes with resume size validation
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    fieldName: string,
-    max_size?: number,
-  ) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+const handleFileChange = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  fieldName: string,
+  max_size?: number,
+  allowed_types?: string,
+) => {
+  if (e.target.files && e.target.files[0]) {
+    const file = e.target.files[0];
 
-      const validation = validateFile(file, fieldName, max_size);
-      if (!validation.isValid) {
-        toast.error(validation.message);
-        e.target.value = ''; // Clear the file input
-        return;
-      }
-
-      setFormData((prev) => ({ ...prev, [fieldName]: file }));
-      toast.success(
-        `${fieldName.replace(/_/g, ' ')} uploaded successfully (${(
-          file.size /
-          (1024 * 1024)
-        ).toFixed(2)}MB)`,
-      );
+    // Use max_size (which comes from field.max_length)
+    const validation = validateFile(file, max_size, allowed_types);
+    
+    if (!validation.isValid) {
+      toast.error(validation.message);
+      e.target.value = ''; // Clear the file input
+      // Also clear from formData
+      setFormData((prev) => ({ ...prev, [fieldName]: null }));
+      return;
     }
-  };
+
+    setFormData((prev) => ({ ...prev, [fieldName]: file }));
+    toast.success(
+      `${field.label || fieldName.replace(/_/g, ' ')} uploaded successfully (${(
+        file.size /
+        (1024 * 1024)
+      ).toFixed(2)}MB)`,
+    );
+  }
+};
 
   // Handle drag and drop for files with resume size validation
   const handleDragOver = (e: React.DragEvent, fieldName: string) => {
@@ -487,41 +500,40 @@ export const ApplyJobPage: React.FC = () => {
     e.stopPropagation();
   };
 
-  const handleDrop = (
-    e: React.DragEvent,
-    fieldName: string,
-    fieldConfig?: FormField['fileConfig'],
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
+const handleDrop = (
+  e: React.DragEvent,
+  fieldName: string,
+  fieldConfig?: FormField['fileConfig'],
+) => {
+  e.preventDefault();
+  e.stopPropagation();
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-
-      // Log file info for debugging
-      console.log('File dropped:', {
-        name: file.name,
-        size: file.size,
-        sizeMB: (file.size / (1024 * 1024)).toFixed(2) + 'MB',
-        type: file.type,
-        maxAllowedMB: jobDetails.resume_size || 10,
-      });
-
-      const validation = validateFile(file, fieldName, fieldConfig);
-      if (!validation.isValid) {
-        toast.error(validation.message);
-        return;
-      }
-
-      setFormData((prev) => ({ ...prev, [fieldName]: file }));
-      toast.success(
-        `${fieldName.replace(/_/g, ' ')} uploaded successfully (${(
-          file.size /
-          (1024 * 1024)
-        ).toFixed(2)}MB)`,
-      );
+  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    const file = e.dataTransfer.files[0];
+    
+    // Get the current field from your fields array
+    const currentField = fields.find(f => f.name === fieldName);
+    
+    const validation = validateFile(
+      file, 
+      currentField?.max_length, // Use max_length from field
+      currentField?.allowed_type // Use allowed_type from field
+    );
+    
+    if (!validation.isValid) {
+      toast.error(validation.message);
+      return;
     }
-  };
+
+    setFormData((prev) => ({ ...prev, [fieldName]: file }));
+    toast.success(
+      `${currentField?.label || fieldName.replace(/_/g, ' ')} uploaded successfully (${(
+        file.size /
+        (1024 * 1024)
+      ).toFixed(2)}MB)`,
+    );
+  }
+};
 
   // Validate form field based on validation rules
   const validateField = (field: FormField, value: any): string => {
@@ -714,6 +726,16 @@ export const ApplyJobPage: React.FC = () => {
     navigate(-1);
   };
 
+  const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return '0 Bytes';
+  
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
   // Render dynamic form fields
   const renderFormField = (field: FormField) => {
     const error = formErrors[field.name];
@@ -791,99 +813,104 @@ export const ApplyJobPage: React.FC = () => {
           </div>
         );
 
-      case 'file':
-      case 'file_button':
-        return (
-          <div key={field.name}>
-            <label className="block text-sm font-semibold text-slate-900 mb-2">
-              {field.label} {field.required === 1 ? <span className="text-red-500">*</span> : ''}
-            </label>
+        case 'file':
+case 'file_button':
+  return (
+    <div key={field.name}>
+      <label className="block text-sm font-semibold text-slate-900 mb-2">
+        {field.label} {field.required === 1 ? <span className="text-red-500">*</span> : ''}
+      </label>
+      <div
+        className="relative"
+        onDragOver={(e) => handleDragOver(e, field.name)}
+        onDrop={(e) => handleDrop(e, field.name, field.fileConfig)}
+      >
+        <input
+          ref={(el) => (fileInputRefs.current[field.name] = el)}
+          type="file"
+          name={field.name}
+          accept={field.allowed_type
+            ?.split(',')
+            .map((t) => `.${t.trim().toLowerCase()}`)
+            .join(',')}
+          required={field.required === 1}
+          onChange={(e) => handleFileChange(
+            e, 
+            field.name, 
+            field.max_length, // This is 5 in your case
+            field.allowed_type // This is "DOC,DOCX" in your case
+          )}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+        />
+        <div
+          className={`flex items-center justify-between px-6 py-5 border-2 ${
+            formData[field.name]
+              ? 'border-emerald-500 bg-emerald-50'
+              : error
+                ? 'border-red-300 bg-red-50'
+                : 'border-dashed border-slate-300'
+          } rounded-2xl hover:border-emerald-400 transition-all cursor-pointer bg-slate-50 hover:bg-emerald-50`}
+        >
+          <div className="flex items-center gap-4">
             <div
-              className="relative"
-              onDragOver={(e) => handleDragOver(e, field.name)}
-              onDrop={(e) => handleDrop(e, field.name, field.fileConfig)}
+              className={`p-3 rounded-xl ${
+                formData[field.name]
+                  ? 'bg-emerald-100'
+                  : error
+                    ? 'bg-red-100'
+                    : 'bg-slate-100'
+              }`}
             >
-              <input
-                ref={(el) => (fileInputRefs.current[field.name] = el)}
-                type="file"
-                name={field.name}
-                accept={field.allowed_type
-                  ?.split(',')
-                  .map((t) => `.${t.trim().toLowerCase()}`)
-                  .join(',')}
-                required={field.required === 1}
-                onChange={(e) => handleFileChange(e, field.name, field.max_length)}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              />
-              <div
-                className={`flex items-center justify-between px-6 py-5 border-2 ${
+              <svg
+                className={`w-5 h-5 ${
                   formData[field.name]
-                    ? 'border-emerald-500 bg-emerald-50'
+                    ? 'text-emerald-600'
                     : error
-                      ? 'border-red-300 bg-red-50'
-                      : 'border-dashed border-slate-300'
-                } rounded-2xl hover:border-emerald-400 transition-all cursor-pointer bg-slate-50 hover:bg-emerald-50`}
+                      ? 'text-red-600'
+                      : 'text-slate-500'
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`p-3 rounded-xl ${
-                      formData[field.name]
-                        ? 'bg-emerald-100'
-                        : error
-                          ? 'bg-red-100'
-                          : 'bg-slate-100'
-                    }`}
-                  >
-                    <svg
-                      className={`w-5 h-5 ${
-                        formData[field.name]
-                          ? 'text-emerald-600'
-                          : error
-                            ? 'text-red-600'
-                            : 'text-slate-500'
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-slate-900 text-sm">
-                      {formData[field.name] instanceof File
-                        ? formData[field.name].name
-                        : field.placeholder || 'Choose File'}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      {formData[field.name] instanceof File
-                        ? `Uploaded ${  (formData[field.name].size)}`
-                        : 'No file chosen'}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors"
-                  onClick={() => fileInputRefs.current[field.name]?.click()}
-                >
-                  Browse
-                </button>
-              </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
             </div>
-            <p className="text-xs text-slate-500 mt-2">
-              {field.allowed_type ? `Allowed types: ${field.allowed_type}` : 'All file types'}
-              {field.max_length ? ` (Max ${field.max_length}MB)` : ''}
-            </p>
-            {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+            <div>
+              <p className="font-semibold text-slate-900 text-sm">
+                {formData[field.name] instanceof File
+                  ? formData[field.name].name
+                  : field.placeholder || 'Choose File'}
+              </p>
+              <p className="text-xs text-slate-500 mt-1">
+                {formData[field.name] instanceof File
+                  ? `Uploaded ${formatFileSize(formData[field.name].size)}`
+                  : 'No file chosen'}
+              </p>
+            </div>
           </div>
-        );
-
+          <button
+            type="button"
+            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors"
+            onClick={() => fileInputRefs.current[field.name]?.click()}
+          >
+            Browse
+          </button>
+        </div>
+      </div>
+      <p className="text-xs text-slate-500 mt-2">
+        {field.allowed_type ? `Allowed types: ${field.allowed_type}` : 'All file types'}
+        {field.max_length ? ` (Max ${field.max_length}MB)` : ''}
+      </p>
+      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+    </div>
+  );
+     
       case 'checkbox':
         return (
           <div key={field.name} className="flex items-start gap-3">

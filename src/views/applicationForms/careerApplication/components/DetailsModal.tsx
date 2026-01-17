@@ -309,12 +309,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({ isOpen, onClose, applicatio
               <h3 className="text-xl font-semibold text-gray-900">
                 Application Details
               </h3>
-              <p className="text-sm text-gray-500 mt-1">
-                Reference ID: {application.refference_id} | Status: 
-                <Badge color={statusBadge.color} className="ml-2">
-                  {statusBadge.label}
-                </Badge>
-              </p>
             </div>
             <button
               onClick={onClose}

@@ -100,7 +100,7 @@ const Dashboard = () => {
     academic: user.role === 'CustomerAdmin' ? user.academic_id : dashboardFilters.academic,
   });
 
-  console.log(dashboardFilters.academic);
+  console.log(dashboardFilters.year.toString());
 
   // Year Options - Automatically updates every year
   const yearOptions = getYearOptions(5); 
@@ -452,7 +452,7 @@ const Dashboard = () => {
 
      {
       dashboardFilters.academicType === 4 ?
-      <CareerDashboard academicId={dashboardFilters.academic}/> :
+      <CareerDashboard academicId={dashboardFilters.academic.toString()} year={dashboardFilters.year} /> :
       <>
        {/* Statistics Cards - Row 1 */}
       <div className="grid grid-cols-9 gap-6 mb-6">
