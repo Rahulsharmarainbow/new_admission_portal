@@ -46,7 +46,7 @@ const TransportationSettingsTab: React.FC<TransportationSettingsTableProps> = ({
     order: 'desc',
     orderBy: 'id',
     search: '',
-    academic_id: '',
+    academic_id: selectedAcademic?.toString() || '',
   });
   const [total, setTotal] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -93,13 +93,13 @@ const TransportationSettingsTab: React.FC<TransportationSettingsTableProps> = ({
     setLoading(true);
     try {
       const payload = {
-        academic_id: filters.academic_id ? parseInt(filters.academic_id) : undefined,
+        academic_id: filters.academic_id ? parseInt(filters.academic_id)  : selectedAcademic ? parseInt(selectedAcademic) : undefined,
         page: filters.page,
         rowsPerPage: filters.rowsPerPage,
         order: filters.order,
         orderBy: filters.orderBy,
         search: filters.search,
-        type: 3
+        type: 4
       };
 
       const response = await axios.post(
@@ -129,7 +129,7 @@ const TransportationSettingsTab: React.FC<TransportationSettingsTableProps> = ({
 
   useEffect(() => {
     fetchSettings();
-  }, [filters.page, filters.rowsPerPage, filters.order, filters.orderBy, debouncedSearch, filters.academic_id]);
+  }, [filters.page, filters.rowsPerPage, filters.order, filters.orderBy, debouncedSearch, filters.academic_id, selectedAcademic]);
 
   // Handle search
   const handleSearch = (searchValue: string) => {

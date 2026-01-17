@@ -613,7 +613,7 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
                   </div>
 
                   {/* Resume Size */}
-                  <div>
+                  {/* <div>
                     <Label htmlFor="resumeSize" className="block mb-2">
                       <div className="flex items-center gap-2">
                         <span>Maximum Resume Size (MB)</span>
@@ -638,7 +638,7 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
                     <p className="text-sm text-gray-500 mt-1">
                       Accepted range: 1MB to 100MB
                     </p>
-                  </div>
+                  </div> */}
 
                   {/* Banner Image/Video */}
                   <div>

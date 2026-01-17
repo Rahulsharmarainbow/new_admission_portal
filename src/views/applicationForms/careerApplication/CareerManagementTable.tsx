@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MdOutlineRemoveRedEye, MdFilterList, MdDownload, MdDeleteForever, MdClose } from 'react-icons/md';
+import {
+  MdOutlineRemoveRedEye,
+  MdFilterList,
+  MdDownload,
+  MdDeleteForever,
+  MdClose,
+} from 'react-icons/md';
 import { TbEdit, TbLoader2 } from 'react-icons/tb';
 import { BsSearch, BsFileEarmarkText } from 'react-icons/bs';
 import { FaSort, FaSortUp, FaSortDown, FaCross } from 'react-icons/fa';
-import {
-  Button,
-  Tooltip,
-  Checkbox,
-} from 'flowbite-react';
+import { Button, Tooltip, Checkbox } from 'flowbite-react';
 import Select from 'react-select';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -79,8 +81,8 @@ interface CdFilters {
 
 const CareerManagementTable: React.FC = () => {
   const { user } = useAuth();
-   const location = useLocation();
-   const dashboardFilters = location.state?.filters || {};
+  const location = useLocation();
+  const dashboardFilters = location.state?.filters || {};
 
   // Refs to track initial load and prevent duplicate calls
   const initialLoadRef = useRef(true);
@@ -95,7 +97,7 @@ const CareerManagementTable: React.FC = () => {
   const [cdFilters, setCdFilters] = useState<CdFilters>({});
 
   // Initialize filters
-  const [filters, setFilters] = useState<Filters>(() => {    
+  const [filters, setFilters] = useState<Filters>(() => {
     const baseFilters = {
       page: 0,
       rowsPerPage: 10,
@@ -181,8 +183,8 @@ const CareerManagementTable: React.FC = () => {
     filters.job_title,
     filters.experience,
     filters.qualification,
-    ...Object.values(cdFilters).filter(value => value && value.toString().trim() !== '')
-  ].filter(value => value && value.toString().trim() !== '').length;
+    ...Object.values(cdFilters).filter((value) => value && value.toString().trim() !== ''),
+  ].filter((value) => value && value.toString().trim() !== '').length;
 
   // Fetch status options - only once and when academic_id changes
   const fetchStatusOptions = async (academicId?: string) => {
@@ -305,93 +307,93 @@ const CareerManagementTable: React.FC = () => {
 
   // Handle Excel download
   const handleDownloadExcel = async () => {
-  const academicIdToUse = user?.role === 'CustomerAdmin' ? user.academic_id : filters.academic_id;
+    const academicIdToUse = user?.role === 'CustomerAdmin' ? user.academic_id : filters.academic_id;
 
-  if (!academicIdToUse) {
-    toast.error('Please select an academic first');
-    return;
-  }
-
-  setDownloadLoading(true);
-  try {
-    const requestBody: any = {
-      academic_id: academicIdToUse,
-      s_id: user?.id || '',
-      job_id: filters.job_id || '',
-      refference_id: filters.refference_id || '',
-      job_title: filters.job_title || '',
-      experience: filters.experience || '',
-      qualification: filters.qualification || '',
-      status: filters.status || '',
-      search: filters.search || '',
-    };
-
-    // Add cdFilters if any exist
-    if (Object.keys(cdFilters).length > 0) {
-      requestBody.cdFilters = cdFilters;
+    if (!academicIdToUse) {
+      toast.error('Please select an academic first');
+      return;
     }
 
-    console.log('Downloading Excel with:', requestBody);
+    setDownloadLoading(true);
+    try {
+      const requestBody: any = {
+        academic_id: academicIdToUse,
+        s_id: user?.id || '',
+        job_id: filters.job_id || '',
+        refference_id: filters.refference_id || '',
+        job_title: filters.job_title || '',
+        experience: filters.experience || '',
+        qualification: filters.qualification || '',
+        status: filters.status || '',
+        search: filters.search || '',
+      };
 
-    const response = await axios.post(
-      `${apiUrl}/${user?.role}/CareerApplication/download-career-application`,
-      requestBody,
-      {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    );
-
-    if (response.data?.success && response.data?.data) {
-      const { filename, excel_base64 } = response.data.data;
-
-      // Decode base64 string to binary
-      const binaryString = atob(excel_base64);
-      const bytes = new Uint8Array(binaryString.length);
-
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+      // Add cdFilters if any exist
+      if (Object.keys(cdFilters).length > 0) {
+        requestBody.cdFilters = cdFilters;
       }
 
-      // Create blob from bytes
-      const blob = new Blob([bytes], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      });
+      console.log('Downloading Excel with:', requestBody);
 
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', filename || 'career-applications.xlsx');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      const response = await axios.post(
+        `${apiUrl}/${user?.role}/CareerApplication/download-career-application`,
+        requestBody,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
 
-      toast.success('Excel file downloaded successfully!');
-    } else {
-      throw new Error(response.data?.message || 'Failed to generate Excel file');
+      if (response.data?.success && response.data?.data) {
+        const { filename, excel_base64 } = response.data.data;
+
+        // Decode base64 string to binary
+        const binaryString = atob(excel_base64);
+        const bytes = new Uint8Array(binaryString.length);
+
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        // Create blob from bytes
+        const blob = new Blob([bytes], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename || 'career-applications.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        toast.success('Excel file downloaded successfully!');
+      } else {
+        throw new Error(response.data?.message || 'Failed to generate Excel file');
+      }
+    } catch (error: any) {
+      console.error('Error downloading Excel:', error);
+
+      if (error.response?.status === 404) {
+        toast.error('No data found to export');
+      } else if (error.response?.status === 500) {
+        toast.error('Server error while generating Excel file');
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to download Excel file');
+      }
+    } finally {
+      setDownloadLoading(false);
     }
-  } catch (error: any) {
-    console.error('Error downloading Excel:', error);
-
-    if (error.response?.status === 404) {
-      toast.error('No data found to export');
-    } else if (error.response?.status === 500) {
-      toast.error('Server error while generating Excel file');
-    } else if (error.response?.data?.message) {
-      toast.error(error.response.data.message);
-    } else if (error.message) {
-      toast.error(error.message);
-    } else {
-      toast.error('Failed to download Excel file');
-    }
-  } finally {
-    setDownloadLoading(false);
-  }
-};
+  };
 
   // Initial setup - runs only once
   useEffect(() => {
@@ -417,7 +419,7 @@ const CareerManagementTable: React.FC = () => {
     };
 
     initializeData();
-  }, []); 
+  }, []);
 
   // Fetch applications when filters change (except initial load)
   useEffect(() => {
@@ -656,7 +658,7 @@ const CareerManagementTable: React.FC = () => {
       ...newFilters,
       page: 0,
     }));
-    
+
     if (newCdFilters) {
       setCdFilters(newCdFilters);
     }
@@ -665,7 +667,7 @@ const CareerManagementTable: React.FC = () => {
   // Clear all filters
   const handleClearFilters = () => {
     const currentYear = new Date().getFullYear().toString();
-    
+
     setFilters({
       page: 0,
       rowsPerPage: 10,
@@ -680,7 +682,7 @@ const CareerManagementTable: React.FC = () => {
       experience: '',
       qualification: '',
     });
-    
+
     setCdFilters({});
     setSort({ key: 'refference_id', direction: 'desc' });
     setSelectedApplications([]);
@@ -887,30 +889,34 @@ const CareerManagementTable: React.FC = () => {
                   <Button
                     onClick={handleBulkStatusUpdate}
                     disabled={!bulkStatus || isBulkUpdating}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 px-4 py-2"
                   >
                     {isBulkUpdating ? (
                       <>
-                        <TbLoader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <TbLoader2 className="w-5 h-5 animate-spin" />
                         Updating...
                       </>
                     ) : (
                       'Update'
                     )}
                   </Button>
+
                   <Button
                     color="failure"
                     onClick={handleDeleteClick}
                     disabled={isBulkUpdating}
-                    className="flex items-center gap-2"
+                    className="flex items-center justify-center px-3 py-2 min-w-[40px]"
+                    title="Delete selected"
                   >
-                    <MdDeleteForever className="h-4 w-4 hover:text-red-600" />
+                    <MdDeleteForever className="w-5 h-5" />
                   </Button>
+
                   <Button
                     onClick={() => setSelectedApplications([])}
-                    className="bg-gray-100 hover:bg-gray-200"
+                    className="bg-gray-100 hover:bg-gray-200 flex items-center justify-center px-3 py-2 min-w-[40px]"
+                    title="Clear selection"
                   >
-                    <MdClose className="w-4 h-4 text-red-600" />
+                    <MdClose className="w-5 h-5 text-red-600" />
                   </Button>
                 </div>
               )}
@@ -1640,7 +1646,7 @@ const CareerManagementTable: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={showDeleteModal}

@@ -12,9 +12,9 @@ const assetUrl =
 
 // Configuration for file uploads
 const FILE_UPLOAD_CONFIG = {
-  maxSize: 5, // MB - configurable
-  allowedTypes: ['pdf', 'doc', 'docx'], // configurable
-  maxSizeInBytes: 5 * 1024 * 1024, // 5MB in bytes
+  maxSize: 5,
+  allowedTypes: ['pdf', 'doc', 'docx'],
+  maxSizeInBytes: 5 * 1024 * 1024,
   allowedMimeTypes: [
     'application/pdf',
     'application/msword',
@@ -402,11 +402,11 @@ export const ApplyJobPage: React.FC = () => {
   console.log('resume size  ::::', jobDetails?.resume_size);
 
   // File validation function with resume size check
-  const validateFile = (file: File, fieldName: string, fieldConfig?: FormField['fileConfig']) => {
+  const validateFile = (file: File, fieldName: string, max_size?: number) => {
     let isValid = true;
     let message = '';
-    const maxSizeMB = jobDetails.resume_size || 15; 
-    const maxSizeBytes = maxSizeMB * 1024 * 1024; 
+    const maxSizeMB = max_size || 5;
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
     // Check file size
     if (file.size > maxSizeBytes) {
@@ -436,21 +436,21 @@ export const ApplyJobPage: React.FC = () => {
     }
 
     // Custom validation from fieldConfig if provided
-    if (fieldConfig) {
-      if (fieldConfig.allowedTypes && !fieldConfig.allowedTypes.includes(file.type)) {
-        isValid = false;
-        message =
-          fieldConfig.errorMessage ||
-          `Invalid file type. Allowed types: ${fieldConfig.allowedTypes.join(', ')}`;
-      }
+    // if (fieldConfig) {
+    //   if (fieldConfig.allowedTypes && !fieldConfig.allowedTypes.includes(file.type)) {
+    //     isValid = false;
+    //     message =
+    //       fieldConfig.errorMessage ||
+    //       `Invalid file type. Allowed types: ${fieldConfig.allowedTypes.join(', ')}`;
+    //   }
 
-      if (fieldConfig.maxSize && file.size > fieldConfig.maxSize) {
-        isValid = false;
-        message =
-          fieldConfig.errorMessage ||
-          `File size exceeds ${fieldConfig.maxSize / (1024 * 1024)}MB limit.`;
-      }
-    }
+    //   if (fieldConfig.maxSize && file.size > fieldConfig.maxSize) {
+    //     isValid = false;
+    //     message =
+    //       fieldConfig.errorMessage ||
+    //       `File size exceeds ${fieldConfig.maxSize / (1024 * 1024)}MB limit.`;
+    //   }
+    // }
 
     return { isValid, message };
   };
@@ -459,21 +459,12 @@ export const ApplyJobPage: React.FC = () => {
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     fieldName: string,
-    fieldConfig?: FormField['fileConfig'],
+    max_size?: number,
   ) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
 
-      // Log file info for debugging
-      console.log('File selected:', {
-        name: file.name,
-        size: file.size,
-        sizeMB: (file.size / (1024 * 1024)).toFixed(2) + 'MB',
-        type: file.type,
-        maxAllowedMB: jobDetails.resume_size || 10,
-      });
-
-      const validation = validateFile(file, fieldName, fieldConfig);
+      const validation = validateFile(file, fieldName, max_size);
       if (!validation.isValid) {
         toast.error(validation.message);
         e.target.value = ''; // Clear the file input
@@ -802,10 +793,6 @@ export const ApplyJobPage: React.FC = () => {
 
       case 'file':
       case 'file_button':
-        const fieldMaxSize = field.fileConfig?.maxSize || uploadConfig.maxSize;
-        const fieldAllowedTypes = field.fileConfig?.allowedTypes || uploadConfig.allowedTypes;
-        const allowedTypesStr = fieldAllowedTypes.map((t) => t.toUpperCase()).join(', ');
-
         return (
           <div key={field.name}>
             <label className="block text-sm font-semibold text-slate-900 mb-2">
@@ -820,9 +807,12 @@ export const ApplyJobPage: React.FC = () => {
                 ref={(el) => (fileInputRefs.current[field.name] = el)}
                 type="file"
                 name={field.name}
-                accept={fieldAllowedTypes.map((t) => `.${t.toLowerCase()}`).join(',')}
+                accept={field.allowed_type
+                  ?.split(',')
+                  .map((t) => `.${t.trim().toLowerCase()}`)
+                  .join(',')}
                 required={field.required === 1}
-                onChange={(e) => handleFileChange(e, field.name, field.fileConfig)}
+                onChange={(e) => handleFileChange(e, field.name, field.max_length)}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
               <div
@@ -830,8 +820,8 @@ export const ApplyJobPage: React.FC = () => {
                   formData[field.name]
                     ? 'border-emerald-500 bg-emerald-50'
                     : error
-                    ? 'border-red-300 bg-red-50'
-                    : 'border-dashed border-slate-300'
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-dashed border-slate-300'
                 } rounded-2xl hover:border-emerald-400 transition-all cursor-pointer bg-slate-50 hover:bg-emerald-50`}
               >
                 <div className="flex items-center gap-4">
@@ -840,8 +830,8 @@ export const ApplyJobPage: React.FC = () => {
                       formData[field.name]
                         ? 'bg-emerald-100'
                         : error
-                        ? 'bg-red-100'
-                        : 'bg-slate-100'
+                          ? 'bg-red-100'
+                          : 'bg-slate-100'
                     }`}
                   >
                     <svg
@@ -849,8 +839,8 @@ export const ApplyJobPage: React.FC = () => {
                         formData[field.name]
                           ? 'text-emerald-600'
                           : error
-                          ? 'text-red-600'
-                          : 'text-slate-500'
+                            ? 'text-red-600'
+                            : 'text-slate-500'
                       }`}
                       fill="none"
                       stroke="currentColor"
@@ -872,7 +862,7 @@ export const ApplyJobPage: React.FC = () => {
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
                       {formData[field.name] instanceof File
-                        ? `Uploaded (${(formData[field.name].size / 1024 / 1024).toFixed(2)} MB)`
+                        ? `Uploaded ${  (formData[field.name].size)}`
                         : 'No file chosen'}
                     </p>
                   </div>
@@ -887,7 +877,8 @@ export const ApplyJobPage: React.FC = () => {
               </div>
             </div>
             <p className="text-xs text-slate-500 mt-2">
-              {allowedTypesStr} (Max {fieldMaxSize}MB)
+              {field.allowed_type ? `Allowed types: ${field.allowed_type}` : 'All file types'}
+              {field.max_length ? ` (Max ${field.max_length}MB)` : ''}
             </p>
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
           </div>
@@ -1051,8 +1042,8 @@ export const ApplyJobPage: React.FC = () => {
                   formData['resume']
                     ? 'border-emerald-500 bg-emerald-50'
                     : formErrors['resume']
-                    ? 'border-red-300 bg-red-50'
-                    : 'border-dashed border-slate-300'
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-dashed border-slate-300'
                 } rounded-2xl hover:border-emerald-400 transition-all cursor-pointer bg-slate-50 hover:bg-emerald-50`}
               >
                 <div className="flex items-center gap-4">
@@ -1061,8 +1052,8 @@ export const ApplyJobPage: React.FC = () => {
                       formData['resume']
                         ? 'bg-emerald-100'
                         : formErrors['resume']
-                        ? 'bg-red-100'
-                        : 'bg-slate-100'
+                          ? 'bg-red-100'
+                          : 'bg-slate-100'
                     }`}
                   >
                     <svg
@@ -1070,8 +1061,8 @@ export const ApplyJobPage: React.FC = () => {
                         formData['resume']
                           ? 'text-emerald-600'
                           : formErrors['resume']
-                          ? 'text-red-600'
-                          : 'text-slate-500'
+                            ? 'text-red-600'
+                            : 'text-slate-500'
                       }`}
                       fill="none"
                       stroke="currentColor"

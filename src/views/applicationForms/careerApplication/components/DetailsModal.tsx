@@ -379,6 +379,11 @@ const DetailsModal: React.FC<DetailsModalProps> = ({ isOpen, onClose, applicatio
                     </div>
                   </div>
 
+                  
+                </div>
+
+                {/* Additional Information */}
+                <div className="space-y-6">
                   {/* Job Information */}
                   <div>
                     <h4 className="text-lg font-medium text-gray-900 mb-4">Job Information</h4>
@@ -413,60 +418,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({ isOpen, onClose, applicatio
                           </Button>
                         </div>
                       )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Additional Information */}
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-lg font-medium text-gray-900 mb-4">Application Details</h4>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-500">Application ID</label>
-                        <p className="mt-1 text-sm text-gray-900">{applicationData?.id || application.id}</p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-500">Academic ID</label>
-                        <p className="mt-1 text-sm text-gray-900">{applicationData?.academic_id || application.academic_id}</p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-500">Job ID</label>
-                        <p className="mt-1 text-sm text-gray-900">{applicationData?.job_id || application.job_id}</p>
-                      </div>
-                      {application.created_at && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-500">Applied Date</label>
-                          <p className="mt-1 text-sm text-gray-900">
-                            {new Date(application.created_at).toLocaleDateString('en-IN', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Status Information */}
-                  <div>
-                    <h4 className="text-lg font-medium text-gray-900 mb-4">Status Information</h4>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-500">Current Status</label>
-                        <div className="mt-1">
-                          <Badge color={statusBadge.color} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium">
-                            {statusBadge.label}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-500">Total Notes</label>
-                        <p className="mt-1 text-sm text-gray-900">{applicationData?.notes?.length || 0}</p>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -613,14 +564,14 @@ const DetailsModal: React.FC<DetailsModalProps> = ({ isOpen, onClose, applicatio
                     </svg>
                     <p className="text-lg font-medium text-gray-600 mb-2">No notes found</p>
                     <p className="text-sm text-gray-500 mb-4">Add your first note to track this application</p>
-                    <Button
+                    {/* <Button
                       onClick={() => setShowAddNoteModal(true)}
                       color="blue"
-                      className="flex items-center gap-2"
+                      className="gap-2"
                     >
                       <MdAdd className="w-4 h-4" />
                       Add Note
-                    </Button>
+                    </Button> */}
                   </div>
                 )}
               </div>

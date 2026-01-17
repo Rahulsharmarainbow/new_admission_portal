@@ -100,6 +100,8 @@ const Dashboard = () => {
     academic: user.role === 'CustomerAdmin' ? user.academic_id : dashboardFilters.academic,
   });
 
+  console.log(dashboardFilters.academic);
+
   // Year Options - Automatically updates every year
   const yearOptions = getYearOptions(5); 
 
@@ -358,6 +360,7 @@ const Dashboard = () => {
     updateFilter('academicName', selected?.academic_name);
   };
 
+
   // ✅ Handle Roll No Click
   const handleRollNoClick = (application: any) => {
     const applicationId = application.application_id || application.id;
@@ -369,7 +372,7 @@ const Dashboard = () => {
   };
 
   // Career dashboard
-  if (user && user?.academic_type === 4) {
+  if (user.role === 'CustomerAdmin' && user?.academic_type === 4 ) {
     return <CareerDashboard />;
   }
 
@@ -447,7 +450,11 @@ const Dashboard = () => {
   </div>
 )}
 
-      {/* Statistics Cards - Row 1 */}
+     {
+      dashboardFilters.academicType === 4 ?
+      <CareerDashboard academicId={dashboardFilters.academic}/> :
+      <>
+       {/* Statistics Cards - Row 1 */}
       <div className="grid grid-cols-9 gap-6 mb-6">
         <div className="lg:col-span-3 col-span-12">
           <ApplicationCard
@@ -825,6 +832,8 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+      </>
+     }
     </>
   );
 };

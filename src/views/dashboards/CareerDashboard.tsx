@@ -159,7 +159,7 @@ const getStatusSubtitle = (statusName: string) => {
 // Color palette for cards
 const colorPalette = ['#0085db'];
 
-const CareerDashboard = () => {
+const CareerDashboard = (academicId: string) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -168,10 +168,10 @@ const CareerDashboard = () => {
     page: 0,
     rowsPerPage: 10,
     year: new Date().getFullYear().toString(),
-    academic_id: user?.academic_id || '',
+    academic_id: user.role === 'CustomerAdmin' ? user?.academic_id: academicId.academicId,
     search: '',
   });
-
+console.log(filters.academic_id);
   // Debounced search
   const debouncedSearch = useDebounce(filters.search, 500);
 
