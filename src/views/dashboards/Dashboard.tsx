@@ -100,8 +100,6 @@ const Dashboard = () => {
     academic: user.role === 'CustomerAdmin' ? user.academic_id : dashboardFilters.academic,
   });
 
-  console.log(dashboardFilters.year.toString());
-
   // Year Options - Automatically updates every year
   const yearOptions = getYearOptions(5); 
 
@@ -139,7 +137,6 @@ const Dashboard = () => {
   // Fetch dashboard data
   const fetchDashboardData = async () => {
     if (!user?.id || !user?.token) return;
-
     setLoading(true);
     try {
       const data = await dashboardService.getDashboardData(filters, user.id, user.token, user.role);
@@ -452,7 +449,11 @@ const Dashboard = () => {
 
      {
       dashboardFilters.academicType === 4 ?
-      <CareerDashboard academicId={dashboardFilters.academic.toString()} year={dashboardFilters.year} /> :
+  <CareerDashboard 
+    key={`${filters.academic}-${filters.year}`} 
+    academicId={filters.academic} 
+    year={filters.year} 
+  /> :
       <>
        {/* Statistics Cards - Row 1 */}
       <div className="grid grid-cols-9 gap-6 mb-6">

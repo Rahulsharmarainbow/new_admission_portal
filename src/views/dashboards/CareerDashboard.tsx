@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 import { useAuth } from 'src/hook/useAuth';
@@ -14,6 +14,7 @@ import img1 from '../../../public/Images/top-error-shape.png';
 import img2 from '../../../public/Images/top-info-shape.png';
 import img3 from '../../../public/Images/top-warning-shape.png';
 import { CareerDashboardFilters, careerDashboardService } from './CareerDashboardService';
+import { useDashboardFilters } from 'src/hook/DashboardFilterContext';
 
 interface CareerCardProps {
   title: string;
@@ -159,30 +160,51 @@ const getStatusSubtitle = (statusName: string) => {
 // Color palette for cards
 const colorPalette = ['#0085db'];
 
-const CareerDashboard = (academicId: string, year: any) => {
+interface CareerDashboardProps {
+  academicId?: string;
+  year?: string;
+}
+
+// ... existing interfaces ...
+
+const CareerDashboard: React.FC<CareerDashboardProps> = ({ academicId, year }) => {
+  const { filters: dashboardFilters, updateFilter } = useDashboardFilters();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<CareerDashboardResponse | null>(null);
+  
+  // ✅ useRef to track previous values
+  const prevAcademicIdRef = useRef<string>('');
+  const prevYearRef = useRef<string>('');
+  
+  // ✅ Initialize filters
   const [filters, setFilters] = useState<CareerDashboardFilters>({
     page: 0,
     rowsPerPage: 10,
-    year: year || "",
-    academic_id: user.role === 'CustomerAdmin' ? user?.academic_id: academicId.academicId,
+    year: new Date().getFullYear().toString(),
+    academic_id: user.role === 'CustomerAdmin' ? user?.academic_id : '',
     search: '',
   });
-console.log(year);
-  // Debounced search
+console.log(filters)
+  // ✅ Debounced search
   const debouncedSearch = useDebounce(filters.search, 500);
 
-  // Fetch career dashboard data
-  const fetchCareerDashboardData = async () => {
+  // ✅ Fetch career dashboard data
+  const fetchCareerDashboardData = async (currentFilters: CareerDashboardFilters) => {
+    console.log('Fetching career dashboard data...');
     if (!user?.id || !user?.token) return;
+
+    // Don't fetch if academic_id is not available
+    if (!currentFilters.academic_id) {
+      console.log('Waiting for academic_id...');
+      return;
+    }
 
     setLoading(true);
     try {
       const data = await careerDashboardService.getCareerDashboardData(
-        filters,
+        currentFilters,
         user.id,
         user.token,
         user.role
@@ -196,15 +218,93 @@ console.log(year);
     }
   };
 
+  // ✅ Effect to initialize filters from props
   useEffect(() => {
-    fetchCareerDashboardData();
+    if (academicId || year) {
+      const newYear = year || new Date().getFullYear().toString();
+      const newAcademicId = academicId || '';
+      
+      // Only update if values have changed
+      if (newAcademicId !== prevAcademicIdRef.current || newYear !== prevYearRef.current) {
+        console.log('Initializing filters:', { newAcademicId, newYear });
+        
+        setFilters(prev => ({
+          ...prev,
+          year: newYear,
+          academic_id: newAcademicId,
+          page: 0 // Reset to first page
+        }));
+        
+        // Update refs
+        prevAcademicIdRef.current = newAcademicId;
+        prevYearRef.current = newYear;
+      }
+    }
+  }, [academicId, year]);
+
+  // ✅ Effect to sync with dashboardFilters context
+  useEffect(() => {
+    if (user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') {
+      const contextYear = dashboardFilters.year || new Date().getFullYear().toString();
+      const contextAcademicId = dashboardFilters.academic || '';
+      
+      // Only update if values have changed
+      if (contextAcademicId !== prevAcademicIdRef.current || contextYear !== prevYearRef.current) {
+        console.log('Syncing with context:', { contextAcademicId, contextYear });
+        
+        setFilters(prev => ({
+          ...prev,
+          year: contextYear,
+          academic_id: contextAcademicId,
+          page: 0 // Reset to first page
+        }));
+        
+        // Update refs
+        prevAcademicIdRef.current = contextAcademicId;
+        prevYearRef.current = contextYear;
+      }
+    }
+  }, [dashboardFilters.year, dashboardFilters.academic, user?.role]);
+
+  // ✅ Main effect for API calls
+  useEffect(() => {
+    // Skip if filters are not ready
+    if (!filters.academic_id) {
+      console.log('Filters not ready:', filters);
+      return;
+    }
+
+    // Check if we have valid data to fetch
+    const shouldFetch = filters.academic_id && filters.year;
+    
+    if (shouldFetch) {
+      console.log('Fetching data with filters:', filters);
+      
+      // Use a timeout to ensure state is updated
+      const timeoutId = setTimeout(() => {
+        fetchCareerDashboardData(filters);
+      }, 100); // Small delay to ensure state is settled
+      
+      return () => clearTimeout(timeoutId);
+    }
   }, [
+    filters.academic_id,
+    filters.year,
     filters.page,
     filters.rowsPerPage,
     debouncedSearch,
-    filters.year,
-    filters.academic_id,
   ]);
+
+  // ✅ Search and pagination effects remain the same
+  useEffect(() => {
+    if (filters.academic_id && filters.year) {
+      const timeoutId = setTimeout(() => {
+        fetchCareerDashboardData(filters);
+      }, 300);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [filters.page, filters.rowsPerPage, debouncedSearch]);
 
   // 🔥 Dynamic Year Options Generator
   const getYearOptions = (yearsBack: number = 5): string[] => {
@@ -227,16 +327,21 @@ console.log(year);
         filters: {
           status: card?.value?.toString(),
           id: card.id,
+          academic_id: filters.academic_id,
+          year: filters.year
         }
       }
     });
   };
+
   const handleCardClick2 = (card: any) => {
     navigate(`/${user.role}/frontend-editing/career`, {
       state: {
         filters: {
           status: card.value,
           id: card.id,
+          academic_id: filters.academic_id,
+          year: filters.year
         }
       }
     });
@@ -257,9 +362,19 @@ console.log(year);
     setFilters((prev) => ({ ...prev, rowsPerPage, page: 0 }));
   };
 
-  // Update year
-  const handleYearChange = (year: string) => {
-    setFilters((prev) => ({ ...prev, year, page: 0 }));
+  // Update year in local state
+  const handleYearChange = (selectedYear: string) => {
+    console.log('Year changed to:', selectedYear);
+    setFilters((prev) => ({ 
+      ...prev, 
+      year: selectedYear, 
+      page: 0 
+    }));
+    
+    // Also update in context for SuperAdmin/SupportAdmin
+    if (user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') {
+      updateFilter('year', selectedYear);
+    }
   };
 
   // Handle Resume Download
@@ -282,10 +397,23 @@ console.log(year);
   const handleViewApplication = (application: any) => {
     navigate(`/${user.role}/career-applications`, {
       state: {
-        applicationId: application.reference_id
+        applicationId: application.reference_id,
+        academic_id: filters.academic_id,
+        year: filters.year
       }
     });
   };
+
+  // Show initial loading if academic_id is not available
+  if (!filters.academic_id) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <p className="text-gray-600">Loading career dashboard...</p>
+        <p className="text-sm text-gray-500">Academic ID: {academicId || 'Not available'}</p>
+      </div>
+    );
+  }
 
   // Loading state
   if (loading && !dashboardData) {
@@ -298,91 +426,91 @@ console.log(year);
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
-      {/* <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Career Dashboard</h1>
-          <p className="text-gray-600">Manage and track career applications</p>
-        </div>
-        
-        <div className="relative w-full md:w-auto">
-          <select
-            value={filters.year}
-            onChange={(e) => handleYearChange(e.target.value)}
-            className="w-full md:w-auto min-w-[180px] px-3 py-2.5 border border-gray-300 rounded-md bg-white 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
-          >
-            {yearOptions.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-            <HiChevronDown className="w-4 h-4" />
+      {/* Header Section with Year Dropdown */}
+      {
+        user.role === "CustomerAdmin" && (
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+          <div className="relative w-full sm:w-auto">
+            <select
+              value={filters.year || new Date().getFullYear().toString()}
+              onChange={(e) => handleYearChange(e.target.value)}
+              className="w-full sm:w-auto min-w-[250px] px-3 py-2.5 border border-gray-300 rounded-md bg-white 
+                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
+            >
+              {yearOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <HiChevronDown className="w-4 h-4" />
+            </div>
           </div>
         </div>
-      </div>  */}
+      </div>
+        )
+      }
 
-      {/* Statistics Cards - Total Applications First, then Dynamic from API */}
+      {/* Statistics Cards */}
       <div className="mb-8">
-  <h1 className="text-lg font-bold text-gray-900 mb-4">Career Application Statistics</h1>
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-    {/* Total Applications Card - First */}
-    <CareerCard
-      key="total"
-      title="Total Applications"
-      value={dashboardData?.total_applications || 0}
-      icon={getStatusIcon('total')}
-      bgColor={colorPalette[0]}
-      image={img2}
-      subtitle={getStatusSubtitle('total')}
-      onClick={() => handleCardClick('total')}
-      isClickable={true}
-    />
-    
-    {/* Dynamic Status Cards from API */}
-    {dashboardData?.career_status?.map((countItem, index) => (
-      <CareerCard
-        key={countItem.id}
-        title={countItem.name}
-        value={countItem.count}
-        icon={getStatusIcon(countItem.name)}
-        bgColor={colorPalette[(index + 1) % colorPalette.length]}
-        image={getStatusImage(index + 1)}
-        subtitle={getStatusSubtitle(countItem.name)}
-        onClick={() => handleCardClick(countItem)}
-        isClickable={true}
-      />
-    ))}
-  </div>
-</div>
+        <h1 className="text-lg font-bold text-gray-900 mb-4">Career Application Statistics</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <CareerCard
+            key="total"
+            title="Total Applications"
+            value={dashboardData?.total_applications || 0}
+            icon={getStatusIcon('total')}
+            bgColor={colorPalette[0]}
+            image={img2}
+            subtitle={getStatusSubtitle('total')}
+            onClick={() => handleCardClick('total')}
+            isClickable={true}
+          />
+          
+          {dashboardData?.career_status?.map((countItem, index) => (
+            <CareerCard
+              key={countItem.id}
+              title={countItem.name}
+              value={countItem.count}
+              icon={getStatusIcon(countItem.name)}
+              bgColor={colorPalette[(index + 1) % colorPalette.length]}
+              image={getStatusImage(index + 1)}
+              subtitle={getStatusSubtitle(countItem.name)}
+              onClick={() => handleCardClick(countItem)}
+              isClickable={true}
+            />
+          ))}
+        </div>
+      </div>
 
-<div className="mb-8">
-  <h1 className="text-lg font-bold text-gray-900 mb-4">Job Status</h1>
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-    {dashboardData?.job_status?.map((countItem, index) => (
-      <CareerCard
-        key={countItem.id}
-        title={countItem.name}
-        value={countItem.count}
-        icon={getStatusIcon(countItem.name)}
-        bgColor={colorPalette[(index + 1) % colorPalette.length]}
-        image={getStatusImage(index + 1)}
-        subtitle={getStatusSubtitle(countItem.name)}
-        onClick={() => handleCardClick2(countItem)}
-        isClickable={true}
-      />
-    ))}
-  </div>
-</div>
+      <div className="mb-8">
+        <h1 className="text-lg font-bold text-gray-900 mb-4">Job Status</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {dashboardData?.job_status?.map((countItem, index) => (
+            <CareerCard
+              key={countItem.id}
+              title={countItem.name}
+              value={countItem.count}
+              icon={getStatusIcon(countItem.name)}
+              bgColor={colorPalette[(index + 1) % colorPalette.length]}
+              image={getStatusImage(index + 1)}
+              subtitle={getStatusSubtitle(countItem.name)}
+              onClick={() => handleCardClick2(countItem)}
+              isClickable={true}
+            />
+          ))}
+        </div>
+      </div>
+
       {/* Recent Applications Table */}
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
           <div>
             <h5 className="text-lg font-semibold text-gray-900">Recent Career Applications</h5>
             <h6 className="text-sm text-gray-600">
-              Latest submitted applications ({dashboardData?.recent_applications?.length || 0})
+              Year: {filters.year} | Total: {dashboardData?.total_applications || 0} applications
             </h6>
           </div>
           <div className="relative w-full lg:w-auto">
@@ -499,7 +627,7 @@ console.log(year);
               <div className="text-center py-12">
                 <FiUsers className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No applications found</h3>
-                <p className="text-gray-500">There are no career applications yet.</p>
+                <p className="text-gray-500">There are no career applications for the selected filters.</p>
               </div>
             )}
 
