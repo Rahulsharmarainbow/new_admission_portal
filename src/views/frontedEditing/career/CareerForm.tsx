@@ -14,6 +14,7 @@ import CareerStatusManagement from './tabs/CareerStatusManagement';
 import CareerDropdown from 'src/Frontend/Common/CareerDropdown';
 import TransportationSettingsTab from './tabs/TransportationSettingsTable';
 import { useLocation } from 'react-router';
+import ContentTab from './tabs/ContentTab';
 
 const CareerForm = () => {
   const { user } = useAuth();
@@ -125,6 +126,15 @@ const CareerForm = () => {
             title="Settings"
           >
             <TransportationSettingsTab
+              selectedAcademic={selectedAcademic} 
+            />
+          </Tabs.Item>
+          <Tabs.Item 
+            active={activeTab === 5}
+            icon={HiOutlineNewspaper} 
+            title="Content Management"
+          >
+            <ContentTab
               selectedAcademic={selectedAcademic} 
             />
           </Tabs.Item>

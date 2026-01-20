@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Card, Label, TextInput, Button, Spinner, Textarea } from 'flowbite-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
@@ -6,6 +6,7 @@ import Loader from 'src/Frontend/Common/Loader';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import { HiOutlinePlus, HiOutlineTrash } from 'react-icons/hi';
 import { set } from 'lodash';
+import JoditEditor from 'jodit-react';
 
 // Static Font Awesome icons list
 const fontAwesomeIcons = [
@@ -67,13 +68,64 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
   const [headerHeading, setHeaderHeading] = useState('');
   const [academicAddress, setAcademicAddress] = useState('');
   const [buttonUrl, setButtonUrl] = useState('');
-
+  const editorRef = useRef(null);
+  const [longDescription, setLongDescription] = useState('');
   // Footer Fields
   const [academicMobile, setAcademicMobile] = useState('');
   const [academicEmail, setAcademicEmail] = useState('');
 
   // Social Media Fields
   const [socialIcons, setSocialIcons] = useState<SocialIcon[]>([{ icon_url: '', icon: '' }]);
+
+  const editorConfig = useMemo(
+    () => ({
+      readonly: false,
+      height: 400,
+      toolbarSticky: false,
+      toolbarAdaptive: false,
+      buttons: [
+        'source',
+        '|',
+        'bold',
+        'italic',
+        'underline',
+        'strikethrough',
+        '|',
+        'ul',
+        'ol',
+        '|',
+        'font',
+        'fontsize',
+        'brush',
+        'paragraph',
+        '|',
+        'image',
+        'video',
+        'table',
+        'link',
+        '|',
+        'left',
+        'center',
+        'right',
+        'justify',
+        '|',
+        'undo',
+        'redo',
+        '|',
+        'hr',
+        'eraser',
+        'copyformat',
+        'fullsize',
+      ],
+      showXPathInStatusbar: false,
+      showCharsCounter: false,
+      showWordsCounter: false,
+      uploader: { insertImageAsBase64URI: true },
+      placeholder: 'Enter career page description here...',
+      theme: 'default',
+    }),
+    [],
+  );
 
   useEffect(() => {
     if (selectedAcademic) getCareerFooterData(selectedAcademic);
@@ -255,6 +307,10 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
     }
   };
 
+  const handleEditorBlur = useCallback((newContent: string) => {
+    setAcademicAddress(newContent);
+  }, []);
+
   if (!selectedAcademic) {
     return (
       <Card className="p-6">
@@ -339,32 +395,37 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
                   />
                 </div>
 
-               <div>
-                 <Label htmlFor="academic_website" className="block mb-2">
-  Button URL
-</Label>
-<TextInput
-  id="academic_website"
-  type="url"
-  value={buttonUrl}
-  onChange={(e) => setButtonUrl(e.target.value)}
-  placeholder="https://example.com/apply"
-/>
-               </div>
-
+                <div>
+                  <Label htmlFor="academic_website" className="block mb-2">
+                    Button URL
+                  </Label>
+                  <TextInput
+                    id="academic_website"
+                    type="url"
+                    value={buttonUrl}
+                    onChange={(e) => setButtonUrl(e.target.value)}
+                    placeholder="https://example.com/apply"
+                  />
+                </div>
 
                 {/* Academic Address */}
                 <div className="md:col-span-2">
                   <Label htmlFor="academicAddress" className="block mb-2">
                     Academic Address
                   </Label>
-                  <Textarea
+                  <JoditEditor
+                    ref={editorRef}
+                    value={academicAddress}
+                    config={editorConfig}
+                    onBlur={handleEditorBlur}
+                  />
+                  {/* <Textarea
                     id="academicAddress"
                     value={academicAddress}
                     onChange={(e) => setAcademicAddress(e.target.value)}
                     placeholder="Enter academic address"
                     rows={3}
-                  />
+                  /> */}
                 </div>
               </div>
 

@@ -1,9 +1,8 @@
-
+// Header.tsx (Updated)
 import React from 'react';
 import { Link } from 'react-router';
 
-const assetUrl =
-  import.meta.env.VITE_ASSET_URL || '';
+const assetUrl = import.meta.env.VITE_ASSET_URL || '';
 
 interface HeaderProps {
   baseUrl?: string;
@@ -12,6 +11,7 @@ interface HeaderProps {
   logo?: string;
   address?: string;
   primaryWebsiteUrl?: string;
+  themeColor?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -21,8 +21,8 @@ const Header: React.FC<HeaderProps> = ({
   logo,
   address,
   primaryWebsiteUrl = '',
+  themeColor,
 }) => {
-
   const getLogoUrl = (logoPath?: string) => {
     if (!logoPath) return null;
     return logoPath.startsWith('http') ? logoPath : `${assetUrl}/${logoPath}`;
@@ -30,41 +30,36 @@ const Header: React.FC<HeaderProps> = ({
 
   const logoUrl = getLogoUrl(logo);
 
-
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-8 py-3">
-
-        {/* MAIN FLEX */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-
           {/* Left Block */}
           <div className="flex items-center gap-3 min-w-0">
-
             {logoUrl && (
-              <Link to={baseUrl}>
+              <Link to={baseUrl || '/'}>
                 <button className="flex-shrink-0">
-                <img
-                  src={logoUrl}
-                  alt="Institute Logo"
-                  className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
-                />
-              </button>
+                  <img
+                    src={logoUrl}
+                    alt="Institute Logo"
+                    className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
+                  />
+                </button>
               </Link>
             )}
 
             <div className="min-w-0">
-              <Link to={baseUrl}>
-              <button className="text-left">
-                <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 truncate hover:text-indigo-600">
-                  {instituteName}
-                </h1>
-              </button>
+              <Link to={baseUrl || '/'}>
+                <button className="text-left">
+                  <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 truncate hover:theme-text">
+                    {instituteName}
+                  </h1>
+                </button>
               </Link>
 
               {address && (
                 <p className="text-xs sm:text-sm text-slate-500 truncate">
-                  {address}
+                 <div dangerouslySetInnerHTML={{__html: address}} />
                 </p>
               )}
             </div>
@@ -72,15 +67,21 @@ const Header: React.FC<HeaderProps> = ({
 
           {/* Right Button */}
           <div className="flex justify-start md:justify-end">
-            <Link to={primaryWebsiteUrl}>
-            <button
-              className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md"
-            >
-              Go to Homepage
-            </button>
-            </Link>
+            {primaryWebsiteUrl && (
+              <a
+                href={primaryWebsiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <button
+                  className="w-full text-white md:w-auto theme-button px-4 py-2 rounded-lg text-sm font-medium transition shadow-md"
+                  style={themeColor ? { backgroundColor: themeColor } : {}}
+                >
+                  Go to Homepage
+                </button>
+              </a>
+            )}
           </div>
-
         </div>
       </div>
     </header>

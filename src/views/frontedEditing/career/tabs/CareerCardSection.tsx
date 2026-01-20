@@ -4,20 +4,14 @@ import {
   Label, 
   TextInput, 
   Button, 
-  Spinner, 
-  Modal,
-  Tooltip,
-  ModalHeader,
-  ModalBody
+  Spinner,
+  Select 
 } from 'flowbite-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import Loader from 'src/Frontend/Common/Loader';
 import JoditEditor from 'jodit-react';
 import { ChromePicker } from 'react-color';
-// import DatePicker from 'react-datepicker';
-// import "react-datepicker/dist/react-datepicker.css";
-import { format } from 'date-fns';
 
 interface CareerHeaderFooterData {
   id?: number;
@@ -30,6 +24,10 @@ interface CareerHeaderFooterData {
   search_color?: string;
   search_text_color?: string;
   success_message?: string;
+  terms_consent_text?: string;
+  theme_colour?: string;
+  font_family?: string;
+  developed_by?: string;
   resume_size?: number;
   created_at?: string;
   updated_at?: string;
@@ -42,6 +40,30 @@ interface CareerCardSectionProps {
 }
 
 const assetUrl = import.meta.env.VITE_ASSET_URL;
+
+// Font families array for dropdown
+const FONT_FAMILIES = [
+  { value: 'Roboto', label: 'Roboto' },
+  { value: 'Open Sans', label: 'Open Sans' },
+  { value: 'Montserrat', label: 'Montserrat' },
+  { value: 'Poppins', label: 'Poppins' },
+  { value: 'Lato', label: 'Lato' },
+  { value: 'Nunito', label: 'Nunito' },
+  { value: 'Inter', label: 'Inter' },
+  { value: 'Raleway', label: 'Raleway' },
+  { value: 'Ubuntu', label: 'Ubuntu' },
+  { value: 'Merriweather', label: 'Merriweather' },
+  { value: 'Playfair Display', label: 'Playfair Display' },
+  { value: 'Source Sans Pro', label: 'Source Sans Pro' },
+  { value: 'Oswald', label: 'Oswald' },
+  { value: 'Roboto Condensed', label: 'Roboto Condensed' },
+  { value: 'Noto Sans', label: 'Noto Sans' },
+  { value: 'Arial, sans-serif', label: 'Arial' },
+  { value: 'Helvetica, sans-serif', label: 'Helvetica' },
+  { value: 'Georgia, serif', label: 'Georgia' },
+  { value: 'Times New Roman, serif', label: 'Times New Roman' },
+  { value: 'Verdana, sans-serif', label: 'Verdana' },
+];
 
 const CareerCardSection: React.FC<CareerCardSectionProps> = ({
   selectedAcademic,
@@ -59,29 +81,37 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
   const [isVideo, setIsVideo] = useState(false);
   
   // New fields
-  const [bannerColor, setBannerColor] = useState('#3B82F6'); // Default blue
-  const [bannerTextColor, setBannerTextColor] = useState('#FFFFFF'); // Default white
-  const [searchColor, setSearchColor] = useState('#10B981'); // Default green
-  const [searchTextColor, setSearchTextColor] = useState('#FFFFFF'); // Default white
+  const [bannerColor, setBannerColor] = useState('#3B82F6'); 
+  const [bannerTextColor, setBannerTextColor] = useState('#FFFFFF'); 
+  const [searchColor, setSearchColor] = useState('#10B981'); 
+  const [searchTextColor, setSearchTextColor] = useState('#FFFFFF'); 
   const [successMessage, setSuccessMessage] = useState('');
-  const [resumeSize, setResumeSize] = useState<number>(10); // Default 10MB
+  const [resumeSize, setResumeSize] = useState<number>(10); 
+  
+  // Newly added fields
+  const [developedBy, setDevelopedBy] = useState('');
+  const [fontFamily, setFontFamily] = useState('');
+  const [themeColour, setThemeColour] = useState('#3B82F6');
+  const [termsConsentText, setTermsConsentText] = useState('');
+  
+  // Color picker states
   const [showBannerColorPicker, setShowBannerColorPicker] = useState(false);
   const [showBannerTextColorPicker, setShowBannerTextColorPicker] = useState(false);
   const [showSearchColorPicker, setShowSearchColorPicker] = useState(false);
   const [showSearchTextColorPicker, setShowSearchTextColorPicker] = useState(false);
+  const [showThemeColorPicker, setShowThemeColorPicker] = useState(false);
 
   // Date pickers
   const [bannerTextColorDate, setBannerTextColorDate] = useState<Date | null>(null);
   const [searchTextColorDate, setSearchTextColorDate] = useState<Date | null>(null);
 
-  // Preview modal
-  const [showPreviewModal, setShowPreviewModal] = useState(false);
-
   const editorRef = useRef(null);
+  const termsEditorRef = useRef(null);
   const bannerColorPickerRef = useRef<HTMLDivElement>(null);
   const bannerTextColorPickerRef = useRef<HTMLDivElement>(null);
   const searchColorPickerRef = useRef<HTMLDivElement>(null);
   const searchTextColorPickerRef = useRef<HTMLDivElement>(null);
+  const themeColorPickerRef = useRef<HTMLDivElement>(null);
 
   const editorConfig = useMemo(
     () => ({
@@ -127,7 +157,7 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
       showCharsCounter: false,
       showWordsCounter: false,
       uploader: { insertImageAsBase64URI: true },
-      placeholder: 'Enter career page description here...',
+      placeholder: 'Enter text here...',
       theme: 'default',
     }),
     [],
@@ -160,6 +190,12 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
       ) {
         setShowSearchTextColorPicker(false);
       }
+      if (
+        themeColorPickerRef.current && 
+        !themeColorPickerRef.current.contains(event.target as Node)
+      ) {
+        setShowThemeColorPicker(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -168,6 +204,10 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
 
   const handleEditorBlur = useCallback((newContent: string) => {
     setLongDescription(newContent);
+  }, []);
+
+  const handleTermsEditorBlur = useCallback((newContent: string) => {
+    setTermsConsentText(newContent);
   }, []);
 
   useEffect(() => {
@@ -213,8 +253,13 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
     setSuccessMessage(data.success_message || '');
     setResumeSize(data.resume_size || 10);
     
-    // Set dates if they exist in the data (you might need to adjust based on your API response)
-    // This is an example - adjust based on how dates are stored in your database
+    // New fields
+    setDevelopedBy(data.developed_by || '');
+    setFontFamily(data.font_family || '');
+    setThemeColour(data.theme_colour || '#3B82F6');
+    setTermsConsentText(data.terms_consent_text || '');
+    
+    // Set dates if they exist in the data
     if (data.banner_text_color_date) {
       setBannerTextColorDate(new Date(data.banner_text_color_date));
     }
@@ -252,6 +297,13 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
     setSearchTextColor('#FFFFFF');
     setSuccessMessage('');
     setResumeSize(10);
+    
+    // Reset new fields
+    setDevelopedBy('');
+    setFontFamily('');
+    setThemeColour('#3B82F6');
+    setTermsConsentText('');
+    
     setBannerTextColorDate(null);
     setSearchTextColorDate(null);
   };
@@ -289,6 +341,12 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
       formData.append('search_text_color', searchTextColor);
       formData.append('success_message', successMessage);
       formData.append('resume_size', resumeSize.toString());
+      
+      // New fields
+      formData.append('developed_by', developedBy);
+      formData.append('font_family', fontFamily);
+      formData.append('theme_colour', themeColour);
+      formData.append('terms_consent_text', termsConsentText);
 
       // Append dates if they exist
       if (bannerTextColorDate) {
@@ -397,6 +455,47 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
                     />
                   </div>
 
+                  {/* New fields - Developed By and Font Family */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Developed By */}
+                    <div>
+                      <Label htmlFor="developedBy" className="block mb-2">
+                        Developed By
+                      </Label>
+                      <TextInput
+                        id="developedBy"
+                        type="text"
+                        value={developedBy}
+                        onChange={(e) => setDevelopedBy(e.target.value)}
+                        placeholder="e.g., Company Name or Developer Name"
+                      />
+                    </div>
+
+                    {/* Font Family */}
+                    <div>
+                      <Label htmlFor="fontFamily" className="block mb-2">
+                        Font Family
+                      </Label>
+                      <Select
+                        id="fontFamily"
+                        value={fontFamily}
+                        onChange={(e) => setFontFamily(e.target.value)}
+                      >
+                        <option value="">Select a font family</option>
+                        {FONT_FAMILIES.map((font) => (
+                          <option key={font.value} value={font.value}>
+                            {font.label}
+                          </option>
+                        ))}
+                      </Select>
+                      {fontFamily && (
+                        <p className="mt-1 text-sm text-gray-500">
+                          Selected font: {fontFamily}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Color Pickers */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Banner Color */}
@@ -497,37 +596,6 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
                             </div>
                           )}
                         </div>
-                        
-                        {/* <div>
-                          <Label htmlFor="bannerTextColorDate" className="block mb-2 text-sm">
-                            Banner Text Color Effective Date
-                          </Label>
-                          <div className="relative">
-                            <DatePicker
-                              selected={bannerTextColorDate}
-                              onChange={(date) => setBannerTextColorDate(date)}
-                              dateFormat="MMMM d, yyyy"
-                              placeholderText="Select effective date"
-                              className="block w-full border border-gray-300 rounded-lg p-2.5 text-sm"
-                              isClearable
-                              showPopperArrow={false}
-                            />
-                            {bannerTextColorDate && (
-                              <button
-                                type="button"
-                                onClick={() => setBannerTextColorDate(null)}
-                                className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
-                              >
-                                ✕
-                              </button>
-                            )}
-                          </div>
-                          {bannerTextColorDate && (
-                            <p className="text-xs text-gray-500 mt-1">
-                              Selected: {format(bannerTextColorDate, 'MMMM d, yyyy')}
-                            </p>
-                          )}
-                        </div> */}
                       </div>
                     </div>
 
@@ -563,37 +631,39 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
                             </div>
                           )}
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Theme Colour */}
+                    <div>
+                      <Label htmlFor="themeColour" className="block mb-2">
+                        Theme Colour
+                      </Label>
+                      <div className="relative" ref={themeColorPickerRef}>
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-10 h-10 rounded-lg border border-gray-300 cursor-pointer"
+                            style={{ backgroundColor: themeColour }}
+                            onClick={() => setShowThemeColorPicker(!showThemeColorPicker)}
+                          />
+                          <TextInput
+                            id="themeColour"
+                            type="text"
+                            value={themeColour}
+                            onChange={(e) => setThemeColour(e.target.value)}
+                            placeholder="#3B82F6"
+                            className="flex-1"
+                          />
+                        </div>
                         
-                        {/* <div>
-                          <Label htmlFor="searchTextColorDate" className="block mb-2 text-sm">
-                            Search Text Color Effective Date
-                          </Label>
-                          <div className="relative">
-                            <DatePicker
-                              selected={searchTextColorDate}
-                              onChange={(date) => setSearchTextColorDate(date)}
-                              dateFormat="MMMM d, yyyy"
-                              placeholderText="Select effective date"
-                              className="block w-full border border-gray-300 rounded-lg p-2.5 text-sm"
-                              isClearable
-                              showPopperArrow={false}
+                        {showThemeColorPicker && (
+                          <div className="absolute z-10 mt-2">
+                            <ChromePicker
+                              color={themeColour}
+                              onChange={(color) => setThemeColour(color.hex)}
                             />
-                            {searchTextColorDate && (
-                              <button
-                                type="button"
-                                onClick={() => setSearchTextColorDate(null)}
-                                className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
-                              >
-                                ✕
-                              </button>
-                            )}
                           </div>
-                          {searchTextColorDate && (
-                            <p className="text-xs text-gray-500 mt-1">
-                              Selected: {format(searchTextColorDate, 'MMMM d, yyyy')}
-                            </p>
-                          )}
-                        </div> */}
+                        )}
                       </div>
                     </div>
                   </div>
@@ -612,33 +682,24 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
                     />
                   </div>
 
-                  {/* Resume Size */}
-                  {/* <div>
-                    <Label htmlFor="resumeSize" className="block mb-2">
-                      <div className="flex items-center gap-2">
-                        <span>Maximum Resume Size (MB)</span>
-                        <Tooltip content="Maximum allowed file size for resume uploads">
-                          <span className="text-gray-400 cursor-help">ℹ️</span>
-                        </Tooltip>
-                      </div>
+                  {/* Terms & Consent Text Editor */}
+                  <div>
+                    <Label htmlFor="termsConsentText" className="block mb-2">
+                      Terms & Consent Text
                     </Label>
-                    <div className="flex items-center gap-3">
-                      <TextInput
-                        id="resumeSize"
-                        type="number"
-                        min="1"
-                        max="100"
-                        step="1"
-                        value={resumeSize}
-                        onChange={(e) => setResumeSize(parseInt(e.target.value) || 10)}
-                        className="flex-1"
+                    <div className="border border-gray-300 rounded-lg overflow-hidden">
+                      <JoditEditor
+                        ref={termsEditorRef}
+                        value={termsConsentText}
+                        config={{
+                          ...editorConfig,
+                          height: 200,
+                          placeholder: 'Enter terms and conditions or consent text here...',
+                        }}
+                        onBlur={handleTermsEditorBlur}
                       />
-                      <span className="text-gray-600 whitespace-nowrap">MB</span>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Accepted range: 1MB to 100MB
-                    </p>
-                  </div> */}
+                  </div>
 
                   {/* Banner Image/Video */}
                   <div>
@@ -666,14 +727,6 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
                           <div className="flex items-center space-x-2 mt-2">
                             <Button
                               type="button"
-                              color="light"
-                              size="xs"
-                              onClick={() => setShowPreviewModal(true)}
-                            >
-                              Preview
-                            </Button>
-                            <Button
-                              type="button"
                               color="failure"
                               size="xs"
                               onClick={handleRemoveBanner}
@@ -695,6 +748,25 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
                       </div>
                     </div>
                   </div>
+
+                  {/* Resume Size */}
+                  {/* <div className="max-w-xs">
+                    <Label htmlFor="resumeSize" className="block mb-2">
+                      Resume Size Limit (MB)
+                    </Label>
+                    <TextInput
+                      id="resumeSize"
+                      type="number"
+                      value={resumeSize}
+                      onChange={(e) => setResumeSize(parseInt(e.target.value) || 10)}
+                      min={1}
+                      max={100}
+                      placeholder="10"
+                    />
+                    <p className="mt-1 text-sm text-gray-500">
+                      Maximum file size for resume upload (1-100 MB)
+                    </p>
+                  </div> */}
 
                   {/* Long Description - Rich Text Editor */}
                   <div>
@@ -729,32 +801,6 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
           </Card>
         </div>
       )}
-
-      {/* Preview Modal */}
-      <Modal
-        show={showPreviewModal}
-        onClose={() => setShowPreviewModal(false)}
-        size="4xl"
-      >
-        <ModalHeader>Preview Banner</ModalHeader>
-        <ModalBody>
-          <div className="flex justify-center">
-            {isVideo ? (
-              <video 
-                src={bannerPreview} 
-                controls 
-                className="w-full max-h-[70vh]"
-              />
-            ) : (
-              <img
-                src={bannerPreview}
-                alt="Banner Preview"
-                className="w-full max-h-[70vh] object-contain"
-              />
-            )}
-          </div>
-        </ModalBody>
-      </Modal>
     </div>
   );
 };
