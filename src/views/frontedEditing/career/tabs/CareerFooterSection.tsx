@@ -75,7 +75,7 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
   const [academicEmail, setAcademicEmail] = useState('');
 
   // Social Media Fields
-  const [socialIcons, setSocialIcons] = useState<SocialIcon[]>([{ icon_url: '', icon: '' }]);
+  const [socialIcons, setSocialIcons] = useState<SocialIcon[]>([]);
 
   const editorConfig = useMemo(
     () => ({
@@ -156,8 +156,6 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
       }
     } catch (error: any) {
       console.error('Error fetching career footer data:', error);
-      if (error.response?.status === 404) resetForm();
-      else toast.error(error.response?.data?.message || 'Error fetching data');
     } finally {
       setLoading(false);
     }
@@ -205,11 +203,6 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
     const validSocialIcons = socialIcons.filter(
       (icon) => icon.icon_url.trim() !== '' && icon.icon.trim() !== '',
     );
-
-    if (validSocialIcons.length === 0) {
-      toast.error('At least one social icon with both icon class and URL is required');
-      return;
-    }
 
     setSaving(true);
 
@@ -261,7 +254,6 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
       }
     } catch (error: any) {
       console.error('Error updating data:', error);
-      toast.error(error.response?.data?.message || 'Error updating data');
     } finally {
       setSaving(false);
     }
@@ -419,13 +411,6 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
                     config={editorConfig}
                     onBlur={handleEditorBlur}
                   />
-                  {/* <Textarea
-                    id="academicAddress"
-                    value={academicAddress}
-                    onChange={(e) => setAcademicAddress(e.target.value)}
-                    placeholder="Enter academic address"
-                    rows={3}
-                  /> */}
                 </div>
               </div>
 
@@ -459,6 +444,20 @@ const CareerFooterSection: React.FC<CareerFooterSectionProps> = ({
               </div>
 
               <h2 className="text-xl font-semibold mb-6">Social Media Icons</h2>
+              {socialIcons.length === 0 && (
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    color="success"
+                    onClick={addSocialIcon}
+                    className="px-4 py-2"
+                  >
+                    <HiOutlinePlus className="h-5 w-5 mr-2" />
+                    Add Social Icon
+                  </Button>
+                </div>
+              )}
+
               <div className="space-y-4 mb-10">
                 {socialIcons.map((icon, index) => (
                   <div

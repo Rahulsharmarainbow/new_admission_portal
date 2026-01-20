@@ -78,6 +78,8 @@ import CareerManagementTable from 'src/views/applicationForms/careerApplication/
 import { userInfo } from 'os';
 import CareerDashboard from 'src/views/dashboards/CareerDashboard';
 import ErrorTable from 'src/views/errorLog/ErrorTable';
+import { CandidateLogin } from 'src/views/candidate-panel/auth/CandidateLogin';
+import { CandidateDashboard } from 'src/views/candidate-panel/CandidateDashboard';
 
 
 /* ***Layouts**** */
@@ -397,6 +399,8 @@ const MainRoutes = [
     { path: '/auth/register', element: <Register /> },
     { path: '404', element: <Error /> },
     { path: '/auth/404', element: <Error /> },
+    { path: '/CandidatePanel/login', element: <CandidateLogin /> },
+    { path: '/CandidatePanel/dashboard', element: <CandidateDashboard /> },
 
     // 🔒 All Below → Protected
     {

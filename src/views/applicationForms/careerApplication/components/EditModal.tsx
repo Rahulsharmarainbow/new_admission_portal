@@ -263,7 +263,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, application, onU
               {field.label}
               {field.required === 1 && <span className="text-red-500">*</span>}
             </Label>
-            <div className="mt-1">
+            <div className="mt-1 mb-2">
               <input
                 type="file"
                 id={field.name}
@@ -276,12 +276,12 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, application, onU
                   file:bg-blue-50 file:text-blue-700
                   hover:file:bg-blue-100"
               />
-              {field.value && (
+              {/* {field.value && (
                 <div className="mt-2 text-sm text-gray-600">
                   <span className="font-medium">Current file:</span>{' '}
                   {field.value}
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         );

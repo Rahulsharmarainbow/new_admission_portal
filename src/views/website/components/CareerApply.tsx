@@ -945,11 +945,11 @@ const fetchFilteredJobsDirect = useCallback(async () => {
           </div>
         </div>
       </section>
-  {/* Scroll to top anchor */}
-      <div ref={scrollToTopRef} className="absolute top-0" />
+  
       {/* Job Listings + Filters */}
       <main className="flex-1 py-8 scrollbar-thin" ref={jobsContainerRef}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Job cards */}
             <div className={filters.length > 0 ? "lg:col-span-8" : "lg:col-span-12"}>
@@ -994,6 +994,9 @@ const fetchFilteredJobsDirect = useCallback(async () => {
                 ) : (
                   <>
                     {/* Jobs Count */}
+                      
+            {/* Scroll to top anchor */}
+                  <div ref={scrollToTopRef} className="absolute top-0" />
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-slate-900">
                         Available Jobs 

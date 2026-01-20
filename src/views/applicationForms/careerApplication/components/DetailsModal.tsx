@@ -17,6 +17,7 @@ interface Note {
 }
 
 interface ApplicationData {
+  textarea_brief: any;
   id: number;
   academic_id: number;
   job_id: number;
@@ -28,6 +29,7 @@ interface ApplicationData {
   mobile: string;
   resume: string;
   candidate_details: {
+    textarea_brief: any;
     name: string;
     email: string;
     mobile: string;
@@ -369,6 +371,10 @@ const DetailsModal: React.FC<DetailsModalProps> = ({ isOpen, onClose, applicatio
                       <div>
                         <label className="block text-sm font-medium text-gray-500">Mobile Number</label>
                         <p className="mt-1 text-sm text-gray-900">{applicationData?.mobile || application.mobile}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-500">Brief</label>
+                        <p className="mt-1 text-sm text-gray-900">{applicationData?.candidate_details?.textarea_brief || application.textarea_brief}</p>
                       </div>
                     </div>
                   </div>

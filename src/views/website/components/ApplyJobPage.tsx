@@ -81,11 +81,11 @@ type InstituteData = {
 // Format file size utility
 const formatFileSize = (bytes: number) => {
   if (bytes === 0) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
@@ -96,13 +96,13 @@ export const ApplyJobPage: React.FC = () => {
   const [institute, setInstitute] = useState<InstituteData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Form state
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-  
+
   // Success popup state
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -112,7 +112,7 @@ export const ApplyJobPage: React.FC = () => {
     if (institute && jobDetails) {
       // Set page title
       document.title = `${jobDetails.job_title} - ${institute.header.academic_name}`;
-      
+
       // Set favicon
       const setFavicon = (faviconUrl: string) => {
         const existingLinks = document.querySelectorAll('link[rel*="icon"]');
@@ -129,22 +129,24 @@ export const ApplyJobPage: React.FC = () => {
         const faviconUrl = `${assetUrl}/${institute.header.favicon}`;
         setFavicon(faviconUrl);
       }
-      
+
       // Apply theme color
       if (jobDetails.theme_colour) {
         document.documentElement.style.setProperty('--theme-color', jobDetails.theme_colour);
       }
-      
+
       // Apply font family
       if (jobDetails.font_family) {
         document.documentElement.style.setProperty('--font-family', jobDetails.font_family);
-        
+
         // Load Google Font if it's a Google Font
-        if (!jobDetails.font_family.includes('Arial') && 
-            !jobDetails.font_family.includes('Helvetica') &&
-            !jobDetails.font_family.includes('Georgia') &&
-            !jobDetails.font_family.includes('Times') &&
-            !jobDetails.font_family.includes('Verdana')) {
+        if (
+          !jobDetails.font_family.includes('Arial') &&
+          !jobDetails.font_family.includes('Helvetica') &&
+          !jobDetails.font_family.includes('Georgia') &&
+          !jobDetails.font_family.includes('Times') &&
+          !jobDetails.font_family.includes('Verdana')
+        ) {
           const link = document.createElement('link');
           link.href = `https://fonts.googleapis.com/css2?family=${jobDetails.font_family.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`;
           link.rel = 'stylesheet';
@@ -184,7 +186,7 @@ export const ApplyJobPage: React.FC = () => {
       }
     `;
     document.head.appendChild(style);
-    
+
     return () => {
       document.head.removeChild(style);
     };
@@ -212,14 +214,14 @@ export const ApplyJobPage: React.FC = () => {
         }>(
           `${apiUrl}/PublicCareer/get-job-details`,
           { slug: jobId },
-          { headers: { 'Content-Type': 'application/json' } }
+          { headers: { 'Content-Type': 'application/json' } },
         );
 
         if (response.data?.status === true) {
           const { data: jobData, institude: instituteData } = response.data;
           setJobDetails(jobData);
           setInstitute(instituteData);
-          
+
           // Initialize form data
           const initialFormData: Record<string, any> = {};
           if (jobData.result && Array.isArray(jobData.result)) {
@@ -251,16 +253,16 @@ export const ApplyJobPage: React.FC = () => {
               });
             });
           }
-          
+
           // Add default fields if not present
           const defaultFields = ['name', 'email', 'mobile', 'resume'];
-          defaultFields.forEach(field => {
+          defaultFields.forEach((field) => {
             if (!(field in initialFormData)) {
               initialFormData[field] = '';
               if (field === 'resume') initialFormData[field] = null;
             }
           });
-          
+
           setFormData(initialFormData);
           setSuccessMessage(jobData.success_message);
         } else {
@@ -300,10 +302,13 @@ export const ApplyJobPage: React.FC = () => {
   const validateFile = (file: File, max_size?: number, allowed_types?: string) => {
     let isValid = true;
     let message = '';
-    
+
     // Convert max_size from string to number if needed
-    const maxSizeMB = max_size ? Number(max_size) : 
-                     jobDetails?.resume_size ? Number(jobDetails.resume_size) : 5;
+    const maxSizeMB = max_size
+      ? Number(max_size)
+      : jobDetails?.resume_size
+        ? Number(jobDetails.resume_size)
+        : 5;
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
     // Check file size
@@ -318,12 +323,10 @@ export const ApplyJobPage: React.FC = () => {
 
     // Check if allowed_types is provided
     if (allowed_types) {
-      const allowedExtensions = allowed_types
-        .split(',')
-        .map((t) => `.${t.trim().toLowerCase()}`);
+      const allowedExtensions = allowed_types.split(',').map((t) => `.${t.trim().toLowerCase()}`);
 
-      const hasValidExtension = allowedExtensions.some(ext => 
-        fileExtension === ext.toLowerCase()
+      const hasValidExtension = allowedExtensions.some(
+        (ext) => fileExtension === ext.toLowerCase(),
       );
 
       const mimeTypeMap: Record<string, string[]> = {
@@ -333,12 +336,12 @@ export const ApplyJobPage: React.FC = () => {
         '.txt': ['text/plain'],
       };
 
-      const allowedMimeTypes = allowedExtensions.flatMap(ext => 
-        mimeTypeMap[ext.toLowerCase()] || []
+      const allowedMimeTypes = allowedExtensions.flatMap(
+        (ext) => mimeTypeMap[ext.toLowerCase()] || [],
       );
 
       const hasValidMimeType = allowedMimeTypes.includes(file.type.toLowerCase());
-      
+
       if (!hasValidExtension && !hasValidMimeType) {
         isValid = false;
         message = `Invalid file type. Allowed types: ${allowed_types}.`;
@@ -353,12 +356,12 @@ export const ApplyJobPage: React.FC = () => {
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     fieldName: string,
-    field: FormField
+    field: FormField,
   ) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const validation = validateFile(file, field.max_length, field.allowed_type);
-      
+
       if (!validation.isValid) {
         toast.error(validation.message);
         e.target.value = '';
@@ -367,10 +370,9 @@ export const ApplyJobPage: React.FC = () => {
       }
 
       setFormData((prev) => ({ ...prev, [fieldName]: file }));
-      toast.success(
-        `${field.label} uploaded successfully (${formatFileSize(file.size)})`,
-        { icon: '📎' }
-      );
+      toast.success(`${field.label} uploaded successfully (${formatFileSize(file.size)})`, {
+        icon: '📎',
+      });
     }
   };
 
@@ -380,28 +382,23 @@ export const ApplyJobPage: React.FC = () => {
     e.stopPropagation();
   };
 
-  const handleDrop = (
-    e: React.DragEvent,
-    fieldName: string,
-    field: FormField
-  ) => {
+  const handleDrop = (e: React.DragEvent, fieldName: string, field: FormField) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       const validation = validateFile(file, field.max_length, field.allowed_type);
-      
+
       if (!validation.isValid) {
         toast.error(validation.message);
         return;
       }
 
       setFormData((prev) => ({ ...prev, [fieldName]: file }));
-      toast.success(
-        `${field.label} uploaded successfully (${formatFileSize(file.size)})`,
-        { icon: '📎' }
-      );
+      toast.success(`${field.label} uploaded successfully (${formatFileSize(file.size)})`, {
+        icon: '📎',
+      });
     }
   };
 
@@ -550,10 +547,10 @@ export const ApplyJobPage: React.FC = () => {
         }
         setFormData(resetFormData);
         setFormErrors({});
-        
+
         // Show success popup
         setShowSuccessPopup(true);
-        
+
         toast.success(response.data.message || 'Application submitted successfully!');
       } else {
         toast.error(response.data?.message || 'Failed to submit application');
@@ -562,7 +559,7 @@ export const ApplyJobPage: React.FC = () => {
       console.error('Submission error:', error);
       toast.error(
         error.response?.data?.message ||
-        'There was an error submitting your application. Please try again.'
+          'There was an error submitting your application. Please try again.',
       );
     } finally {
       setIsSubmitting(false);
@@ -590,8 +587,8 @@ export const ApplyJobPage: React.FC = () => {
               value={value}
               onChange={handleInputChange}
               className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
-                error 
-                  ? 'border-red-300 focus:ring-red-500/20' 
+                error
+                  ? 'border-red-300 focus:ring-red-500/20'
                   : 'border-slate-300 focus:ring-theme-color/20'
               }`}
               placeholder={field.placeholder}
@@ -613,8 +610,8 @@ export const ApplyJobPage: React.FC = () => {
               onChange={handleInputChange}
               rows={4}
               className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm placeholder-slate-500 resize-none ${
-                error 
-                  ? 'border-red-300 focus:ring-red-500/20' 
+                error
+                  ? 'border-red-300 focus:ring-red-500/20'
                   : 'border-slate-300 focus:ring-theme-color/20'
               }`}
               placeholder={field.placeholder}
@@ -636,8 +633,8 @@ export const ApplyJobPage: React.FC = () => {
               value={value}
               onChange={handleInputChange}
               className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm bg-white ${
-                error 
-                  ? 'border-red-300 focus:ring-red-500/20' 
+                error
+                  ? 'border-red-300 focus:ring-red-500/20'
                   : 'border-slate-300 focus:ring-theme-color/20'
               }`}
               required={field.required === 1}
@@ -676,21 +673,33 @@ export const ApplyJobPage: React.FC = () => {
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 required={field.required === 1}
               />
-              <div className={`flex items-center justify-between px-6 py-5 border-2 rounded-2xl cursor-pointer transition-all ${
-                value
-                  ? 'theme-border bg-theme-50'
-                  : error
-                    ? 'border-red-300 bg-red-50'
-                    : 'border-dashed border-slate-300 bg-slate-50 hover:bg-theme-50'
-              }`}>
+              <div
+                className={`flex items-center justify-between px-6 py-5 border-2 rounded-2xl cursor-pointer transition-all ${
+                  value
+                    ? 'theme-border bg-theme-50'
+                    : error
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-dashed border-slate-300 bg-slate-50 hover:bg-theme-50'
+                }`}
+              >
                 <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-xl ${
-                    value ? 'theme-bg bg-opacity-10' : 'bg-slate-100'
-                  }`}>
-                    <svg className={`w-5 h-5 ${value ? 'theme-text' : 'text-slate-500'}`}
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <div
+                    className={`p-3 rounded-xl ${
+                      value ? 'theme-bg bg-opacity-10' : 'bg-slate-100'
+                    }`}
+                  >
+                    <svg
+                      className={`w-5 h-5 ${value ? 'theme-text' : 'text-slate-500'}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
                     </svg>
                   </div>
                   <div>
@@ -698,7 +707,7 @@ export const ApplyJobPage: React.FC = () => {
                       {value instanceof File ? value.name : field.placeholder || 'Choose File'}
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
-                      {value instanceof File 
+                      {value instanceof File
                         ? `Uploaded ${formatFileSize(value.size)}`
                         : 'No file chosen'}
                     </p>
@@ -715,8 +724,11 @@ export const ApplyJobPage: React.FC = () => {
             </div>
             <p className="text-xs text-slate-500 mt-2">
               {field.allowed_type ? `Allowed: ${field.allowed_type}` : 'All file types'}
-              {field.max_length ? ` (Max ${field.max_length}MB)` : 
-               jobDetails?.resume_size ? ` (Max ${jobDetails.resume_size}MB)` : ''}
+              {field.max_length
+                ? ` (Max ${field.max_length}MB)`
+                : jobDetails?.resume_size
+                  ? ` (Max ${jobDetails.resume_size}MB)`
+                  : ''}
             </p>
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
           </div>
@@ -753,8 +765,8 @@ export const ApplyJobPage: React.FC = () => {
               value={value}
               onChange={handleInputChange}
               className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
-                error 
-                  ? 'border-red-300 focus:ring-red-500/20' 
+                error
+                  ? 'border-red-300 focus:ring-red-500/20'
                   : 'border-slate-300 focus:ring-theme-color/20'
               }`}
               placeholder={field.placeholder}
@@ -768,7 +780,11 @@ export const ApplyJobPage: React.FC = () => {
 
   // Render dynamic form
   const renderDynamicForm = () => {
-    if (!jobDetails?.result || !Array.isArray(jobDetails.result) || jobDetails.result.length === 0) {
+    if (
+      !jobDetails?.result ||
+      !Array.isArray(jobDetails.result) ||
+      jobDetails.result.length === 0
+    ) {
       // Default form
       return (
         <div className="space-y-6">
@@ -783,8 +799,8 @@ export const ApplyJobPage: React.FC = () => {
                 value={formData.name || ''}
                 onChange={handleInputChange}
                 className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
-                  formErrors.name 
-                    ? 'border-red-300 focus:ring-red-500/20' 
+                  formErrors.name
+                    ? 'border-red-300 focus:ring-red-500/20'
                     : 'border-slate-300 focus:ring-theme-color/20'
                 }`}
                 placeholder="Your full name"
@@ -803,8 +819,8 @@ export const ApplyJobPage: React.FC = () => {
                 value={formData.email || ''}
                 onChange={handleInputChange}
                 className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
-                  formErrors.email 
-                    ? 'border-red-300 focus:ring-red-500/20' 
+                  formErrors.email
+                    ? 'border-red-300 focus:ring-red-500/20'
                     : 'border-slate-300 focus:ring-theme-color/20'
                 }`}
                 placeholder="your.email@example.com"
@@ -825,14 +841,16 @@ export const ApplyJobPage: React.FC = () => {
                 value={formData.mobile || ''}
                 onChange={handleInputChange}
                 className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
-                  formErrors.mobile 
-                    ? 'border-red-300 focus:ring-red-500/20' 
+                  formErrors.mobile
+                    ? 'border-red-300 focus:ring-red-500/20'
                     : 'border-slate-300 focus:ring-theme-color/20'
                 }`}
                 placeholder="Your phone number"
                 required
               />
-              {formErrors.mobile && <p className="mt-1 text-sm text-red-600">{formErrors.mobile}</p>}
+              {formErrors.mobile && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.mobile}</p>
+              )}
             </div>
 
             <div>
@@ -880,34 +898,46 @@ export const ApplyJobPage: React.FC = () => {
                     validation: null,
                     value: null,
                     allowed_type: 'PDF,DOC,DOCX',
-                    max_length: jobDetails?.resume_size ? Number(jobDetails.resume_size) : 5
+                    max_length: jobDetails?.resume_size ? Number(jobDetails.resume_size) : 5,
                   };
                   handleFileChange(e, 'resume', field);
                 }}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 required
               />
-              <div className={`flex items-center justify-between px-6 py-5 border-2 rounded-2xl cursor-pointer transition-all ${
-                formData['resume']
-                  ? 'theme-border bg-theme-50'
-                  : formErrors['resume']
-                    ? 'border-red-300 bg-red-50'
-                    : 'border-dashed border-slate-300 bg-slate-50 hover:bg-theme-50'
-              }`}>
+              <div
+                className={`flex items-center justify-between px-6 py-5 border-2 rounded-2xl cursor-pointer transition-all ${
+                  formData['resume']
+                    ? 'theme-border bg-theme-50'
+                    : formErrors['resume']
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-dashed border-slate-300 bg-slate-50 hover:bg-theme-50'
+                }`}
+              >
                 <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-xl ${
-                    formData['resume'] ? 'theme-bg bg-opacity-10' : 'bg-slate-100'
-                  }`}>
-                    <svg className={`w-5 h-5 ${formData['resume'] ? 'theme-text' : 'text-slate-500'}`}
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <div
+                    className={`p-3 rounded-xl ${
+                      formData['resume'] ? 'theme-bg bg-opacity-10' : 'bg-slate-100'
+                    }`}
+                  >
+                    <svg
+                      className={`w-5 h-5 ${formData['resume'] ? 'theme-text' : 'text-slate-500'}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
                     </svg>
                   </div>
                   <div>
                     <p className="font-semibold text-slate-900 text-sm">
-                      {formData['resume'] instanceof File 
-                        ? formData['resume'].name 
+                      {formData['resume'] instanceof File
+                        ? formData['resume'].name
                         : 'Choose Resume'}
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
@@ -929,7 +959,9 @@ export const ApplyJobPage: React.FC = () => {
             <p className="text-xs text-slate-500 mt-2">
               PDF, DOC, DOCX (Max {jobDetails?.resume_size || 5}MB)
             </p>
-            {formErrors['resume'] && <p className="mt-1 text-sm text-red-600">{formErrors['resume']}</p>}
+            {formErrors['resume'] && (
+              <p className="mt-1 text-sm text-red-600">{formErrors['resume']}</p>
+            )}
           </div>
 
           <div>
@@ -958,10 +990,7 @@ export const ApplyJobPage: React.FC = () => {
             style={{ justifyContent: section.justify || 'start' }}
           >
             {section.children.map((field: FormField) => (
-              <div
-                key={field.name}
-                className={section.width === '100%' ? 'col-span-full' : ''}
-              >
+              <div key={field.name} className={section.width === '100%' ? 'col-span-full' : ''}>
                 {renderFormField(field)}
               </div>
             ))}
@@ -979,22 +1008,19 @@ export const ApplyJobPage: React.FC = () => {
 
   // Get institute data
   const getInstituteLogo = () => institute?.header?.academic_logo || '';
-  const getInstituteName = () => institute?.header?.academic_name || jobDetails?.academic_name || '';
+  const getInstituteName = () =>
+    institute?.header?.academic_name || jobDetails?.academic_name || '';
   const getInstituteAddress = () => institute?.footer?.academic_address || '';
-  const getHRContactEmail = () => 
-    institute?.footer?.academic_email || 'careers@example.com';
+  const getHRContactEmail = () => institute?.footer?.academic_email || 'careers@example.com';
 
   // Get job location
-  const getJobLocation = () => 
-    jobDetails?.job_meta_names?.Location || '';
+  const getJobLocation = () => jobDetails?.job_meta_names?.Location || '';
 
   // Get job type
-  const getJobType = () => 
-    jobDetails?.job_meta_names?.['Job Type'] || '';
+  const getJobType = () => jobDetails?.job_meta_names?.['Job Type'] || '';
 
   // Get experience
-  const getExperience = () => 
-    jobDetails?.job_meta_names?.Experience || '';
+  const getExperience = () => jobDetails?.job_meta_names?.Experience || '';
 
   if (loading) {
     return <Loader />;
@@ -1005,9 +1031,18 @@ export const ApplyJobPage: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center p-8">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-8 h-8 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
           <h3 className="text-xl font-bold text-slate-900 mb-2">Page Not Found</h3>
@@ -1035,7 +1070,7 @@ export const ApplyJobPage: React.FC = () => {
         baseUrl={jobDetails?.baseUrl}
         institute_id={instituteId}
         primaryWebsiteUrl={institute?.academic_website}
-         themeColor={jobDetails?.theme_colour}
+        themeColor={jobDetails?.theme_colour}
       />
 
       {/* Main Content */}
@@ -1053,11 +1088,24 @@ export const ApplyJobPage: React.FC = () => {
                     <span className="font-semibold text-lg">{jobDetails.company_name}</span>
                     <span className="text-slate-400">•</span>
                     <span className="flex items-center gap-1">
-                      <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        className="w-5 h-5 text-slate-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
                       {getJobLocation() || 'Remote'}
                     </span>
@@ -1085,14 +1133,14 @@ export const ApplyJobPage: React.FC = () => {
                   <h2 className="text-xl font-bold text-slate-900 mb-4 pb-3 border-b border-slate-300">
                     Job Description
                   </h2>
-                  <div 
-  className="prose prose-slate max-w-none font-[Poppins] 
+                  <div
+                    className="prose prose-slate max-w-none font-[Poppins] 
     [&_*]:!font-[Poppins]
     [&_ul]:list-disc [&_ul]:!ml-6 [&_ul]:mb-4 
     [&_ol]:list-decimal [&_ol]:!ml-6 [&_ol]:mb-4 
     [&_li]:mb-2 [&_p]:mb-4"
-  dangerouslySetInnerHTML={{ __html: jobDetails.description }}
-/>
+                    dangerouslySetInnerHTML={{ __html: jobDetails.description }}
+                  />
                 </div>
 
                 {/* Requirements */}
@@ -1102,10 +1150,18 @@ export const ApplyJobPage: React.FC = () => {
                     <ul className="space-y-2">
                       {jobDetails.requirements.map((req, index) => (
                         <li key={index} className="flex items-start gap-2">
-                          <svg className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" 
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <svg
+                            className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
                           </svg>
                           <span className="text-slate-700">{req}</span>
                         </li>
@@ -1125,8 +1181,12 @@ export const ApplyJobPage: React.FC = () => {
                     className="inline-flex items-center gap-2 theme-text font-semibold hover:opacity-80"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
                     </svg>
                     {getHRContactEmail()}
                   </a>
@@ -1151,16 +1211,22 @@ export const ApplyJobPage: React.FC = () => {
 
                   {/* Terms and Conditions */}
                   {jobDetails.terms_consent_text && (
-                    <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <div className="flex items-start gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
                       <input
                         type="checkbox"
                         id="terms"
                         required
-                        className="mt-1 w-4 h-4 theme-text bg-white border-slate-300 rounded focus:ring-theme-color"
+                        className="mt-1 w-4 h-4 theme-text bg-white border-slate-300 rounded focus:ring-theme-color flex-shrink-0"
                       />
-                      <label htmlFor="terms" className="text-sm text-slate-700">
-                        <div dangerouslySetInnerHTML={{ __html: jobDetails.terms_consent_text }} />
-                      </label>
+
+                      <div className="text-sm text-slate-700">
+                        <label htmlFor="terms" className="cursor-pointer">
+                          <div
+                            className="terms-consent-text"
+                            dangerouslySetInnerHTML={{ __html: jobDetails.terms_consent_text }}
+                          />
+                        </label>
+                      </div>
                     </div>
                   )}
 
@@ -1174,10 +1240,24 @@ export const ApplyJobPage: React.FC = () => {
                   >
                     {isSubmitting ? (
                       <>
-                        <svg className="animate-spin w-5 h-5 text-white" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        <svg
+                          className="animate-spin w-5 h-5 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
                         </svg>
                         Submitting...
                       </>
@@ -1216,15 +1296,6 @@ export const ApplyJobPage: React.FC = () => {
 };
 
 export default ApplyJobPage;
-
-
-
-
-
-
-
-
-
 
 // import { useState, useRef, useEffect } from 'react';
 // import { useSearchParams, useNavigate, useLocation, useParams } from 'react-router';
@@ -1580,7 +1651,7 @@ export default ApplyJobPage;
 // const validateFile = (file: File, max_size?: number, allowed_types?: string) => {
 //   let isValid = true;
 //   let message = '';
-  
+
 //   // Use max_length from field config (not max_size)
 //   const maxSizeMB = max_size || 5;
 //   const maxSizeBytes = maxSizeMB * 1024 * 1024;
@@ -1607,7 +1678,7 @@ export default ApplyJobPage;
 //     console.log('File type:', file.type);
 
 //     // Check if file extension matches allowed extensions
-//     const hasValidExtension = allowedExtensions.some(ext => 
+//     const hasValidExtension = allowedExtensions.some(ext =>
 //       fileExtension === ext.toLowerCase()
 //     );
 
@@ -1620,13 +1691,13 @@ export default ApplyJobPage;
 //     };
 
 //     // Get allowed MIME types for the allowed extensions
-//     const allowedMimeTypes = allowedExtensions.flatMap(ext => 
+//     const allowedMimeTypes = allowedExtensions.flatMap(ext =>
 //       mimeTypeMap[ext.toLowerCase()] || []
 //     );
 
 //     // Check if file is valid by either extension or MIME type
 //     const hasValidMimeType = allowedMimeTypes.includes(file.type.toLowerCase());
-    
+
 //     if (!hasValidExtension && !hasValidMimeType) {
 //       isValid = false;
 //       message = `Invalid file type. Allowed types: ${allowed_types}.`;
@@ -1650,7 +1721,7 @@ export default ApplyJobPage;
 
 //     // Use max_size (which comes from field.max_length)
 //     const validation = validateFile(file, max_size, allowed_types);
-    
+
 //     if (!validation.isValid) {
 //       toast.error(validation.message);
 //       e.target.value = ''; // Clear the file input
@@ -1686,13 +1757,13 @@ export default ApplyJobPage;
 //   if (e.dataTransfer.files && e.dataTransfer.files[0]) {
 //     const file = e.dataTransfer.files[0];
 //     const currentField = fields.find(f => f.name === fieldName);
-    
+
 //     const validation = validateFile(
-//       file, 
-//       currentField?.max_length, 
-//       currentField?.allowed_type 
+//       file,
+//       currentField?.max_length,
+//       currentField?.allowed_type
 //     );
-    
+
 //     if (!validation.isValid) {
 //       toast.error(validation.message);
 //       return;
@@ -1901,11 +1972,11 @@ export default ApplyJobPage;
 
 //   const formatFileSize = (bytes: number) => {
 //   if (bytes === 0) return '0 Bytes';
-  
+
 //   const k = 1024;
 //   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
 //   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
 //   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 // };
 
@@ -2008,8 +2079,8 @@ export default ApplyJobPage;
 //             .join(',')}
 //           required={field.required === 1}
 //           onChange={(e) => handleFileChange(
-//             e, 
-//             field.name, 
+//             e,
+//             field.name,
 //             field.max_length, // This is 5 in your case
 //             field.allowed_type // This is "DOC,DOCX" in your case
 //           )}
@@ -2083,7 +2154,7 @@ export default ApplyJobPage;
 //       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
 //     </div>
 //   );
-     
+
 //       case 'checkbox':
 //         return (
 //           <div key={field.name} className="flex items-start gap-3">
@@ -2741,9 +2812,9 @@ export default ApplyJobPage;
 //                   </h2>
 //                   {jobDetails.description ? (
 //                     <div
-//                       className="prose prose-slate max-w-none 
-//              [&_ul]:list-disc [&_ul]:!ml-6 [&_ul]:mb-4 
-//              [&_ol]:list-decimal [&_ol]:!ml-6 [&_ol]:mb-4 
+//                       className="prose prose-slate max-w-none
+//              [&_ul]:list-disc [&_ul]:!ml-6 [&_ul]:mb-4
+//              [&_ol]:list-decimal [&_ol]:!ml-6 [&_ol]:mb-4
 //              [&_li]:mb-2 [&_p]:mb-4"
 //                       dangerouslySetInnerHTML={{ __html: jobDetails.description }}
 //                     />
