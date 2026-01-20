@@ -35,7 +35,7 @@ const Header: React.FC<HeaderProps> = ({
       <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-8 py-3">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           {/* Left Block */}
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-start gap-3 flex-1">
             {logoUrl && (
               <Link to={baseUrl || '/'}>
                 <button className="flex-shrink-0">
@@ -48,9 +48,9 @@ const Header: React.FC<HeaderProps> = ({
               </Link>
             )}
 
-            <div className="min-w-0">
+            <div className="flex-1">
               <Link to={baseUrl || '/'}>
-                <button className="text-left">
+                <button className="text-left w-full">
                   <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 truncate hover:theme-text">
                     {instituteName}
                   </h1>
@@ -58,9 +58,9 @@ const Header: React.FC<HeaderProps> = ({
               </Link>
 
               {address && (
-                <p className="text-xs sm:text-sm text-slate-500 truncate">
+                <div className="text-xs sm:text-sm text-slate-500 leading-relaxed break-words whitespace-normal">
                  <div dangerouslySetInnerHTML={{__html: address}} />
-                </p>
+                </div>
               )}
             </div>
           </div>

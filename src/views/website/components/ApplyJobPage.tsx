@@ -589,7 +589,7 @@ export const ApplyJobPage: React.FC = () => {
               name={field.name}
               value={value}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-3 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
+              className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
                 error 
                   ? 'border-red-300 focus:ring-red-500/20' 
                   : 'border-slate-300 focus:ring-theme-color/20'
@@ -612,7 +612,7 @@ export const ApplyJobPage: React.FC = () => {
               value={value}
               onChange={handleInputChange}
               rows={4}
-              className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-3 focus:border-theme-color transition-all text-sm placeholder-slate-500 resize-none ${
+              className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm placeholder-slate-500 resize-none ${
                 error 
                   ? 'border-red-300 focus:ring-red-500/20' 
                   : 'border-slate-300 focus:ring-theme-color/20'
@@ -635,7 +635,7 @@ export const ApplyJobPage: React.FC = () => {
               name={field.name}
               value={value}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-3 focus:border-theme-color transition-all text-sm bg-white ${
+              className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm bg-white ${
                 error 
                   ? 'border-red-300 focus:ring-red-500/20' 
                   : 'border-slate-300 focus:ring-theme-color/20'
@@ -752,7 +752,7 @@ export const ApplyJobPage: React.FC = () => {
               name={field.name}
               value={value}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-3 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
+              className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
                 error 
                   ? 'border-red-300 focus:ring-red-500/20' 
                   : 'border-slate-300 focus:ring-theme-color/20'
@@ -782,7 +782,7 @@ export const ApplyJobPage: React.FC = () => {
                 name="name"
                 value={formData.name || ''}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-3 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
+                className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
                   formErrors.name 
                     ? 'border-red-300 focus:ring-red-500/20' 
                     : 'border-slate-300 focus:ring-theme-color/20'
@@ -802,7 +802,7 @@ export const ApplyJobPage: React.FC = () => {
                 name="email"
                 value={formData.email || ''}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-3 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
+                className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
                   formErrors.email 
                     ? 'border-red-300 focus:ring-red-500/20' 
                     : 'border-slate-300 focus:ring-theme-color/20'
@@ -824,7 +824,7 @@ export const ApplyJobPage: React.FC = () => {
                 name="mobile"
                 value={formData.mobile || ''}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-3 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
+                className={`w-full px-4 py-3.5 border rounded-2xl focus:ring-1 focus:border-theme-color transition-all text-sm placeholder-slate-500 ${
                   formErrors.mobile 
                     ? 'border-red-300 focus:ring-red-500/20' 
                     : 'border-slate-300 focus:ring-theme-color/20'
@@ -842,7 +842,7 @@ export const ApplyJobPage: React.FC = () => {
                 name="experience"
                 value={formData.experience || ''}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3.5 border border-slate-300 rounded-2xl focus:ring-3 focus:ring-theme-color/20 focus:border-theme-color transition-all text-sm placeholder-slate-500"
+                className="w-full px-4 py-3.5 border border-slate-300 rounded-2xl focus:ring-1 focus:ring-theme-color/20 focus:border-theme-color transition-all text-sm placeholder-slate-500"
                 placeholder="e.g., 2 years"
               />
             </div>
@@ -855,7 +855,7 @@ export const ApplyJobPage: React.FC = () => {
               value={formData.address || ''}
               onChange={handleInputChange}
               rows={2}
-              className="w-full px-4 py-3.5 border border-slate-300 rounded-2xl focus:ring-3 focus:ring-theme-color/20 focus:border-theme-color transition-all text-sm placeholder-slate-500 resize-none"
+              className="w-full px-4 py-3.5 border border-slate-300 rounded-2xl focus:ring-1 focus:ring-theme-color/20 focus:border-theme-color transition-all text-sm placeholder-slate-500 resize-none"
               placeholder="Your address"
             />
           </div>
@@ -939,7 +939,7 @@ export const ApplyJobPage: React.FC = () => {
               value={formData.cover_letter || ''}
               onChange={handleInputChange}
               rows={4}
-              className="w-full px-4 py-3.5 border border-slate-300 rounded-2xl focus:ring-3 focus:ring-theme-color/20 focus:border-theme-color transition-all text-sm placeholder-slate-500 resize-none"
+              className="w-full px-4 py-3.5 border border-slate-300 rounded-2xl focus:ring-1 focus:ring-theme-color/20 focus:border-theme-color transition-all text-sm placeholder-slate-500 resize-none"
               placeholder="Tell us about your experience, skills, and why you're interested in this role..."
             />
           </div>
@@ -1086,12 +1086,13 @@ export const ApplyJobPage: React.FC = () => {
                     Job Description
                   </h2>
                   <div 
-                    className="prose prose-slate max-w-none 
-                      [&_ul]:list-disc [&_ul]:!ml-6 [&_ul]:mb-4 
-                      [&_ol]:list-decimal [&_ol]:!ml-6 [&_ol]:mb-4 
-                      [&_li]:mb-2 [&_p]:mb-4"
-                    dangerouslySetInnerHTML={{ __html: jobDetails.description }}
-                  />
+  className="prose prose-slate max-w-none font-[Poppins] 
+    [&_*]:!font-[Poppins]
+    [&_ul]:list-disc [&_ul]:!ml-6 [&_ul]:mb-4 
+    [&_ol]:list-decimal [&_ol]:!ml-6 [&_ol]:mb-4 
+    [&_li]:mb-2 [&_p]:mb-4"
+  dangerouslySetInnerHTML={{ __html: jobDetails.description }}
+/>
                 </div>
 
                 {/* Requirements */}
