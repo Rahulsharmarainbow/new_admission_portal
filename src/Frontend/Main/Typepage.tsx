@@ -49,11 +49,10 @@ const TypePage = () => {
 
     fetchPageData();
   }, [institute_id, page_route]);
-  
+
   // ✅ Show loader first
   if (loading) return <Loader />;
 
-  
   // ✅ Handle special route
   if (page_route === "apply") return <Apply />;
 
@@ -67,10 +66,9 @@ const TypePage = () => {
     return html.replace(/font-family\s*:[^;"]*;?/gi, "");
   };
 
-    if(pageData.academic_type === 4) {
-    return <CareerTypePage pageData={pageData} loading={loading} />;
+if(pageData.academic_type === 4) {
+    return <CareerTypePage pageData={pageData} />;
   }
-
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -106,7 +104,7 @@ const TypePage = () => {
         <div className="bg-white w-full max-w-8xl rounded-2xl shadow-lg p-6 sm:p-10">
           <div
             className="prose max-w-none text-gray-700 leading-relaxed prose-headings:text-gray-900 prose-p:my-4 prose-p:text-base prose-p:leading-7 prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-800 prose-li:marker:text-primary"
-            dangerouslySetInnerHTML={{ __html: cleanHTML(pageData?.data?.content) }}
+            dangerouslySetInnerHTML={{ __html: cleanHTML(pageData.data.content) }}
           />
         </div>
       </main>

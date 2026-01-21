@@ -1,21 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import Apply from "./Apply";
-import Loader from "../Common/Loader";
-import { Helmet } from "react-helmet-async";
-import NotFound from "./NotFound";
-import Header from "src/views/website/components/Header";
-import Footer from "src/views/website/components/Footer";
+import React, { useEffect } from 'react';
+import { useParams } from 'react-router';
+import { Helmet } from 'react-helmet-async';
+import Header from 'src/views/website/components/Header';
+import Footer from 'src/views/website/components/Footer';
+import NotFound from './NotFound';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 const assetUrl = import.meta.env.VITE_ASSET_URL;
 
-const CareerTypePage = ({pageData, loading}:any) => {
+const CareerTypePage = ({ pageData }: any) => {
   let { institute_id, page_route } = useParams();
 
-    const hexToRgb = (hex: string): string => {
+  const hexToRgb = (hex: string): string => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result 
+    return result
       ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
       : '59, 130, 246'; // default blue
   };
@@ -23,67 +21,141 @@ const CareerTypePage = ({pageData, loading}:any) => {
   // Helper function to check if font is a Google Font
   const isGoogleFont = (fontFamily: string): boolean => {
     const systemFonts = [
-      'Arial', 'Helvetica', 'Georgia', 'Times', 'Verdana', 
-      'Tahoma', 'Trebuchet MS', 'Courier New', 'Comic Sans MS'
+      'Arial',
+      'Helvetica',
+      'Georgia',
+      'Times',
+      'Verdana',
+      'Tahoma',
+      'Trebuchet MS',
+      'Courier New',
+      'Comic Sans MS',
+      'system-ui',
+      '-apple-system',
+      'BlinkMacSystemFont',
+      'Segoe UI',
+      'Roboto',
+      'sans-serif',
     ];
-    return !systemFonts.some(font => fontFamily.includes(font));
+    return !systemFonts.some((font) => fontFamily.toLowerCase().includes(font.toLowerCase()));
   };
 
+  // Google Font name format karna
+  const formatGoogleFontName = (fontFamily: string): string => {
+    // Remove quotes and extra spaces
+    const name = fontFamily.replace(/['"]/g, '').trim();
+    // Replace spaces with +
+    return name.replace(/\s+/g, '+');
+  };
 
-  // Apply theme + font
-useEffect(() => {
-  if (!pageData?.banner) return;
+  // Apply theme + font to entire page
+  useEffect(() => {
+    if (!pageData?.banner) return;
 
-  const { theme_colour, font_family } = pageData.banner;
+    const { theme_colour, font_family } = pageData.banner;
 
-  if (theme_colour) {
-    document.documentElement.style.setProperty('--theme-color', theme_colour);
-    document.documentElement.style.setProperty('--theme-color-rgb', hexToRgb(theme_colour));
-  }
+    // Apply theme color
+    if (theme_colour) {
+      document.documentElement.style.setProperty('--theme-color', theme_colour);
+      document.documentElement.style.setProperty('--theme-color-rgb', hexToRgb(theme_colour));
+    }
 
-  if (font_family) {
-    document.documentElement.style.setProperty('--font-family', font_family);
+    // Apply font family globally
+    if (font_family) {
+      const formattedFont = font_family.trim();
 
-    if (isGoogleFont(font_family)) {
-      const id = `google-font-${font_family}`;
-      if (!document.getElementById(id)) {
-        const link = document.createElement('link');
-        link.id = id;
-        link.rel = 'stylesheet';
-        link.href = `https://fonts.googleapis.com/css2?family=${font_family.replace(/\s+/g, '+')}&display=swap`;
-        document.head.appendChild(link);
+      // Apply font to document root
+      document.documentElement.style.setProperty('--font-family', formattedFont);
+
+      // Apply font to body and all elements
+      document.body.style.fontFamily = formattedFont;
+
+      // Load Google Font if needed
+      if (isGoogleFont(formattedFont)) {
+        const fontName = formatGoogleFontName(formattedFont);
+        const id = `google-font-${fontName}`;
+
+        if (!document.getElementById(id)) {
+          const link = document.createElement('link');
+          link.id = id;
+          link.rel = 'stylesheet';
+          link.href = `https://fonts.googleapis.com/css2?family=${fontName}:wght@300;400;500;600;700&display=swap`;
+          document.head.appendChild(link);
+        }
       }
     }
-  }
-}, [pageData]);
 
+    // Cleanup on unmount
+    return () => {
+      document.documentElement.style.removeProperty('--font-family');
+      document.body.style.fontFamily = '';
+    };
+  }, [pageData]);
 
-  // ✅ Remove inline font-family
-  const cleanHTML = (html) => {
-    return html?.replace(/font-family\s*:[^;"]*;?/gi, "");
+  // ✅ Clean HTML - remove inline font-family and apply global font
+  const cleanHTML = (html = '') => {
+    return (
+      html
+        // remove embedded footer
+        .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+
+        // remove fixed widths
+        .replace(/width\s*:\s*\d+px;?/gi, '')
+        .replace(/max-width\s*:\s*\d+px;?/gi, '')
+
+        // remove bootstrap layout classes
+        .replace(/class="[^"]*(container|row|col-[^"]*)[^"]*"/gi, 'class=""')
+
+        // remove forced font styles
+        .replace(/font-family\s*:[^;"]*;?/gi, '')
+        .replace(/font-size\s*:\s*\d+px;?/gi, '')
+    );
   };
 
+  // Custom CSS for applying font to all elements
+  const globalFontCSS = `
+    * {
+      font-family: var(--font-family, inherit) !important;
+    }
+    
+    body {
+      font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif) !important;
+    }
+    
+    h1, h2, h3, h4, h5, h6,
+    p, span, div, a, button, input, textarea, select,
+    .prose, .prose * {
+      font-family: var(--font-family, inherit) !important;
+    }
+  `;
+
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 overflow-x-hidden">
       <Helmet>
-        <title>{pageData?.header?.academic_name || "Admission Portal"}</title>
+        <title>{pageData?.header?.academic_name || 'Admission Portal'}</title>
+
         <link
           rel="icon"
           type="image/png"
           href={
-            pageData?.header?.logo
+            pageData?.header?.academic_logo
               ? `${assetUrl}/${pageData.header.academic_logo}`
-              : "/favicon.ico"
+              : '/favicon.ico'
           }
         />
+
         <meta
           name="description"
-          content={`Welcome to ${
-            pageData?.header?.academic_name || "Institute"
-          } admission portal`}
+          content={`Welcome to ${pageData?.header?.academic_name || 'Institute'} admission portal`}
         />
+
+        <style>{globalFontCSS}</style>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </Helmet>
 
+      {/* HEADER */}
       <Header
         instituteName={pageData?.header?.academic_name || ''}
         logo={pageData?.header?.academic_logo || ''}
@@ -94,21 +166,30 @@ useEffect(() => {
         themeColor={pageData?.banner?.theme_colour}
       />
 
-      <main className="flex-grow bg-transparent mx-3 md:mx-8 py-10 flex justify-center">
-        <div className="bg-white w-full max-w-8xl rounded-2xl shadow-lg p-6 sm:p-10">
+      {/* MAIN */}
+      <main className="flex-grow w-full px-2 sm:px-4 md:px-6 lg:px-8 py-6 md:py-10 flex justify-center">
+        <div className="w-full max-w-7xl bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 lg:p-10 overflow-hidden">
           <div
-  className="prose max-w-none leading-relaxed text-gray-700"
-  style={{ fontFamily: 'var(--font-family)' }}
-  dangerouslySetInnerHTML={{
-    __html: cleanHTML(pageData?.page?.content),
-  }}
-/>
-
+            className="
+    cms-content
+    prose
+    prose-sm
+    sm:prose-base
+    lg:prose-lg
+    max-w-none
+    text-gray-700
+    leading-relaxed
+  "
+            dangerouslySetInnerHTML={{
+              __html: cleanHTML(pageData?.page?.content),
+            }}
+          />
         </div>
       </main>
 
-      <Footer 
-              footerData={pageData?.footer} 
+      {/* FOOTER */}
+      <Footer
+        footerData={pageData?.footer}
         baseUrl={pageData?.baseUrl}
         instituteName={pageData?.header?.academic_name}
         institute={pageData}

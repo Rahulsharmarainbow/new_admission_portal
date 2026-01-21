@@ -105,7 +105,7 @@ const CareerApply: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [search, setSearch] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  
+  const [isFetching, setIsFetching] = useState(false);
   // State for filters
   const [filters, setFilters] = useState<FilterType[]>([]);
   const [activeFilters, setActiveFilters] = useState<FilterState>({});
@@ -261,9 +261,9 @@ const CareerApply: React.FC = () => {
         if (response.data?.status === true) {
           setCareerData(response.data);
           
-          if (response.data.jobs && Array.isArray(response.data.jobs)) {
-            setJobs(response.data.jobs);
-          }
+          // if (response.data.jobs && Array.isArray(response.data.jobs)) {
+          //   setJobs(response.data.jobs);
+          // }
           
           if (response.data.filters && Array.isArray(response.data.filters)) {
             setFilters(response.data.filters);
@@ -292,124 +292,101 @@ const CareerApply: React.FC = () => {
   }, [institute_id, location.pathname, location.search]);
 
   // Fetch jobs with filters and pagination
-const fetchJobs = useCallback(async (pageNum: number = 0, reset: boolean = false) => {
-  if (loadingRef.current) return;
-  
-  try {
-    if (!institute_id || institute_id === ':institute_id') {
-      institute_id = window.location.hostname;
-    }
+const fetchJobs = useCallback(
+  async (pageNum: number, reset = false) => {
+    if (loadingRef.current) return;
 
-    loadingRef.current = true;
-    
-    if (reset) {
-      setIsFiltering(true);
-    } else {
-      setIsLoadingMore(true);
-    }
-    
-    // Get CURRENT filters
-    const currentFilters = { ...activeFilters };
-    
-    // Convert filters to API format
-    const formattedFilters: { [key: string]: string[] } = {};
-    
-    Object.entries(currentFilters).forEach(([filterType, filterIds]) => {
-      if (filterIds.length > 0) {
-        formattedFilters[filterType] = filterIds.map(id => id.toString());
+    try {
+      loadingRef.current = true;
+      setIsFetching(true);
+
+      const formattedFilters: Record<string, string[]> = {};
+      Object.entries(activeFilters).forEach(([k, v]) => {
+        if (v.length) formattedFilters[k] = v.map(String);
+      });
+
+      const response = await axios.post(
+        `${apiUrl}/PublicCareer/get-career-jobs`,
+        {
+          unique_code: institute_id,
+          page: pageNum,
+          rowsPerPage,
+          filters: formattedFilters,
+          search: search.trim(),
+        }
+      );
+
+      if (response.data?.status) {
+        setJobs(prev =>
+          reset ? response.data.data : [...prev, ...response.data.data]
+        );
+        setPage(reset ? 1 : pageNum + 1);
+
+        setHasMore(
+          response.data.has_more ??
+          response.data.data.length === rowsPerPage
+        );
       }
+    } finally {
+      loadingRef.current = false;
+      setIsFetching(false); // ✅ loader always stops
+      setIsSearching(false);
+    }
+  },
+  [activeFilters, search, institute_id]
+);
+
+
+
+const scrollToFirstJob = useCallback(() => {
+  if (!jobsContainerRef.current) return;
+
+  const firstJob =
+    jobsContainerRef.current.querySelector('[data-job-card]');
+
+  if (firstJob) {
+    firstJob.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
     });
-    
-    const currentSearch = search;
-    
-    const response = await axios.post<{
-      status: boolean;
-      total: number;
-      data: Job[];
-      has_more?: boolean;
-    }>(
-      `${apiUrl}/PublicCareer/get-career-jobs`,
-      {
-        unique_code: institute_id,
-        page: pageNum,
-        rowsPerPage,
-        filters: formattedFilters,
-        search: currentSearch.trim()
-      },
-      { headers: { 'Content-Type': 'application/json' } }
-    );
-
-    if (response.data?.status === true) {
-      if (reset) {
-        setJobs(response.data.data);
-        setIsFiltering(false); // Filtering complete
-      } else {
-        setJobs(prev => [...prev, ...response.data.data]);
-      }
-      
-      const hasMoreJobs = response.data.has_more !== undefined 
-        ? response.data.has_more 
-        : response.data.data.length === rowsPerPage;
-      setHasMore(hasMoreJobs);
-      
-      if (reset) {
-        setPage(1);
-      } else {
-        setPage(prev => prev + 1);
-      }
-      
-      // Scroll to top after reset
-      if (reset && scrollToTopRef.current) {
-        setTimeout(() => {
-          window.scrollTo({
-            top: scrollToTopRef.current?.offsetTop || 0,
-            behavior: 'smooth'
-          });
-        }, 100);
-      }
-    }
-  } catch (err: any) {
-    console.error('Error fetching jobs:', err);
-    toast.error(err.response?.data?.message || 'Failed to load jobs');
-    setIsFiltering(false);
-  } finally {
-    loadingRef.current = false;
-    setIsLoadingMore(false);
-    setIsSearching(false);
   }
-}, [institute_id, rowsPerPage, activeFilters, search]);
+}, []);
+
+
+
+useEffect(() => {
+  if (jobs.length === 0) return;
+  scrollToFirstJob();
+}, [jobs, scrollToFirstJob]);
+
 
 // Handle filter change - COMPLETE VERSION
-const handleFilterChange = (filterType: string, filterId: number) => {
-  setIsFiltering(true); 
-  
+// const handleFilterChange = (filterType: string, filterId: number) => {
+//   setActiveFilters(prev => {
+//     const list = prev[filterType] || [];
+//     const updated = list.includes(filterId)
+//       ? list.filter(id => id !== filterId)
+//       : [...list, filterId];
+
+//     return { ...prev, [filterType]: updated };
+//   });
+// };
+
+const handleFilterChange = (type: string, id: number) => {
   setActiveFilters(prev => {
-    const currentFilters = prev[filterType] || [];
-    const newFilters = currentFilters.includes(filterId)
-      ? currentFilters.filter(id => id !== filterId)
-      : [...currentFilters, filterId];
-    
-    return { ...prev, [filterType]: newFilters };
+    const list = prev[type] || [];
+    return {
+      ...prev,
+      [type]: list.includes(id)
+        ? list.filter(x => x !== id)
+        : [...list, id],
+    };
   });
 };
 
-// Add useEffect to watch for filter changes
-useEffect(() => {
-  // Calculate selected filters whenever activeFilters changes
-  const allSelected = Object.values(activeFilters).flat();
-  setSelectedFilters(allSelected);
-  
-  // Debounce the API call
-  const timeoutId = setTimeout(() => {
-    if (Object.keys(activeFilters).some(key => activeFilters[key].length > 0) || search.trim() !== '') {
-      setJobs([]);
-      setPage(0);
-      fetchJobs(0, true);
-    }
-  }, 300); // 300ms debounce
-  
-  return () => clearTimeout(timeoutId);
-}, [activeFilters, search, fetchJobs]);
+
+
+
 
 // Separate function for fetching filtered jobs
 const fetchFilteredJobs = useCallback(() => {
@@ -463,28 +440,6 @@ const fetchFilteredJobs = useCallback(() => {
 };
 
 
-  // Effect to handle filter changes
-useEffect(() => {
-  // This effect will run when activeFilters changes
-  const hasFilters = Object.keys(activeFilters).some(key => activeFilters[key].length > 0);
-  
-  if (hasFilters) {
-    // Debounce filter changes
-    if (filterDebounceRef.current) {
-      clearTimeout(filterDebounceRef.current);
-    }
-    
-    filterDebounceRef.current = setTimeout(() => {
-      fetchFilteredJobs();
-    }, 300);
-  }
-  
-  return () => {
-    if (filterDebounceRef.current) {
-      clearTimeout(filterDebounceRef.current);
-    }
-  };
-}, [activeFilters, fetchFilteredJobs]);
 
 // Cleanup on unmount
 useEffect(() => {
@@ -513,17 +468,18 @@ const handleSearch = () => {
 };
 
   // Handle search clear
-  const handleClearSearch = () => {
-    setSearch('');
-    // Clear any existing timeout
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-    
-    setJobs([]);
-    setPage(0);
-    fetchJobs(0, true);
-  };
+const handleClearSearch = () => {
+  // clear timers
+  if (searchTimeoutRef.current) {
+    clearTimeout(searchTimeoutRef.current);
+  }
+
+  setIsFiltering(true);
+  setSearch('');        // 🔑 only state change
+  setPage(0);
+  setJobs([]);
+};
+
 
   // Infinite scroll observer with better handling
   useEffect(() => {
@@ -551,44 +507,78 @@ const handleSearch = () => {
     };
   }, [fetchJobs, hasMore, page, isSearching]);
 
+
+useEffect(() => {
+  if (careerData?.jobs?.length) {
+    setJobs(careerData.jobs); // first page
+    setPage(2);               // next API page
+  }
+}, [careerData]);
+
+
+useEffect(() => {
+  const timeout = setTimeout(() => {
+    setJobs([]);
+    setPage(0);
+    fetchJobs(0, true);  
+  }, 300);
+
+  return () => clearTimeout(timeout);
+}, [activeFilters, search, fetchJobs]);
+
+
+
+
   // Clear all filters
- const clearAllFilters = () => {
-  // पहले states को clear करें
-  const resetFilters: FilterState = {};
-  filters.forEach(filter => {
-    resetFilters[filter.type_name] = [];
-  });
-  setActiveFilters(resetFilters);
-  setSelectedFilters([]);
+//  const clearAllFilters = () => {
+//   // पहले states को clear करें
+//   const resetFilters: FilterState = {};
+//   filters.forEach(filter => {
+//     resetFilters[filter.type_name] = [];
+//   });
+//   setActiveFilters(resetFilters);
+//   setSelectedFilters([]);
+//   setSearch('');
+  
+//   // Clear search timeout
+//   if (searchTimeoutRef.current) {
+//     clearTimeout(searchTimeoutRef.current);
+//   }
+  
+//   // Clear filter debounce
+//   if (filterDebounceRef.current) {
+//     clearTimeout(filterDebounceRef.current);
+//   }
+  
+//   // Set loading state for job list
+//   setJobs([]);
+//   setIsLoadingMore(true);
+  
+//   // Scroll to top
+//   // if (scrollToTopRef.current) {
+//   //   window.scrollTo({
+//   //     top: scrollToTopRef.current.offsetTop || 0,
+//   //     behavior: 'smooth'
+//   //   });
+//   // }
+  
+//   // Direct API call with empty filters (no debounce)
+//   // setTimeout(() => {
+//   //   fetchFilteredJobsDirect();
+//   // }, 100);
+// };
+
+const clearAllFilters = () => {
+  const reset: FilterState = {};
+  filters.forEach(f => (reset[f.type_name] = []));
+
   setSearch('');
-  
-  // Clear search timeout
-  if (searchTimeoutRef.current) {
-    clearTimeout(searchTimeoutRef.current);
-  }
-  
-  // Clear filter debounce
-  if (filterDebounceRef.current) {
-    clearTimeout(filterDebounceRef.current);
-  }
-  
-  // Set loading state for job list
+  setActiveFilters(reset);
   setJobs([]);
-  setIsLoadingMore(true);
-  
-  // Scroll to top
-  if (scrollToTopRef.current) {
-    window.scrollTo({
-      top: scrollToTopRef.current.offsetTop || 0,
-      behavior: 'smooth'
-    });
-  }
-  
-  // Direct API call with empty filters (no debounce)
-  setTimeout(() => {
-    fetchFilteredJobsDirect();
-  }, 100);
+  setPage(0);
 };
+
+
 
 
 const fetchFilteredJobsDirect = useCallback(async () => {
@@ -618,7 +608,7 @@ const fetchFilteredJobsDirect = useCallback(async () => {
 
     if (response.data?.status === true) {
       setJobs(response.data.data);
-      setPage(1);
+      setPage(2);
       
       const hasMoreJobs = response.data.has_more !== undefined 
         ? response.data.has_more 
@@ -945,7 +935,7 @@ const fetchFilteredJobsDirect = useCallback(async () => {
           </div>
         </div>
       </section>
-  
+  <div ref={jobsContainerRef} />
       {/* Job Listings + Filters */}
       <main className="flex-1 py-8 scrollbar-thin" ref={jobsContainerRef}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -955,7 +945,7 @@ const fetchFilteredJobsDirect = useCallback(async () => {
             <div className={filters.length > 0 ? "lg:col-span-8" : "lg:col-span-12"}>
               <div className="space-y-6">
                 { 
-                  isFiltering ? (
+                  isFetching  ? (
                     <Loader />
                   ) : (
                     jobs.length === 0 ? (
@@ -1022,6 +1012,7 @@ const fetchFilteredJobsDirect = useCallback(async () => {
                         return (
                           <article
                             key={job.id}
+                            data-job-card
                             className="group bg-white border border-slate-200 hover:border-theme-color hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden hover:-translate-y-1"
                           >
                             <div className="p-6 lg:p-8">

@@ -1211,22 +1211,19 @@ export const ApplyJobPage: React.FC = () => {
 
                   {/* Terms and Conditions */}
                   {jobDetails.terms_consent_text && (
-                    <div className="flex items-start gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <div className="flex items-baseline gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
                       <input
                         type="checkbox"
                         id="terms"
                         required
-                        className="mt-1 w-4 h-4 theme-text bg-white border-slate-300 rounded focus:ring-theme-color flex-shrink-0"
+                        className="w-4 h-4 theme-text bg-white border-slate-300 rounded focus:ring-theme-color mt-0.5"
                       />
-
-                      <div className="text-sm text-slate-700">
-                        <label htmlFor="terms" className="cursor-pointer">
-                          <div
-                            className="terms-consent-text"
-                            dangerouslySetInnerHTML={{ __html: jobDetails.terms_consent_text }}
-                          />
-                        </label>
-                      </div>
+                      <label
+                        htmlFor="terms"
+                        className="text-sm text-slate-700 cursor-pointer flex-1"
+                      >
+                        <div dangerouslySetInnerHTML={{ __html: jobDetails.terms_consent_text }} />
+                      </label>
                     </div>
                   )}
 

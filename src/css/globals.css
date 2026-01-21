@@ -351,3 +351,25 @@
 .space-y-2.position-relative {
     position: relative;
 }
+
+/* Proper list indentation */
+.cms-content ul,
+.cms-content ol {
+  padding-left: 1.5rem !important;   /* 24px */
+  margin-left: 0 !important;
+}
+
+/* Nested lists */
+.cms-content ul ul,
+.cms-content ol ol,
+.cms-content ul ol,
+.cms-content ol ul {
+  padding-left: 1.5rem !important;
+}
+
+/* Bullet alignment */
+.cms-content li {
+  margin-left: 0;
+  padding-left: 0.25rem;
+}
+
