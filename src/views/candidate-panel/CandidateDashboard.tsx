@@ -1,108 +1,70 @@
 // components/candidate/CandidateDashboard.tsx
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import { Button, Card, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from 'flowbite-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { Button, Card, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Modal, Spinner, ModalHeader, ModalBody } from 'flowbite-react';
 import { 
   HiDocumentText, 
   HiClock, 
   HiCurrencyRupee, 
   HiCash,
   HiPencil,
-  HiArrowRight
+  HiRefresh,
+  HiExclamationCircle,
+  HiCheckCircle,
+  HiXCircle
 } from 'react-icons/hi';
-
-// Mock data for demonstration
-const mockApplicationData = {
-  stats: {
-    totalPaidApplications: 15,
-    totalInitializedApplications: 8,
-    totalPaidTransactions: 23,
-    totalPaidAmount: 45250
-  },
-  applications: [
-    {
-      id: 1,
-      application_id: 'APP001',
-      form_name: 'MBA Admission Form 2024',
-      payment_status: 'Paid',
-      amount: 1500,
-      applied_at: '2024-01-15 10:30 AM',
-      last_updated: '2024-01-15 10:30 AM'
-    },
-    {
-      id: 2,
-      application_id: 'APP002',
-      form_name: 'B.Tech Application Form',
-      payment_status: 'Initialized',
-      amount: 1200,
-      applied_at: '2024-01-14 02:45 PM',
-      last_updated: '2024-01-14 02:45 PM'
-    },
-    {
-      id: 3,
-      application_id: 'APP003',
-      form_name: 'MCA Entrance Form',
-      payment_status: 'Paid',
-      amount: 1000,
-      applied_at: '2024-01-13 11:20 AM',
-      last_updated: '2024-01-13 11:20 AM'
-    },
-    {
-      id: 4,
-      application_id: 'APP004',
-      form_name: 'PhD Application Form',
-      payment_status: 'Paid',
-      amount: 2000,
-      applied_at: '2024-01-12 09:15 AM',
-      last_updated: '2024-01-12 09:15 AM'
-    },
-    {
-      id: 5,
-      application_id: 'APP005',
-      form_name: 'MBA Admission Form 2024',
-      payment_status: 'Initialized',
-      amount: 1500,
-      applied_at: '2024-01-11 04:30 PM',
-      last_updated: '2024-01-11 04:30 PM'
-    },
-    {
-      id: 6,
-      application_id: 'APP006',
-      form_name: 'B.Sc Application Form',
-      payment_status: 'Paid',
-      amount: 800,
-      applied_at: '2024-01-10 01:20 PM',
-      last_updated: '2024-01-10 01:20 PM'
-    },
-    {
-      id: 7,
-      application_id: 'APP007',
-      form_name: 'M.Sc Application Form',
-      payment_status: 'Paid',
-      amount: 900,
-      applied_at: '2024-01-09 10:45 AM',
-      last_updated: '2024-01-09 10:45 AM'
-    },
-    {
-      id: 8,
-      application_id: 'APP008',
-      form_name: 'BA Admission Form',
-      payment_status: 'Initialized',
-      amount: 700,
-      applied_at: '2024-01-08 03:15 PM',
-      last_updated: '2024-01-08 03:15 PM'
-    }
-  ]
-};
+import { toast } from 'react-hot-toast';
+import { useCandidateAuth } from 'src/hook/CandidateAuthContext';
+import axios from 'axios';
 
 interface Application {
-  id: number;
-  application_id: string;
+  s_no: number;
+  application_id: number;
   form_name: string;
-  payment_status: 'Paid' | 'Initialized';
-  amount: number;
+  payment_status: number; // 0 = Initialized, 1 = Paid
   applied_at: string;
-  last_updated: string;
+  amount?: number;
+  caste_id?: number;
+  location_id?: number;
+  transaction_id?: string;
+}
+
+interface DashboardCounts {
+  total_paid_applications: number;
+  total_initialized_applications: number;
+  total_paid_transactions: number;
+  total_paid_amount: number;
+}
+
+interface DashboardResponse {
+  status: boolean;
+  dashboard_counts: DashboardCounts;
+  applications_list: Application[];
+  total_applications: number;
+}
+
+interface PayableAmountResponse {
+  total_payable_fee: number;
+  total_fee: number;
+  discount_amount: number;
+  processing_fee: number;
+  gst_amount: number;
+  other_charges: number;
+}
+
+interface PaymentData {
+  total_payable_fee: number;
+  total_fee: number;
+  discount_amount: number;
+  processing_fee: number;
+  gst_amount: number;
+  other_charges: number;
+}
+
+interface InstituteData {
+  razorpay_api_key?: string;
+  payment_type?: number; // 1 = Razorpay, 2 = PG Direct
+  name?: string;
 }
 
 interface StatCardProps {
@@ -120,7 +82,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, prefix =
         <div>
           <p className="text-sm text-gray-600 mb-1">{title}</p>
           <p className="text-2xl font-bold" style={{ color }}>
-            {prefix}{value}
+            {prefix}{value.toLocaleString()}
           </p>
         </div>
         <div className={`p-3 rounded-full`} style={{ backgroundColor: `${color}20` }}>
@@ -132,81 +94,424 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, prefix =
 };
 
 export const CandidateDashboard: React.FC = () => {
+  const {
+    candidateUser,
+    candidateToken,
+    logout,
+    isAuthenticated,
+  } = useCandidateAuth();
+  
   const navigate = useNavigate();
-  const [stats, setStats] = useState(mockApplicationData.stats);
-  const [applications, setApplications] = useState<Application[]>(mockApplicationData.applications);
-  const [isLoading, setIsLoading] = useState(false);
+  const { institute_id } = useParams();
+  const [stats, setStats] = useState<DashboardCounts>({
+    total_paid_applications: 0,
+    total_initialized_applications: 0,
+    total_paid_transactions: 0,
+    total_paid_amount: 0
+  });
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalApplications, setTotalApplications] = useState(0);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
+  const [instituteData, setInstituteData] = useState<InstituteData>({});
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  const rowsPerPage = 10;
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => {
+      console.log('Razorpay script loaded successfully');
+    };
+    script.onerror = () => {
+      console.error('Failed to load Razorpay script');
+      toast.error('Payment gateway loading failed. Please refresh the page.');
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const fetchInstituteData = async () => {
+    try {
+      const response = await axios.post(`${apiUrl}/Public/Get-header-footer`, {
+        unique_code: institute_id,
+      });
+      if (response.data?.header) {
+        setInstituteData({
+          name: response.data.header.name,
+          razorpay_api_key: response.data.header.razorpay_api_key,
+          payment_type: response.data.header.payment_type,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching institute data:', error);
+    }
+  };
+
+  const fetchDashboardData = async (page = 0, refresh = false) => {
+    try {
+      if (refresh) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
+
+      const academicId = candidateUser?.academic_id || '';
+      const sId = candidateUser?.id || '';
+      const currentYear = new Date().getFullYear();
+
+      const response = await axios.post(
+        `${apiUrl}/Candidates/get-candidate-dashboard`,
+        {},
+        {
+          params: {
+            page,
+            rowsPerPage,
+            order: 'desc',
+            orderBy: 'id',
+            year: currentYear,
+            academic_id: academicId,
+            s_id: sId,
+          },
+          headers: {
+            'Authorization': `Bearer ${candidateToken}`,
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+
+      const data: DashboardResponse = response.data;
+
+      if (data.status) {
+        setStats(data.dashboard_counts);
+        setApplications(data.applications_list);
+        setTotalApplications(data.total_applications);
+        setCurrentPage(page);
+        toast.success('Dashboard data loaded successfully');
+      } else {
+        toast.error('Failed to load dashboard data');
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      toast.error('Error loading dashboard. Please try again.');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  const fetchPayableAmount = async (application: Application) => {
+    try {
+      const response = await axios.post(`${apiUrl}/Public/Get-payable-amount`, {
+        caste_id: application.caste_id,
+        academic_id: 17 ,// candidateUser?.academic_id,
+        location_id: application.location_id,
+      });
+
+      if (response.data?.total_payable_fee) {
+        setPaymentData(response.data);
+        return response.data;
+      } else {
+        toast.error('Unable to calculate payment amount');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching payable amount:', error);
+      toast.error('Failed to calculate payment amount');
+      return null;
+    }
+  };
+
+  const handlePayment = useCallback(async () => {
+    if (!selectedApplication || !paymentData) return;
+
+    setPaymentLoading(true);
+
+    try {
+      // Fetch institute data if not already loaded
+      if (!instituteData.payment_type) {
+        await fetchInstituteData();
+      }
+
+      const paymentAmount = Math.round(paymentData.total_payable_fee * 100); // Convert to paise
+
+      // Create Razorpay order
+      const orderResponse = await axios.post(`${apiUrl}/frontend/razorpay-order`, {
+        amount: paymentAmount,
+        academic_id: candidateUser?.academic_id,
+        receipt: `receipt_${selectedApplication.application_id}`,
+      }, {
+        headers: {
+          'Authorization': `Bearer ${candidateToken}`,
+        }
+      });
+
+      const order = orderResponse.data;
+
+      // Initialize Razorpay checkout
+      const options = {
+        key: instituteData.razorpay_api_key,
+        amount: order.amount,
+        currency: order.currency || 'INR',
+        name: instituteData.name || 'University Admission',
+        description: `Payment for Application ${selectedApplication.application_id}`,
+        order_id: order.id,
+        handler: async (paymentResponse: any) => {
+          try {
+            // Verify payment on server
+            const verifyResponse = await axios.post(
+              `${apiUrl}/frontend/college-save-final-step-data`,
+              {
+                razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                razorpay_order_id: paymentResponse.razorpay_order_id,
+                razorpay_signature: paymentResponse.razorpay_signature,
+                academic_id: candidateUser?.academic_id,
+                application_id: selectedApplication.application_id,
+                transaction_id: selectedApplication.transaction_id || '',
+              },
+              {
+                headers: {
+                  'Authorization': `Bearer ${candidateToken}`,
+                }
+              }
+            );
+
+            if (verifyResponse.data.success) {
+              setPaymentSuccess(true);
+              toast.success('Payment successful!');
+              
+              // Refresh dashboard data after successful payment
+              setTimeout(() => {
+                fetchDashboardData(currentPage, true);
+                setShowPaymentModal(false);
+                setPaymentSuccess(false);
+              }, 2000);
+            } else {
+              toast.error('Payment verification failed');
+            }
+          } catch (error) {
+            console.error('Payment verification failed:', error);
+            toast.error('Payment verification failed. Please contact support.');
+          }
+        },
+        prefill: {
+          name: candidateUser?.name || '',
+          email: candidateUser?.email || '',
+          contact: candidateUser?.mobile || '',
+        },
+        notes: {
+          application_id: selectedApplication.application_id.toString(),
+          candidate_id: candidateUser?.id?.toString(),
+        },
+        theme: {
+          color: '#1e40af',
+        },
+        modal: {
+          ondismiss: () => {
+            console.log('Payment cancelled by user');
+            setPaymentLoading(false);
+            toast('Payment cancelled', { icon: '⚠️' });
+          },
+        },
+      };
+
+      // @ts-ignore
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error: any) {
+      console.error('Payment initialization failed:', error);
+      toast.error(error.response?.data?.message || 'Payment initialization failed');
+    } finally {
+      setPaymentLoading(false);
+    }
+  }, [selectedApplication, paymentData, instituteData, candidateUser, candidateToken, apiUrl, currentPage]);
+
+  const handlePGDirectPayment = useCallback(async () => {
+    if (!selectedApplication || !paymentData) return;
+
+    setPaymentLoading(true);
+    try {
+      const response = await axios.post(
+        `${apiUrl}/payment/initiate`,
+        {
+          amount: Number(paymentData.total_payable_fee)?.toFixed(2),
+          customerEmailID: candidateUser?.email || '',
+          customerMobileNo: candidateUser?.mobile || '',
+          academic_id: candidateUser?.academic_id,
+          application_id: selectedApplication.application_id,
+          transaction_id: selectedApplication.transaction_id || '',
+          pageFinalredirect: window.location.href
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${candidateToken}`,
+          }
+        }
+      );
+
+      if (response.data.success && response.data.paymentUrl) {
+        window.location.href = response.data.paymentUrl;
+      } else {
+        toast.error('Unable to initiate payment');
+      }
+    } catch (error) {
+      console.error('PG payment initiation failed:', error);
+      toast.error('Payment initiation failed. Please try again.');
+    } finally {
+      setPaymentLoading(false);
+    }
+  }, [selectedApplication, paymentData, candidateUser, candidateToken, apiUrl]);
+
+  const initiatePayment = async (application: Application) => {
+    setSelectedApplication(application);
+    setPaymentSuccess(false);
+    
+    // First fetch payable amount
+    const payableData = await fetchPayableAmount(application);
+    
+    if (payableData) {
+      setPaymentData(payableData);
+      setShowPaymentModal(true);
+    }
+  };
+
+  const handlePayNowClick = async () => {
+    if (!instituteData.payment_type) {
+      await fetchInstituteData();
+    }
+    await handlePayment();
+    if (instituteData.payment_type === 1) {
+      await handlePayment();
+    } else if (instituteData.payment_type === 2) {
+      await handlePGDirectPayment();
+    } else {
+      toast.error('Payment method not configured');
+    }
+  };
 
   useEffect(() => {
-    // In real implementation, fetch data from API
-    // fetchCandidateDashboardData();
+    fetchDashboardData();
+    fetchInstituteData();
   }, []);
 
   const handleLogout = () => {
-    // Clear candidate session/token
-    localStorage.removeItem('candidate_token');
-    navigate('/CandidatePanel/login');
+    logout();
+    navigate(`/Fronted/${institute_id}/CandidatePanel/login`);
   };
 
-  const handleEditApplication = (applicationId: string) => {
+  const handleEditApplication = (applicationId: number) => {
     // Navigate to edit application page
-    navigate(`/CandidatePanel/application/edit/${applicationId}`);
+    // navigate(`/CandidatePanel/application/edit/${applicationId}`);
   };
 
-  const handlePayNow = (applicationId: string) => {
-    // Call the same payment function as apply page
-    // paymentService.initiatePayment(applicationId);
-    alert(`Payment initiated for ${applicationId}`);
+  const handleRefresh = () => {
+    fetchDashboardData(currentPage, true);
   };
+
+  const handlePageChange = (newPage: number) => {
+    fetchDashboardData(newPage);
+  };
+
+  const formatDateTime = (dateTime: string) => {
+    const date = new Date(dateTime);
+    return date.toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const getPaymentStatusText = (status: number) => {
+    return status === 1 ? 'Paid' : 'Initialized';
+  };
+
+  const getPaymentStatusColor = (status: number) => {
+    return status === 1 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+  };
+
+  const totalPages = Math.ceil(totalApplications / rowsPerPage);
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header with logout */}
-      {/* <Header> */}
-        <div className="flex items-center gap-4">
-          <span className="text-gray-700">Welcome, Candidate!</span>
-          <Button 
-            size="sm" 
-            color="gray" 
-            onClick={handleLogout}
-            className="hover:bg-gray-200"
-          >
-            Logout
-          </Button>
+      {/* Header */}
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-semibold text-gray-900">Admission Portal</h1>
+              <p className="text-sm text-gray-600">Welcome, {candidateUser?.name || 'Candidate'}!</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button 
+                size="sm" 
+                color="gray" 
+                onClick={handleLogout}
+                className="hover:bg-gray-200"
+              >
+                Logout
+              </Button>
+            </div>
+          </div>
         </div>
-      {/* </Header> */}
+      </header>
       
       <main className="flex-grow bg-gray-50 py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          {/* Dashboard Title */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Candidate Dashboard</h1>
-            <p className="text-gray-600 mt-2">View and manage your applications</p>
+          {/* Dashboard Header */}
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Candidate Dashboard</h1>
+              <p className="text-gray-600 mt-2">View and manage your applications</p>
+            </div>
+            <Button
+              color="light"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center gap-2"
+            >
+              <HiRefresh className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            </Button>
           </div>
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard
               title="Total Paid Applications"
-              value={stats.totalPaidApplications}
+              value={stats.total_paid_applications}
               icon={<HiDocumentText className="h-6 w-6" />}
               color="#10B981"
             />
             <StatCard
               title="Total Initialized Applications"
-              value={stats.totalInitializedApplications}
+              value={stats.total_initialized_applications}
               icon={<HiClock className="h-6 w-6" />}
               color="#F59E0B"
             />
             <StatCard
               title="Total Paid Transactions"
-              value={stats.totalPaidTransactions}
+              value={stats.total_paid_transactions}
               icon={<HiCash className="h-6 w-6" />}
               color="#3B82F6"
             />
             <StatCard
               title="Total Paid Amount"
-              value={stats.totalPaidAmount}
+              value={stats.total_paid_amount}
               icon={<HiCurrencyRupee className="h-6 w-6" />}
               color="#8B5CF6"
               prefix="₹"
@@ -218,124 +523,560 @@ export const CandidateDashboard: React.FC = () => {
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-xl font-bold text-gray-900">Your Applications</h2>
-                <p className="text-gray-600">View and manage all your submitted applications</p>
+                <p className="text-gray-600">
+                  Showing {applications.length} of {totalApplications} applications
+                </p>
               </div>
-              {/* <Button color="blue" onClick={() => navigate('/apply')}>
-                <HiArrowRight className="mr-2 h-5 w-5" />
-                Apply for New
-              </Button> */}
             </div>
 
             {isLoading ? (
               <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <Spinner size="xl" />
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table hoverable>
-                  <TableHead>
-                    <TableHeadCell>S.No</TableHeadCell>
-                    <TableHeadCell>Application ID</TableHeadCell>
-                    <TableHeadCell>Form Name</TableHeadCell>
-                    <TableHeadCell>Amount</TableHeadCell>
-                    <TableHeadCell>Payment Status</TableHeadCell>
-                    <TableHeadCell>Applied At</TableHeadCell>
-                    <TableHeadCell>Actions</TableHeadCell>
-                  </TableHead>
-                  <TableBody className="divide-y">
-                    {applications.map((app, index) => (
-                      <TableRow key={app.id} className="hover:bg-gray-50">
-                        <TableCell>{index + 1}</TableCell>
-                        <TableCell className="font-medium text-blue-600">
-                          {app.application_id}
-                        </TableCell>
-                        <TableCell>{app.form_name}</TableCell>
-                        <TableCell>₹{app.amount}</TableCell>
-                        <TableCell>
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                            app.payment_status === 'Paid' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {app.payment_status}
-                          </span>
-                        </TableCell>
-                        <TableCell>{app.applied_at}</TableCell>
-                        <TableCell>
-
-                         {app.payment_status === 'Paid' ? 
-                        <></> :
-                         <div className="flex gap-2">
-                            <Button
-                              size="xs"
-                              color="gray"
-                              onClick={() => handleEditApplication(app.application_id)}
-                            >
-                              <HiPencil className="h-4 w-4 mr-1" />
-                              Edit
-                            </Button>
-                            {app.payment_status === 'Initialized' && (
-                              <Button
-                                size="xs"
-                                color="blue"
-                                onClick={() => handlePayNow(app.application_id)}
-                              >
-                                Pay Now
-                              </Button>
+              <>
+                <div className="overflow-x-auto">
+                  <Table hoverable>
+                    <TableHead>
+                      <TableHeadCell>S.No</TableHeadCell>
+                      <TableHeadCell>Application ID</TableHeadCell>
+                      <TableHeadCell>Form Name</TableHeadCell>
+                      <TableHeadCell>Payment Status</TableHeadCell>
+                      <TableHeadCell>Applied At</TableHeadCell>
+                      <TableHeadCell>Actions</TableHeadCell>
+                    </TableHead>
+                    <TableBody className="divide-y">
+                      {applications.map((app) => (
+                        <TableRow key={app.application_id} className="hover:bg-gray-50">
+                          <TableCell>{app.s_no}</TableCell>
+                          <TableCell className="font-medium text-blue-600">
+                            {app.application_id}
+                          </TableCell>
+                          <TableCell>{app.form_name}</TableCell>
+                          <TableCell>
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getPaymentStatusColor(app.payment_status)}`}>
+                              {getPaymentStatusText(app.payment_status)}
+                            </span>
+                          </TableCell>
+                          <TableCell>{formatDateTime(app.applied_at)}</TableCell>
+                          <TableCell>
+                            {app.payment_status === 0 ? (
+                              <div className="flex gap-2">
+                                <Button
+                                  size="xs"
+                                  color="gray"
+                                  onClick={() => handleEditApplication(app.application_id)}
+                                >
+                                  <HiPencil className="h-4 w-4 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  size="xs"
+                                  color="blue"
+                                  onClick={() => initiatePayment(app)}
+                                  disabled={paymentLoading}
+                                >
+                                  {paymentLoading && selectedApplication?.application_id === app.application_id ? (
+                                    <Spinner size="sm" />
+                                  ) : (
+                                    'Pay Now'
+                                  )}
+                                </Button>
+                              </div>
+                            ) : (
+                              <span className="text-gray-500 text-sm">No actions available</span>
                             )}
-                          </div>
-                        }
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
 
-            {applications.length === 0 && !isLoading && (
-              <div className="text-center py-12">
-                <HiDocumentText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications Found</h3>
-                <p className="text-gray-600 mb-4">You haven't submitted any applications yet.</p>
-                <Button color="blue" onClick={() => navigate('/apply')}>
-                  Apply Now
-                </Button>
-              </div>
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-6 border-t pt-4">
+                    <div className="text-sm text-gray-700">
+                      Page {currentPage + 1} of {totalPages}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        color="light"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 0}
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        size="sm"
+                        color="light"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages - 1}
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
-          </Card>
-
-          {/* Additional Info Card */}
-          <Card>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Important Information</h3>
-            <ul className="space-y-3 text-gray-600">
-              <li className="flex items-start">
-                <span className="text-blue-500 mr-2">•</span>
-                <span>You can edit applications that are in "Initialized" status</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-500 mr-2">•</span>
-                <span>Applications with "Paid" status cannot be edited</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-500 mr-2">•</span>
-                <span>Click "Pay Now" to complete payment for initialized applications</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-500 mr-2">•</span>
-                <span>All payments are secure and processed through Razorpay</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-500 mr-2">•</span>
-                <span>For any issues, please contact support@example.com</span>
-              </li>
-            </ul>
           </Card>
         </div>
       </main>
-      
-      {/* Footer */}
-      {/* <Footer /> */}
+
+      {/* Payment Modal */}
+      <Modal
+        show={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        size="md"
+      >
+        <ModalHeader>
+          {paymentSuccess ? 'Payment Successful' : 'Complete Payment'}
+        </ModalHeader>
+        <ModalBody>
+          {paymentSuccess ? (
+            <div className="text-center py-8">
+              <HiCheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Payment Successful!
+              </h3>
+              <p className="text-gray-600">
+                Your payment for Application {selectedApplication?.application_id} has been processed successfully.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Payment Details for Application {selectedApplication?.application_id}
+                </h3>
+                
+                {paymentData && (
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Fee:</span>
+                      <span className="font-medium">₹{paymentData.total_fee?.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Discount:</span>
+                      <span className="font-medium text-green-600">-₹{paymentData.discount_amount?.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Processing Fee:</span>
+                      <span className="font-medium">₹{paymentData.processing_fee?.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">GST:</span>
+                      <span className="font-medium">₹{paymentData.gst_amount?.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Other Charges:</span>
+                      <span className="font-medium">₹{paymentData.other_charges?.toFixed(2)}</span>
+                    </div>
+                    <div className="border-t pt-2 mt-2">
+                      <div className="flex justify-between font-bold text-lg">
+                        <span>Total Payable:</span>
+                        <span className="text-blue-600">₹{paymentData.total_payable_fee?.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <Button
+                  onClick={handlePayNowClick}
+                  disabled={paymentLoading}
+                  className="w-full"
+                  color="blue"
+                >
+                  {paymentLoading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <Spinner size="sm" />
+                      Processing...
+                    </div>
+                  ) : (
+                    `Pay ₹${paymentData?.total_payable_fee?.toFixed(2)}`
+                  )}
+                </Button>
+                <Button
+                  color="light"
+                  onClick={() => setShowPaymentModal(false)}
+                  disabled={paymentLoading}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </>
+          )}
+        </ModalBody>
+      </Modal>
     </div>
   );
 };
+
+
+
+
+
+
+// // components/candidate/CandidateDashboard.tsx
+// import React, { useState, useEffect } from 'react';
+// import { useNavigate, useParams } from 'react-router';
+// import { Button, Card, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from 'flowbite-react';
+// import { 
+//   HiDocumentText, 
+//   HiClock, 
+//   HiCurrencyRupee, 
+//   HiCash,
+//   HiPencil,
+//   HiRefresh,
+//   HiExclamationCircle
+// } from 'react-icons/hi';
+// import { toast } from 'react-hot-toast';
+// import { useCandidateAuth } from 'src/hook/CandidateAuthContext';
+
+// interface Application {
+//   s_no: number;
+//   application_id: number;
+//   form_name: string;
+//   payment_status: number; // 0 = Initialized, 1 = Paid
+//   applied_at: string;
+//   amount?: number; // Optional, might come from API
+// }
+
+// interface DashboardCounts {
+//   total_paid_applications: number;
+//   total_initialized_applications: number;
+//   total_paid_transactions: number;
+//   total_paid_amount: number;
+// }
+
+// interface DashboardResponse {
+//   status: boolean;
+//   dashboard_counts: DashboardCounts;
+//   applications_list: Application[];
+//   total_applications: number;
+// }
+
+// interface StatCardProps {
+//   title: string;
+//   value: number;
+//   icon: React.ReactNode;
+//   color: string;
+//   prefix?: string;
+// }
+
+// const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, prefix = '' }) => {
+//   return (
+//     <Card className="hover:shadow-lg transition-shadow duration-300">
+//       <div className="flex items-center justify-between">
+//         <div>
+//           <p className="text-sm text-gray-600 mb-1">{title}</p>
+//           <p className="text-2xl font-bold" style={{ color }}>
+//             {prefix}{value.toLocaleString()}
+//           </p>
+//         </div>
+//         <div className={`p-3 rounded-full`} style={{ backgroundColor: `${color}20` }}>
+//           <div style={{ color }}>{icon}</div>
+//         </div>
+//       </div>
+//     </Card>
+//   );
+// };
+
+// export const CandidateDashboard: React.FC = () => {
+//   const {
+//         candidateUser,
+//         candidateToken,
+//         logout,
+//         isAuthenticated,
+//       } = useCandidateAuth();
+//   const navigate = useNavigate();
+//   const [stats, setStats] = useState<DashboardCounts>({
+//     total_paid_applications: 0,
+//     total_initialized_applications: 0,
+//     total_paid_transactions: 0,
+//     total_paid_amount: 0
+//   });
+//   const [applications, setApplications] = useState<Application[]>([]);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [isRefreshing, setIsRefreshing] = useState(false);
+//   const [currentPage, setCurrentPage] = useState(0);
+//   const [totalApplications, setTotalApplications] = useState(0);
+//     const { institute_id } = useParams();
+//   const rowsPerPage = 10;
+// const apiUrl = import.meta.env.VITE_API_URL;
+//   const fetchDashboardData = async (page = 0, refresh = false) => {
+//     try {
+//       if (refresh) {
+//         setIsRefreshing(true);
+//       } else {
+//         setIsLoading(true);
+//       }
+      
+//       // Get academic_id and other required params from localStorage or context
+//       const academicId = candidateUser.academic_id || '';
+//       const sId = candidateUser.id || '';
+//       const currentYear = new Date().getFullYear();
+
+//       const response = await fetch(
+//         `${apiUrl}/Candidates/get-candidate-dashboard?page=${page}&rowsPerPage=${rowsPerPage}&order=desc&orderBy=id&year=${currentYear}&academic_id=${academicId}&s_id=${sId}`,
+//         {
+//           method: 'POST',
+//           headers: {
+//             'accept': '/',
+//             'authorization': `Bearer ${candidateToken}`,
+//             'content-type': 'application/json',
+//           }
+//         }
+//       );
+
+//       const data: DashboardResponse = await response.json();
+
+//       if (data.status) {
+//         setStats(data.dashboard_counts);
+//         setApplications(data.applications_list);
+//         setTotalApplications(data.total_applications);
+//         setCurrentPage(page);
+//         toast.success('Dashboard data loaded successfully');
+//       } else {
+//         toast.error('Failed to load dashboard data');
+//       }
+//     } catch (error) {
+//       console.error('Error fetching dashboard data:', error);
+//       toast.error('Error loading dashboard. Please try again.');
+//     } finally {
+//       setIsLoading(false);
+//       setIsRefreshing(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchDashboardData();
+//   }, []);
+
+//   const handleLogout = () => {
+//     logout();
+//     navigate(`/Fronted/${institute_id}/CandidatePanel/login`);
+//   };
+
+//   const handleEditApplication = (applicationId: number) => {
+//     // Navigate to edit application page
+//     navigate(`/CandidatePanel/application/edit/${applicationId}`);
+//   };
+
+//   const handlePayNow = (applicationId: number) => {
+//     // Call payment API
+//     toast.success(`Payment initiated for application ${applicationId}`);
+//     // In real implementation, call payment service
+//     // paymentService.initiatePayment(applicationId);
+//   };
+
+//   const handleRefresh = () => {
+//     fetchDashboardData(currentPage, true);
+//   };
+
+//   const handlePageChange = (newPage: number) => {
+//     fetchDashboardData(newPage);
+//   };
+
+//   const formatDateTime = (dateTime: string) => {
+//     const date = new Date(dateTime);
+//     return date.toLocaleString('en-IN', {
+//       day: '2-digit',
+//       month: 'short',
+//       year: 'numeric',
+//       hour: '2-digit',
+//       minute: '2-digit',
+//       hour12: true
+//     });
+//   };
+
+//   const getPaymentStatusText = (status: number) => {
+//     return status === 1 ? 'Paid' : 'Initialized';
+//   };
+
+//   const getPaymentStatusColor = (status: number) => {
+//     return status === 1 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+//   };
+
+//   const totalPages = Math.ceil(totalApplications / rowsPerPage);
+
+//   return (
+//     <div className="min-h-screen flex flex-col">
+//       {/* Header - Assuming you have a proper Header component */}
+//       <header className="bg-white shadow">
+//         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+//           <div className="flex items-center justify-between">
+//             <div>
+//               <h1 className="text-xl font-semibold text-gray-900">Admission Portal</h1>
+//             </div>
+//             <div className="flex items-center gap-4">
+//               <span className="text-gray-700">Welcome, Candidate!</span>
+//               <Button 
+//                 size="sm" 
+//                 color="gray" 
+//                 onClick={handleLogout}
+//                 className="hover:bg-gray-200"
+//               >
+//                 Logout
+//               </Button>
+//             </div>
+//           </div>
+//         </div>
+//       </header>
+      
+//       <main className="flex-grow bg-gray-50 py-8 px-4">
+//         <div className="max-w-7xl mx-auto">
+//           {/* Dashboard Header */}
+//           <div className="flex justify-between items-center mb-8">
+//             <div>
+//               <h1 className="text-3xl font-bold text-gray-900">Candidate Dashboard</h1>
+//               <p className="text-gray-600 mt-2">View and manage your applications</p>
+//             </div>
+//             <Button
+//               color="light"
+//               onClick={handleRefresh}
+//               disabled={isRefreshing}
+//               className="flex items-center gap-2"
+//             >
+//               <HiRefresh className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+//               {isRefreshing ? 'Refreshing...' : 'Refresh'}
+//             </Button>
+//           </div>
+
+//           {/* Statistics Cards */}
+//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+//             <StatCard
+//               title="Total Paid Applications"
+//               value={stats.total_paid_applications}
+//               icon={<HiDocumentText className="h-6 w-6" />}
+//               color="#10B981"
+//             />
+//             <StatCard
+//               title="Total Initialized Applications"
+//               value={stats.total_initialized_applications}
+//               icon={<HiClock className="h-6 w-6" />}
+//               color="#F59E0B"
+//             />
+//             <StatCard
+//               title="Total Paid Transactions"
+//               value={stats.total_paid_transactions}
+//               icon={<HiCash className="h-6 w-6" />}
+//               color="#3B82F6"
+//             />
+//             <StatCard
+//               title="Total Paid Amount"
+//               value={stats.total_paid_amount}
+//               icon={<HiCurrencyRupee className="h-6 w-6" />}
+//               color="#8B5CF6"
+//               prefix="₹"
+//             />
+//           </div>
+
+//           {/* Applications Table */}
+//           <Card className="mb-8">
+//             <div className="flex justify-between items-center mb-6">
+//               <div>
+//                 <h2 className="text-xl font-bold text-gray-900">Your Applications</h2>
+//                 <p className="text-gray-600">
+//                   Showing {applications.length} of {totalApplications} applications
+//                 </p>
+//               </div>
+//             </div>
+
+//             {isLoading ? (
+//               <div className="flex justify-center items-center h-64">
+//                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+//               </div>
+//             ) : (
+//               <>
+//                 <div className="overflow-x-auto">
+//                   <Table hoverable>
+//                     <TableHead>
+//                       <TableHeadCell>S.No</TableHeadCell>
+//                       <TableHeadCell>Application ID</TableHeadCell>
+//                       <TableHeadCell>Form Name</TableHeadCell>
+//                       <TableHeadCell>Payment Status</TableHeadCell>
+//                       <TableHeadCell>Applied At</TableHeadCell>
+//                       <TableHeadCell>Actions</TableHeadCell>
+//                     </TableHead>
+//                     <TableBody className="divide-y">
+//                       {applications.map((app) => (
+//                         <TableRow key={app.application_id} className="hover:bg-gray-50">
+//                           <TableCell>{app.s_no}</TableCell>
+//                           <TableCell className="font-medium text-blue-600">
+//                             {app.application_id}
+//                           </TableCell>
+//                           <TableCell>{app.form_name}</TableCell>
+//                           <TableCell>
+//                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getPaymentStatusColor(app.payment_status)}`}>
+//                               {getPaymentStatusText(app.payment_status)}
+//                             </span>
+//                           </TableCell>
+//                           <TableCell>{formatDateTime(app.applied_at)}</TableCell>
+//                           <TableCell>
+//                             {app.payment_status === 0 ? (
+//                               <div className="flex gap-2">
+//                                 <Button
+//                                   size="xs"
+//                                   color="gray"
+//                                   onClick={() => handleEditApplication(app.application_id)}
+//                                 >
+//                                   <HiPencil className="h-4 w-4 mr-1" />
+//                                   Edit
+//                                 </Button>
+//                                 <Button
+//                                   size="xs"
+//                                   color="blue"
+//                                   onClick={() => handlePayNow(app.application_id)}
+//                                 >
+//                                   Pay Now
+//                                 </Button>
+//                               </div>
+//                             ) : (
+//                               <span className="text-gray-500 text-sm">No actions available</span>
+//                             )}
+//                           </TableCell>
+//                         </TableRow>
+//                       ))}
+//                     </TableBody>
+//                   </Table>
+//                 </div>
+
+//                 {/* Pagination */}
+//                 {totalPages > 1 && (
+//                   <div className="flex items-center justify-between mt-6 border-t pt-4">
+//                     <div className="text-sm text-gray-700">
+//                       Page {currentPage + 1} of {totalPages}
+//                     </div>
+//                     <div className="flex gap-2">
+//                       <Button
+//                         size="sm"
+//                         color="light"
+//                         onClick={() => handlePageChange(currentPage - 1)}
+//                         disabled={currentPage === 0}
+//                       >
+//                         Previous
+//                       </Button>
+//                       <Button
+//                         size="sm"
+//                         color="light"
+//                         onClick={() => handlePageChange(currentPage + 1)}
+//                         disabled={currentPage === totalPages - 1}
+//                       >
+//                         Next
+//                       </Button>
+//                     </div>
+//                   </div>
+//                 )}
+//               </>
+//             )}
+//           </Card>
+//         </div>
+//       </main>
+//     </div>
+//   );
+// };

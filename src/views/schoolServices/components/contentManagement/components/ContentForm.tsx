@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Button,
   Modal,
@@ -7,13 +7,13 @@ import {
   ModalFooter,
   ModalHeader,
   ModalBody,
-} from "flowbite-react";
-import axios from "axios";
-import { useAuth } from "src/hook/useAuth";
-import toast from "react-hot-toast";
-import AcademicDropdown from "src/Frontend/Common/AcademicDropdown";
-import JoditEditor from "jodit-react";
-import SchoolDropdown from "src/Frontend/Common/SchoolDropdown";
+} from 'flowbite-react';
+import axios from 'axios';
+import { useAuth } from 'src/hook/useAuth';
+import toast from 'react-hot-toast';
+import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
+import JoditEditor from 'jodit-react';
+import SchoolDropdown from 'src/Frontend/Common/SchoolDropdown';
 
 interface Content {
   id: number;
@@ -23,6 +23,7 @@ interface Content {
   html_content: string;
   created_at: string;
   academic_name: string;
+  form_id: string;
 }
 
 interface ContentFormProps {
@@ -37,6 +38,7 @@ interface FormData {
   page_name: string;
   page_route: string;
   html_content: string;
+  form_id: string;
 }
 
 const ContentForm: React.FC<ContentFormProps> = ({
@@ -48,10 +50,11 @@ const ContentForm: React.FC<ContentFormProps> = ({
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    academic_id: "",
-    page_name: "",
-    page_route: "",
-    html_content: "",
+    academic_id: '',
+    page_name: '',
+    page_route: '',
+    html_content: '',
+    form_id: '2',
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [autoGenerateRoute, setAutoGenerateRoute] = useState(true);
@@ -66,57 +69,58 @@ const ContentForm: React.FC<ContentFormProps> = ({
       toolbarSticky: false,
       toolbarAdaptive: false,
       buttons: [
-        "source",
-        "|",
-        "bold",
-        "italic",
-        "underline",
-        "strikethrough",
-        "|",
-        "ul",
-        "ol",
-        "|",
-        "font",
-        "fontsize",
-        "brush",
-        "paragraph",
-        "|",
-        "image",
-        "video",
-        "table",
-        "link",
-        "|",
-        "left",
-        "center",
-        "right",
-        "justify",
-        "|",
-        "undo",
-        "redo",
-        "|",
-        "hr",
-        "eraser",
-        "copyformat",
-        "fullsize",
+        'source',
+        '|',
+        'bold',
+        'italic',
+        'underline',
+        'strikethrough',
+        '|',
+        'ul',
+        'ol',
+        '|',
+        'font',
+        'fontsize',
+        'brush',
+        'paragraph',
+        '|',
+        'image',
+        'video',
+        'table',
+        'link',
+        '|',
+        'left',
+        'center',
+        'right',
+        'justify',
+        '|',
+        'undo',
+        'redo',
+        '|',
+        'hr',
+        'eraser',
+        'copyformat',
+        'fullsize',
       ],
       showXPathInStatusbar: false,
       showCharsCounter: false,
       showWordsCounter: false,
       uploader: { insertImageAsBase64URI: true },
-      placeholder: "Start typing your content here...",
-      theme: "default",
+      placeholder: 'Start typing your content here...',
+      theme: 'default',
     }),
-    []
+    [],
   );
 
   // ✅ Initialize or reset form when modal opens
   useEffect(() => {
     if (isOpen) {
       setFormData({
-        academic_id: editingContent?.academic_id?.toString() || "",
-        page_name: editingContent?.page_name || "",
-        page_route: editingContent?.page_route || "",
-        html_content: editingContent?.html_content || "",
+        academic_id: editingContent?.academic_id?.toString() || '',
+        page_name: editingContent?.page_name || '',
+        page_route: editingContent?.page_route || '',
+        html_content: editingContent?.html_content || '',
+        form_id: editingContent?.form_id?.toString() || '2',
       });
       setAutoGenerateRoute(!editingContent);
       setErrors({});
@@ -131,17 +135,20 @@ const ContentForm: React.FC<ContentFormProps> = ({
         setErrors((prev) => ({ ...prev, [field]: undefined }));
       }
     },
-    [errors]
+    [errors],
   );
 
   const handleAcademicChange = useCallback(
-    (academicId: string) => handleInputChange("academic_id", academicId),
-    [handleInputChange]
+    (academicId: string) => handleInputChange('academic_id', academicId),
+    [handleInputChange],
   );
 
   // ✅ Auto-generate route based on page name
   const generatePageRoute = (pageName: string) =>
-    pageName.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/(^_|_$)/g, "");
+    pageName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/(^_|_$)/g, '');
 
   const handlePageNameChange = useCallback(
     (value: string) => {
@@ -149,53 +156,48 @@ const ContentForm: React.FC<ContentFormProps> = ({
         const newData = { ...prev, page_name: value };
         if (
           autoGenerateRoute &&
-          (!prev.page_route ||
-            prev.page_route === generatePageRoute(prev.page_name))
+          (!prev.page_route || prev.page_route === generatePageRoute(prev.page_name))
         ) {
           newData.page_route = generatePageRoute(value);
         }
         return newData;
       });
-      if (errors.page_name)
-        setErrors((prev) => ({ ...prev, page_name: undefined }));
+      if (errors.page_name) setErrors((prev) => ({ ...prev, page_name: undefined }));
     },
-    [autoGenerateRoute, errors.page_name]
+    [autoGenerateRoute, errors.page_name],
   );
 
   const handlePageRouteChange = useCallback(
     (value: string) => {
-      handleInputChange("page_route", value.toLowerCase());
+      handleInputChange('page_route', value.toLowerCase());
       setAutoGenerateRoute(false);
     },
-    [handleInputChange]
+    [handleInputChange],
   );
 
   // ✅ Jodit onBlur handler (saves content only on blur)
   const handleEditorBlur = useCallback(
     (newContent: string) => {
       setFormData((prev) => ({ ...prev, html_content: newContent }));
-      if (errors.html_content)
-        setErrors((prev) => ({ ...prev, html_content: undefined }));
+      if (errors.html_content) setErrors((prev) => ({ ...prev, html_content: undefined }));
     },
-    [errors.html_content]
+    [errors.html_content],
   );
 
   // ✅ Validation
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
-    if (!formData.academic_id && user?.role !== "CustomerAdmin")
-      newErrors.academic_id = "Academic is required";
-    if (!formData.page_name.trim())
-      newErrors.page_name = "Page name is required";
-    if (!formData.page_route.trim())
-      newErrors.page_route = "Page route is required";
-    if (!formData.html_content.trim())
-      newErrors.html_content = "Content is required";
+    if (!formData.academic_id && user?.role !== 'CustomerAdmin')
+      newErrors.academic_id = 'Academic is required';
+    if (!formData.page_name.trim()) newErrors.page_name = 'Page name is required';
+    if (!formData.page_route.trim()) newErrors.page_route = 'Page route is required';
+    if (!formData.html_content.trim()) newErrors.html_content = 'Content is required';
+    if (!formData.form_id) newErrors.form_id = 'Type is required';
 
     const routeRegex = /^[a-z0-9_-]+$/;
     if (formData.page_route && !routeRegex.test(formData.page_route)) {
       newErrors.page_route =
-        "Page route can only contain lowercase letters, numbers, underscores, and hyphens";
+        'Page route can only contain lowercase letters, numbers, underscores, and hyphens';
     }
 
     setErrors(newErrors);
@@ -224,25 +226,23 @@ const ContentForm: React.FC<ContentFormProps> = ({
         {
           headers: {
             Authorization: `Bearer ${user?.token}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       if (response.data.status === true) {
         toast.success(
-          editingContent
-            ? "Content updated successfully!"
-            : "Content added successfully!"
+          editingContent ? 'Content updated successfully!' : 'Content added successfully!',
         );
         onSuccess();
         onClose();
       } else {
-        toast.error(response.data.message || "Operation failed");
+        toast.error(response.data.message || 'Operation failed');
       }
     } catch (error: any) {
-      console.error("Error saving content:", error);
-      toast.error("Failed to save content");
+      console.error('Error saving content:', error);
+      toast.error('Failed to save content');
     } finally {
       setLoading(false);
     }
@@ -250,15 +250,13 @@ const ContentForm: React.FC<ContentFormProps> = ({
 
   return (
     <Modal show={isOpen} onClose={onClose} size="5xl">
-      <ModalHeader>
-        {editingContent ? "Edit Content" : "Add New Content"}
-      </ModalHeader>
+      <ModalHeader>{editingContent ? 'Edit Content' : 'Add New Content'}</ModalHeader>
 
       <ModalBody>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="flex flex-wrap sm:flex-nowrap gap-4">
             {/* Academic Dropdown */}
-            {(user?.role === "SuperAdmin" || user?.role === "SupportAdmin") && (
+            {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && (
               <div className="w-full sm:w-1/3">
                 <Label className="block mb-2">
                   School <span className="text-red-500">*</span>
@@ -269,9 +267,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
                   placeholder="Select academic..."
                 />
                 {errors.academic_id && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.academic_id}
-                  </p>
+                  <p className="text-red-500 text-sm mt-1">{errors.academic_id}</p>
                 )}
               </div>
             )}
@@ -285,13 +281,9 @@ const ContentForm: React.FC<ContentFormProps> = ({
                 value={formData.page_name}
                 onChange={(e) => handlePageNameChange(e.target.value)}
                 placeholder="e.g., About Us"
-                color={errors.page_name ? "failure" : "gray"}
+                color={errors.page_name ? 'failure' : 'gray'}
               />
-              {errors.page_name && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.page_name}
-                </p>
-              )}
+              {errors.page_name && <p className="text-red-500 text-sm mt-1">{errors.page_name}</p>}
             </div>
 
             {/* Page Route */}
@@ -303,14 +295,33 @@ const ContentForm: React.FC<ContentFormProps> = ({
                 value={formData.page_route}
                 onChange={(e) => handlePageRouteChange(e.target.value)}
                 placeholder="e.g., about_us"
-                color={errors.page_route ? "failure" : "gray"}
+                color={errors.page_route ? 'failure' : 'gray'}
               />
               {errors.page_route && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.page_route}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{errors.page_route}</p>
               )}
             </div>
+          </div>
+
+          {/* Type Dropdown */}
+          <div className="w-full sm:w-1/3">
+            <Label className="block mb-2">
+              Type <span className="text-red-500">*</span>
+            </Label>
+
+            <select
+              value={formData.form_id}
+              onChange={(e) => handleInputChange('form_id', e.target.value)}
+              className={`w-full rounded-md border px-3 py-2 text-sm
+      ${errors.form_id ? 'border-red-500' : 'border-gray-300'}
+      focus:border-blue-500 focus:ring-blue-500`}
+            >
+              {/* <option value="">Select Type</option> */}
+              <option value="1">Form</option>
+              <option value="2">Content</option>
+            </select>
+
+            {errors.form_id && <p className="text-red-500 text-sm mt-1">{errors.form_id}</p>}
           </div>
 
           {/* Jodit Editor */}
@@ -327,9 +338,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
               />
             </div>
             {errors.html_content && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.html_content}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{errors.html_content}</p>
             )}
           </div>
         </form>
@@ -339,20 +348,16 @@ const ContentForm: React.FC<ContentFormProps> = ({
         <Button color="alternative" onClick={onClose} disabled={loading}>
           Cancel
         </Button>
-        <Button
-          onClick={handleSubmit}
-          gradientDuoTone="cyanToBlue"
-          disabled={loading}
-        >
+        <Button onClick={handleSubmit} gradientDuoTone="cyanToBlue" disabled={loading}>
           {loading ? (
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              {editingContent ? "Updating..." : "Adding..."}
+              {editingContent ? 'Updating...' : 'Adding...'}
             </div>
           ) : editingContent ? (
-            "Update Content"
+            'Update Content'
           ) : (
-            "Add Content"
+            'Add Content'
           )}
         </Button>
       </ModalFooter>

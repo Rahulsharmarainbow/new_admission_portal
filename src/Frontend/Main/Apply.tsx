@@ -40,20 +40,21 @@ interface ApplyData {
 }
 
 const Apply = () => {
-  let { institute_id } = useParams();
+  let { institute_id, form_route } = useParams();
   const navigate = useNavigate();
   const [applyData, setApplyData] = useState<ApplyData | null>(null);
   const [modalData, setModalData] = useState<Any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [formId, setFormId] = useState("");
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const assetUrl = import.meta.env.VITE_ASSET_URL;
   if (!institute_id || institute_id === ':institute_id') {
     institute_id = window.location.hostname; // use domain as fallback
   }
-
+console.log(formId);
   useEffect(() => {
     const fetchApplyData = async () => {
       try {
@@ -61,6 +62,7 @@ const Apply = () => {
           `${apiUrl}/Public/Get-apply-form`,
           {
             unique_code: institute_id,
+            form_route: form_route
           },
           {
             headers: {
@@ -71,6 +73,7 @@ const Apply = () => {
         console.log(response.data);
         if (response.status === 200) {
           setApplyData(response.data);
+          setFormId(response.data.form_id)
           setModalData(response.data.apply_modals);
           if(response.data?.apply_modals?.visible == 1){
             setPreviewOpen(true);
@@ -198,6 +201,7 @@ const Apply = () => {
             transportation_setting={applyData.transportation_setting}
             apply_modal={applyData.apply_modal}
             OtherData={applyData.OtherData}
+            formId={formId}
             type="school"
           />
           </div>
@@ -213,6 +217,7 @@ const Apply = () => {
             header={applyData.header}
             cdata={applyData.cdata}
             apply_modal={applyData.apply_modal}
+            formId={formId}
             type="collage"
           />
     ) : (

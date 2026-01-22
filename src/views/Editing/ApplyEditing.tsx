@@ -8,11 +8,13 @@ import Sidebar from './Sidebar';
 import AllAcademicsDropdown from '../../Frontend/Common/AllAcademicsDropdown';
 import Loader from 'src/Frontend/Common/Loader';
 import PreviewForm from './PreviewForm';
+import RouteDropdown from 'src/Frontend/Common/RouteDropdown';
+import { filter } from 'lodash';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 interface FieldType {
- id: number;
+  id: number;
   label: string;
   type?: string;
   width?: number;
@@ -31,24 +33,24 @@ interface FieldType {
   target?: string;
   h_target?: string;
   v_target?: string;
-  columns?: ColumnType[]; 
-  rows?: RowType[]; 
+  columns?: ColumnType[];
+  rows?: RowType[];
   min_rows?: number;
-  max_rows?: number; 
-  add_button_text?: string; 
-  show_sl_no?: number; 
+  max_rows?: number;
+  add_button_text?: string;
+  show_sl_no?: number;
 }
 
 interface ColumnType {
   id: number;
   name: string;
   label: string;
-  type: string; 
+  type: string;
   placeholder?: string;
   required: number;
   validation?: string;
-  options?: string[]; 
-  tbl?: string; 
+  options?: string[];
+  tbl?: string;
   width?: number;
 }
 
@@ -87,6 +89,7 @@ const ApplyEditing: React.FC = () => {
   const [selectedAcademicId, setSelectedAcademicId] = useState<string>('');
   const [filters, setFilters] = useState({
     academic: '',
+    page_route: '',
   });
   const [tableOptions, setTableOptions] = useState<TableOption[]>([]);
   const [deletedFieldIds, setDeletedFieldIds] = useState<number[]>([]);
@@ -248,7 +251,7 @@ const ApplyEditing: React.FC = () => {
 
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Editing/get-apply-page`,
-        { academic_id: parseInt(academic_id) },
+        { academic_id: parseInt(academic_id), form_id: filters.page_route },
         {
           headers: {
             Authorization: `Bearer ${user?.token}`,
@@ -298,6 +301,7 @@ const ApplyEditing: React.FC = () => {
 
       const payload = {
         academic_id: parseInt(academic_id),
+        form_id : filters.page_route,
         cards: applyCards.map((card) => ({
           ...card,
           children: card.children.map((child) => ({
@@ -347,7 +351,7 @@ const ApplyEditing: React.FC = () => {
       fetchApplyPage(filters.academic);
       fetchTableOptions(filters.academic);
     }
-  }, [filters.academic]);
+  }, [filters.academic, filters.page_route]);
 
   useEffect(() => {
     // Initial fetch with default academic ID
@@ -362,7 +366,7 @@ const ApplyEditing: React.FC = () => {
       fetchApplyPage(defaultAcademicId);
       fetchTableOptions(defaultAcademicId);
     }
-  }, [user]);
+  }, [user, filters.page_route]);
 
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
@@ -638,7 +642,21 @@ const ApplyEditing: React.FC = () => {
                   {user?.academic_name ? `Academic: ${user.academic_name}` : 'Apply Page Editor'}
                 </div>
               )}
+
+              <div className="flex items-center gap-4 flex-1">
+                <div className="relative w-full sm:w-auto">
+                  <RouteDropdown
+                academicId={filters.academic}
+                value={filters.page_route}
+                setFormData={setFilters}
+                name="page_route"
+                // label="Page Route"
+                // isRequired
+              />
+                </div>
             </div>
+            </div>
+            
 
             <div className="flex gap-2">
               <div className="flex gap-3 mb-6">
@@ -964,12 +982,6 @@ const ApplyEditing: React.FC = () => {
 };
 
 export default ApplyEditing;
-
-
-
-
-
-
 
 // import React, { useEffect, useState, memo } from 'react';
 // import { Card, Spinner, Button } from 'flowbite-react';

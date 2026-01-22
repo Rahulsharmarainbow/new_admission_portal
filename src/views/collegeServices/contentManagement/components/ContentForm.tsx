@@ -15,6 +15,7 @@ import AcademicDropdown from "src/Frontend/Common/AcademicDropdown";
 import JoditEditor from "jodit-react";
 
 interface Content {
+  form_id: any;
   id: number;
   academic_id: string;
   page_name: string;
@@ -36,6 +37,7 @@ interface FormData {
   page_name: string;
   page_route: string;
   html_content: string;
+  form_id: string; 
 }
 
 const ContentForm: React.FC<ContentFormProps> = ({
@@ -51,6 +53,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
     page_name: "",
     page_route: "",
     html_content: "",
+    form_id: "2",
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [autoGenerateRoute, setAutoGenerateRoute] = useState(true);
@@ -116,6 +119,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
         page_name: editingContent?.page_name || "",
         page_route: editingContent?.page_route || "",
         html_content: editingContent?.html_content || "",
+        form_id: editingContent?.form_id?.toString() || "2",
       });
       setAutoGenerateRoute(!editingContent);
       setErrors({});
@@ -190,6 +194,8 @@ const ContentForm: React.FC<ContentFormProps> = ({
       newErrors.page_route = "Page route is required";
     if (!formData.html_content.trim())
       newErrors.html_content = "Content is required";
+    if (!formData.form_id)
+      newErrors.form_id = "Type is required";
 
     const routeRegex = /^[a-z0-9_-]+$/;
     if (formData.page_route && !routeRegex.test(formData.page_route)) {
@@ -311,6 +317,34 @@ const ContentForm: React.FC<ContentFormProps> = ({
               )}
             </div>
           </div>
+
+          {/* Type Dropdown */}
+<div className="w-full sm:w-1/3">
+  <Label className="block mb-2">
+    Type <span className="text-red-500">*</span>
+  </Label>
+
+  <select
+    value={formData.form_id}
+    onChange={(e) =>
+      handleInputChange("form_id", e.target.value)
+    }
+    className={`w-full rounded-md border px-3 py-2 text-sm
+      ${errors.form_id ? "border-red-500" : "border-gray-300"}
+      focus:border-blue-500 focus:ring-blue-500`}
+  >
+    {/* <option value="">Select Type</option> */}
+    <option value="1">Form</option>
+    <option value="2">Content</option>
+  </select>
+
+  {errors.form_id && (
+    <p className="text-red-500 text-sm mt-1">
+      {errors.form_id}
+    </p>
+  )}
+</div>
+
 
           {/* Jodit Editor */}
           <div>

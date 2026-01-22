@@ -116,6 +116,7 @@ import CustomToaster from './components/CustomToaster';
 import { SidebarProvider } from './layouts/full/sidebar/SidebarContext';
 import { NotificationProvider } from './layouts/full/header/components/NotificationContext'; // ✅ Import NotificationProvider
 import { DashboardFilterProvider } from './hook/DashboardFilterContext';
+import { CandidateAuthProvider } from './hook/CandidateAuthContext';
 
 function App() {
   return (
@@ -124,16 +125,18 @@ function App() {
       <CookiesProvider>
         <React.StrictMode>
           <AuthProvider>
-            <DashboardFilterProvider>
-              <NotificationProvider>
-                <SidebarProvider>
-                  <ThemeModeScript />
-                  <ThemeProvider theme={customTheme}>
-                    <RouterProvider router={router} />
-                  </ThemeProvider>
-                </SidebarProvider>
-              </NotificationProvider>
-            </DashboardFilterProvider>
+            <CandidateAuthProvider>
+              <DashboardFilterProvider>
+                <NotificationProvider>
+                  <SidebarProvider>
+                    <ThemeModeScript />
+                    <ThemeProvider theme={customTheme}>
+                      <RouterProvider router={router} />
+                    </ThemeProvider>
+                  </SidebarProvider>
+                </NotificationProvider>
+              </DashboardFilterProvider>
+            </CandidateAuthProvider>
           </AuthProvider>
         </React.StrictMode>
       </CookiesProvider>

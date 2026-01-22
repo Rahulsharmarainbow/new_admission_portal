@@ -399,8 +399,8 @@ const MainRoutes = [
     { path: '/auth/register', element: <Register /> },
     { path: '404', element: <Error /> },
     { path: '/auth/404', element: <Error /> },
-    { path: '/CandidatePanel/login', element: <CandidateLogin /> },
-    { path: '/CandidatePanel/dashboard', element: <CandidateDashboard /> },
+    { path: '/Frontend/:institute_id/CandidatePanel/login', element: <CandidateLogin /> },
+    { path: '/Frontend/:institute_id/CandidatePanel/dashboard', element: <CandidateDashboard /> },
 
     // 🔒 All Below → Protected
     {
@@ -412,7 +412,7 @@ const MainRoutes = [
       )
     },
     {
-      path: '/Frontend/:institute_id/apply',
+      path: '/Frontend/:institute_id/:form_route',
       element: (
         <ProtectedRoute>
           <Apply />

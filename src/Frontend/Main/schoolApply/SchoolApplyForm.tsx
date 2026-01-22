@@ -32,6 +32,7 @@ interface SchoolApplyFormProps {
   transportation_setting: any;
   apply_modal?: any;
   OtherData?: any;
+  formId: string;
   type: string;
 }
 
@@ -60,6 +61,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
   transportation_setting,
   apply_modal,
   OtherData,
+  formId,
   type,
 }) => {
   const [activeStep, setActiveStep] = useState(0);
