@@ -16,6 +16,8 @@ import {
 import { toast } from 'react-hot-toast';
 import { useCandidateAuth } from 'src/hook/CandidateAuthContext';
 import axios from 'axios';
+import Header from 'src/Frontend/Common/Header';
+import { C } from 'node_modules/react-router/dist/development/index-react-server-client-BeVfPpWg.d.mts';
 
 interface Application {
   s_no: number;
@@ -102,7 +104,7 @@ export const CandidateDashboard: React.FC = () => {
   } = useCandidateAuth();
   
   const navigate = useNavigate();
-  const { institute_id } = useParams();
+  let { institute_id } = useParams();
   const [stats, setStats] = useState<DashboardCounts>({
     total_paid_applications: 0,
     total_initialized_applications: 0,
@@ -119,13 +121,17 @@ export const CandidateDashboard: React.FC = () => {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [instituteData, setInstituteData] = useState<InstituteData>({});
+  const [credentialData, setCredentialData] = useState({});
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   const rowsPerPage = 10;
   const apiUrl = import.meta.env.VITE_API_URL;
-
+  if (!institute_id || institute_id === ':institute_id') {
+    institute_id = window.location.hostname; 
+  }
   // Load Razorpay script
   useEffect(() => {
+    fetchInstituteData();
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
@@ -149,11 +155,7 @@ export const CandidateDashboard: React.FC = () => {
         unique_code: institute_id,
       });
       if (response.data?.header) {
-        setInstituteData({
-          name: response.data.header.name,
-          razorpay_api_key: response.data.header.razorpay_api_key,
-          payment_type: response.data.header.payment_type,
-        });
+        setInstituteData(response.data);        
       }
     } catch (error) {
       console.error('Error fetching institute data:', error);
@@ -184,6 +186,7 @@ export const CandidateDashboard: React.FC = () => {
             year: currentYear,
             academic_id: academicId,
             s_id: sId,
+            unique_code: institute_id,
           },
           headers: {
             'Authorization': `Bearer ${candidateToken}`,
@@ -199,7 +202,7 @@ export const CandidateDashboard: React.FC = () => {
         setApplications(data.applications_list);
         setTotalApplications(data.total_applications);
         setCurrentPage(page);
-        toast.success('Dashboard data loaded successfully');
+        setCredentialData(data.credentials);
       } else {
         toast.error('Failed to load dashboard data');
       }
@@ -216,7 +219,8 @@ export const CandidateDashboard: React.FC = () => {
     try {
       const response = await axios.post(`${apiUrl}/Public/Get-payable-amount`, {
         caste_id: application.caste_id,
-        academic_id: 17 ,// candidateUser?.academic_id,
+        academic_id: candidateUser?.academic_id,
+        class_id: application.class_id,
         location_id: application.location_id,
       });
 
@@ -240,11 +244,6 @@ export const CandidateDashboard: React.FC = () => {
     setPaymentLoading(true);
 
     try {
-      // Fetch institute data if not already loaded
-      if (!instituteData.payment_type) {
-        await fetchInstituteData();
-      }
-
       const paymentAmount = Math.round(paymentData.total_payable_fee * 100); // Convert to paise
 
       // Create Razorpay order
@@ -262,7 +261,7 @@ export const CandidateDashboard: React.FC = () => {
 
       // Initialize Razorpay checkout
       const options = {
-        key: instituteData.razorpay_api_key,
+        key: credentialData.razorpay_api_key,
         amount: order.amount,
         currency: order.currency || 'INR',
         name: instituteData.name || 'University Admission',
@@ -303,7 +302,6 @@ export const CandidateDashboard: React.FC = () => {
             }
           } catch (error) {
             console.error('Payment verification failed:', error);
-            toast.error('Payment verification failed. Please contact support.');
           }
         },
         prefill: {
@@ -332,7 +330,6 @@ export const CandidateDashboard: React.FC = () => {
       rzp.open();
     } catch (error: any) {
       console.error('Payment initialization failed:', error);
-      toast.error(error.response?.data?.message || 'Payment initialization failed');
     } finally {
       setPaymentLoading(false);
     }
@@ -388,32 +385,41 @@ export const CandidateDashboard: React.FC = () => {
   };
 
   const handlePayNowClick = async () => {
-    if (!instituteData.payment_type) {
-      await fetchInstituteData();
-    }
-    await handlePayment();
-    if (instituteData.payment_type === 1) {
+    if (credentialData.payment_type === 1) {
       await handlePayment();
-    } else if (instituteData.payment_type === 2) {
+    } else if (credentialData.payment_type === 2) {
       await handlePGDirectPayment();
     } else {
       toast.error('Payment method not configured');
     }
   };
 
-  useEffect(() => {
-    fetchDashboardData();
-    fetchInstituteData();
-  }, []);
+useEffect(() => {
+  if (!candidateToken) {
+    navigate(
+      institute_id
+        ? `/Frontend/${institute_id}/CandidatePanel/login`
+        : `/Frontend/CandidatePanel/login`
+    );
+    return; 
+  }
 
-  const handleLogout = () => {
-    logout();
-    navigate(`/Fronted/${institute_id}/CandidatePanel/login`);
-  };
+  fetchDashboardData();
+}, [candidateToken, institute_id]);
+
+
+const handleLogout = () => {
+  logout();
+
+  navigate(
+    institute_id
+      ? `/Frontend/${institute_id}/CandidatePanel/login`
+      : `/Frontend/CandidatePanel/login`
+  );
+};
 
   const handleEditApplication = (applicationId: number) => {
-    // Navigate to edit application page
-    // navigate(`/CandidatePanel/application/edit/${applicationId}`);
+    navigate(`/Frontend/${institute_id}/CandidatePanel/edit-application/${applicationId}`);
   };
 
   const handleRefresh = () => {
@@ -448,27 +454,14 @@ export const CandidateDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">Admission Portal</h1>
-              <p className="text-sm text-gray-600">Welcome, {candidateUser?.name || 'Candidate'}!</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button 
-                size="sm" 
-                color="gray" 
-                onClick={handleLogout}
-                className="hover:bg-gray-200"
-              >
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+              baseUrl={instituteData?.baseUrl}
+              institute_id={institute_id}
+              instituteName={instituteData.header?.name}
+              logo={instituteData.header?.logo}
+              address={instituteData.header?.address}
+              otherLogo={instituteData.header?.academic_new_logo}
+            />
       
       <main className="flex-grow bg-gray-50 py-8 px-4">
         <div className="max-w-7xl mx-auto">
@@ -478,6 +471,7 @@ export const CandidateDashboard: React.FC = () => {
               <h1 className="text-3xl font-bold text-gray-900">Candidate Dashboard</h1>
               <p className="text-gray-600 mt-2">View and manage your applications</p>
             </div>
+            <div className="flex items-center gap-4">
             <Button
               color="light"
               onClick={handleRefresh}
@@ -487,6 +481,16 @@ export const CandidateDashboard: React.FC = () => {
               <HiRefresh className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
+             
+              <Button 
+                size="sm" 
+                color="alternate" 
+                onClick={handleLogout}
+                className="hover:bg-gray-200"
+              >
+                Logout
+              </Button>
+            </div>
           </div>
 
           {/* Statistics Cards */}
@@ -647,67 +651,58 @@ export const CandidateDashboard: React.FC = () => {
             </div>
           ) : (
             <>
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Payment Details for Application {selectedApplication?.application_id}
-                </h3>
-                
-                {paymentData && (
-                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Total Fee:</span>
-                      <span className="font-medium">₹{paymentData.total_fee?.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Discount:</span>
-                      <span className="font-medium text-green-600">-₹{paymentData.discount_amount?.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Processing Fee:</span>
-                      <span className="font-medium">₹{paymentData.processing_fee?.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">GST:</span>
-                      <span className="font-medium">₹{paymentData.gst_amount?.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Other Charges:</span>
-                      <span className="font-medium">₹{paymentData.other_charges?.toFixed(2)}</span>
-                    </div>
-                    <div className="border-t pt-2 mt-2">
-                      <div className="flex justify-between font-bold text-lg">
-                        <span>Total Payable:</span>
-                        <span className="text-blue-600">₹{paymentData.total_payable_fee?.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
 
-              <div className="flex flex-col gap-3">
-                <Button
-                  onClick={handlePayNowClick}
-                  disabled={paymentLoading}
-                  className="w-full"
-                  color="blue"
-                >
-                  {paymentLoading ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <Spinner size="sm" />
-                      Processing...
-                    </div>
-                  ) : (
-                    `Pay ₹${paymentData?.total_payable_fee?.toFixed(2)}`
-                  )}
-                </Button>
-                <Button
-                  color="light"
-                  onClick={() => setShowPaymentModal(false)}
-                  disabled={paymentLoading}
-                >
-                  Cancel
-                </Button>
+            <div className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 scale-100">
+            {/* Dialog Header */}
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-center text-xl font-bold text-green-600">Confirm Payment</h3>
+            </div>
+
+            {/* Dialog Content */}
+            <div className="p-6">
+              <div className="text-center mb-4">
+                <div className="text-2xl font-bold text-gray-800 mb-2">
+                  ₹ {paymentData?.total_payable_fee?.toLocaleString('en-IN')}
+                </div>
+                <p className="text-gray-600 text-sm">
+                  You will be redirected to secure payment gateway
+                </p>
               </div>
+            </div>
+
+            {/* Dialog Actions */}
+            <div className="flex justify-center gap-4 p-6 border-t border-gray-200">
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                  disabled={paymentLoading}
+                className={`flex-1 px-4 py-2 border border-gray-400 text-gray-700 rounded-lg font-semibold transition-colors duration-200 ${
+                  paymentLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                 onClick={handlePayNowClick}
+                  disabled={paymentLoading}
+                className={`flex-1 px-4 py-2 rounded-lg font-semibold text-white transition-all duration-200 ${
+                  paymentLoading
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700 hover:shadow-lg'
+                }`}
+              >
+                {paymentLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Processing...
+                  </div>
+                ) : (
+                  'Proceed to Pay'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
             </>
           )}
         </ModalBody>

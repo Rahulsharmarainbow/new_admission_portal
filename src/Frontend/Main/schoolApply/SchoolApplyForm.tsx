@@ -783,6 +783,7 @@ const SchoolApplyForm: React.FC<SchoolApplyFormProps> = ({
             files: fileData,
             amount: payableResponse.data.total_payable_fee,
             academic_id: academic_id,
+            form_id: formId,
           });
 
           if (response.data.success) {

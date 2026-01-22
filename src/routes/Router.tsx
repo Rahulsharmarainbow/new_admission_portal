@@ -80,6 +80,7 @@ import CareerDashboard from 'src/views/dashboards/CareerDashboard';
 import ErrorTable from 'src/views/errorLog/ErrorTable';
 import { CandidateLogin } from 'src/views/candidate-panel/auth/CandidateLogin';
 import { CandidateDashboard } from 'src/views/candidate-panel/CandidateDashboard';
+import CandidateApplicationEditPage from 'src/views/candidate-panel/applicationEdit/CandidateApplicationEditPage';
 
 
 /* ***Layouts**** */
@@ -401,6 +402,7 @@ const MainRoutes = [
     { path: '/auth/404', element: <Error /> },
     { path: '/Frontend/:institute_id/CandidatePanel/login', element: <CandidateLogin /> },
     { path: '/Frontend/:institute_id/CandidatePanel/dashboard', element: <CandidateDashboard /> },
+    { path: '/Frontend/:institute_id/CandidatePanel/edit-application/:id', element: <CandidateApplicationEditPage /> },
 
     // 🔒 All Below → Protected
     {

@@ -192,7 +192,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
       newErrors.page_name = "Page name is required";
     if (!formData.page_route.trim())
       newErrors.page_route = "Page route is required";
-    if (!formData.html_content.trim())
+    if (!formData.html_content.trim() && formData.form_id === '2')
       newErrors.html_content = "Content is required";
     if (!formData.form_id)
       newErrors.form_id = "Type is required";
@@ -347,7 +347,9 @@ const ContentForm: React.FC<ContentFormProps> = ({
 
 
           {/* Jodit Editor */}
-          <div>
+         {
+          (formData.form_id == '2') && (
+             <div>
             <Label className="block mb-2">
               HTML Content <span className="text-red-500">*</span>
             </Label>
@@ -365,6 +367,8 @@ const ContentForm: React.FC<ContentFormProps> = ({
               </p>
             )}
           </div>
+          )
+         }
         </form>
       </ModalBody>
 

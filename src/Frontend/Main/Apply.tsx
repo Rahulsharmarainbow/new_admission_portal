@@ -52,7 +52,7 @@ const Apply = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
   const assetUrl = import.meta.env.VITE_ASSET_URL;
   if (!institute_id || institute_id === ':institute_id') {
-    institute_id = window.location.hostname; // use domain as fallback
+    institute_id = window.location.hostname; 
   }
 console.log(formId);
   useEffect(() => {
@@ -230,6 +230,7 @@ console.log(formId);
             header={applyData.header}
             cdata={applyData.cdata}
             apply_modal={applyData.apply_modal}
+            formId={formId}
             type="collage"
           />
     )

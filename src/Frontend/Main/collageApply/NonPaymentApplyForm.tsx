@@ -20,6 +20,7 @@ interface ApplyFormProps {
   header: any;
   cdata: any;
   apply_modal?: any;
+  formId: string;
   type: string;
 }
 
@@ -34,6 +35,7 @@ const NonPaymentApplyForm: React.FC<ApplyFormProps> = ({
   header,
   cdata,
   apply_modal,
+  formId,
   type
 }) => {
   const [activeStep, setActiveStep] = useState(0);
@@ -662,6 +664,7 @@ const handleFileChange = useCallback(
                 academic_id: academic_id,
                 application_id: formData.application_id,
                 transaction_id: formData.transaction_id,
+                form_id: formId,
               },
             );
 
@@ -719,6 +722,7 @@ const handleFileChange = useCallback(
             files: fileData,
             academic_id: academic_id,
             application_id: formData.application_id,
+            form_id: formId,
           });
 
            if (response.data.success) {

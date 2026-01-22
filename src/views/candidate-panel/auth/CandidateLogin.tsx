@@ -9,6 +9,7 @@ import { useCandidateAuth } from 'src/hook/CandidateAuthContext';
 import { BsPhone, BsShield } from 'react-icons/bs';
 import { FiHelpCircle, FiMail, FiSmartphone } from 'react-icons/fi';
 import { FaMapPin, FaPhone } from 'react-icons/fa';
+import { uniq } from 'lodash';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -21,16 +22,18 @@ export const CandidateLogin: React.FC = () => {
   const otpRefs = useRef<HTMLInputElement[]>([]);
   const navigate = useNavigate();
   const { login } = useCandidateAuth();
-  const { institute_id } = useParams();
+  let { institute_id } = useParams();
   const [institute, setInstitute] = useState<any>(null);
-
+  if (!institute_id || institute_id === ':institute_id') {
+    institute_id = window.location.hostname; 
+  }
   const sendOtp = async () => {
     setLoading(true);
     try {
       const res = await fetch(`${apiUrl}/auth/check-candidates`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, unique_code: institute_id }),
       });
       const data = await res.json();
 
@@ -57,7 +60,7 @@ export const CandidateLogin: React.FC = () => {
       const res = await fetch(`${apiUrl}/auth/Candidate-verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: candidateId, otp: otpValue }),
+        body: JSON.stringify({ id: candidateId, otp: otpValue, unique_code: institute_id }),
       });
 
       const data = await res.json();
@@ -65,7 +68,7 @@ export const CandidateLogin: React.FC = () => {
       if (data.status) {
         login(data.candidate, data.auth_token);
         toast.success('Login successful');
-        navigate('/Frontend/${institute_id}/CandidatePanel/dashboard');
+        navigate(`/Frontend/${institute_id}/CandidatePanel/dashboard`);
       } else {
         toast.error('Invalid OTP');
       }

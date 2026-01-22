@@ -291,6 +291,11 @@ const ApplyEditing: React.FC = () => {
   // Handle publish button click
   const handlePublish = async () => {
     setPublishing(true);
+    if(filters.page_route === '') {
+      toast.error('Please select a form route');
+      setPublishing(false);
+      return
+    }
     try {
       const academic_id =
         user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin'
@@ -572,6 +577,7 @@ const ApplyEditing: React.FC = () => {
       </div>
     );
   }
+
 
   // Show message when no academic is selected
   if (!selectedAcademicId && (user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin')) {
@@ -952,14 +958,19 @@ const ApplyEditing: React.FC = () => {
           </Droppable>
 
           {/* Add Section Button at Bottom */}
-          <div className="mt-6 text-center">
+          {
+            filters.page_route ? <div className="mt-6 text-center">
             <Button
               onClick={addNewSection}
               className="bg-green-600 hover:bg-green-700 focus:ring-green-300"
             >
               + Add New Section
             </Button>
-          </div>
+          </div> :
+          <div className="flex items-center justify-center">
+        <h2>Please select one form Route</h2>
+      </div>
+          }
         </div>
       </div>
 

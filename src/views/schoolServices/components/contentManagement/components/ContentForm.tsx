@@ -191,7 +191,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
       newErrors.academic_id = 'Academic is required';
     if (!formData.page_name.trim()) newErrors.page_name = 'Page name is required';
     if (!formData.page_route.trim()) newErrors.page_route = 'Page route is required';
-    if (!formData.html_content.trim()) newErrors.html_content = 'Content is required';
+    if (!formData.html_content.trim() && formData.form_id === '2') newErrors.html_content = 'Content is required';
     if (!formData.form_id) newErrors.form_id = 'Type is required';
 
     const routeRegex = /^[a-z0-9_-]+$/;
@@ -247,7 +247,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
       setLoading(false);
     }
   };
-
+console.log(formData.page_route);
   return (
     <Modal show={isOpen} onClose={onClose} size="5xl">
       <ModalHeader>{editingContent ? 'Edit Content' : 'Add New Content'}</ModalHeader>
@@ -325,7 +325,9 @@ const ContentForm: React.FC<ContentFormProps> = ({
           </div>
 
           {/* Jodit Editor */}
-          <div>
+          {
+            formData.form_id === '2' && (
+              <div>
             <Label className="block mb-2">
               HTML Content <span className="text-red-500">*</span>
             </Label>
@@ -341,6 +343,8 @@ const ContentForm: React.FC<ContentFormProps> = ({
               <p className="text-red-500 text-sm mt-1">{errors.html_content}</p>
             )}
           </div>
+            )
+          }
         </form>
       </ModalBody>
 
