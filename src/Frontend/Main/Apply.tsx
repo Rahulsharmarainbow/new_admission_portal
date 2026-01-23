@@ -54,7 +54,7 @@ const Apply = () => {
   if (!institute_id || institute_id === ':institute_id') {
     institute_id = window.location.hostname; 
   }
-console.log(formId);
+console.log(form_route);
   useEffect(() => {
     const fetchApplyData = async () => {
       try {
