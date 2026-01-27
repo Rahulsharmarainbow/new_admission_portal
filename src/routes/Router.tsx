@@ -81,6 +81,7 @@ import ErrorTable from 'src/views/errorLog/ErrorTable';
 import { CandidateLogin } from 'src/views/candidate-panel/auth/CandidateLogin';
 import { CandidateDashboard } from 'src/views/candidate-panel/CandidateDashboard';
 import CandidateApplicationEditPage from 'src/views/candidate-panel/applicationEdit/CandidateApplicationEditPage';
+import AcademicBannersTable from 'src/views/frontendBannerPage/AcademicBannersTable';
 
 
 /* ***Layouts**** */
@@ -189,6 +190,7 @@ const MainRoutes = [
       { path: '/SuperAdmin/career-applications/edit/:applicationId', element: <ApplicationEditPage/> },
       { path: '/SuperAdmin/application-details/:applicationId', element: <ApplicationDetailsPage/> },
       { path: '/SuperAdmin/data-manager/export-configuration', element: <ExportConfig/> },
+      { path: '/SuperAdmin/frontend-editing/banner', element: <AcademicBannersTable/> },
       { path: '*', element: <Navigate to="/auth/404" /> },
       
     ],
@@ -257,6 +259,7 @@ const MainRoutes = [
       { path: 'application-details/:applicationId', element: <ApplicationDetailsPage/> },
        { path: 'notifications', element: <NotificationsPage/> },
        { path: 'data-manager/export-configuration', element: <ExportConfig/> },
+       { path: '/frontend-editing/banner', element: <AcademicBannersTable/> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
@@ -323,6 +326,7 @@ const MainRoutes = [
       { path: 'career-applications/edit/:applicationId', element: <ApplicationEditPage/> },
       { path: 'application-details/:applicationId', element: <ApplicationDetailsPage/> },
        { path: 'notifications', element: <NotificationsPage/> },
+       { path: '/frontend-editing/banner', element: <AcademicBannersTable/> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },

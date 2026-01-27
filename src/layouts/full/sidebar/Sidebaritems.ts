@@ -179,7 +179,13 @@ const SidebarContent: Record<number, MenuItem[]> = {
               id: uniqueId(),
               url: '/SuperAdmin/frontend-editing/career',
               isPro: false,
-            },        
+            },    
+             {
+              name: 'Banner Page',
+              id: uniqueId(),
+              url: '/SuperAdmin/frontend-editing/banner',
+              isPro: false,
+            },       
           ],
         },
 
