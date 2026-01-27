@@ -448,6 +448,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               url: '/SuperAdmin/frontend-editing/career',
               isPro: false,
             }, 
+            {
+              name: 'Banner Page',
+              id: uniqueId(),
+              url: '/SupportAdmin/frontend-editing/banner',
+              isPro: false,
+            },    
           ],
         },
         {
@@ -701,6 +707,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               url: '/CustomerAdmin/frontend-editing/home',
               isPro: false,
             }, 
+            {
+              name: 'Banner Page',
+              id: uniqueId(),
+              url: '/CustomerAdmin/frontend-editing/banner',
+              isPro: false,
+            },    
           ],
         },
             {
