@@ -1,6 +1,6 @@
 // components/candidate/CandidateDashboard.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import { Button, Card, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Modal, Spinner, ModalHeader, ModalBody } from 'flowbite-react';
 import { 
   HiDocumentText, 
@@ -11,7 +11,8 @@ import {
   HiRefresh,
   HiExclamationCircle,
   HiCheckCircle,
-  HiXCircle
+  HiXCircle,
+  HiDocumentDownload
 } from 'react-icons/hi';
 import { toast } from 'react-hot-toast';
 import { useCandidateAuth } from 'src/hook/CandidateAuthContext';
@@ -112,6 +113,7 @@ export const CandidateDashboard: React.FC = () => {
     total_paid_amount: 0
   });
   const [applications, setApplications] = useState<Application[]>([]);
+  const[baseUrl,setBaseUrl] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -123,6 +125,8 @@ export const CandidateDashboard: React.FC = () => {
   const [instituteData, setInstituteData] = useState<InstituteData>({});
   const [credentialData, setCredentialData] = useState({});
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [downloadingReceiptId, setDownloadingReceiptId] = useState(null);
+
 
   const rowsPerPage = 10;
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -200,6 +204,7 @@ export const CandidateDashboard: React.FC = () => {
       if (data.status) {
         setStats(data.dashboard_counts);
         setApplications(data.applications_list);
+        setBaseUrl(data.baseUrl);
         setTotalApplications(data.total_applications);
         setCurrentPage(page);
         setCredentialData(data.credentials);
@@ -241,7 +246,7 @@ export const CandidateDashboard: React.FC = () => {
   const handlePayment = useCallback(async () => {
     if (!selectedApplication || !paymentData) return;
 
-    setPaymentLoading(true);
+    
 
     try {
       const paymentAmount = Math.round(paymentData.total_payable_fee * 100); // Convert to paise
@@ -268,6 +273,7 @@ export const CandidateDashboard: React.FC = () => {
         description: `Payment for Application ${selectedApplication.application_id}`,
         order_id: order.id,
         handler: async (paymentResponse: any) => {
+          setPaymentLoading(true);
           try {
             // Verify payment on server
             const verifyResponse = await axios.post(
@@ -296,12 +302,15 @@ export const CandidateDashboard: React.FC = () => {
                 fetchDashboardData(currentPage, true);
                 setShowPaymentModal(false);
                 setPaymentSuccess(false);
-              }, 2000);
+                setPaymentLoading(false);
+              }, 1000);
             } else {
               toast.error('Payment verification failed');
+              setPaymentLoading(false);
             }
           } catch (error) {
             console.error('Payment verification failed:', error);
+            setPaymentLoading(false);
           }
         },
         prefill: {
@@ -320,6 +329,7 @@ export const CandidateDashboard: React.FC = () => {
           ondismiss: () => {
             console.log('Payment cancelled by user');
             setPaymentLoading(false);
+            
             toast('Payment cancelled', { icon: '⚠️' });
           },
         },
@@ -372,6 +382,7 @@ export const CandidateDashboard: React.FC = () => {
   }, [selectedApplication, paymentData, candidateUser, candidateToken, apiUrl]);
 
   const initiatePayment = async (application: Application) => {
+    console.log(application);
     setSelectedApplication(application);
     setPaymentSuccess(false);
     
@@ -385,6 +396,7 @@ export const CandidateDashboard: React.FC = () => {
   };
 
   const handlePayNowClick = async () => {
+    // setShowPaymentModal(false);
     if (credentialData.payment_type === 1) {
       await handlePayment();
     } else if (credentialData.payment_type === 2) {
@@ -396,11 +408,10 @@ export const CandidateDashboard: React.FC = () => {
 
 useEffect(() => {
   if (!candidateToken) {
-    navigate(
-      institute_id
-        ? `/Frontend/${institute_id}/CandidatePanel/login`
-        : `/Frontend/CandidatePanel/login`
-    );
+    // window.location.href  = baseUrl+"/CandidatePanel/login";
+    const currentPath = window.location.pathname;
+    const loginPath = currentPath.replace('/dashboard', '/login');
+    navigate(loginPath);
     return; 
   }
 
@@ -410,16 +421,16 @@ useEffect(() => {
 
 const handleLogout = () => {
   logout();
-
-  navigate(
-    institute_id
-      ? `/Frontend/${institute_id}/CandidatePanel/login`
-      : `/Frontend/CandidatePanel/login`
-  );
+   const currentPath = window.location.pathname;
+    const loginPath = currentPath.replace('/dashboard', '/login');
+    navigate(loginPath);
+    return; 
 };
 
   const handleEditApplication = (applicationId: number) => {
-    navigate(`/Frontend/${institute_id}/CandidatePanel/edit-application/${applicationId}`);
+    // console.log(`${baseUrl}/CandidatePanel/edit-application/${applicationId}`);return false;
+      navigate(`/${baseUrl}/CandidatePanel/edit-application/${applicationId}`, { replace: true });
+
   };
 
   const handleRefresh = () => {
@@ -445,6 +456,51 @@ const handleLogout = () => {
   const getPaymentStatusText = (status: number) => {
     return status === 1 ? 'Paid' : 'Initialized';
   };
+
+  const handleDownloadReceipt = async (application_id: string) => {
+      setDownloadingReceiptId(application_id);
+        try {
+          const response = await fetch(`${apiUrl}/Candidates/download-receipt`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${candidateToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ application_id })
+          });
+          const data = await response.json();
+          if (data && data.pdf && data.filename) {
+            const { pdf, filename } = data;
+            const binaryString = window.atob(pdf);
+            const bytes = new Uint8Array(binaryString.length);
+            
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            
+            const blob = new Blob([bytes], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            const downloadFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
+            link.download = downloadFilename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          } else {
+            throw new Error('Invalid response format');
+          }
+        } catch (error) {
+          
+          console.error('Receipt download failed:', error);
+          toast.error('Receipt download failed. Please try again.');
+        }
+        finally {
+          setDownloadingReceiptId(null);
+        }
+      };
 
   const getPaymentStatusColor = (status: number) => {
     return status === 1 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
@@ -544,6 +600,7 @@ const handleLogout = () => {
                     <TableHead>
                       <TableHeadCell>S.No</TableHeadCell>
                       <TableHeadCell>Application ID</TableHeadCell>
+                      <TableHeadCell>Name</TableHeadCell>
                       <TableHeadCell>Form Name</TableHeadCell>
                       <TableHeadCell>Payment Status</TableHeadCell>
                       <TableHeadCell>Applied At</TableHeadCell>
@@ -556,6 +613,7 @@ const handleLogout = () => {
                           <TableCell className="font-medium text-blue-600">
                             {app.application_id}
                           </TableCell>
+                          <TableCell>{app.applicant_name}</TableCell>
                           <TableCell>{app.form_name}</TableCell>
                           <TableCell>
                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getPaymentStatusColor(app.payment_status)}`}>
@@ -566,14 +624,13 @@ const handleLogout = () => {
                           <TableCell>
                             {app.payment_status === 0 ? (
                               <div className="flex gap-2">
-                                <Button
-                                  size="xs"
-                                  color="gray"
-                                  onClick={() => handleEditApplication(app.application_id)}
+                               <Link
+                                  to={`${baseUrl}/CandidatePanel/edit-application/${app.application_id}`}
+                                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                                 >
                                   <HiPencil className="h-4 w-4 mr-1" />
                                   Edit
-                                </Button>
+                                </Link>
                                 <Button
                                   size="xs"
                                   color="blue"
@@ -588,7 +645,27 @@ const handleLogout = () => {
                                 </Button>
                               </div>
                             ) : (
-                              <span className="text-gray-500 text-sm">No actions available</span>
+                               <div className="flex gap-2">
+                                <Button
+                                  size="xs"
+                                  color="gray"
+                                  onClick={() => handleDownloadReceipt(app.id)}
+                                  disabled={downloadingReceiptId === app.id}
+                                  className="inline-flex items-center gap-1"
+                                >
+                                   {downloadingReceiptId == app.id ? (
+                                      <>
+                                        <Spinner size="sm" className="mr-1" />
+                                        Downloading...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <HiDocumentDownload className="h-4 w-4" />
+                                        Download PDF
+                                      </>
+                                    )}
+                                </Button>
+                              </div>
                             )}
                           </TableCell>
                         </TableRow>
@@ -629,7 +706,27 @@ const handleLogout = () => {
         </div>
       </main>
 
-      {/* Payment Modal */}
+      <Modal
+  show={paymentLoading}
+  size="md"
+  popup
+  onClose={() => {}}
+  dismissible={false}
+>
+  
+  <ModalBody>
+    <div className="text-center">
+      <Spinner size="xl" className="mx-auto mb-4" />
+      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+        Processing Payment
+      </h3>
+      <p className="text-gray-500 dark:text-gray-400 mt-2">
+        Please wait while we redirect you to the payment gateway...
+      </p>
+    </div>
+  </ModalBody>
+</Modal>
+
       <Modal
         show={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}

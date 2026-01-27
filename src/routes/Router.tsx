@@ -413,22 +413,22 @@ const MainRoutes = [
         </ProtectedRoute>
       )
     },
-    {
-      path: '/Frontend/:institute_id/:form_route',
-      element: (
-        <ProtectedRoute>
-          <Apply />
-        </ProtectedRoute>
-      )
-    },
+    // {
+    //   path: '/Frontend/:institute_id/:form_route',
+    //   element: (
+    //     <ProtectedRoute>
+    //       <Apply />
+    //     </ProtectedRoute>
+    //   )
+    // },
 
     
     {
       path: '/Frontend/:institute_id/:page_route',
       element: (
-        <ProtectedRoute>
+        // <ProtectedRoute>
           <TypePage />
-        </ProtectedRoute>
+        // </ProtectedRoute>
       )
     },
     {
@@ -482,8 +482,7 @@ const MainRoutes = [
 
 ];
 
-export const CustomDomainRoutes = [
-  {
+export const CustomDomainRoutes = [  {
     path: "/",
     element: (
       // <ProtectedRoute>
@@ -492,23 +491,23 @@ export const CustomDomainRoutes = [
     ),
     children: [
       { path: "/", element: <Home /> },
-      { path: "/:form_route", element: <Apply /> },
+      
       { path: "/:page_route", element: <TypePage /> },
       { path: "/rankcard", element: <Rankcard /> },
       { path: "/Hall-ticket", element: <HallTicket /> },
       { path: "/Form-view", element: <FormView /> },
       { path: "/Confirmation", element: <Confirmation /> },
-      { path: '/job_details/:jobId', element: <ApplyJobPage/> }, 
       { path: '/CandidatePanel/login', element: <CandidateLogin /> },
       { path: '/CandidatePanel/dashboard', element: <CandidateDashboard /> },
       { path: '/CandidatePanel/edit-application/:id', element: <CandidateApplicationEditPage /> },
+      { path: '/job_details/:jobId', element: <ApplyJobPage/> }, 
       { path: "*", element: <Navigate to="/" /> },
     ],
   },
 ];
 
 
-const MAIN_DOMAINS = ["localhost", "admissionportalrevamp.testingscrew.com","starenroll.co.in"];
+const MAIN_DOMAINS = ["localhost","admissionportalrevamp.testingscrew.com","starenroll.co.in"];
 
 // Get current hostname
 const currentDomain = window.location.hostname;

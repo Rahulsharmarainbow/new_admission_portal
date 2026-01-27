@@ -182,7 +182,7 @@ export const ApplyJobPage: React.FC = () => {
       }
       
       body {
-        font-family: var(--font-family);
+        font-family: var(--font-family) !important;
       }
     `;
     document.head.appendChild(style);
@@ -1133,15 +1133,32 @@ export const ApplyJobPage: React.FC = () => {
                   <h2 className="text-xl font-bold text-slate-900 mb-4 pb-3 border-b border-slate-300">
                     Job Description
                   </h2>
-                  <div
-                    className="prose prose-slate max-w-none font-[Poppins] 
-    [&_*]:!font-[Poppins]
-    [&_ul]:list-disc [&_ul]:!ml-6 [&_ul]:mb-4 
-    [&_ol]:list-decimal [&_ol]:!ml-6 [&_ol]:mb-4 
-    [&_li]:mb-2 [&_p]:mb-4"
-                    dangerouslySetInnerHTML={{ __html: jobDetails.description }}
-                  />
-                </div>
+                 <div className="prose prose-slate max-w-none">
+  <div
+    className="job-description-content"
+    style={{ 
+      fontFamily: jobDetails.font_family || 'Poppins, sans-serif'
+    }}
+    dangerouslySetInnerHTML={{ 
+      __html: jobDetails.description 
+    }}
+  />
+  <style>{`
+    .job-description-content,
+    .job-description-content *,
+    .job-description-content p,
+    .job-description-content span,
+    .job-description-content div {
+      font-family: ${jobDetails.font_family || 'Poppins, sans-serif'} !important;
+    }
+    .job-description-content ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+    .job-description-content ol { list-style-type: decimal; margin-left: 1.5rem; margin-bottom: 1rem; }
+    .job-description-content li { margin-bottom: 0.5rem;margin-left:1rem; }
+    .job-description-content p { margin-bottom: 1rem; }
+  `}</style>
+</div>
+                  </div>
+                
 
                 {/* Requirements */}
                 {jobDetails.requirements && jobDetails.requirements.length > 0 && (
@@ -1222,7 +1239,9 @@ export const ApplyJobPage: React.FC = () => {
                         htmlFor="terms"
                         className="text-sm text-slate-700 cursor-pointer flex-1"
                       >
-                        <div dangerouslySetInnerHTML={{ __html: jobDetails.terms_consent_text }} />
+                        <div
+                        
+                         dangerouslySetInnerHTML={{ __html: jobDetails.terms_consent_text }} />
                       </label>
                     </div>
                   )}

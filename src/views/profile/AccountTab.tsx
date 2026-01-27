@@ -342,7 +342,7 @@ const AccountTab = () => {
         setNewPassword('');
         setConfirmPassword('');
       } else {
-        toast.error('Failed to update profile');
+        toast.error(response.data.message);
       }
     } catch (error) {
       console.error('Error updating profile:', error);

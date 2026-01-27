@@ -43,7 +43,7 @@ const CustomToaster = () => {
 
               <div className="flex flex-col flex-1 min-w-0">
                 <div className="text-sm font-semibold mb-1">
-                  {t.type === "success" ? "Success" : "Error"}
+                  {t.type === "success" ? "Success" : "Warning"}
                 </div>
                 <div className="text-sm break-words">
                   {t.message}

@@ -472,28 +472,39 @@ const CareerCardSection: React.FC<CareerCardSectionProps> = ({
                     </div>
 
                     {/* Font Family */}
-                    <div>
-                      <Label htmlFor="fontFamily" className="block mb-2">
-                        Font Family
-                      </Label>
-                      <Select
-                        id="fontFamily"
-                        value={fontFamily}
-                        onChange={(e) => setFontFamily(e.target.value)}
-                      >
-                        <option value="">Select a font family</option>
-                        {FONT_FAMILIES.map((font) => (
-                          <option key={font.value} value={font.value}>
-                            {font.label}
-                          </option>
-                        ))}
-                      </Select>
-                      {fontFamily && (
-                        <p className="mt-1 text-sm text-gray-500">
-                          Selected font: {fontFamily}
-                        </p>
-                      )}
-                    </div>
+                   <div className="space-y-2">
+  <div className="flex items-center justify-between">
+    <label htmlFor="fontInput" className="font-medium text-gray-900">
+      Font Family
+    </label>
+    {fontFamily && (
+      <button
+        type="button"
+        onClick={() => setFontFamily('')}
+        className="text-sm text-red-600 hover:text-red-800"
+      >
+        Clear
+      </button>
+    )}
+  </div>
+  
+  <input
+    id="fontInput"
+    type="text"
+    value={fontFamily}
+    onChange={(e) => setFontFamily(e.target.value)}
+    placeholder="Paste or type font family (e.g., 'Segoe UI', 'Montserrat', 'Open Sans')"
+    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white text-gray-900 hover:border-gray-400 placeholder-gray-500"
+  />
+  
+  {fontFamily && (
+    <div className="pt-2">
+      <p className="text-sm text-gray-600">
+        Using font: <code className="px-2 py-1 bg-gray-100 rounded font-mono">{fontFamily}</code>
+      </p>
+    </div>
+  )}
+</div>
                   </div>
 
                   {/* Color Pickers */}

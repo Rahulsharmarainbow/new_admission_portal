@@ -147,7 +147,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
   const generatePageRoute = (pageName: string) =>
     pageName
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^_|_$)/g, '');
 
   const handlePageNameChange = useCallback(

@@ -305,6 +305,10 @@ const fetchJobs = useCallback(
         if (v.length) formattedFilters[k] = v.map(String);
       });
 
+      if (!institute_id || institute_id === ':institute_id') {
+        institute_id = window.location.hostname;
+      }
+
       const response = await axios.post(
         `${apiUrl}/PublicCareer/get-career-jobs`,
         {
@@ -357,7 +361,7 @@ const scrollToFirstJob = useCallback(() => {
 useEffect(() => {
   if (jobs.length === 0) return;
   scrollToFirstJob();
-}, [jobs, scrollToFirstJob]);
+}, [activeFilters]);
 
 
 // Handle filter change - COMPLETE VERSION
@@ -764,11 +768,12 @@ const fetchFilteredJobsDirect = useCallback(async () => {
 
   // Banner styles
   const bannerStyles = {
-    background: careerData?.banner?.banner_color 
-      ? careerData.banner.banner_color.includes('gradient')
-        ? careerData.banner.banner_color
-        : `linear-gradient(135deg, ${careerData.banner.banner_color} 0%, ${careerData.banner.banner_color}99 50%, ${careerData.banner.banner_color}66 100%)`
-      : 'linear-gradient(135deg, #f97316 0%, #fb923c 50%, #fbbf24 100%)'
+    // background: careerData?.banner?.banner_color 
+    //   ? careerData.banner.banner_color.includes('gradient')
+    //     ? careerData.banner.banner_color
+    //     : `linear-gradient(135deg, ${careerData.banner.banner_color} 0%, ${careerData.banner.banner_color}99 50%, ${careerData.banner.banner_color}66 100%)`
+    //   : 'linear-gradient(135deg, #f97316 0%, #fb923c 50%, #fbbf24 100%)'
+    background: 'var(--theme-color)'
   };
 
   const bannerTextStyle = {
@@ -777,11 +782,13 @@ const fetchFilteredJobsDirect = useCallback(async () => {
 
   // Search section styles
   const searchSectionStyles = {
-    background: careerData?.banner?.search_color 
-      ? careerData.banner.search_color.includes('gradient')
-        ? careerData.banner.search_color
-        : `linear-gradient(135deg, ${careerData.banner.search_color} 0%, ${careerData.banner.search_color}99 50%, ${careerData.banner.search_color}66 100%)`
-      : 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #1e40af 100%)'
+    // background: careerData?.banner?.search_color 
+    //   ? careerData.banner.search_color.includes('gradient')
+    //     ? careerData.banner.search_color
+    //     : `linear-gradient(135deg, ${careerData.banner.search_color} 0%, ${careerData.banner.search_color}99 50%, ${careerData.banner.search_color}66 100%)`
+    //   : 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #1e40af 100%)'
+
+     background: 'var(--theme-color)'
   };
 
   const searchTextStyle = {
@@ -820,15 +827,43 @@ const fetchFilteredJobsDirect = useCallback(async () => {
                 {careerData?.banner?.title || 'Build Your Career With Us'}
               </h2>
 
-              <div className="text-sm md:text-base max-w-xl space-y-3">
-                <div 
-                  className="prose prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ 
-                    __html: careerData?.banner?.long_description || ` `
-                  }}
-                  style={bannerTextStyle}
-                />
-              </div>
+             
+
+
+            <div className="text-sm md:text-base max-w-xl space-y-3">
+              <div 
+  className="prose prose-invert max-w-none"
+  dangerouslySetInnerHTML={{ 
+    __html: (careerData?.banner?.long_description || ' ')
+      .replace(/\[heart_icon\]/g, `
+        <span style="
+          display: inline-block;
+          vertical-align: middle;
+          margin: 0 4px;
+          animation: heartPulse 1.5s ease-in-out infinite;
+        ">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+          </svg>
+        </span>
+      `)
+  }}
+  style={bannerTextStyle}
+/>
+
+<style>{`
+  @keyframes heartPulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.8;
+    }
+  }
+`}</style>
+            </div>
             </div>
 
             {/* RIGHT IMAGE/VIDEO BLOCK */}

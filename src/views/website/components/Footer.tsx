@@ -101,7 +101,8 @@ const Footer: React.FC<FooterProps> = ({
                     <div className="relative">
                       <div 
                         className="absolute -inset-2 rounded-2xl opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"
-                        style={{ background: `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}99 50%, ${themeColor}66 100%)` }}
+                        style2={{ background: `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}99 50%, ${themeColor}66 100%)` }}
+                        style={{ background: 'var(--theme-color)' }}
                       ></div>
                       {logoUrl ? (
                         <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg overflow-hidden relative z-10 border-2 border-slate-100">
@@ -120,7 +121,8 @@ const Footer: React.FC<FooterProps> = ({
                         <div 
                           className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg relative z-10 group-hover:scale-105 transition-transform duration-300"
                           style={{ 
-                            background: `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}99 50%, ${themeColor}66 100%)` 
+                            // background: `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}99 50%, ${themeColor}66 100%)` 
+                            background: 'var(--theme-color)'
                           }}
                         >
                           <span className="text-white font-bold text-xl">
@@ -361,7 +363,8 @@ const Footer: React.FC<FooterProps> = ({
         className="py-4"
         style={{ 
           backgroundColor: themeColor,
-          background: `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}99 50%, ${themeColor}66 100%)` 
+          // background: `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}99 50%, ${themeColor}66 100%)` 
+          background: 'var(--theme-color)'
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

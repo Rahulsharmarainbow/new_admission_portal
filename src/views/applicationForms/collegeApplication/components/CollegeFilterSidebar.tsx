@@ -16,6 +16,7 @@ interface Filters {
   academic_id: string;
   year: string;
   degree: string;
+  form_id:number;
   paymentStatus: string;
   applicationNumber: string;
   transactions_id: string;
@@ -281,6 +282,29 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
             </div>
           )}
 
+           {/* Degree Dropdown from filter options */}
+          {filterOptions?.admission_pages && filterOptions.admission_pages.length > 0 && (
+            <div>
+              <Label htmlFor="form_id" className="block mb-2 text-sm font-medium text-gray-700">
+                Form Name
+              </Label>
+              <Select
+                options={filterOptions.admission_pages.map(degree => ({
+                  value: degree.id?.toString(),
+                  label: degree.name,
+                }))}
+                value={filterOptions.admission_pages
+                  .map(degree => ({ value: degree.id?.toString(), label: degree.name }))
+                  .find(option => option.value === filters.form_id)}
+                onChange={(option) => handleSelectChange('form_id', option)}
+                placeholder="Form Name..."
+                isClearable
+                className="react-select-container"
+                classNamePrefix="react-select"
+              />
+            </div>
+          )}
+
           {/* Year Dropdown - Updated with Dynamic Options */}
           <div>
             <Label htmlFor="year" className="block mb-2 text-sm font-medium text-gray-700">
@@ -319,6 +343,9 @@ const CollegeFilterSidebar: React.FC<CollegeFilterSidebarProps> = ({
               />
             </div>
           )}
+
+
+         
 
           {/* Date Range */}
           <div className="grid grid-cols-2 gap-4">

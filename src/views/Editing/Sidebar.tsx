@@ -439,6 +439,9 @@ const formatFieldName = (input: string): string => {
 
             {renderValidationTypeDropdown(field)}
 
+            
+
+
             <div>
               <Label htmlFor="required">
                 Required?
@@ -743,6 +746,33 @@ const formatFieldName = (input: string): string => {
             </div>
 
             {renderWidthDropdown(field)}
+
+
+             <div>
+              <Label htmlFor="label">
+                Allowed Types
+              </Label>
+              <TextInput
+                id="label"
+                type="text"
+                value={field.allowed_type || ''}
+                onChange={(e) => handleChange('allowed_type', e.target.value)}
+                placeholder="Enter field label"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="label">
+                Max length In MB
+              </Label>
+              <TextInput
+                id="label"
+                type="text"
+                value={field.max_length  || ''}
+                onChange={(e) => handleChange('max_length', e.target.value)}
+                placeholder="Enter field label"
+              />
+            </div>
 
             <div>
               <Label htmlFor="content">

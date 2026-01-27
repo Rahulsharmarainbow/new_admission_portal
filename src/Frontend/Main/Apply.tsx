@@ -39,7 +39,7 @@ interface ApplyData {
   academic_id?: any; // Added property to fix error
 }
 
-const Apply = () => {
+const Apply = (page_route) => {
   let { institute_id, form_route } = useParams();
   const navigate = useNavigate();
   const [applyData, setApplyData] = useState<ApplyData | null>(null);
@@ -54,7 +54,7 @@ const Apply = () => {
   if (!institute_id || institute_id === ':institute_id') {
     institute_id = window.location.hostname; 
   }
-console.log(form_route);
+console.log(page_route);
   useEffect(() => {
     const fetchApplyData = async () => {
       try {
@@ -62,7 +62,7 @@ console.log(form_route);
           `${apiUrl}/Public/Get-apply-form`,
           {
             unique_code: institute_id,
-            form_route: form_route
+            form_route: page_route.page_route
           },
           {
             headers: {

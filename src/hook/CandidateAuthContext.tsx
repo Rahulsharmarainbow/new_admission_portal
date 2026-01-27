@@ -10,9 +10,10 @@ type CandidateUser = {
 type AuthContextType = {
   candidateUser: CandidateUser | null;
   candidateToken: string | null;
-  login: (user: CandidateUser, token: string) => void;
+  login: (user: CandidateUser, token: string,institudeId:string) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  InstitudeId:string;
 };
 
 const CandidateAuthContext = createContext<AuthContextType | null>(null);
@@ -21,25 +22,35 @@ export const CandidateAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [cookies, setCookie, removeCookie] = useCookies([
     'candidateUser',
     'candidateToken',
+    'InstitudeId'
   ]);
 
   const [candidateUser, setCandidateUser] = useState<CandidateUser | null>(null);
   const [candidateToken, setCandidateToken] = useState<string | null>(null);
+  const [InstitudeId, setInstitudeId] = useState<string | null>(null);
 
   // 🔄 On refresh – restore from cookies
   useEffect(() => {
     if (cookies.candidateUser && cookies.candidateToken) {
       setCandidateUser(cookies.candidateUser);
       setCandidateToken(cookies.candidateToken);
+      if (cookies.InstitudeId) {
+        setInstitudeId(cookies.InstitudeId);
+      }
     }
   }, [cookies]);
 
-  const login = (user: CandidateUser, token: string) => {
+  const login = (user: CandidateUser, token: string,InstitudeId:string) => {
     setCandidateUser(user);
     setCandidateToken(token);
+    setInstitudeId(InstitudeId);
 
     // 🍪 Store in cookies
     setCookie('candidateUser', user, {
+      path: '/',
+      sameSite: 'lax',
+    });
+    setCookie('InstitudeId', InstitudeId, {
       path: '/',
       sameSite: 'lax',
     });
@@ -66,6 +77,7 @@ export const CandidateAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         login,
         logout,
         isAuthenticated: !!candidateToken,
+        InstitudeId
       }}
     >
       {children}

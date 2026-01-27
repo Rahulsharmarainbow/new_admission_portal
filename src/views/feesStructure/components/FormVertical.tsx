@@ -124,6 +124,35 @@ const FormVertical = () => {
       : [];
     setCaste(selectedValues);
   };
+ const fetchRoutes = async (academicId) => {
+       try {
+         const res = await axios.post(
+           `${apiUrl}/SuperAdmin/Dropdown/get-form-route`,
+           { academic_id: academicId },
+           {
+             headers: {
+               Authorization: `Bearer ${user?.token}`,
+               "Content-Type": "application/json",
+             },
+           }
+         );
+ 
+         if (res.data?.data && Array.isArray(res.data.data)) {
+           const list = res.data.data.map((item: any) => ({
+             value: item.id,
+             label: item.page_name,
+           }));
+           setOptions(list);
+         } else {
+           setOptions([]);
+         }
+       } catch (error) {
+         console.error("Failed to fetch routes", error);
+         setOptions([]);
+       } finally {
+         setLoading(false);
+       }
+     };
 
   const handleAcademicSelect = (selectedId: string) => {
     // const selectedId = event.target.value;
@@ -314,15 +343,25 @@ const FormVertical = () => {
     <div>
       {/* Select Academic Section */}
       <Card className="mb-6">
-        <div className="w-[40%]">
-          <AcademicDropdown
-          value={selectedAcademic}
-          onChange={handleAcademicSelect}
-          label="First Select Academic"
-          isRequired
-        />
-        </div>
-      </Card>
+  <div className="flex flex-row gap-4">
+    <div className="flex-1">
+      <AcademicDropdown
+        value={selectedAcademic}
+        onChange={handleAcademicSelect}
+        label="First Select Academic"
+        isRequired
+      />
+    </div>
+    <div className="flex-1">
+      <AcademicDropdown
+        value={selectedAcademic}
+        onChange={handleAcademicSelect}
+        label="Select Page"
+        isRequired
+      />
+    </div>
+  </div>
+</Card>
 
       {/* Conditional Forms */}
       {!formError && formVisible && (
@@ -429,6 +468,19 @@ const FormVertical = () => {
               <h2 className="text-xl font-semibold mb-4">Other Settings</h2>
               <form onSubmit={MainhandleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+
+                   <div className="md:col-span-4">
+                    <Label htmlFor="extendFee">Platform Fee *</Label>
+                    <TextInput
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={extendFee}
+                      onChange={handleInputChange(setExtendFee)}
+                      required
+                    />
+                  </div>
+
                   <div className="md:col-span-4">
                     <Label htmlFor="actualFee">Fee for Non-Special Castes *</Label>
                     <TextInput

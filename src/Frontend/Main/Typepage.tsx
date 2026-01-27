@@ -52,9 +52,11 @@ const TypePage = () => {
 
   // ✅ Show loader first
   if (loading) return <Loader />;
-
+  if(pageData.data.type==1){
+    return <Apply page_route={page_route} />;
+  }
   // ✅ Handle special route
-  if (page_route === "apply") return <Apply />;
+  
 
   // ✅ Not found case
   if (!pageData) {

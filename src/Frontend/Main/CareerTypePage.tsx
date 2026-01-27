@@ -18,35 +18,7 @@ const CareerTypePage = ({ pageData }: any) => {
       : '59, 130, 246'; // default blue
   };
 
-  // Helper function to check if font is a Google Font
-  const isGoogleFont = (fontFamily: string): boolean => {
-    const systemFonts = [
-      'Arial',
-      'Helvetica',
-      'Georgia',
-      'Times',
-      'Verdana',
-      'Tahoma',
-      'Trebuchet MS',
-      'Courier New',
-      'Comic Sans MS',
-      'system-ui',
-      '-apple-system',
-      'BlinkMacSystemFont',
-      'Segoe UI',
-      'Roboto',
-      'sans-serif',
-    ];
-    return !systemFonts.some((font) => fontFamily.toLowerCase().includes(font.toLowerCase()));
-  };
-
-  // Google Font name format karna
-  const formatGoogleFontName = (fontFamily: string): string => {
-    // Remove quotes and extra spaces
-    const name = fontFamily.replace(/['"]/g, '').trim();
-    // Replace spaces with +
-    return name.replace(/\s+/g, '+');
-  };
+ 
 
   // Apply theme + font to entire page
   useEffect(() => {
@@ -71,8 +43,8 @@ const CareerTypePage = ({ pageData }: any) => {
       document.body.style.fontFamily = formattedFont;
 
       // Load Google Font if needed
-      if (isGoogleFont(formattedFont)) {
-        const fontName = formatGoogleFontName(formattedFont);
+      // if (isGoogleFont(formattedFont)) {
+        const fontName =formattedFont;
         const id = `google-font-${fontName}`;
 
         if (!document.getElementById(id)) {
@@ -82,7 +54,7 @@ const CareerTypePage = ({ pageData }: any) => {
           link.href = `https://fonts.googleapis.com/css2?family=${fontName}:wght@300;400;500;600;700&display=swap`;
           document.head.appendChild(link);
         }
-      }
+      // }
     }
 
     // Cleanup on unmount
@@ -170,21 +142,22 @@ const CareerTypePage = ({ pageData }: any) => {
       <main className="flex-grow w-full px-2 sm:px-4 md:px-6 lg:px-8 py-6 md:py-10 flex justify-center">
         <div className="w-full max-w-7xl bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 lg:p-10 overflow-hidden">
           <div
+          style={{textAlign:"justify"}}
             className="
-    cms-content
-    prose
-    prose-sm
-    sm:prose-base
-    lg:prose-lg
-    max-w-none
-    text-gray-700
-    leading-relaxed
-  "
-            dangerouslySetInnerHTML={{
-              __html: cleanHTML(pageData?.page?.content),
-            }}
-          />
-        </div>
+              cms-content
+              prose
+              prose-sm
+              sm:prose-base
+              lg:prose-lg
+              max-w-none
+              text-gray-700
+              leading-relaxed
+            "
+                      dangerouslySetInnerHTML={{
+                        __html: cleanHTML(pageData?.data?.content),
+                      }}
+                    />
+          </div>
       </main>
 
       {/* FOOTER */}
