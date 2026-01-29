@@ -227,6 +227,7 @@ export const CandidateDashboard: React.FC = () => {
         academic_id: candidateUser?.academic_id,
         class_id: application.class_id,
         location_id: application.location_id,
+        formId:application.form_id
       });
 
       if (response.data?.total_payable_fee) {
@@ -275,9 +276,12 @@ export const CandidateDashboard: React.FC = () => {
         handler: async (paymentResponse: any) => {
           setPaymentLoading(true);
           try {
-            // Verify payment on server
+             const apiEndpoint = order.academic_type == 1 
+          ? `${apiUrl}/frontend/school-save-final-step-data`
+          : `${apiUrl}/frontend/college-save-final-step-data`;
+
             const verifyResponse = await axios.post(
-              `${apiUrl}/frontend/college-save-final-step-data`,
+              apiEndpoint,
               {
                 razorpay_payment_id: paymentResponse.razorpay_payment_id,
                 razorpay_order_id: paymentResponse.razorpay_order_id,

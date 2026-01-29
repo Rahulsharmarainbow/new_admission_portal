@@ -67,7 +67,7 @@ const FeesManagements = ({ selectedAcademic, user, apiUrl }) => {
           }
         });
       } else {
-        toast.error(res.data.message || "Failed to load fees data");
+        console.log(res.data.message || "Failed to load fees data");
       }
     } catch (err) {
       console.error("Error fetching fees data:", err);
@@ -153,11 +153,11 @@ const FeesManagements = ({ selectedAcademic, user, apiUrl }) => {
         toast.success(res.data.message || "Fees data updated successfully!");
         fetchFeesData(); // Refresh data
       } else {
-        toast.error(res.data.message || "Failed to update fees data");
+        console.log(res.data.message || "Failed to update fees data");
       }
     } catch (err) {
       console.error("Error updating fees data:", err);
-      toast.error(err.response?.data?.message || "Error updating fees data");
+      console.log(err.response?.data?.message || "Error updating fees data");
     } finally {
       setSaving(false);
     }

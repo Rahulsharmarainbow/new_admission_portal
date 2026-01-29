@@ -13,9 +13,9 @@ export const BaseSidebarContent = () => {
   // Add extra menus based on academic_type
   const hiddenMenus = {
     // academic_type: 1 → School
-    1: ['College Services','College Applications', 'Career Management'],
-    2: ['School Services','School Applications', 'Career Management'],
-    3: ['School Services','School Applications', 'Career Management'],
+    1: ['College Services','College Applications', 'Career Management','Career Applications'],
+    2: ['School Services','School Applications', 'Career Management','Career Applications'],
+    3: ['School Services','School Applications', 'Career Management','Career Applications'],
     4: ['School Services','School Applications','College Applications','College Services','Transaction', 'Fronted Management']
   };
 

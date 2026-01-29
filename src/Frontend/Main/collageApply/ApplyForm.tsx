@@ -12,6 +12,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import { GlobalWorkerOptions } from "pdfjs-dist/build/pdf";
 import pdfWorker from "pdfjs-dist/build/pdf.worker?url";
 import PaymentForm from './PaymentForm';
+import { isEmpty } from 'lodash';
 
 GlobalWorkerOptions.workerSrc = pdfWorker;
 
@@ -52,6 +53,10 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [formOptions, setFormOptions] = useState<{ [key: string]: any[] }>({});
+  // const [emailUniquenessResults, setEmailUniquenessResults] = useState<{[key: string]: boolean}>({});
+  const emailUniquenessResultsRef = useRef({});
+
+
 
   const formRefs = useRef<{ [key: string]: any }>({});
   const validationErrors = useRef<{ [key: string]: string }>({});
@@ -124,10 +129,12 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   };
 
   const checkValidation = useCallback(
-    (name: string, type: string, validation: string, validation_message: string) => {
+    (name: string, type: string, validation: string, validation_message: string,unique_validation) => {
       if (type === 'file_button') {
         validationErrors.current[name] = '';
       } else {
+        console.log(emailUniquenessResultsRef.current[name]);
+        
         if (name === 'adharCard') {
           let aadhaarCard = '';
           let isValid = true;
@@ -151,7 +158,11 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           if (!emailRegex.test(formData[name])) {
             validationErrors.current[name] = 'Invalid email address';
-          } else {
+          } 
+          else if(unique_validation && emailUniquenessResultsRef.current[name]){
+          validationErrors.current[name] = 'Email Already Exist';
+        }
+          else {
             validationErrors.current[name] = '';
           }
         } else if (validation === 'mobile') {
@@ -173,7 +184,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   useEffect(() => {
     required_child.forEach((child) => {
       if (formData[child.name] !== undefined || child.required) {
-        checkValidation(child.name, child.type, child.validation, child.validation_message);
+        checkValidation(child.name, child.type, child.validation, child.validation_message,child.unique_validation);
       }
     });
   }, [formData, required_child]);
@@ -187,9 +198,13 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
     }
   }, [errors, activeStep]);
 
+  
+
   // Handle input change with API calls
+
+  
   const handleInputChange = useCallback(
-    (name: string, value: any, fieldConfig?: any) => {
+    (name: string, value: any, fieldConfig?: any, isUnique?: boolean) => {
       setFormData((prev) => ({
         ...prev,
         [name]: value,
@@ -201,7 +216,79 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
           [name]: '',
         }));
       }
+      if(isUnique){
+        const isValidEmail = (email) => {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return emailRegex.test(email);
+        };
 
+        // Then in your onChange handler or wherever this code is:
+        if (isValidEmail(value)) {
+          fetch(
+            `${apiUrl}/frontend/check_email_by_form_id?selectedValue=${encodeURIComponent(value)}&form_id=${formId}&academicId=${academic_id}&customerId=${cdata.c_id}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            },
+          )
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              return response.json();
+            })
+            .then((data) => {
+              console.log(data);
+              if (data.success) {
+                 setErrors((prev) => ({
+                  ...prev,
+                  [name]: '',
+                  }));
+
+                // setEmailUniquenessResults(prev => ({
+                //   ...prev,
+                //   [name]: false
+                // }));
+
+                // CORRECT: Create a new object and replace the ref
+                emailUniquenessResultsRef.current = {
+                  ...emailUniquenessResultsRef.current,
+                  [name]: false  // false = email exists
+                };
+              } else {
+                //  setEmailUniquenessResults(prev => ({
+                //   ...prev,
+                //   [name]: true
+                // }));
+
+                // CORRECT: Create a new object and replace the ref
+                emailUniquenessResultsRef.current = {
+                  ...emailUniquenessResultsRef.current,
+                  [name]: true  // false = email exists
+                };
+                setErrors((prev) => ({
+                ...prev,
+                [name]: data.message,
+                }));
+              } 
+            })
+            .catch((error) => {
+              console.error('Error fetching data from API:', error);
+              setFormOptions((prev) => ({
+                ...prev,
+                [fieldConfig.target]: [],
+              }));
+            });
+        } else {
+          // Clear the form options if email is invalid
+          setFormOptions((prev) => ({
+            ...prev,
+            [fieldConfig.target]: [],
+          }));
+        }
+      }
       if (fieldConfig?.apiurl && fieldConfig?.target) {
         fetch(
           `${apiUrl}${fieldConfig.apiurl}?selectedValue=${encodeURIComponent(
@@ -241,6 +328,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
             }));
           });
       }
+      
     },
     [errors, apiUrl, academic_id, cdata],
   );
@@ -414,10 +502,12 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   const validateStep = useCallback(
       (step: number) => {
         const newErrors: { [key: string]: string } = {};
-  
+        console.log("border2",emailUniquenessResultsRef.current);
         if (step === 0) {
           required_child.forEach((child) => {
-            if (child.type === 'file_button') {
+            console.log(child);
+             
+             if (child.type === 'file_button') {
               if (!fileData[child.name]) {
                 newErrors[child.name] = child.validation_message || `${child.label} is required`;
               }
@@ -522,17 +612,25 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
                   delete newErrors[child.name];
                 }
               } 
-               else if (child.validation === 'email') {
+              
+              else if (child.validation === 'email') {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                console.log(emailUniquenessResultsRef.current[child.name]);
                 if (!emailRegex.test(formData[child.name])) {
                   newErrors[child.name] = 'Invalid email address';
                 }
+                
+                else if(child.unique_validation==1 && emailUniquenessResultsRef.current[child.name]){
+                  console.log(emailUniquenessResultsRef.current[child.name]);
+                    newErrors[child.name] = 'Email Already Exist for this form';
+                  }
               } else if (child.validation === 'mobile') {
                 const phoneRegex = /^\d{10}$/;
                 if (!phoneRegex.test(formData[child.name])) {
                   newErrors[child.name] = 'Phone number must be 10 digits';
                 }
-              } else if (child.type === 'date' && formData[child.name]) {
+              }
+               else if (child.type === 'date' && formData[child.name]) {
                 const inputDate = new Date(formData[child.name]);
                 const today = new Date();
   
@@ -549,6 +647,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
                   }
                 }
               }
+              
               else if (!formData[child.name] && formData[child.name] !== 0) {
                 newErrors[child.name] = child.validation_message || `${child.label} is required`;
               }
@@ -717,6 +816,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
           caste_id: formData.category,
           academic_id: academic_id,
           location_id: formData.selectBelong,
+          formId:formId
         });
         console.log('payableResponse', payableResponse.data);
         if (payableResponse.data?.total_payable_fee) {

@@ -456,6 +456,21 @@ const formatFieldName = (input: string): string => {
               </Select>
             </div>
 
+
+            <div>
+              <Label htmlFor="unique_validation">
+                Unique Validation?
+              </Label>
+              <Select
+                id="unique_validation"
+                value={field.unique_validation?.toString() || '0'}
+                onChange={(e) => handleChange('unique_validation', Number(e.target.value))}
+              >
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+              </Select>
+            </div>
+
             {field.required === 1 && (
               <div>
                 <Label htmlFor="validation_message">

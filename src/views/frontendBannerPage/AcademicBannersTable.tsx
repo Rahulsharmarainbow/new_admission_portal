@@ -2300,7 +2300,7 @@ const AcademicBannersTable: React.FC = () => {
     
     // If imagePath is a relative path without starting '/'
     // Assuming the image is stored in academic_banners directory
-    return `${apiAssetsUrl}/academic_banners/${imagePath}`;
+    return `${apiAssetsUrl}/${imagePath}`;
   };
 
   return (
@@ -2449,9 +2449,7 @@ const AcademicBannersTable: React.FC = () => {
                                   className="w-16 h-10 object-cover rounded border border-gray-200 cursor-pointer"
                                   onClick={() => window.open(getImageUrl(banner.banner_image), '_blank')}
                                 />
-                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded flex items-center justify-center">
-                                  <BsEye className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                                </div>
+                               
                               </div>
                             </Tooltip>
                           ) : (

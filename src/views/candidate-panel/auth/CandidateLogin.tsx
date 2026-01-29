@@ -10,6 +10,8 @@ import { BsPhone, BsShield, BsArrowLeft, BsArrowRight } from 'react-icons/bs';
 import { FiHelpCircle, FiMail, FiSmartphone, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { FaMapPin, FaPhone, FaUniversity, FaGraduationCap, FaLaptopCode, FaUsers } from 'react-icons/fa';
 import { uniq } from 'lodash';
+const assetUrl = import.meta.env.VITE_ASSET_URL;
+
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -20,6 +22,7 @@ export const CandidateLogin: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [candidateId, setCandidateId] = useState<number | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [carouselSlides,setCarouselSlides] = useState([]);
   const otpRefs = useRef<HTMLInputElement[]>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -37,13 +40,7 @@ export const CandidateLogin: React.FC = () => {
     isTesting = true;
   }
 
-  // Carousel slides data
-  const carouselSlides = [
-    {
-      image: "https://www.cnlu.ac.in/wp-content/uploads/2025/09/Placement.webp"
-    }
-  ];
-
+  
   const sendOtp = async () => {
     setLoading(true);
     try {
@@ -116,17 +113,24 @@ export const CandidateLogin: React.FC = () => {
       body: JSON.stringify({ unique_code: institute_id,need_banner:true }),
     })
       .then((res) => res.json())
-      .then((data) => setInstitute(data));
+      .then((data) => {
+        setInstitute(data);
+        setCarouselSlides(data.academic_banners);
+      })
+      
   }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % carouselSlides.length);
+      if(carouselSlides.length>0){
+        setCurrentSlide((prev) => (prev + 1) % carouselSlides.length);
+      }
     }, 5000);
     return () => clearInterval(interval);
   }, []);
 
   if (!institute) return <Loader />;
+  if (!carouselSlides) return <Loader />;
 
   const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -181,7 +185,11 @@ export const CandidateLogin: React.FC = () => {
           <div className="bg-white flex flex-col lg:flex-row items-center justify-center max-w-7xl mx-auto gap-8">
             {/* Left Panel - Carousel */}
             <div className="w-full lg:w-1/2">
-              <div className="relative rounded-2xl shadow-xl overflow-hidden h-full">
+              <div className="relative rounded-2xl shadow-xl overflow-hidden h-full"
+              style={{
+                backgroundColor: carouselSlides[currentSlide]?.color_code || '#3b82f6' // Fallback color
+              }} 
+              >
                 {/* Carousel Container */}
                 <div 
                   ref={carouselRef}
@@ -197,11 +205,16 @@ export const CandidateLogin: React.FC = () => {
                             ? 'opacity-100 translate-x-0'
                             : 'opacity-0 translate-x-full'
                         }`}
+                        onClick={() => {
+                          if (slide.redirect_url) {
+                            window.open(slide.redirect_url, '_blank');
+                          }
+                        }}
                       >
                         {/* Background Image with Gradient Overlay */}
                         <div 
                           className="absolute inset-0 bg-contain bg-center bg-no-repeat"
-                          style={{ backgroundImage: `url(${slide.image})` }}
+                          style={{ backgroundImage: `url(${assetUrl}/${slide.banner_image})` }}
                         >
                           <div className={`absolute inset-0  ${slide.bgColor} opacity-90`}></div>
                         </div>
@@ -242,12 +255,7 @@ export const CandidateLogin: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Slide Counter */}
-                  <div className="absolute top-6 right-6">
-                    <span className="bg-black/30 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      {currentSlide + 1} / {carouselSlides.length}
-                    </span>
-                  </div>
+                 
                 </div>
 
               

@@ -66,7 +66,7 @@ interface PopupData {
         const popupData: PopupData = response.data.data;
         setFormFields(popupData);
       } else {
-        toast.error('Failed to fetch popup data');
+        // toast.error('Failed to fetch popup data');
         resetForm();
       }
     } catch (error: any) {
@@ -75,7 +75,7 @@ interface PopupData {
         // If no data found, show empty form
         resetForm();
       } else {
-        toast.error(error.response?.data?.message || 'An error occurred while fetching popup data');
+        console.log(error.response?.data?.message || 'An error occurred while fetching popup data');
       }
     } finally {
       setLoading(false);
