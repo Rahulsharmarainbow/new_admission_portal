@@ -104,7 +104,7 @@ const CareerManagementTable: React.FC = () => {
       order: 'desc' as 'asc' | 'desc',
       orderBy: 'refference_id',
       search: '',
-      academic_id: '',
+      academic_id: dashboardFilters?.academic_id || '',
       status: dashboardFilters?.status || '',
       job_id: '',
       refference_id: '',
@@ -1520,7 +1520,7 @@ const CareerManagementTable: React.FC = () => {
                                 src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
                                   previewModal.url,
                                 )}`}
-                                className="w-full h-full"
+                                 className="w-full h-[75vh]"
                                 title="Office Document Preview"
                                 onLoad={() =>
                                   setPreviewModal((prev) => ({ ...prev, isLoading: false }))

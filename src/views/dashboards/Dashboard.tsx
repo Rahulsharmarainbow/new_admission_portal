@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router';
 import { useDashboardFilters } from 'src/hook/DashboardFilterContext';
 import { useAllAcademics } from 'src/hook/useAllAcademics';
 import CareerDashboard from './CareerDashboard';
+import RouteDropdown from 'src/Frontend/Common/RouteDropdown';
 
 interface ApplicationCardProps {
   title: string;
@@ -97,6 +98,7 @@ const Dashboard = () => {
     orderBy: 'id',
     search: '',
     year: dashboardFilters.year,
+    form_id: dashboardFilters.form_id,
     academic: user.role === 'CustomerAdmin' ? user.academic_id : dashboardFilters.academic,
   });
 
@@ -159,6 +161,7 @@ const Dashboard = () => {
     debouncedSearch,
     filters.year,
     filters.academic,
+    filters.form_id
   ]);
 
   // ✅ Initialize filters for CustomerAdmin on component mount
@@ -357,6 +360,15 @@ const Dashboard = () => {
     updateFilter('academicName', selected?.academic_name);
   };
 
+  const handleFormSelect = (formId: string) => {
+    updateFilter('form_id', formId);
+     setFilters(prev => ({
+    ...prev,
+    form_id: formId,
+    page: 0 // Reset to first page when changing form
+  }));
+  };
+
 
   // ✅ Handle Roll No Click
   const handleRollNoClick = (application: any) => {
@@ -418,6 +430,15 @@ const Dashboard = () => {
                 className="min-w-[250px] text-sm"
               />
             </div>
+            <RouteDropdown
+                    academicId={dashboardFilters.academic}
+                    value={dashboardFilters.form_id}
+                    onChange={handleFormSelect}
+                    className="min-w-[250px] text-sm"
+                    isRequired
+                    placeholder={dashboardFilters.academic ? "Select form page..." : "Select academic first"}
+                    disabled={!dashboardFilters.academic}
+                  />
           </div>
         </div>
       )}
@@ -442,7 +463,18 @@ const Dashboard = () => {
         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
           <HiChevronDown className="w-4 h-4" />
         </div>
+
+        
       </div>
+       <RouteDropdown
+                    academicId={dashboardFilters.academic}
+                    value={dashboardFilters.form_id}
+                    onChange={handleFormSelect}
+                    className="min-w-[250px] text-sm"
+                    isRequired
+                    placeholder={dashboardFilters.academic ? "Select form page..." : "Select academic first"}
+                    disabled={!dashboardFilters.academic}
+                  />
     </div>
   </div>
 )}

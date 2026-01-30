@@ -394,10 +394,9 @@ console.log(filters)
   };
 
   // Handle View Application
-  const handleViewApplication = (application: any) => {
+  const handleViewAll = () => {
     navigate(`/${user.role}/career-applications`, {
       state: {
-        applicationId: application.reference_id,
         academic_id: filters.academic_id,
         year: filters.year
       }
@@ -513,17 +512,27 @@ console.log(filters)
               Year: {filters.year} | Total: {dashboardData?.total_applications || 0} applications
             </h6>
           </div>
-          <div className="relative w-full lg:w-auto">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <BsFillSearchHeartFill className="w-5 h-5 text-blue-400" />
+          
+          <div className="flex items-center gap-3 w-full lg:w-auto">
+            <div className="relative flex-1 lg:flex-none">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <BsFillSearchHeartFill className="w-5 h-5 text-blue-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search Applications..."
+                value={filters.search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full lg:w-64"
+              />
             </div>
-            <input
-              type="text"
-              placeholder="Search Applications..."
-              value={filters.search}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full lg:w-64"
-            />
+            
+            <button
+              onClick={() => handleViewAll()} // Your function here
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+            >
+              View All
+            </button>
           </div>
         </div>
 
@@ -558,9 +567,7 @@ console.log(filters)
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Resume
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                  
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -574,9 +581,9 @@ console.log(filters)
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span
-                          className="text-blue-600 font-medium hover:text-blue-800 hover:underline cursor-pointer"
-                          onClick={() => handleViewApplication(app)}
-                          title="Click to view application"
+                          className="font-medium "
+                        
+                          
                         >
                           {app.reference_id}
                         </span>
@@ -609,14 +616,7 @@ console.log(filters)
                           <span className="text-sm text-gray-400">No Resume</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => handleViewApplication(app)}
-                          className="text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50 transition-colors"
-                        >
-                          View Details
-                        </button>
-                      </td>
+                     
                     </tr>
                   ))}
                 </tbody>

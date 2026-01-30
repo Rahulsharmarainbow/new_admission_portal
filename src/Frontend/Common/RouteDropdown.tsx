@@ -60,7 +60,7 @@ const RouteDropdown: React.FC<RouteDropdownProps> = ({
       setLoading(true);
       try {
         const res = await axios.post(
-          `${apiUrl}/SuperAdmin/Dropdown/get-form-route`,
+          `${apiUrl}/${user.role}/Dropdown/get-form-route`,
           { academic_id: academicId },
           {
             headers: {

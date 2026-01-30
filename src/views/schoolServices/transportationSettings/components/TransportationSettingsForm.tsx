@@ -6,6 +6,7 @@ import { useAuth } from "src/hook/useAuth";
 import toast from "react-hot-toast";
 import SchoolDropdown from "src/Frontend/Common/SchoolDropdown";
 import AcademicDropdown from "src/Frontend/Common/AcademicDropdown";
+import RouteDropdown from "src/Frontend/Common/RouteDropdown";
 
 interface TransportationSetting {
   id: number;
@@ -54,6 +55,8 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
 
   // Reset form when modal opens/closes or editing setting changes
   useEffect(() => {
+  
+         
     if (isOpen) {
       if (editingSetting) {
         setFormData({
@@ -72,8 +75,11 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
       }
       setErrors({});
       setShowParamValue(false);
+      if(user?.role === 'CustomerAdmin'){
+        handleAcademicChange(user?.academic_id?.toString());
+      }
     }
-  }, [isOpen, editingSetting]);
+  }, [isOpen, editingSetting,user]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
@@ -100,6 +106,7 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
     try {
       const payload = {
         academic_id: parseInt(formData.academic_id),
+        form_id:formData.form_id,
         paramKey: formData.paramKey,
         paramName: formData.paramName,
         paramValue: formData.paramValue,
@@ -171,6 +178,11 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
     handleInputChange("academic_id", academicId);
   };
 
+  const handleFormSelect = (formId: string) => {
+     handleInputChange("form_id", formId);
+    
+  };
+
   const toggleShowParamValue = () => {
     setShowParamValue(!showParamValue);
   };
@@ -179,7 +191,7 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
     <Modal show={isOpen} onClose={onClose} size="lg">
       <div className="p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4">
-          {editingSetting ? "Edit Transportation Setting" : "Add New Transportation Setting"}
+          {editingSetting ? "Edit Setting" : "Add New Setting"}
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -191,20 +203,13 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
             >
               Select {`${type === '2' ? 'Academic' : 'Scholl'}`} <span className="text-red-500">*</span>
             </label>
-            {/* <SchoolDropdown
-              value={formData.academic_id}
-              formData={formData}
-              setFormData={setFormData}
-              onChange={handleAcademicChange}
-              includeAllOption={false}
-            /> */}
              {type === "2" ? (
                   <AcademicDropdown
                     value={formData.academic_id}
-              formData={formData}
-              setFormData={setFormData}
-              onChange={handleAcademicChange}
-              includeAllOption={false}
+                    formData={formData}
+                    setFormData={setFormData}
+                    onChange={handleAcademicChange}
+                    includeAllOption={false}
                   />
                 ) : (
                   <SchoolDropdown
@@ -215,10 +220,27 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
               includeAllOption={false}
                   />
                 )}
+              
             {errors.academic_id && (
               <p className="text-red-500 text-sm mt-1">{errors.academic_id}</p>
             )}
           </div> )}
+
+             <label
+                    htmlFor="paramName"
+                    className="block mb-1 mt-3 text-sm font-medium text-gray-700"
+                  >
+                    Parameter Name <span className="text-red-500">*</span>
+                  </label>
+                 <RouteDropdown
+                    academicId={formData.academic_id}
+                    value={formData.form_id}
+                    onChange={handleFormSelect}
+                    
+                    isRequired
+                    placeholder={formData.academic_id ? "Select form page..." : "Select academic first"}
+                    disabled={!formData.academic_id}
+                  />
 
           {/* Parameter Name Input */}
           <div>

@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 export interface DashboardFilterState {
   year: string;
   academic: string;
+  form_id:string;
   academicType?: number; // 1 for school, 2/3 for college
   ApplicationStatus?: 'captured' | 'initialized' | null;
   CountStatus?: 'captured' | 'initialized' | null;
@@ -19,6 +20,7 @@ interface DashboardFilterContextType {
 const defaultFilters: DashboardFilterState = {
   year: new Date().getFullYear().toString(),
   academic: '',
+  form_id:'',
   academicType: undefined,
   ApplicationStatus: null,
   CountStatus: null,

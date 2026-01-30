@@ -14,6 +14,7 @@ import { createPortal } from 'react-dom';
 import SchoolDropdown from 'src/Frontend/Common/SchoolDropdown';
 import TransportationSettingsForm from './TransportationSettingsForm';
 import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
+import RouteDropdown from 'src/Frontend/Common/RouteDropdown';
 
 interface TransportationSetting {
   id: number;
@@ -68,6 +69,7 @@ const TransportationSettingsTable: React.FC<TransportationSettingsTableProps> = 
   const [showFormModal, setShowFormModal] = useState(false);
   const [editingSetting, setEditingSetting] = useState<TransportationSetting | null>(null);
   const dropdownRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const [selectedFormId, setSelectedFormId] = useState(''); // नया state
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number }>({
     top: 0,
     left: 0,
@@ -100,12 +102,25 @@ const TransportationSettingsTable: React.FC<TransportationSettingsTableProps> = 
     };
   }, []);
 
-  // Fetch settings data
+  const handleFormSelect = (formId: string) => {
+     setFilters((prev) => ({
+      ...prev,
+      form_id: formId,
+      page: 0,
+    }));
+    setFormData((prev) => ({
+      ...prev,
+      form_id: formId,
+    }));
+    
+  };
+
   const fetchSettings = async () => {
     setLoading(true);
     try {
       const payload = {
         academic_id: filters.academic_id ? parseInt(filters.academic_id) : undefined,
+        form_id: filters.form_id ? parseInt(filters.form_id) : undefined,
         page: filters.page,
         rowsPerPage: filters.rowsPerPage,
         order: filters.order,
@@ -140,8 +155,11 @@ const TransportationSettingsTable: React.FC<TransportationSettingsTableProps> = 
   };
 
   useEffect(() => {
+    if(user?.role === 'CustomerAdmin'){
+    handleAcademicChange(user?.academic_id?.toString());
+  }
     fetchSettings();
-  }, [filters.page, filters.rowsPerPage, filters.order, filters.orderBy, debouncedSearch, filters.academic_id]);
+  }, [filters.page, filters.rowsPerPage, filters.order, filters.orderBy, debouncedSearch, filters.form_id]);
 
   // Handle search
   const handleSearch = (searchValue: string) => {
@@ -301,26 +319,41 @@ return (
           />
         </div>
 
-        {/* School Dropdown */}
-       {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && (
-  <div className="w-full sm:w-64">
-    {currentType === "2" ? (
-      <AcademicDropdown
-        formData={formData}
-        setFormData={setFormData}
-        onChange={handleAcademicChange}
-        includeAllOption
-      />
-    ) : (
-      <SchoolDropdown
-        formData={formData}
-        setFormData={setFormData}
-        onChange={handleAcademicChange}
-        includeAllOption
-      />
+      
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+    {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && (
+    <div>
+      {currentType === "2" ? (
+        <AcademicDropdown
+          formData={formData}
+          setFormData={setFormData}
+          onChange={handleAcademicChange}
+          includeAllOption
+        />
+      ) : (
+        <SchoolDropdown
+          formData={formData}
+          setFormData={setFormData}
+          onChange={handleAcademicChange}
+          includeAllOption
+        />
+      )}
+    </div>
     )}
+    {/* Route Dropdown */}
+    <div>
+      <RouteDropdown
+        academicId={formData.academic_id}
+        value={formData.form_id}
+        onChange={handleFormSelect}
+        
+        isRequired
+        placeholder={formData.academic_id ? "Select form page..." : "Select academic first"}
+        disabled={!formData.academic_id}
+      />
+    </div>
   </div>
-)}
+
       </div>
 
       {/* Add Button */}
@@ -355,7 +388,7 @@ return (
                 onClick={() => handleSort('academic_name')}
               >
                 <div className="flex items-center space-x-1">
-                  <span>School Name</span>
+                  <span>Academic Name</span>
                   {getSortIcon('academic_name')}
                 </div>
               </th>

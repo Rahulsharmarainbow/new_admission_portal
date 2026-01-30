@@ -14,6 +14,7 @@ import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
 import { set } from 'lodash';
 import { useLocation } from 'react-router';
 import AllAcademicsDropdown from 'src/Frontend/Common/AllAcademicsDropdown';
+import RouteDropdown from 'src/Frontend/Common/RouteDropdown';
 
 interface Transaction {
   id: number;
@@ -59,7 +60,8 @@ const TransactionManagementTable: React.FC = () => {
     order: 'desc',
     orderBy: 'id',
     search: '',
-    academic_id: dashboardFilters.academic || '',
+    // academic_id: dashboardFilters.academic || '',
+    academic_id: user.role === 'CustomerAdmin' ? user.academic_id : dashboardFilters.academic,
     status: dashboardFilters.CountStatus
       ? dashboardFilters.CountStatus == 'captured'
         ? '1'
@@ -82,6 +84,7 @@ const TransactionManagementTable: React.FC = () => {
         `${apiUrl}/${user?.role}/Transactions/get-transactions`,
         {
           academic_id: filters.academic_id || undefined,
+          form_id: filters.form_id || undefined,
           startDate: filters.startDate || undefined,
           endDate: filters.endDate || undefined,
           status: filters.status ? parseInt(filters.status) : undefined,
@@ -122,6 +125,7 @@ const TransactionManagementTable: React.FC = () => {
     filters.orderBy,
     debouncedSearch,
     filters.academic_id,
+    filters.form_id,
     filters.status,
     filters.startDate,
     filters.endDate,
@@ -167,6 +171,14 @@ const TransactionManagementTable: React.FC = () => {
     setFilters((prev) => ({
       ...prev,
       academic_id: academicId,
+      page: 0,
+    }));
+  };
+
+  const handleFormSelect = (academicId: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      form_id: academicId,
       page: 0,
     }));
   };
@@ -244,6 +256,7 @@ const TransactionManagementTable: React.FC = () => {
         {
           s_id: '1', // You might want to make this dynamic based on your requirements
           academic_id: filters.academic_id || '',
+          form_id: filters.form_id || '',
           startDate: filters.startDate || '',
           endDate: filters.endDate || '',
           status: filters.status || '',
@@ -368,6 +381,16 @@ const TransactionManagementTable: React.FC = () => {
                   />
                 </div>
               )}
+
+               <RouteDropdown
+                      academicId={filters.academic_id}
+                      value={filters.form_id}
+                      onChange={handleFormSelect}
+                      className="min-w-[250px] text-sm"
+                      isRequired
+                      placeholder={filters.academic_id ? "Select form page..." : "Select academic first"}
+                      disabled={!filters.academic_id}
+                    />
             </div>
 
             {/* Download Button */}

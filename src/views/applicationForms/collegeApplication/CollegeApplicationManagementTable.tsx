@@ -271,6 +271,7 @@ const CollegeApplicationManagementTable: React.FC = () => {
 
   // Handle year change
   const handleYearChange = (selectedOption: any) => {
+    alert(selectedOption);
     setFilters((prev) => ({
       ...prev,
       year: selectedOption?.value || '',
@@ -373,6 +374,7 @@ const CollegeApplicationManagementTable: React.FC = () => {
       const requestBody: any = {
         academic_id: filters.academic_id || '',
         s_id: user?.id || '',
+        year:filters.year||'',
         degree: filters.degree || '',
         form_id: filters.form_id || '',
         startDate: filters.fromDate || '',
