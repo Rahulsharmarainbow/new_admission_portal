@@ -82,6 +82,8 @@ import { CandidateLogin } from 'src/views/candidate-panel/auth/CandidateLogin';
 import { CandidateDashboard } from 'src/views/candidate-panel/CandidateDashboard';
 import CandidateApplicationEditPage from 'src/views/candidate-panel/applicationEdit/CandidateApplicationEditPage';
 import AcademicBannersTable from 'src/views/frontendBannerPage/AcademicBannersTable';
+import FeedbackTable from 'src/views/feedback/FeedbackTable';
+import AssetsExport from 'src/views/exportData/assetsExport/components/AssetsExport';
 
 
 /* ***Layouts**** */
@@ -191,6 +193,8 @@ const MainRoutes = [
       { path: '/SuperAdmin/application-details/:applicationId', element: <ApplicationDetailsPage/> },
       { path: '/SuperAdmin/data-manager/export-configuration', element: <ExportConfig/> },
       { path: '/SuperAdmin/frontend-editing/banner', element: <AcademicBannersTable/> },
+      { path: '/SuperAdmin/Feedback', element: <FeedbackTable/> },
+      { path: '/SuperAdmin/assets-export', element: <AssetsExport/> },
       { path: '*', element: <Navigate to="/auth/404" /> },
       
     ],

@@ -212,6 +212,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               url: '/SuperAdmin/Ticket/Resolved',
               isPro: false,
             },
+            {
+              name: 'FeedBack',
+              id: uniqueId(),
+              url: '/SuperAdmin/Feedback',
+              isPro: false,
+            },
           ],
         },
         {
@@ -328,6 +334,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               name: 'College Data',
               id: uniqueId(),
               url: '/SuperAdmin/college-data',
+              isPro: false,
+            },
+            {
+              name: 'Assets Export',
+              id: uniqueId(),
+              url: '/SuperAdmin/assets-export',
               isPro: false,
             },
           ],
