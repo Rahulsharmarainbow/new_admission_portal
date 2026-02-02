@@ -431,61 +431,61 @@ const Dashboard = () => {
               />
             </div>
             <RouteDropdown
-                    academicId={dashboardFilters.academic}
-                    value={dashboardFilters.form_id}
-                    onChange={handleFormSelect}
-                    className="min-w-[250px] text-sm"
-                    isRequired
-                    placeholder={dashboardFilters.academic ? "Select form page..." : "Select academic first"}
-                    disabled={!dashboardFilters.academic}
-                  />
+                academicId={dashboardFilters.academic}
+                value={dashboardFilters.form_id}
+                onChange={handleFormSelect}
+                className="min-w-[250px] text-sm"
+                isRequired
+                placeholder={dashboardFilters.academic ? "Select form page..." : "Select academic first"}
+                disabled={!dashboardFilters.academic}
+              />
           </div>
         </div>
       )}
 
       {user?.role === 'CustomerAdmin' && (
-  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-    <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-      {/* 🔥 Dynamic Year Dropdown - Auto updates every year */}
-      <div className="relative w-full sm:w-auto">
-        <select
-          value={dashboardFilters.year}
-          onChange={(e) => handleYearChange(e.target.value)}
-          className="w-full sm:w-auto min-w-[250px] px-3 py-2.5 border border-gray-300 rounded-md bg-white 
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
-        >
-          {yearOptions.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-          <HiChevronDown className="w-4 h-4" />
-        </div>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+            {/* 🔥 Dynamic Year Dropdown - Auto updates every year */}
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={dashboardFilters.year}
+                onChange={(e) => handleYearChange(e.target.value)}
+                className="w-full sm:w-auto min-w-[250px] px-3 py-2.5 border border-gray-300 rounded-md bg-white 
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm"
+              >
+                {yearOptions.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <HiChevronDown className="w-4 h-4" />
+              </div>
 
-        
-      </div>
-       <RouteDropdown
-                    academicId={dashboardFilters.academic}
-                    value={dashboardFilters.form_id}
-                    onChange={handleFormSelect}
-                    className="min-w-[250px] text-sm"
-                    isRequired
-                    placeholder={dashboardFilters.academic ? "Select form page..." : "Select academic first"}
-                    disabled={!dashboardFilters.academic}
-                  />
-    </div>
-  </div>
-)}
+              
+            </div>
+            <RouteDropdown
+                          academicId={dashboardFilters.academic}
+                          value={dashboardFilters.form_id}
+                          onChange={handleFormSelect}
+                          className="min-w-[250px] text-sm"
+                          isRequired
+                          placeholder={dashboardFilters.academic ? "Select form page..." : "Select academic first"}
+                          disabled={!dashboardFilters.academic}
+                        />
+          </div>
+        </div>
+      )}
 
      {
       dashboardFilters.academicType === 4 ?
-  <CareerDashboard 
-    key={`${filters.academic}-${filters.year}`} 
-    academicId={filters.academic} 
-    year={filters.year} 
-  /> :
+        <CareerDashboard 
+          key={`${filters.academic}-${filters.year}`} 
+          academicId={filters.academic} 
+          year={filters.year} 
+        /> :
       <>
        {/* Statistics Cards - Row 1 */}
       <div className="grid grid-cols-9 gap-6 mb-6">

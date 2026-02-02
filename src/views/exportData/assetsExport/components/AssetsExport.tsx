@@ -86,50 +86,46 @@ const AssetsExport: React.FC = () => {
 
       // Actual API call - adjust endpoint as needed
       const response = await axios.post(
-        `${apiUrl}/${user?.role}/Applications/Export-college-data`,
+        `${apiUrl}/${user?.role}/Applications/Export-assets-data`,
         payload,
-        {
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-            "Content-Type": "application/json",
-          },
-          responseType: 'blob', // Important for file download
-        }
+       {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'application/json',
+        },
+      }
       );
 
-      // Create download link for the blob
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+    
+      
+       if (response.data.success) {
+      // Create download link from base64
       const link = document.createElement('a');
-      link.href = url;
-      
-      // Extract filename from response headers or use default
-      const contentDisposition = response.headers['content-disposition'];
-      let filename = 'college_data_export.xlsx';
-      
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
-        if (filenameMatch && filenameMatch.length === 2) {
-          filename = filenameMatch[1];
-        }
-      }
-      
-      link.setAttribute('download', filename);
+      link.href = `data:${response.data.filetype};base64,${response.data.file}`;
+      link.download = response.data.filename;
       document.body.appendChild(link);
       link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+      
+      toast.success(response.data.message || 'Documents exported successfully!');
+      
+      // Show summary
+      console.log(`Exported ${response.data.total_files} files from ${response.data.total_students} students`);
+    } else {
+      console.log(response.data.error || 'Failed to export documents');
+    }
 
-      toast.success("College data exported successfully!");
+      // toast.success("College data exported successfully!");
 
       // Reset form
-      setFormData(prev => ({
-        ...prev,
-        startDate: "",
-        endDate: "",
-        page_route: "",
-        include_documents: false,
-        include_pdf: false
-      }));
+      // setFormData(prev => ({
+      //   ...prev,
+      //   startDate: "",
+      //   endDate: "",
+      //   page_route: "",
+      //   include_documents: false,
+      //   include_pdf: false
+      // }));
 
     } catch (error: any) {
       console.error('Error exporting data:', error);

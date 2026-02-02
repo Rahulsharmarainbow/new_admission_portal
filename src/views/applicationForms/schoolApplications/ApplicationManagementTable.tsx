@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MdOutlineRemoveRedEye, MdFilterList, MdSort, MdClass } from 'react-icons/md';
+import { MdOutlineRemoveRedEye, MdFilterList, MdSort, MdClass, MdOutlinePayment } from 'react-icons/md';
 import { TbEdit, TbFileTypePdf, TbLoader2 } from 'react-icons/tb';
 import { BsDownload, BsSearch, BsX } from 'react-icons/bs';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
@@ -16,6 +16,7 @@ import ApplicationDetailModal from './components/ApplicationDetailModal';
 import { useLocation, useNavigate } from 'react-router';
 import SchoolFilterSidebar from './components/SchoolFilterSidebar';
 import CareerDropdown from 'src/Frontend/Common/CareerDropdown';
+import PaymentButton from './components/PaymentButton';
 
 interface Application {
   id: number;
@@ -87,6 +88,9 @@ const getYearOptions = (yearsBack: number = 5): { value: string; label: string }
 
   return years;
 };
+
+
+
 
 const ApplicationManagementTable: React.FC = () => {
   const { user } = useAuth();
@@ -174,6 +178,57 @@ const ApplicationManagementTable: React.FC = () => {
 
     setActiveFiltersCount(count);
   }, [filters, cdFilters]);
+
+
+  const fetchPaymentDetailsApi = async (applicationId) => {
+  try {
+    const response = await fetch(`${apiUrl}/${user?.role}/Applications/getPayableAmount`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add authorization header if needed
+        'Authorization': `Bearer ${user?.token}`,
+      },
+      body: JSON.stringify({
+        application_id: applicationId
+        // Add any other required parameters if needed
+        // student_id: user?.id,
+        // university_id: user?.university_id,
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching payment details:', error);
+    throw error;
+  }
+};
+
+  const processPaymentApi = async (applicationId, discount, finalAmount) => {
+    // Your API call to process payment
+    const response = await fetch('/api/payments/process', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        applicationId,
+        discount,
+        finalAmount
+      })
+    });
+    const data = await response.json();
+    return data;
+  };
+
+  const handlePaymentSuccess = (applicationId, result) => {
+    console.log('Payment successful for application:', applicationId);
+  };
 
   // Fetch applications data
   const fetchApplications = async () => {
@@ -673,20 +728,28 @@ const ApplicationManagementTable: React.FC = () => {
                                     onClick={() => handlePdfDownload(application.id)}
                                     disabled={downloadingId === application.id}
                                     className={`p-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow
-                        ${
-                          downloadingId === application.id
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700'
-                        }`}
-                                  >
-                                    {downloadingId === application.id ? (
-                                      <TbLoader2 className="w-4 h-4 animate-spin" />
-                                    ) : (
-                                      <TbFileTypePdf className="w-4 h-4" />
-                                    )}
-                                  </button>
+                                        ${
+                                          downloadingId === application.id
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                            : 'bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700'
+                                        }`}
+                                                  >
+                                                    {downloadingId === application.id ? (
+                                                      <TbLoader2 className="w-4 h-4 animate-spin" />
+                                                    ) : (
+                                                      <TbFileTypePdf className="w-4 h-4" />
+                                                    )}
+                                    </button>
                                 </Tooltip>
                               </div>
+                               {/* {application.payment_status == 0 && (
+                                  <PaymentButton
+                                    application={application}
+                                    fetchPaymentDetailsApi={fetchPaymentDetailsApi}
+                                    processPaymentApi={processPaymentApi}
+                                    onPaymentSuccess={handlePaymentSuccess}
+                                  />
+                                )} */}
                             </td>
                             <td className="py-3 px-3 border-r border-gray-100 group-hover:border-blue-100 text-sm text-gray-600">
                               <div className="truncate" title={application?.created_at_formatted}>

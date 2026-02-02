@@ -94,7 +94,7 @@ const Header = ({ baseUrl, institute_id, instituteName, logo, otherLogo, address
           className=" md:block mr-4"
         >
           <p className="text-xs md:text-sm text-gray-600 mt-1">
-            {headerData.university.address}
+            <div dangerouslySetInnerHTML={{ __html: headerData.university.address }} />
           </p>
           </Link>
         )}

@@ -11,6 +11,7 @@
 
 
 
+
 @custom-variant dark (&:is(.dark *));
 
 
@@ -19,7 +20,7 @@
 @theme {
 
   --font-*: initial;
-  --font-sans: "Plus Jakarta Sans", sans-serif;
+  --font-sans: "Figtree", sans-serif;
 
   --color-primary: oklch(0.6 0.1613 247.83);
   --color-secondary: oklch(0.57 0.0172 241.96);
