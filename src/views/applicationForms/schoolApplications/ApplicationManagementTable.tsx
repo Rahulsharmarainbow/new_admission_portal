@@ -235,6 +235,7 @@ const ApplicationManagementTable: React.FC = () => {
     setLoading(true);
     try {
       const requestBody: any = {
+        s_id: user?.id,
         academic_id: filters.academic_id || undefined,
         year: filters.year || undefined,
         classAppliedFor: filters.classAppliedFor || undefined,

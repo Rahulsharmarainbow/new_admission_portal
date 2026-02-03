@@ -15,9 +15,12 @@ export const BaseSidebarContent = () => {
     // academic_type: 1 → School
     1: ['College Services','College Applications', 'Career Management','Career Applications'],
     2: ['School Services','School Applications', 'Career Management','Career Applications'],
-    3: ['School Services','School Applications', 'Career Management','Career Applications'],
-    4: ['School Services','School Applications','College Applications','College Services','Transaction', 'Fronted Management']
+    3: ['School Services','School Applications', 'Career Management','Career Applications',...(user?.compaign_access === 0 ? ['Campaign'] : [])],
+    4: ['School Services','School Applications','College Applications','College Services','Transaction', 'Fronted Management'],
   };
+
+  console.log('hiddenMenus', hiddenMenus);  
+  console.log("userrrrr", user?.compaign_access)
 
  let academicMenus = [];
 
@@ -31,6 +34,8 @@ export const BaseSidebarContent = () => {
       ),
     }));
   }
+
+  console.log("baseMenussss",baseMenus);
 
     return [...baseMenus, ...academicMenus];
   };

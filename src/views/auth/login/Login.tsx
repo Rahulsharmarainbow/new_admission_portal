@@ -40,7 +40,8 @@ export const LoginPage: React.FC = () => {
           sms_status: response.sms_status,
           academic_type: response.academic_type || null,
           academic_id : response.academic_id || null, 
-          token : response.two_step_auth == 0 ? response.auth_token : null 
+          token : response.two_step_auth == 0 ? response.auth_token : null,
+          compaign_access : response.compaign_access || 0, 
         };
 
         if(response.two_step_auth === 0) {

@@ -27,6 +27,7 @@ import toast from 'react-hot-toast';
 import { TextInput } from 'flowbite-react';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
 import AllAcademicsDropdown from 'src/Frontend/Common/AllAcademicsDropdown';
+import AllAcademicsMultiDropdown from 'src/Frontend/Common/AllAcademicsMultiDropdown';
 
 interface FormData {
   name: string;
@@ -37,6 +38,8 @@ interface FormData {
   profile: File | null;
   profilePreview: string;
   notify: number;
+  assign_academic_id: string[];   
+  compaign_access: number;  
 }
 
 interface ApiResponse {
@@ -65,6 +68,8 @@ const UserForm: React.FC = () => {
     profile: null,
     profilePreview: '',
     notify: 1,
+    assign_academic_id: [],
+    compaign_access: 0,   
   });
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -100,6 +105,8 @@ const UserForm: React.FC = () => {
         profile: null,
         profilePreview: '',
         notify: 1,
+        assign_academic_id: [],
+        compaign_access: 0,
       });
     }
   }, [id]);
@@ -316,6 +323,9 @@ const UserForm: React.FC = () => {
           academic_id: userData.academic_id?.toString() || '',
           profilePreview: userData.profile ? `${assetUrl}/${userData.profile}` : '',
           notify: userData.notify ?? 1, 
+          // assign_academic_id: userData.assign_academic_id?.map((id: number) => id.toString()) || [],
+          assign_academic_id: userData.assign_academic_id || [],
+          compaign_access: userData.compaign_access ?? 0
         }));
         // Validate existing phone number
         if (userData.number) {
@@ -426,6 +436,20 @@ const UserForm: React.FC = () => {
       formDataToSend.append('number', formData.number);
       formDataToSend.append('type', type || '');
       if(type === '3')formDataToSend.append('notify', formData.notify.toString());
+
+      if (type === '2' && formData.assign_academic_id.length > 0) {
+  formDataToSend.append(
+    'assign_academic_id',
+    JSON.stringify(formData.assign_academic_id)
+  );
+}
+
+if (type === '3') {
+  formDataToSend.append(
+    'compaign_access',
+    formData.compaign_access.toString()
+  );
+}
 
       // Only append password for new users or if password is provided in edit
       if ((!isEdit && formData.password) || (isEdit && formData.password)) {
@@ -728,12 +752,25 @@ const UserForm: React.FC = () => {
               </div>
             </div>
 
+            {type === '2' && (
+  <div className="mb-6">
+    <AllAcademicsMultiDropdown
+      name="assign_academic_id"
+      label="Assign Academics *"
+      formData={formData}
+      setFormData={setFormData}
+      disabled={loading}
+    />
+  </div>
+)}
+
+
             {/* Academic Dropdown - Only for Customer Admin */}
             {type === '3' && (
               <div className="mb-6">
                 <AllAcademicsDropdown
                   name="academic_id"
-                  label="Academic Institution *"
+                  label="Academic Institution "
                   formData={formData}
                   setFormData={setFormData}
                   isRequired={type === '3'}
@@ -808,9 +845,48 @@ const UserForm: React.FC = () => {
               </div>
             </div>
 
+
             {/* Notify Field - Only for Customer Admin */}
 {type === '3' && (
-  <div className="mb-6">
+  <div className="flex gap-5">
+     <div className="mb-6">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Campaign Access *
+    </label>
+
+    <div className="flex items-center gap-6">
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="radio"
+          name="compaign_access"
+          value="1"
+          checked={formData.compaign_access === 1}
+          onChange={() =>
+            setFormData((prev) => ({ ...prev, compaign_access: 1 }))
+          }
+          disabled={loading}
+          className="w-4 h-4 accent-blue-600"
+        />
+        <span className="text-sm text-gray-700">Yes</span>
+      </label>
+
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="radio"
+          name="compaign_access"
+          value="0"
+          checked={formData.compaign_access === 0}
+          onChange={() =>
+            setFormData((prev) => ({ ...prev, compaign_access: 0 }))
+          }
+          disabled={loading}
+          className="w-4 h-4 accent-blue-600"
+        />
+        <span className="text-sm text-gray-700">No</span>
+      </label>
+    </div>
+  </div>
+<div className="mb-6">
     <label className="block text-sm font-medium text-gray-700 mb-2">
       Notify Customer *
     </label>
@@ -848,6 +924,7 @@ const UserForm: React.FC = () => {
         <span className="text-sm text-gray-700">No</span>
       </label>
     </div>
+  </div>
   </div>
 )}
 

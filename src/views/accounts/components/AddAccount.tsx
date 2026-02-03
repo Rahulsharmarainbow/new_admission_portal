@@ -75,7 +75,7 @@ const AddEditAccount: React.FC = () => {
   const assetUrl = import.meta.env.VITE_ASSET_URL;
 
   // Jodit Editor configuration
-  const editorConfig = useMemo(
+   const editorConfig = useMemo(
     () => ({
       readonly: false,
       height: 300,

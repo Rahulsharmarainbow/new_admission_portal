@@ -77,6 +77,7 @@ const ClassTable: React.FC = () => {
         `${apiUrl}/${user?.role}/Dropdown/get-school`,
         {
           academic_id: filters.academic_id || undefined,
+          s_id: user?.id,
         },
         {
           headers: {
