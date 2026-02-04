@@ -29,7 +29,7 @@ import AccountProfile from 'src/views/profile/AccountProfile';
 import Demo from 'src/views/profile/Demo';
 //import YourComponent from 'src/views/dataManager/typeOfConnection/components/YourComponent';
 import DataManagerPage from 'src/views/dataManager/typeOfConnection/components/DataManagerPage';
-import StateTable from 'src/views/dataManager/state/components/State';
+import StateTable from 'src/views/dataManager/state/components/StateTable';
 import CasteTable from 'src/views/dataManager/district/components/District';
 import AddEditAccount from 'src/views/accounts/components/AddAccount';
 import OpenTickets from 'src/views/ticket/components/OpenTickets';
@@ -84,6 +84,7 @@ import CandidateApplicationEditPage from 'src/views/candidate-panel/applicationE
 import AcademicBannersTable from 'src/views/frontendBannerPage/AcademicBannersTable';
 import FeedbackTable from 'src/views/feedback/FeedbackTable';
 import AssetsExport from 'src/views/exportData/assetsExport/components/AssetsExport';
+import CareerJobsSection from 'src/views/dataManager/state/components/StateTable';
 
 
 /* ***Layouts**** */
@@ -150,7 +151,7 @@ const MainRoutes = [
       { path: "/SuperAdmin/admin/add/:type", element: <UserForm /> },
       { path: "/SuperAdmin/admin/edit/:type/:id", element: <UserForm /> },
       { path: '/SuperAdmin/data-manager/country', element: <CountryTable/> },
-      { path: '/SuperAdmin/data-manager/State', element: <StateTable/> },
+      { path: '/SuperAdmin/data-manager/State', element: <StateTable/>},
       { path: '/SuperAdmin/data-manager/District', element: <CasteTable/> },      // data manager ki District ka component
       { path: '/SuperAdmin/data-manager/type-of-connection', element: <DataManagerPage/> },
       { path: 'data-manager/type-configuration', element: <TypeTable/> },
@@ -264,6 +265,10 @@ const MainRoutes = [
        { path: 'notifications', element: <NotificationsPage/> },
        { path: 'data-manager/export-configuration', element: <ExportConfig/> },
        { path: 'frontend-editing/banner', element: <AcademicBannersTable/> },
+        { path: 'Feedback', element: <FeedbackTable/> },
+      { path: 'assets-export', element: <AssetsExport/> },
+       { path: 'logs', element: <ErrorTable/>},
+       { path: 'frontend-editing/Apply', element: <ApplyEditing/>},
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },

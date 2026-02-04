@@ -432,7 +432,7 @@ const SidebarContent: Record<number, MenuItem[]> = {
             {
               name: 'Content Management',
               id: uniqueId(),
-              url: '/SupportAdmin/content-Management',
+              url: '/SupportAdmin/school-content-Management',
               isPro: false,
             },
           ],
@@ -457,7 +457,7 @@ const SidebarContent: Record<number, MenuItem[]> = {
             {
               name: 'Career Page',
               id: uniqueId(),
-              url: '/SuperAdmin/frontend-editing/career',
+              url: '/SupportAdmin/frontend-editing/career',
               isPro: false,
             }, 
             {
@@ -489,6 +489,12 @@ const SidebarContent: Record<number, MenuItem[]> = {
               name: 'Resolved Ticket',
               id: uniqueId(),
               url: '/SupportAdmin/Ticket/Resolved',
+              isPro: false,
+            },
+             {
+              name: 'FeedBack',
+              id: uniqueId(),
+              url: '/SupportAdmin/Feedback',
               isPro: false,
             },
           ],
@@ -575,10 +581,21 @@ const SidebarContent: Record<number, MenuItem[]> = {
           icon: 'solar:card-transfer-line-duotone',
         },
         {
+          name: 'Error Logs',
+          url: '/SupportAdmin/logs',
+          icon: 'solar:card-transfer-line-duotone',
+        },
+        {
           name: 'Data Manager',
           id: uniqueId(),
           icon: 'solar:database-line-duotone',
           children: [
+            {
+              name: 'Country',
+              id: uniqueId(),
+              url: '/SupportAdmin/data-manager/country',
+              isPro: false,
+            },
             {
               name: 'State',
               id: uniqueId(),
