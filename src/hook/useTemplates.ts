@@ -22,6 +22,7 @@ export const useTemplates = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${user?.token}`,
             },
+            body: JSON.stringify({ s_id: user?.id }),
           }
         );
 

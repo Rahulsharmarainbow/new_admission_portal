@@ -119,6 +119,7 @@ const TransportationSettingsTable: React.FC<TransportationSettingsTableProps> = 
     setLoading(true);
     try {
       const payload = {
+        s_id: user?.id,
         academic_id: filters.academic_id ? parseInt(filters.academic_id) : undefined,
         form_id: filters.form_id ? parseInt(filters.form_id) : undefined,
         page: filters.page,

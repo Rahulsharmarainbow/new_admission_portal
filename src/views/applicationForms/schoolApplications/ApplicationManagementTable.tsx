@@ -3,7 +3,7 @@ import { MdOutlineRemoveRedEye, MdFilterList, MdSort, MdClass, MdOutlinePayment 
 import { TbEdit, TbFileTypePdf, TbLoader2 } from 'react-icons/tb';
 import { BsDownload, BsSearch, BsX } from 'react-icons/bs';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
-import { Button, Tooltip, TextInput } from 'flowbite-react';
+import { Button, Tooltip, TextInput, Modal, ModalHeader, ModalBody } from 'flowbite-react';
 import Select from 'react-select';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -17,6 +17,7 @@ import { useLocation, useNavigate } from 'react-router';
 import SchoolFilterSidebar from './components/SchoolFilterSidebar';
 import CareerDropdown from 'src/Frontend/Common/CareerDropdown';
 import PaymentButton from './components/PaymentButton';
+import AdminAddApplication from './components/AdminAddApplication';
 
 interface Application {
   id: number;
@@ -140,6 +141,7 @@ const ApplicationManagementTable: React.FC = () => {
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [downloadingId, setDownloadingId] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const apiAssetsUrl = import.meta.env.VITE_ASSET_URL;
@@ -190,10 +192,8 @@ const ApplicationManagementTable: React.FC = () => {
         'Authorization': `Bearer ${user?.token}`,
       },
       body: JSON.stringify({
-        application_id: applicationId
-        // Add any other required parameters if needed
-        // student_id: user?.id,
-        // university_id: user?.university_id,
+        application_id: applicationId,
+        s_id: user?.id,
       })
     });
 
@@ -610,6 +610,13 @@ const ApplicationManagementTable: React.FC = () => {
                   classNamePrefix="react-select"
                 />
               </div>
+              <Button
+  onClick={() => setShowAddModal(true)}
+  className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+>
+  + Add Application
+</Button>
+
             </div>
 
             {/* Action Buttons */}
@@ -930,6 +937,22 @@ const ApplicationManagementTable: React.FC = () => {
           onClearFilters={handleClearFilters}
         />
       </div>
+
+      <Modal
+  show={showAddModal}
+  size="7xl"
+  onClose={() => setShowAddModal(false)}
+  dismissible
+>
+  <ModalHeader>Add New Application</ModalHeader>
+
+  <ModalBody className="h-[85vh] overflow-y-auto">
+    <AdminAddApplication
+      onClose={() => setShowAddModal(false)}
+    />
+  </ModalBody>
+</Modal>
+
 
       {/* Application Detail Modal */}
       <ApplicationDetailModal

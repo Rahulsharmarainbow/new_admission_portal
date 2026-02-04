@@ -42,7 +42,7 @@ const TypeOfConnection = ({ selectedAcademic, onTypeChange }: TypeOfConnectionPr
       try {
         const response = await axios.post<TypeResponse>(
           `${apiUrl}/${user?.role}/Dropdown/get-type`,
-          { academic_id: parseInt(selectedAcademic) },
+          { academic_id: parseInt(selectedAcademic),s_id: user?.id || "", },
           {
             headers: {
               Authorization: `Bearer ${user?.token}`,

@@ -551,6 +551,7 @@ const TypeTable: React.FC = () => {
       };
 
       const requestBody = {
+        s_id: user?.id || "",
         academic_id: selectedAcademic,
         page: filters.page,
         rowsPerPage: filters.rowsPerPage,

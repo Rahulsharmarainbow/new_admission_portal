@@ -65,6 +65,7 @@ const DegreeManagementTable: React.FC = () => {
       const response = await axios.post(
         `${apiUrl}/${user?.role}/CollegeManagement/Degree/list`,
         {
+          s_id: user?.id,
           academic_id: filters.academic_id || undefined,
           page: filters.page,
           rowsPerPage: filters.rowsPerPage,

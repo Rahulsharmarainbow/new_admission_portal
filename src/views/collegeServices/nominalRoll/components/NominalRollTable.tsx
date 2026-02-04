@@ -636,6 +636,7 @@ const NominalRollTable: React.FC = () => {
       const response = await axios.post(
         `${apiUrl}/${user?.role}/CollegeManagement/Nominal/list`,
         {
+          s_id: user?.id || "",
           academic_id: filters.academic_id || undefined,
           page: filters.page,
           rowsPerPage: filters.rowsPerPage,
@@ -805,6 +806,7 @@ const NominalRollTable: React.FC = () => {
         {
           academic_id: academicId,
           id: id,
+          s_id: user?.id || "",
         },
         {
           headers: {

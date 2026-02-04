@@ -202,7 +202,7 @@ const CareerManagementTable: React.FC = () => {
     }
 
     try {
-      const requestBody: any = { type: 0 };
+      const requestBody: any = { type: 0, s_id: user?.id || '' };
       requestBody.academic_id = academicIdToUse;
 
       console.log('Fetching status options for academic_id:', academicIdToUse);
@@ -252,6 +252,7 @@ const CareerManagementTable: React.FC = () => {
     setLoading(true);
     try {
       const requestBody: any = {
+        s_id: user?.id || '',
         academic_id: academicIdToUse,
         page: filters.page,
         rowsPerPage: filters.rowsPerPage,

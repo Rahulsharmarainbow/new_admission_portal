@@ -19,6 +19,7 @@ import { useCandidateAuth } from 'src/hook/CandidateAuthContext';
 import axios from 'axios';
 import Header from 'src/Frontend/Common/Header';
 import { C } from 'node_modules/react-router/dist/development/index-react-server-client-BeVfPpWg.d.mts';
+import { useAuth } from 'src/hook/useAuth';
 
 interface Application {
   s_no: number;
@@ -105,6 +106,7 @@ export const CandidateDashboard: React.FC = () => {
   } = useCandidateAuth();
   
   const navigate = useNavigate();
+  const {user} = useAuth();
   let { institute_id } = useParams();
   const [stats, setStats] = useState<DashboardCounts>({
     total_paid_applications: 0,
@@ -157,6 +159,7 @@ export const CandidateDashboard: React.FC = () => {
     try {
       const response = await axios.post(`${apiUrl}/Public/Get-header-footer`, {
         unique_code: institute_id,
+        s_id: user?.id
       });
       if (response.data?.header) {
         setInstituteData(response.data);        

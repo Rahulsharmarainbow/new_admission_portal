@@ -128,6 +128,7 @@ const ApplyEditing: React.FC = () => {
         `${apiUrl}/${user?.role}/Type/dropdown-type`,
         {
           academic_id: parseInt(academic_id),
+          s_id: user?.id || "",
         },
         {
           headers: {

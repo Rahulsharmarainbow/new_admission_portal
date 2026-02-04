@@ -144,6 +144,7 @@ const CareerFilterSidebar: React.FC<SchoolFilterSidebarProps> = ({
         `${apiUrl}/${user?.role}/CareerApplication/get-filter-application`,
         {
           academic_id: parseInt(filters.academic_id),
+          s_id: user?.id,
         //   type : 2
         },
         {

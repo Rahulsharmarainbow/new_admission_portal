@@ -1423,7 +1423,8 @@ const CasteTable: React.FC = () => {
       };
 
       const requestBody = {
-        state_id: "" // Empty for all countries
+        state_id: "" ,
+        s_id: user?.id || "",
       };
 
       const response = await axios.post(
@@ -1457,7 +1458,8 @@ const CasteTable: React.FC = () => {
       };
 
       const requestBody = {
-        country_id: countryId.toString()
+        country_id: countryId.toString(),
+        s_id: user?.id || "",
       };
 
       const response = await axios.post(

@@ -98,6 +98,7 @@ const ContentTable: React.FC = () => {
     setLoading(true);
     try {
       const payload = {
+        s_id: user?.id,
         academic_id: filters.academic_id ? parseInt(filters.academic_id) : undefined,
         page: filters.page,
         rowsPerPage: filters.rowsPerPage,

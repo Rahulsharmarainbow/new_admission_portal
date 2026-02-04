@@ -108,6 +108,7 @@ const CampaignHistoryTable: React.FC = () => {
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Campaign/get-template-history`,
         {
+          s_id: user?.id,
           academic_id: dashboardFilters.academic || undefined,
           year: dashboardFilters.year || undefined,
           form_id: dashboardFilters.form_id || undefined,

@@ -25,7 +25,7 @@ export const useAllAcademics = () => {
     try {
       const res = await axios.post(
         `${apiUrl}/${user?.role}/Dropdown/get-all-academic`,
-        {},
+        {s_id: user?.id},
         {
           headers: {
             Authorization: `Bearer ${user.token}`,

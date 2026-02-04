@@ -42,7 +42,7 @@ const CareerDropdown: React.FC<SchoolDropdownProps> = ({
       try {
         const response = await axios.post(
           `${apiUrl}/SuperAdmin/Dropdown/get-career-academic`,
-          {},
+          {s_id: user?.id},
           {
             headers: {
               Authorization: `Bearer ${user?.token}`,

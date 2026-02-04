@@ -61,7 +61,7 @@ const RouteDropdown: React.FC<RouteDropdownProps> = ({
       try {
         const res = await axios.post(
           `${apiUrl}/${user.role}/Dropdown/get-form-route`,
-          { academic_id: academicId },
+          { academic_id: academicId, s_id: user?.id },
           {
             headers: {
               Authorization: `Bearer ${user?.token}`,

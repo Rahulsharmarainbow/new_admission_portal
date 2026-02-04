@@ -28,7 +28,8 @@ export const useDegrees = (academicId?: string | number) => {
               'Authorization': 'Bearer' + user?.token,
             },
             body: JSON.stringify({
-              academic_id: academicId
+              academic_id: academicId,
+              s_id: user?.id
             })
           }
         );

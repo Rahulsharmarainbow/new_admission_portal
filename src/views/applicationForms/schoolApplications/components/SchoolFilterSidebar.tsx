@@ -142,6 +142,7 @@ const SchoolFilterSidebar: React.FC<SchoolFilterSidebarProps> = ({
         `${apiUrl}/${user?.role}/Applications/college-filter`,
         {
           academic_id: parseInt(filters.academic_id),
+          s_id: user?.id,
           type : 2
         },
         {

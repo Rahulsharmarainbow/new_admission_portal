@@ -382,6 +382,7 @@ const RankCardForm: React.FC<RankCardFormProps> = ({ isOpen, onClose, onSuccess 
         `${apiUrl}/${user?.role}/Dropdown/get-degree`,
         {
           academic_id: parseInt(academicId),
+          s_id: user?.id || "",
         },
         {
           headers: {

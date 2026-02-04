@@ -64,6 +64,7 @@ const TemplatesManagementTable: React.FC = () => {
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Campaign/list`,
         {
+          s_id: user?.id,
           page: filters.page,
           rowsPerPage: filters.rowsPerPage,
           order: filters.order,

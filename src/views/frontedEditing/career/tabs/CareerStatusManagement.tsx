@@ -206,6 +206,7 @@ const CareerStatusManagement: React.FC<CareerStatusManagementProps> = ({
     setLoading(true);
     try {
       const requestData: any = {
+        s_id: user?.id || "",
         search: debouncedSearch,
         page: filters.page,
         rowsPerPage: filters.rowsPerPage,

@@ -102,6 +102,7 @@ const ContentTab: React.FC<ContentTabProps> = ({ selectedAcademic }) => {
     setLoading(true);
     try {
       const payload = {
+        s_id: user?.id || "",
         academic_id: selectedAcademic ? parseInt(selectedAcademic) : undefined,
         page: filters.page,
         rowsPerPage: filters.rowsPerPage,

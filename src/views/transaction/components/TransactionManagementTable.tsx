@@ -83,6 +83,7 @@ const TransactionManagementTable: React.FC = () => {
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Transactions/get-transactions`,
         {
+          s_id: user?.id || "",
           academic_id: filters.academic_id || undefined,
           form_id: filters.form_id || undefined,
           startDate: filters.startDate || undefined,
