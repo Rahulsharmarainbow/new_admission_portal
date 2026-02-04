@@ -340,7 +340,8 @@ const CampaignHistoryTable: React.FC = () => {
             </div>
 
             {/* Academic Dropdown */}
-            <div className="relative w-full sm:w-auto">
+            {(user?.role === 'SuperAdmin' || user?.role === 'SupportAdmin') && (
+              <div className="relative w-full sm:w-auto">
               <AllAcademicsDropdown
                 name="academic"
                 value={dashboardFilters.academic || ''}
@@ -350,6 +351,7 @@ const CampaignHistoryTable: React.FC = () => {
                 className="min-w-[250px] text-sm"
               />
             </div>
+            )}
 
             {/* Route Dropdown */}
             <RouteDropdown

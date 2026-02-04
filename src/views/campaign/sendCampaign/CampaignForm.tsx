@@ -25,9 +25,10 @@ interface Template {
 
 const CampaignForm: React.FC = () => {
   const { user } = useAuth();
+  const academics = user?.academic_id || "";
   const [formMode, setFormMode] = useState<FormMode>('default');
   const [templateId, setTemplateId] = useState<string>("");
-  const [academicId, setAcademicId] = useState<string>("");
+  const [academicId, setAcademicId] = useState<string>(academics);
   const [degreeId, setDegreeId] = useState<string>("");
   const [studentPerformance, setStudentPerformance] = useState<string>("");
   const [channels, setChannels] = useState<string[]>([]);
@@ -44,9 +45,9 @@ const CampaignForm: React.FC = () => {
   });
 
   // Fetch templates on component mount
-  useEffect(() => {
-    fetchTemplates();
-  }, []);
+  // useEffect(() => {
+  //   fetchTemplates();
+  // }, []);
 
 
   const isFormValid = (): boolean => {
@@ -120,7 +121,7 @@ const CampaignForm: React.FC = () => {
   };
 
 
-
+console.log(user)
   // Fetch templates from API
   const fetchTemplates = async () => {
     try {
@@ -588,7 +589,9 @@ const CampaignForm: React.FC = () => {
         )}
 
         {/* Academic Dropdown - Always shown */}
-        <div>
+        {
+         ( user?.role == 'SuperAdmin' || user?.role == 'SupportAdmin') && (
+            <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Academic <span className="text-red-500">*</span>
           </label>
@@ -598,6 +601,8 @@ const CampaignForm: React.FC = () => {
             placeholder="Select Academic"
           />
         </div>
+          )
+        }
 
         {/* Degree Dropdown - Hidden in Excel mode */}
         

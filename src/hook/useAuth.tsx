@@ -14,6 +14,7 @@ interface User {
   email_status: number;
   sms_status: number;
   token?: string;
+  compaign_access: number;
 }
 
 export interface AuthContextType {

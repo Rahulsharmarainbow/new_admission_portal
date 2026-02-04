@@ -255,11 +255,12 @@
 
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Label, TextInput, Textarea } from 'flowbite-react';
 import axios from 'axios';
 import { useAuth } from 'src/hook/useAuth';
 import toast from 'react-hot-toast';
+import JoditEditor from 'jodit-react';
 
 interface TemplateFormModalProps {
   isOpen: boolean;
@@ -290,7 +291,62 @@ const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
     sms_body: '',
   });
 
+    const wtsp_body = useRef<HTMLInputElement>(null);
+    const email_body = useRef<HTMLInputElement>(null);
+    const sms_body = useRef(null);
+
   const apiUrl = import.meta.env.VITE_API_URL;
+
+     // Jodit Editor configuration
+     const editorConfig = useMemo(
+      () => ({
+        readonly: false,
+        height: 300,
+        toolbarSticky: false,
+        toolbarAdaptive: false,
+        buttons: [
+          "source",
+          "|",
+          "bold",
+          "italic",
+          "underline",
+          "strikethrough",
+          "|",
+          "ul",
+          "ol",
+          "|",
+          "font",
+          "fontsize",
+          "brush",
+          "paragraph",
+          "|",
+          "image",
+          "video",
+          "table",
+          "link",
+          "|",
+          "left",
+          "center",
+          "right",
+          "justify",
+          "|",
+          "undo",
+          "redo",
+          "|",
+          "hr",
+          "eraser",
+          "copyformat",
+          "fullsize",
+        ],
+        showXPathInStatusbar: false,
+        showCharsCounter: false,
+        showWordsCounter: false,
+        uploader: { insertImageAsBase64URI: true },
+        placeholder: "Start typing your email template here...",
+        theme: "default",
+      }),
+      []
+    );
 
   useEffect(() => {
     if (isOpen) {
@@ -421,7 +477,7 @@ const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
               <Label htmlFor="whatsapp-body" className="block mb-2 font-medium">
                 WhatsApp Body <span className="text-red-500">*</span>
               </Label>
-              <Textarea
+              {/* <Textarea
                 id="whatsapp-body"
                 value={formData.wtsp_body}
                 onChange={(e) => handleInputChange('wtsp_body', e.target.value)}
@@ -430,7 +486,13 @@ const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
                 disabled={loading}
                 rows={4}
                 className="resize-vertical w-full"
-              />
+              /> */}
+              <JoditEditor
+                                  ref={wtsp_body}
+                                  value={formData.wtsp_body}
+                                  config={editorConfig}
+                                  onBlur={(e) => handleInputChange('wtsp_body', e)}
+                                />
               <p className="text-sm text-gray-500 mt-1">
                 Use variables like: {'{#name#}'}, {'{#roll_no#}'}, {'{#course#}'}, etc.
               </p>
@@ -441,7 +503,7 @@ const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
               <Label htmlFor="email-body" className="block mb-2 font-medium">
                 Email Body <span className="text-red-500">*</span>
               </Label>
-              <Textarea
+              {/* <Textarea
                 id="email-body"
                 value={formData.email_body}
                 onChange={(e) => handleInputChange('email_body', e.target.value)}
@@ -450,7 +512,13 @@ const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
                 disabled={loading}
                 rows={4}
                 className="resize-vertical w-full"
-              />
+              /> */}
+              <JoditEditor
+                                  ref={email_body}
+                                  value={formData.email_body}
+                                  config={editorConfig}
+                                  onBlur={(e) => handleInputChange('email_body', e)}
+                                />
               <p className="text-sm text-gray-500 mt-1">
                 Use variables like: {'{#name#}'}, {'{#roll_no#}'}, {'{#course#}'}, etc.
               </p>
@@ -461,7 +529,7 @@ const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
               <Label htmlFor="sms-body" className="block mb-2 font-medium">
                 SMS Body <span className="text-red-500">*</span>
               </Label>
-              <Textarea
+              {/* <Textarea
                 id="sms-body"
                 value={formData.sms_body}
                 onChange={(e) => handleInputChange('sms_body', e.target.value)}
@@ -470,7 +538,13 @@ const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
                 disabled={loading}
                 rows={3}
                 className="resize-vertical w-full"
-              />
+              /> */}
+              <JoditEditor
+                                  ref={sms_body}
+                                  value={formData.sms_body}
+                                  config={editorConfig}
+                                  onBlur={(e) => handleInputChange('sms_body', e)}
+                                />
               <p className="text-sm text-gray-500 mt-1">
                 Use variables like: {'{#name#}'}, {'{#roll_no#}'}, {'{#course#}'}, etc.
               </p>

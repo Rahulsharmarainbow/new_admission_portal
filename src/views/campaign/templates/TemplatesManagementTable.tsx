@@ -277,6 +277,13 @@ const TemplatesManagementTable: React.FC = () => {
     return `${text.substring(0, maxLength)}...`;
   };
 
+  const stripHtml = (html: string | null | undefined) => {
+  if (!html) return "";
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return doc.body.textContent || "";
+};
+
+
   return (
     <>
       <div className="mb-6">
@@ -397,39 +404,42 @@ const TemplatesManagementTable: React.FC = () => {
                         </td>
                         <td className="py-4 px-4 text-sm text-gray-600 max-w-xs">
                           <Tooltip
-                            content={template.wtsp_body}
-                            placement="top"
-                            style="light"
-                            animation="duration-300"
-                          >
-                            <span className="truncate block">
-                              {truncateText(template.wtsp_body, 50)}
-                            </span>
-                          </Tooltip>
+  content={stripHtml(template.wtsp_body)}
+  placement="top"
+  style="light"
+  animation="duration-300"
+>
+  <span className="truncate block">
+    {truncateText(stripHtml(template.wtsp_body), 50)}
+  </span>
+</Tooltip>
+
                         </td>
                         <td className="py-4 px-4 text-sm text-gray-600 max-w-xs">
                           <Tooltip
-                            content={template.email_body}
-                            placement="top"
-                            style="light"
-                            animation="duration-300"
-                          >
-                            <span className="truncate block">
-                              {truncateText(template.email_body, 50)}
-                            </span>
-                          </Tooltip>
+  content={stripHtml(template.email_body)}
+  placement="top"
+  style="light"
+  animation="duration-300"
+>
+  <span className="truncate block">
+    {truncateText(stripHtml(template.email_body), 50)}
+  </span>
+</Tooltip>
+
                         </td>
                         <td className="py-4 px-4 text-sm text-gray-600 max-w-xs">
                           <Tooltip
-                            content={template.sms_body}
-                            placement="top"
-                            style="light"
-                            animation="duration-300"
-                          >
-                            <span className="truncate block">
-                              {truncateText(template.sms_body, 50)}
-                            </span>
-                          </Tooltip>
+  content={stripHtml(template.sms_body)}
+  placement="top"
+  style="light"
+  animation="duration-300"
+>
+  <span className="truncate block">
+    {truncateText(stripHtml(template.sms_body), 50)}
+  </span>
+</Tooltip>
+
                         </td>
                         <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-600">
                           {new Date(template.created_at).toLocaleDateString()}

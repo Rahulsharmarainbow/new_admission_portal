@@ -42,7 +42,7 @@ const SchoolDropdown: React.FC<SchoolDropdownProps> = ({
       try {
         const response = await axios.post(
           `${apiUrl}/${user?.role}/Dropdown/get-school`,
-          {},
+          {s_id: user?.id},
           {
             headers: {
               Authorization: `Bearer ${user?.token}`,
