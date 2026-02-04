@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef,useMemo,useCallback } from 'react';
 import { Button, Card, Textarea, Label, FileInput } from 'flowbite-react';
 import axios from 'axios';
 import AcademicDropdown from 'src/Frontend/Common/AcademicDropdown';
@@ -8,6 +8,7 @@ import { useAuth } from 'src/hook/useAuth';
 import toast from 'react-hot-toast';
 import RouteDropdown from 'src/Frontend/Common/RouteDropdown';
 import AllAcademicsDropdown from 'src/Frontend/Common/AllAcademicsDropdown';
+import JoditEditor from 'jodit-react';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -32,9 +33,13 @@ const CampaignForm: React.FC = () => {
   const [degreeId, setDegreeId] = useState<string>("");
   const [studentPerformance, setStudentPerformance] = useState<string>("");
   const [channels, setChannels] = useState<string[]>([]);
+  const [emailSubject,setEmailSubject] = useState('');
   const [loading, setLoading] = useState(false);
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
+  const whatsappEditorRef = useRef<HTMLInputElement>(null);
+  const smsEditorRef = useRef<HTMLInputElement>(null);
+  const emailEditorRef = useRef<HTMLInputElement>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   
   // Custom template form data
@@ -43,6 +48,134 @@ const CampaignForm: React.FC = () => {
     email_body: "Dear {#name#},<br>Your roll number is {#roll_no#}.<br>Regards, Academic Dept.",
     sms_body: "Hi {#name#}, Roll No {#roll_no#} - Check your result online."
   });
+
+  const editorConfig = useMemo(
+        () => ({
+          readonly: false,
+          height: 300,
+          toolbarSticky: false,
+          toolbarAdaptive: false,
+          buttons: [
+            "source",
+            "|",
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "|",
+            "ul",
+            "ol",
+            "|",
+            "font",
+            "fontsize",
+            "brush",
+            "paragraph",
+            "|",
+            "image",
+            "video",
+            "table",
+            "link",
+            "|",
+            "left",
+            "center",
+            "right",
+            "justify",
+            "|",
+            "undo",
+            "redo",
+            "|",
+            "hr",
+            "eraser",
+            "copyformat",
+            "fullsize",
+          ],
+          showXPathInStatusbar: false,
+          showCharsCounter: false,
+          showWordsCounter: false,
+          uploader: { insertImageAsBase64URI: true },
+          placeholder: "Start typing your email template here...",
+          theme: "default",
+        }),
+        []
+      );
+
+      const whatsappEditorConfig = useMemo(() => ({
+        readonly: false,
+        height: 200,
+        placeholder: "Enter WhatsApp message template. Use {#variable#} for dynamic content.",
+        readonly: loading,
+        toolbarAdaptive: false,
+        buttons: [
+          'bold', 'italic', 'underline', 'strikethrough',
+          '|', 'ul', 'ol', 'outdent', 'indent',
+          '|', 'font', 'fontsize', 'brush', 'paragraph',
+          '|', 'link', 'symbols', 'fullsize'
+        ],
+        showXPathInStatusbar: false,
+        showCharsCounter: false,
+        showWordsCounter: false,
+        uploader: { insertImageAsBase64URI: true },
+        theme: "default",
+      }), [loading]); // Only depends on loading
+
+      const handleWhatsAppBlur = useCallback((newContent: string) => {
+        setCustomTemplateData(prev => ({
+          ...prev,
+          whatsapp_body: newContent
+        }));
+      }, []);
+
+      const emailEditorConfig = useMemo(() => ({
+        readonly: false,
+        height: 200,
+        placeholder: "Enter WhatsApp message template. Use {#variable#} for dynamic content.",
+        readonly: loading,
+        toolbarAdaptive: false,
+        buttons: [
+          'bold', 'italic', 'underline', 'strikethrough',
+          '|', 'ul', 'ol', 'outdent', 'indent',
+          '|', 'font', 'fontsize', 'brush', 'paragraph',
+          '|', 'link', 'symbols', 'fullsize'
+        ],
+        showXPathInStatusbar: false,
+        showCharsCounter: false,
+        showWordsCounter: false,
+        uploader: { insertImageAsBase64URI: true },
+        theme: "default",
+      }), [loading]); // Only depends on loading
+
+      const handleEmailBlur = useCallback((newContent: string) => {
+        setCustomTemplateData(prev => ({
+          ...prev,
+          email_body: newContent
+        }));
+      }, []);
+
+      const smsEditorConfig = useMemo(() => ({
+        readonly: false,
+        height: 200,
+        placeholder: "Enter WhatsApp message template. Use {#variable#} for dynamic content.",
+        readonly: loading,
+        toolbarAdaptive: false,
+        buttons: [
+          'bold', 'italic', 'underline', 'strikethrough',
+          '|', 'ul', 'ol', 'outdent', 'indent',
+          '|', 'font', 'fontsize', 'brush', 'paragraph',
+          '|', 'link', 'symbols', 'fullsize'
+        ],
+        showXPathInStatusbar: false,
+        showCharsCounter: false,
+        showWordsCounter: false,
+        uploader: { insertImageAsBase64URI: true },
+        theme: "default",
+      }), [loading]); // Only depends on loading
+
+      const handleSmsBlur = useCallback((newContent: string) => {
+        setCustomTemplateData(prev => ({
+          ...prev,
+          sms_body: newContent
+        }));
+      }, []);
 
   // Fetch templates on component mount
   // useEffect(() => {
@@ -165,6 +298,9 @@ console.log(user)
       
       if (response.data.status) {
         setSelectedTemplate(response.data.data);
+        if(formMode != 'custom_template'){
+          setEmailSubject(response.data.data.name); 
+        }
       }
     } catch (error) {
       console.error('Error fetching template details:', error);
@@ -263,7 +399,7 @@ console.log(user)
     }
 
     setLoading(true);
-    
+    // console.log(emailSubject);return false;
     try {
       if (formMode === 'excel_upload') {
         // For Excel upload, create FormData
@@ -349,9 +485,12 @@ console.log(user)
           student_performance_group: studentPerformance,
           channels: channels,
         };
+        if (emailSubject) {
+            requestData.email_subject = emailSubject;
+          }
 
         if (formMode === 'custom_template') {
-          // Prepare content for custom template
+          
           const content: any = {};
           if (channels.includes('whatsapp')) {
             content.whatsapp = customTemplateData.whatsapp_body;
@@ -535,29 +674,45 @@ console.log(user)
         </div>
       </div>
 
-      {/* Four Dropdowns in One Line - Conditionally rendered */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        {/* Template Dropdown - Only for default mode */}
-        {formMode !== 'custom_template' && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Template {isFieldRequired('template') && <span className="text-red-500">*</span>}
-            </label>
-            <TemplateDropdown
-              value={templateId}
-              onChange={handleTemplateChange}
-              placeholder="Select Template"
-              includeAllOption={false}
-              includeCustomOption={true}
-            />
-            {selectedTemplate && (
-              <p className="text-xs text-gray-500 mt-1">
-                Selected: {selectedTemplate.name}
+        {/* Excel Upload Mode Indicator */}
+        {formMode === 'excel_upload' && (
+          <div className="mb-4">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center">
+                <span className="text-green-500 mr-2">📊</span>
+                <span className="text-green-800 font-medium">Excel Upload Mode</span>
+              </div>
+              <p className="text-sm text-green-600 mt-1">
+                Upload Excel file with student data. Degree and Performance filters are not required.
               </p>
-            )}
+            </div>
           </div>
         )}
 
+      {/* Four Dropdowns in One Line - Conditionally rendered */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      {formMode !== 'custom_template' && (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Template {isFieldRequired('template') && <span className="text-red-500">*</span>}
+    </label>
+    <TemplateDropdown
+      value={templateId}
+      onChange={handleTemplateChange}
+      placeholder="Select Template"
+      includeAllOption={false}
+      includeCustomOption={true}
+    />
+    {selectedTemplate && (
+      <p className="text-xs text-gray-500 mt-1">
+        Selected: {selectedTemplate.name}
+      </p>
+    )}
+    
+    {/* Email Subject Field - 50% width */}
+   
+  </div>
+)}
         {/* Custom Template Indicator */}
         {formMode === 'custom_template' && (
           <div className="col-span-4">
@@ -573,20 +728,7 @@ console.log(user)
           </div>
         )}
 
-        {/* Excel Upload Mode Indicator */}
-        {formMode === 'excel_upload' && (
-          <div className="col-span-4">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center">
-                <span className="text-green-500 mr-2">📊</span>
-                <span className="text-green-800 font-medium">Excel Upload Mode</span>
-              </div>
-              <p className="text-sm text-green-600 mt-1">
-                Upload Excel file with student data. Degree and Performance filters are not required.
-              </p>
-            </div>
-          </div>
-        )}
+      
 
         {/* Academic Dropdown - Always shown */}
         {
@@ -643,6 +785,8 @@ console.log(user)
             </select>
           </div>
         )}
+
+        
       </div>
 
       {/* Excel File Upload - Only in Excel mode */}
@@ -685,6 +829,22 @@ console.log(user)
         </div>
       )}
 
+      {formMode == 'custom_template' && (
+           <div className="mt-4 mb-4 w-1/2">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Email Subject {isFieldRequired('email_subject') && <span className="text-red-500">*</span>}
+      </label>
+      <input
+        type="text"
+        value={emailSubject || ''}
+        onChange={(e) => setEmailSubject(e.target.value)}
+        placeholder="Enter email subject line"
+        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+      />
+    
+    </div>
+        )}
+
       {/* Custom Template Text Areas - Only in custom template mode */}
       {formMode === 'custom_template' && (
         <div className="mb-6 space-y-4">
@@ -695,16 +855,13 @@ console.log(user)
               <Label htmlFor="whatsapp-body" className="block mb-2 font-medium">
                 WhatsApp Body {isFieldRequired('whatsapp_body') && <span className="text-red-500">*</span>}
               </Label>
-              <Textarea
-                id="whatsapp-body"
-                value={customTemplateData.whatsapp_body}
-                onChange={(e) => handleCustomTemplateChange('whatsapp_body', e.target.value)}
-                placeholder="Enter WhatsApp message template. Use {#variable#} for dynamic content."
-                required={isFieldRequired('whatsapp_body')}
-                disabled={loading}
-                rows={4}
-                className="resize-vertical w-full"
-              />
+             
+               <JoditEditor
+                  ref={whatsappEditorRef}
+                  value={customTemplateData.whatsapp_body || ''}
+                  config={whatsappEditorConfig}
+                  onBlur={handleWhatsAppBlur}
+                  />
               <p className="text-sm text-gray-500 mt-1">
                 Use variables like: {'{#name#}'}, {'{#roll_no#}'}, {'{#course#}'}, etc.
               </p>
@@ -716,16 +873,33 @@ console.log(user)
               <Label htmlFor="email-body" className="block mb-2 font-medium">
                 Email Body {isFieldRequired('email_body') && <span className="text-red-500">*</span>}
               </Label>
-              <Textarea
-                id="email-body"
-                value={customTemplateData.email_body}
-                onChange={(e) => handleCustomTemplateChange('email_body', e.target.value)}
-                placeholder="Enter email message template. Use {#variable#} for dynamic content."
-                required={isFieldRequired('email_body')}
-                disabled={loading}
-                rows={4}
-                className="resize-vertical w-full"
-              />
+           
+               {/* <JoditEditor
+                ref={emailEditorRef}
+                value={customTemplateData.email_body || ''}
+                config={{
+                  ...editorConfig,
+                  placeholder: "Enter WhatsApp message template. Use {#variable#} for dynamic content.",
+                  readonly: loading,
+                  height: 200, // Adjust height as needed
+                  toolbarAdaptive: false,
+                  buttons: [
+                    'bold', 'italic', 'underline', 'strikethrough',
+                    '|', 'ul', 'ol', 'outdent', 'indent',
+                    '|', 'font', 'fontsize', 'brush', 'paragraph',
+                    '|', 'link', 'symbols', 'fullsize'
+                  ]
+                }}
+                onBlur={(newContent) => handleCustomTemplateChange('email_body', newContent)}
+              
+              /> */}
+
+              <JoditEditor
+                  ref={emailEditorRef}
+                  value={customTemplateData.email_body || ''}
+                  config={emailEditorConfig}
+                  onBlur={handleEmailBlur}
+                  />
               <p className="text-sm text-gray-500 mt-1">
                 Use variables like: {'{#name#}'}, {'{#roll_no#}'}, {'{#course#}'}, etc.
               </p>
@@ -737,16 +911,34 @@ console.log(user)
               <Label htmlFor="sms-body" className="block mb-2 font-medium">
                 SMS Body {isFieldRequired('sms_body') && <span className="text-red-500">*</span>}
               </Label>
-              <Textarea
-                id="sms-body"
-                value={customTemplateData.sms_body}
-                onChange={(e) => handleCustomTemplateChange('sms_body', e.target.value)}
-                placeholder="Enter SMS message template. Use {#variable#} for dynamic content."
-                required={isFieldRequired('sms_body')}
-                disabled={loading}
-                rows={3}
-                className="resize-vertical w-full"
-              />
+          
+              {/* <JoditEditor
+                ref={smsEditorRef}
+                value={customTemplateData.sms_body || ''}
+                config={{
+                  ...editorConfig,
+                  placeholder: "Enter WhatsApp message template. Use {#variable#} for dynamic content.",
+                  readonly: loading,
+                  height: 200, // Adjust height as needed
+                  toolbarAdaptive: false,
+                  buttons: [
+                    'bold', 'italic', 'underline', 'strikethrough',
+                    '|', 'ul', 'ol', 'outdent', 'indent',
+                    '|', 'font', 'fontsize', 'brush', 'paragraph',
+                    '|', 'link', 'symbols', 'fullsize'
+                  ]
+                }}
+                onBlur={(newContent) => handleCustomTemplateChange('sms_body', newContent)}
+                 
+              
+              /> */}
+
+              <JoditEditor
+                  ref={smsEditorRef}
+                  value={customTemplateData.sms_body || ''}
+                  config={smsEditorConfig}
+                  onBlur={handleSmsBlur}
+                  />
               <p className="text-sm text-gray-500 mt-1">
                 Use variables like: {'{#name#}'}, {'{#roll_no#}'}, {'{#course#}'}, etc.
               </p>
@@ -754,6 +946,9 @@ console.log(user)
           )}
         </div>
       )}
+
+
+      
 
       {/* Three Checkboxes in One Line */}
       <div className="flex gap-6 mb-6">
@@ -782,6 +977,7 @@ console.log(user)
           </label>
         ))}
       </div>
+
 
       {/* Channel Data Boxes - Show actual template content in default mode */}
       {channels.length > 0 && formMode !== 'custom_template' && (

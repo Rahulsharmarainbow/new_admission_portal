@@ -488,11 +488,11 @@ const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
                 className="resize-vertical w-full"
               /> */}
               <JoditEditor
-                                  ref={wtsp_body}
-                                  value={formData.wtsp_body}
-                                  config={editorConfig}
-                                  onBlur={(e) => handleInputChange('wtsp_body', e)}
-                                />
+                ref={wtsp_body}
+                value={formData.wtsp_body}
+                config={editorConfig}
+                onBlur={(e) => handleInputChange('wtsp_body', e)}
+              />
               <p className="text-sm text-gray-500 mt-1">
                 Use variables like: {'{#name#}'}, {'{#roll_no#}'}, {'{#course#}'}, etc.
               </p>
