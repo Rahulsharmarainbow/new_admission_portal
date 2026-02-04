@@ -401,7 +401,7 @@ const SidebarContent: Record<number, MenuItem[]> = {
             {
               name: 'College Applications',
               id: uniqueId(),
-              url: '/SupportAdmin/career-applications',
+              url: '/SupportAdmin/college-applications',
               isPro: false,
             },
           ],

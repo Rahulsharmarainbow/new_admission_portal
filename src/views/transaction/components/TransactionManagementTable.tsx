@@ -255,7 +255,7 @@ const TransactionManagementTable: React.FC = () => {
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Transactions/export-transaction`,
         {
-          s_id: '1', // You might want to make this dynamic based on your requirements
+          s_id: user?.id || '', // You might want to make this dynamic based on your requirements
           academic_id: filters.academic_id || '',
           form_id: filters.form_id || '',
           startDate: filters.startDate || '',
