@@ -945,6 +945,7 @@ import { BsPlusLg, BsSearch, BsDownload } from 'react-icons/bs';
 import { MdDeleteForever } from 'react-icons/md';
 import RankCardForm from './RankCardForm';
 import DeleteConfirmationModal from 'src/Frontend/Common/DeleteConfirmationModal';
+import { s } from 'node_modules/react-router/dist/development/context-CIdFp11b.d.mts';
 
 interface RankCard {
   id: number;
@@ -1005,6 +1006,7 @@ const RankCardTable: React.FC = () => {
           order: filters.order,
           orderBy: filters.orderBy,
           search: filters.search,
+          s_id: user?.id,
         },
         {
           headers: {
