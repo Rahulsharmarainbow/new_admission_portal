@@ -2251,11 +2251,13 @@ const AcademicBannersTable: React.FC = () => {
   };
 
   // Handle status toggle
-  const handleStatusToggle = async (id: number, currentStatus: boolean) => {
+  const handleStatusToggle = async (id: number, currentStatus: boolean,academic_id) => {
     setToggleLoading(id);
     try {
+      // alert(academic_id);return false;
       const formData = new FormData();
       formData.append('id', id.toString());
+      formData.append('academic_id', academic_id);
       formData.append('is_active', currentStatus ? '0' : '1');
       formData.append('s_id', user?.id?.toString() || '');
 
@@ -2482,7 +2484,7 @@ const AcademicBannersTable: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <ToggleSwitch
                               checked={banner.is_active}
-                              onChange={() => handleStatusToggle(banner.id, banner.is_active)}
+                              onChange={() => handleStatusToggle(banner.id, banner.is_active,banner.academic_id)}
                               disabled={toggleLoading === banner.id}
                             />
                             <span className={`text-sm font-medium ${banner.is_active ? 'text-green-600' : 'text-red-600'}`}>
