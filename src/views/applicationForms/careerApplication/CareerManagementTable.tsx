@@ -844,7 +844,7 @@ const CareerManagementTable: React.FC = () => {
               </div>
 
               {/* Academic Dropdown - Only for SuperAdmin */}
-              {user?.role === 'SuperAdmin' && (
+              {user?.role === 'SuperAdmin' ||  user?.role === 'SupportAdmin' && (
                 <div className="w-full sm:w-48">
                   <CareerDropdown
                     value={filters.academic_id}
