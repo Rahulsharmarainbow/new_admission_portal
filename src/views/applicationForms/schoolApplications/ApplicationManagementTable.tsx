@@ -18,6 +18,8 @@ import SchoolFilterSidebar from './components/SchoolFilterSidebar';
 import CareerDropdown from 'src/Frontend/Common/CareerDropdown';
 import PaymentButton from './components/PaymentButton';
 import AdminAddApplication from './components/AdminAddApplication';
+import { Icon } from '@iconify/react/dist/iconify.js';
+import AddApplicationModal from './components/AddApplicationModal';
 
 interface Application {
   id: number;
@@ -141,7 +143,20 @@ const ApplicationManagementTable: React.FC = () => {
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [downloadingId, setDownloadingId] = useState(null);
-  const [showAddModal, setShowAddModal] = useState(false);
+
+
+  const [showAddApplicationModal, setShowAddApplicationModal] = useState(false);
+const [addApplicationLoading, setAddApplicationLoading] = useState(false);
+const [academicId, setAcademicId] = useState<string>('');
+const [degreeId, setDegreeId] = useState<string>('');
+const [formConfig, setFormConfig] = useState<any>(null);
+const [addFormData, setAddFormData] = useState<{ [key: string]: any }>({});
+const [addFileData, setAddFileData] = useState<{ [key: string]: any }>({});
+const [addFormErrors, setAddFormErrors] = useState<{ [key: string]: string }>({});
+const [paymentMode, setPaymentMode] = useState<string>('online');
+const [chequeRemark, setChequeRemark] = useState<string>('');
+const [chequeFile, setChequeFile] = useState<File | null>(null);
+
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const apiAssetsUrl = import.meta.env.VITE_ASSET_URL;
@@ -610,17 +625,19 @@ const ApplicationManagementTable: React.FC = () => {
                   classNamePrefix="react-select"
                 />
               </div>
-              <Button
-  onClick={() => setShowAddModal(true)}
-  className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
->
-  + Add Application
-</Button>
 
             </div>
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3 w-full sm:w-auto">
+
+                <Button
+    onClick={() => setShowAddApplicationModal(true)}
+    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+  >
+    <Icon icon="solar:add-circle-line-duotone" className="w-4 h-4" />
+    <span>Add Application</span>
+  </Button>
               {/* Filter Button with Badge - Only Icon */}
               <Button
                 onClick={() => setShowFilterSidebar(!showFilterSidebar)}
@@ -938,20 +955,14 @@ const ApplicationManagementTable: React.FC = () => {
         />
       </div>
 
-      <Modal
-  show={showAddModal}
-  size="7xl"
-  onClose={() => setShowAddModal(false)}
-  dismissible
->
-  <ModalHeader>Add New Application</ModalHeader>
-
-  <ModalBody className="h-[85vh] overflow-y-auto">
-    <AdminAddApplication
-      onClose={() => setShowAddModal(false)}
-    />
-  </ModalBody>
-</Modal>
+      <AddApplicationModal
+  isOpen={showAddApplicationModal}
+  onClose={() => setShowAddApplicationModal(false)}
+  user={user}
+  apiUrl={apiUrl}
+  onSuccess={fetchApplications} 
+  type="school"
+/>
 
 
       {/* Application Detail Modal */}

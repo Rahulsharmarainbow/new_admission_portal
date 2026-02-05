@@ -374,3 +374,14 @@
   padding-left: 0.25rem;
 }
 
+/* styles.css में जोड़ें */
+.fullscreen-modal {
+  max-width: 95% !important;
+  max-height: 95% !important;
+  margin: auto;
+}
+
+.form-step-container {
+  max-height: 70vh;
+  overflow-y: auto;
+}
