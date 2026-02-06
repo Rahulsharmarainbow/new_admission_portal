@@ -1,5 +1,5 @@
 // components/AddApplicationModal.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, Button, TextInput, Textarea, Select, Spinner, ModalHeader, ModalBody, ModalFooter } from 'flowbite-react';
 import { Icon } from '@iconify/react';
 import axios from 'axios';
@@ -36,9 +36,11 @@ const AddApplicationModal: React.FC<AddApplicationModalProps> = ({
   const [fileData, setFileData] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [formOptions, setFormOptions] = useState<{ [key: string]: any[] }>({});
-  const [paymentMode, setPaymentMode] = useState<string>('online');
+  const [paymentMode, setPaymentMode] = useState<string>('cash');
   const [chequeRemark, setChequeRemark] = useState<string>('');
   const [chequeFile, setChequeFile] = useState<File | null>(null);
+  const [chequeBase64, setChequeBase64] = useState<string | null>(null);
+
 
   // Academic options fetch
   const [academicOptions, setAcademicOptions] = useState<any[]>([]);
@@ -90,7 +92,7 @@ const AddApplicationModal: React.FC<AddApplicationModalProps> = ({
       );
        const list = response.data.data.map((item: any) => ({
             value: item.id,
-            label: item.page_name,
+            label: item.page_route,
           }));
       setDegreeOptions(list || []);
     } catch (error) {
@@ -134,33 +136,218 @@ const AddApplicationModal: React.FC<AddApplicationModalProps> = ({
   };
 
   // FormStep handlers
-  const handleInputChange = (name: string, value: any, fieldConfig?: any) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
+  const handleInputChange = useCallback(
+    (name: string, value: any, fieldConfig?: any) => {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
 
-  const handleSelectChange = (name: string, value: any, fieldConfig?: any) => {
-    const [valuePart, textPart] = value.split('$');
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-      [`s_${name}`]: textPart,
-    }));
-  };
+      // Clear error when user starts typing
+      if (errors[name]) {
+        setErrors((prev) => ({
+          ...prev,
+          [name]: '',
+        }));
+      }
+
+      // If field has API configuration, make API call
+      if (fieldConfig?.apiurl && fieldConfig?.target) {
+        fetch(
+          `${apiUrl}${fieldConfig.apiurl}?selectedValue=${encodeURIComponent(
+            value,
+          )}&academicId=${academicId}&customerId=${formConfig?.cdata.c_id}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.success === true) {
+              setFormOptions((prev) => ({
+                ...prev,
+                [fieldConfig.target]: data.classes || data,
+              }));
+            } else {
+              setFormOptions((prev) => ({
+                ...prev,
+                [fieldConfig.target]: [],
+              }));
+            }
+          })
+          .catch((error) => {
+            console.error('Error fetching data from API:', error);
+            setFormOptions((prev) => ({
+              ...prev,
+              [fieldConfig.target]: [],
+            }));
+          });
+      }
+    },
+    [errors, apiUrl, formConfig?.cdata],
+  );
+
+  const handleSelectChange = useCallback(
+    (name: string, value: any, fieldConfig?: any) => {
+      const [valuePart, textPart] = value.split('$');
+
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        [`s_${name}`]: textPart,
+      }));
+
+      // Clear error
+      if (errors[name]) {
+        setErrors((prev) => ({
+          ...prev,
+          [name]: '',
+        }));
+      }
+      console.log(fieldConfig?.apiurl);
+      console.log(fieldConfig?.target);
+      if (fieldConfig?.apiurl && name === 'class') {
+        console.log('hello', fieldConfig?.apiurl);
+        fetch(`${apiUrl}/${fieldConfig.apiurl}?selectedValue=${valuePart}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.success == true) {
+              setFormData((prev) => ({
+                ...prev,
+                [name]: value,
+                [`s_${name}`]: textPart,
+              }));
+            } else {
+              toast.error(data.message || 'Seats not available for this class');
+              setFormData((prev) => ({
+                ...prev,
+                [name]: '',
+                [`s_${name}`]: '',
+              }));
+
+              // Clear error
+              if (errors[name]) {
+                setErrors((prev) => ({
+                  ...prev,
+                  [name]: '',
+                }));
+              }
+            }
+          })
+          .catch((error) => {
+            console.error('Error fetching data from API:', error);
+          });
+      }
+
+      // Handle API calls for select fields
+      if (fieldConfig?.apiurl && fieldConfig?.target) {
+        fetch(`${apiUrl}/${fieldConfig?.apiurl}`, {
+          method: 'POST',
+
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ state_id: valuePart }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then((data) => {
+            const districts = data.districts.map((item: any) => ({
+              value: item.id,
+              text: item.district_title.trim(),
+            }));
+
+            setFormOptions((prev) => ({
+              ...prev,
+              [fieldConfig.target]: districts,
+            }));
+          })
+          .catch((error) => {
+            console.error('Error fetching data from API:', error);
+          });
+      }
+    },
+    [errors, apiUrl],
+  );
 
   const handleCheckboxChange = (name: string, value: boolean, fieldConfig?: any) => {
     setFormData(prev => ({ ...prev, [name]: value ? 1 : 0 }));
+        // Clear error immediately when date is selected
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: '',
+      }));
+    }
   };
 
   const handleDateChange = (name: string, date: any, fieldConfig?: any) => {
     setFormData(prev => ({ ...prev, [name]: date }));
+        // Clear error immediately when date is selected
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: '',
+      }));
+    }
   };
 
-  const handleAadhaarChange = (index: number, value: string, name: string, fieldConfig?: any) => {
-    setFormData(prev => ({ ...prev, [`${name}_${index}`]: value }));
-  };
+  const handleAadhaarChange = useCallback(
+    (index: number, value: string, name: string, fieldConfig?: any) => {
+      if (/^\d$/.test(value)) {
+        if (!isNaN(parseInt(value)) && value !== '' && value.length === 1) {
+          setFormData((prev) => ({
+            ...prev,
+            [`${name}_${index}`]: value,
+          }));
+
+          // Auto-focus next input
+          if (value && index < 11) {
+            const nextInput = document.querySelector(
+              `input[name="${name}_${index + 1}"]`,
+            ) as HTMLInputElement;
+            nextInput?.focus();
+          }
+        }
+      } else if (value === '') {
+        setFormData((prev) => ({
+          ...prev,
+          [`${name}_${index}`]: '',
+        }));
+
+        // Auto-focus previous input on backspace
+        if (index > 0) {
+          const prevInput = document.querySelector(
+            `input[name="${name}_${index - 1}"]`,
+          ) as HTMLInputElement;
+          prevInput?.focus();
+        }
+      }
+    },
+    [],
+  );
 
   const handleFileChange = async (name: string, file: File, fieldConfig?: any) => {
     const base64 = await new Promise<string>((resolve) => {
@@ -174,6 +361,13 @@ const AddApplicationModal: React.FC<AddApplicationModalProps> = ({
       [name]: base64,
       [name + '_file']: file,
     }));
+        // Clear error immediately when date is selected
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: '',
+      }));
+    }
   };
 
   // Validate form
@@ -183,85 +377,166 @@ const AddApplicationModal: React.FC<AddApplicationModalProps> = ({
     if (!formConfig) return false;
 
     // Validate required fields from formConfig
-    formConfig.required_child?.forEach((child: any) => {
-      if (child.required && !formData[child.name] && formData[child.name] !== 0) {
-        newErrors[child.name] = child.validation_message || `${child.label} is required`;
-      }
-    });
+    // formConfig.required_child?.forEach((child: any) => {
+    //   if (child.required && !formData[child.name] && formData[child.name] !== 0) {
+    //     newErrors[child.name] = child.validation_message || `${child.label} is required`;
+    //   }
+    // });
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // setErrors(newErrors);
+    // return Object.keys(newErrors).length === 0;
+
+
+     formConfig.required_child.forEach((child) => {
+          if (child.type === 'file_button') {
+            if (!fileData[child.name]) {
+              newErrors[child.name] = child.validation_message || `${child.label} is required`;
+            }
+          } else {
+            if (child.name === 'adharCard') {
+              let aadhaarCard = '';
+              let hasError = false;
+              for (let i = 0; i < 12; i++) {
+                const digit = formData[`adharCard_${i}`];
+                if (!digit) {
+                  newErrors[child.name] = 'All Aadhaar card digits are required';
+                  hasError = true;
+                  break;
+                }
+                aadhaarCard += digit;
+              }
+              if (!hasError && aadhaarCard.length === 12) {
+                delete newErrors[child.name];
+              }
+            }  else if (child.validation === 'email') {
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              if (!emailRegex.test(formData[child.name])) {
+                newErrors[child.name] = 'Invalid email address';
+              }
+            } else if (child.validation === 'mobile') {
+              const phoneRegex = /^\d{10}$/;
+              if (!phoneRegex.test(formData[child.name])) {
+                newErrors[child.name] = 'Phone number must be 10 digits';
+              }
+            } else if (child.type === 'date' && formData[child.name]) {
+              const inputDate = new Date(formData[child.name]);
+              const today = new Date();
+
+              if (isNaN(inputDate.getTime())) {
+                newErrors[child.name] = 'Invalid date format';
+              } else if (child.max_date) {
+                const maxAllowedDate = new Date(
+                  today.getFullYear() - child.max_date,
+                  today.getMonth(),
+                  today.getDate(),
+                );
+                if (inputDate > maxAllowedDate) {
+                  newErrors[child.name] = `Age must be at most ${child.max_date} years`;
+                }
+              }
+            }
+            else if (!formData[child.name] && formData[child.name] !== 0) {
+              newErrors[child.name] = child.validation_message || `${child.label} is required`;
+            }
+          }
+        });
+
+        // Special validation for SC/ST categories
+        const selectedCategory = formData.s_category;
+        const selectedhalth = formData?.child_has_any_issue?.includes('$')
+          ? formData.child_has_any_issue.split('$')[1]
+          : '';
+
+        if (
+          (selectedCategory === 'SC' || selectedCategory === 'ST') &&
+          !fileData['caste_certificate']
+        ) {
+          newErrors['caste_certificate'] = 'Caste certificate preview is required';
+        }
+        if (selectedhalth === 'Yes' && !formData?.specified_health_issue) {
+          newErrors['specified_health_issue'] = 'Please specify health issue';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
   };
-
+console.log(errors);
   // Handle form submission
-  const handleSubmit = async () => {
-    if (!validateForm()) {
-      toast.error('Please fill all required fields');
+const handleSubmit = async () => {
+  if (!validateForm()) {
+    toast.error('Please fill all required fields');
+    return;
+  }
+  console.log(paymentMode);
+
+  if (!paymentMode) {
+    toast.error('Please select payment mode');
+    return;
+  }
+
+  if (paymentMode == 'cheque') {
+    if (!chequeBase64) {
+      toast.error('Please upload cheque screenshot');
       return;
     }
-
-    setLoading(true);
-    try {
-      // Prepare data for first step submission
-      const submitData = {
-        c_id: formConfig?.cdata?.c_id || user.id,
-        cookieData: formData,
-        files: fileData,
-        academic_id: academicId,
-        form_id: formConfig?.formId,
-        admin_mode: true,
-        payment_mode: paymentMode,
-        cheque_remark: paymentMode === 'cheque' ? chequeRemark : '',
-        admin_id: user.id,
-        admin_role: user.role,
-      };
-
-      // Add cheque file if exists
-      const formDataObj = new FormData();
-      Object.keys(submitData).forEach(key => {
-        if (key === 'files') {
-          Object.keys(fileData).forEach(fileKey => {
-            if (fileData[fileKey + '_file']) {
-              formDataObj.append(`files[${fileKey}]`, fileData[fileKey + '_file']);
-            }
-          });
-        } else if (key === 'cookieData') {
-          formDataObj.append(key, JSON.stringify(submitData[key]));
-        } else {
-          formDataObj.append(key, submitData[key]);
-        }
-      });
-
-      if (paymentMode === 'cheque' && chequeFile) {
-        formDataObj.append('cheque_file', chequeFile);
-      }
-
-      const endpoint = formConfig?.academic_type === 1 
-        ? `${apiUrl}/frontend/school-save-first-step-data`
-        : `${apiUrl}/frontend/college-save-first-step-data`;
-
-      const response = await axios.post(endpoint, formDataObj, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
-
-      if (response.data.success) {
-        toast.success('Application added successfully!');
-        onSuccess();
-        onClose();
-        resetForm();
-      } else {
-        throw new Error(response.data.message || 'Failed to add application');
-      }
-    } catch (error: any) {
-      console.error('Error adding application:', error);
-      toast.error(error.response?.data?.message || 'Failed to add application');
-    } finally {
-      setLoading(false);
+    if (!chequeRemark) {
+      toast.error('Please enter cheque remark');
+      return;
     }
-  };
+  }
+
+  if (paymentMode == 'cash') {
+    if (!chequeRemark) {
+      toast.error('Please enter cheque remark');
+      return;
+    }
+  }
+
+  setLoading(true);
+
+  try {
+    const endpoint =
+      formConfig?.academic_type === 1
+        ? `${apiUrl}/${user.role}/Manual/school-manual-insert-data`
+        : `${apiUrl}/${user.role}/Manual/college-manual-insert-data`;
+
+    const payload = {
+      c_id: formConfig?.cdata?.c_id || user.id,
+      cookieData: formData,      
+      screenshot : paymentMode === "cheque" ? chequeBase64 : null,
+      cheque_remark: chequeRemark || "",
+      files: fileData, 
+      academic_id: academicId,
+      form_id: formConfig?.form_id,
+      payment_type_manual: paymentMode === 'cash' ? '0' : '1',
+      remark: chequeRemark || 'testing',
+      admin_id: user.id,
+      admin_role: user.role,
+    };
+
+    const response = await axios.post(endpoint, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${user.token}`,
+      },
+    });
+
+    if (response.data.success) {
+      toast.success('Application added successfully!');
+      onSuccess();
+      onClose();
+      resetForm();
+    } else {
+      throw new Error(response.data.message || 'Failed to add application');
+    }
+  } catch (error: any) {
+    console.error('Error adding application:', error);
+    toast.error(error.response?.data?.message || 'Failed to add application');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const resetForm = () => {
     setStep(0);
@@ -272,17 +547,26 @@ const AddApplicationModal: React.FC<AddApplicationModalProps> = ({
     setFileData({});
     setErrors({});
     setFormOptions({});
-    setPaymentMode('online');
+    setPaymentMode('cash');
     setChequeRemark('');
     setChequeFile(null);
   };
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setChequeFile(file);
-    }
-  };
+const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    setChequeFile(file);
+
+    const base64 = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.readAsDataURL(file);
+    });
+
+    setChequeBase64(base64);
+  }
+};
+
 
   return (
     <Modal
@@ -303,36 +587,13 @@ const AddApplicationModal: React.FC<AddApplicationModalProps> = ({
       <ModalBody className="p-0 h-[calc(100vh-140px)] overflow-y-auto">
         <div className="p-6">
           {step === 0 ? (
-            // Step 1: Select Academic and Route
             <div className="space-y-6">
-              {/* <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <div className="flex items-center gap-2 text-blue-700 mb-2">
-                  <Icon icon="solar:info-circle-line-duotone" className="w-5 h-5" />
-                  <span className="font-semibold">Select Academic Institution</span>
-                </div>
-                <p className="text-sm text-blue-600">
-                  Please select the academic institution and form route to start adding an application.
-                </p>
-              </div> */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Academic Institution *
                   </label>
-                  {/* <select
-                    value={academicId}
-                    onChange={(e) => setAcademicId(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    disabled={fetchingForm}
-                  >
-                    <option value="">Select Academic</option>
-                    {academicOptions.map(option => (
-                      <option key={option.id} value={option.id}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select> */}
                {
                 type === 'school' &&(
                        <SchoolDropdown
@@ -383,16 +644,6 @@ const AddApplicationModal: React.FC<AddApplicationModalProps> = ({
     </option>
   ))}
 </select>
-
-                  {/* <RouteDropdown  
-              academicId={academicId}
-              value={degreeId}
-              onChange={setDegreeId}
-              className="min-w-[250px] text-sm"
-              isRequired
-              placeholder={academicId ? "Select form page..." : "Select academic first"}
-              disabled={!academicId}
-            /> */}
                 </div>
               </div>
 
@@ -456,16 +707,6 @@ const AddApplicationModal: React.FC<AddApplicationModalProps> = ({
                       Payment Mode *
                     </label>
                     <div className="flex gap-4">
-                      {/* <label className="flex items-center space-x-3">
-                        <input
-                          type="radio"
-                          value="online"
-                          checked={paymentMode === 'online'}
-                          onChange={(e) => setPaymentMode(e.target.value)}
-                          className="w-4 h-4 text-blue-600"
-                        />
-                        <span className="text-gray-700">Online Payment</span>
-                      </label> */}
                       <label className="flex items-center space-x-3">
                         <input
                           type="radio"

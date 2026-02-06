@@ -57,6 +57,7 @@ interface TicketDetails {
 
 interface AddTicketForm {
   ticket_description: any;
+  academic_id: string;
   ticket_title: any;
   priority: string;
 }
@@ -90,13 +91,6 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [ticketToDelete, setTicketToDelete] = useState<number | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-
-  // Form states
-  const [addTicketForm, setAddTicketForm] = useState<AddTicketForm>({
-    ticket_title: '',
-    priority: '',
-    ticket_description: ''
-  });
   const [resolveTicketForm, setResolveTicketForm] = useState<ResolveTicketForm>({
     remark: ''
   });
@@ -295,6 +289,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
         `${apiUrl}/${user?.role}/Tickets/add-tickets`,
         {
           ticket_title: form.ticket_title,
+          academic_id: form.academic_id,
           priority: form.priority,
           ticket_description: form.ticket_description,
           s_id: user?.id
@@ -312,11 +307,6 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
       if (response.data.success) {
         toast.success('Ticket added successfully!');
         setShowAddTicketModal(false);
-        setAddTicketForm({
-          ticket_title: '',
-          priority: '',
-          ticket_description: ''
-        });
         fetchTickets();
       } else {
         toast.error('Failed to add ticket: ' + response.data.message);
