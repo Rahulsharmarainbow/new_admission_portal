@@ -314,19 +314,45 @@ const UserForm: React.FC = () => {
 
       if (response.data) {
         const userData = response.data.data;
-        setFormData((prev) => ({
-          ...prev,
+        
+        // Parse assign_academic_id from string to array
+        let assignAcademicIds: string[] = [];
+        
+        if (userData.assign_academic_id) {
+          try {
+            // If it's a JSON string like "[28,27]", parse it
+            if (typeof userData.assign_academic_id === 'string') {
+              const parsed = JSON.parse(userData.assign_academic_id);
+              assignAcademicIds = Array.isArray(parsed) 
+                ? parsed.map((id: any) => String(id))
+                : [String(userData.assign_academic_id)];
+            } else if (Array.isArray(userData.assign_academic_id)) {
+              assignAcademicIds = userData.assign_academic_id.map((id: any) => String(id));
+            }
+          } catch (e) {
+            console.error('Error parsing assign_academic_id:', e);
+            assignAcademicIds = [];
+          }
+        }
+        
+        console.log('Raw assign_academic_id:', userData.assign_academic_id);
+        console.log('Parsed assignAcademicIds:', assignAcademicIds);
+        
+        setFormData({
           name: userData.name || '',
           email: userData.email || '',
           number: userData.number || '',
           password: userData.d_password || '',
           academic_id: userData.academic_id?.toString() || '',
+          profile: null,
           profilePreview: userData.profile ? `${assetUrl}/${userData.profile}` : '',
           notify: userData.notify ?? 1, 
-          // assign_academic_id: userData.assign_academic_id?.map((id: number) => id.toString()) || [],
-          assign_academic_id: userData.assign_academic_id || [],
+          assign_academic_id: assignAcademicIds,
           compaign_access: userData.compaign_access ?? 0
-        }));
+        });
+        
+        console.log('Form data set with assign_academic_id:', assignAcademicIds);
+        
         // Validate existing phone number
         if (userData.number) {
           validatePhoneNumber(userData.number);
@@ -437,10 +463,14 @@ const UserForm: React.FC = () => {
       formDataToSend.append('type', type || '');
       if(type === '3')formDataToSend.append('notify', formData.notify.toString());
 
-      if (type === '2' && formData.assign_academic_id.length > 0) {
+      if (type === '2' && formData.assign_academic_id && formData.assign_academic_id.length > 0) {
+  // Convert string IDs to integers if needed
+  const academicIds = formData.assign_academic_id.map(id => 
+    typeof id === 'string' ? parseInt(id, 10) : id
+  );
   formDataToSend.append(
     'assign_academic_id',
-    JSON.stringify(formData.assign_academic_id)
+    JSON.stringify(academicIds)
   );
 }
 
