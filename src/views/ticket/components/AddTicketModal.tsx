@@ -1,10 +1,10 @@
+// src/components/Tickets/AddTicketModal.tsx
 import React from 'react';
+import { MdClose } from 'react-icons/md';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Label, TextInput, Textarea, Select } from "flowbite-react";
-import AllAcademicsDropdown from 'src/Frontend/Common/AllAcademicsDropdown';
 
 interface AddTicketForm {
   ticket_title: string;
-  academic_id: string;
   priority: 'low' | 'medium' | 'high' | '';
   ticket_description: string;
 }
@@ -24,7 +24,6 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({
 }) => {
   const [form, setForm] = React.useState<AddTicketForm>({
     ticket_title: '',
-    academic_id: '',
     priority: '',
     ticket_description: ''
   });
@@ -37,7 +36,6 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({
   const handleClose = () => {
     setForm({
       ticket_title: '',
-      academic_id: '',
       priority: '',
       ticket_description: ''
     });
@@ -64,21 +62,11 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({
       <form onSubmit={handleSubmit}>
         <ModalBody>
           <div className="space-y-4">
-
-            <div>
-              <AllAcademicsDropdown
-                  name="academic_id"
-                  label="Academic Institution "
-                  formData={form}
-                  setFormData={setForm}
-                  // isRequired={type === '3'}
-                  disabled={loading}
-                />
-            </div>
-
             {/* Ticket Title */}
             <div>
-              <Label htmlFor="ticket_title" value="Ticket Title *" />
+              <Label htmlFor="ticket_title">
+                Ticket Title *
+              </Label>
               <TextInput
                 id="ticket_title"
                 type="text"
@@ -89,11 +77,12 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({
                 disabled={loading}
               />
             </div>
-            
 
             {/* Priority */}
             <div>
-              <Label htmlFor="priority" value="Priority *" />
+              <Label htmlFor="priority">
+                Priority *
+              </Label>
               <Select
                 id="priority"
                 value={form.priority}
@@ -110,7 +99,9 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({
 
             {/* Description */}
             <div>
-              <Label htmlFor="ticket_description" value="Ticket Description *" />
+              <Label htmlFor="ticket_description">
+                Ticket Description *
+              </Label>
               <Textarea
                 id="ticket_description"
                 value={form.ticket_description}

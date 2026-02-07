@@ -57,7 +57,6 @@ interface TicketDetails {
 
 interface AddTicketForm {
   ticket_description: any;
-  academic_id: string;
   ticket_title: any;
   priority: string;
 }
@@ -91,6 +90,13 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [ticketToDelete, setTicketToDelete] = useState<number | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Form states
+  const [addTicketForm, setAddTicketForm] = useState<AddTicketForm>({
+    ticket_title: '',
+    priority: '',
+    ticket_description: ''
+  });
   const [resolveTicketForm, setResolveTicketForm] = useState<ResolveTicketForm>({
     remark: ''
   });
@@ -289,7 +295,6 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
         `${apiUrl}/${user?.role}/Tickets/add-tickets`,
         {
           ticket_title: form.ticket_title,
-          academic_id: form.academic_id,
           priority: form.priority,
           ticket_description: form.ticket_description,
           s_id: user?.id
@@ -307,6 +312,11 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
       if (response.data.success) {
         toast.success('Ticket added successfully!');
         setShowAddTicketModal(false);
+        setAddTicketForm({
+          ticket_title: '',
+          priority: '',
+          ticket_description: ''
+        });
         fetchTickets();
       } else {
         toast.error('Failed to add ticket: ' + response.data.message);
@@ -424,7 +434,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ status }) => {
             </div>
             
             {/* Add Ticket Button - Only show for Open Tickets */}
-            {status === 'open' && (
+            {(status === 'open' && user?.role === 'CustomerAdmin') && (
               <button
                 onClick={() => setShowAddTicketModal(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap"

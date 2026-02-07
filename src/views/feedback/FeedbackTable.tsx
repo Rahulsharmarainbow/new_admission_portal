@@ -150,17 +150,16 @@ const FeedbackTable: React.FC<FeedbackTableProps> = ({ status }) => {
   };
 
   // Add new feedback
-  const handleAddFeedback = async (form: { ticket_title: string; ticket_description: string; academic_id: string }) => {
+  const handleAddFeedback = async (form: { ticket_title: string; ticket_description: string }) => {
     setAddFeedbackLoading(true);
     try {
       const response = await axios.post(
         `${apiUrl}/${user?.role}/Tickets/add-tickets`,
         {
-          academic_id: form.academic_id,
           ticket_title: form.ticket_title,
           ticket_description: form.ticket_description,
           s_id: user?.id,
-          type: 1,
+          type: 1 // Pass type 1 for feedback
         },
         {
           headers: {
@@ -267,7 +266,9 @@ const FeedbackTable: React.FC<FeedbackTableProps> = ({ status }) => {
             </div>
             
             {/* Add Feedback Button */}
-            <button
+            {
+              user?.role === 'CustomerAdmin' && (
+                <button
               onClick={() => setShowAddFeedbackModal(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap"
             >
@@ -276,6 +277,8 @@ const FeedbackTable: React.FC<FeedbackTableProps> = ({ status }) => {
               </svg>
               Add Feedback
             </button>
+              )
+            }
           </div>
 
           {/* Table with Loader */}

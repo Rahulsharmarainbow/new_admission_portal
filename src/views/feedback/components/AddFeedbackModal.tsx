@@ -1,9 +1,7 @@
 import React from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Label, TextInput, Textarea } from "flowbite-react";
-import AllAcademicsDropdown from 'src/Frontend/Common/AllAcademicsDropdown';
 
 interface AddFeedbackForm {
-  academic_id: string;
   ticket_title: string;
   ticket_description: string;
 }
@@ -22,7 +20,6 @@ const AddFeedbackModal: React.FC<AddFeedbackModalProps> = ({
   loading
 }) => {
   const [form, setForm] = React.useState<AddFeedbackForm>({
-    academic_id: '',
     ticket_title: '',
     ticket_description: ''
   });
@@ -34,7 +31,6 @@ const AddFeedbackModal: React.FC<AddFeedbackModalProps> = ({
 
   const handleClose = () => {
     setForm({
-      academic_id: '',
       ticket_title: '',
       ticket_description: ''
     });
@@ -61,16 +57,6 @@ const AddFeedbackModal: React.FC<AddFeedbackModalProps> = ({
       <form onSubmit={handleSubmit}>
         <ModalBody>
           <div className="space-y-4">
-
-            <div>
-              <AllAcademicsDropdown
-                  name="academic_id"
-                  label="Academic"
-                  formData={form}
-                  setFormData={setForm}
-                  disabled={loading}
-                />
-            </div>
             {/* Feedback Title */}
             <div>
               <Label htmlFor="ticket_title">
@@ -89,7 +75,7 @@ const AddFeedbackModal: React.FC<AddFeedbackModalProps> = ({
 
             {/* Description */}
             <div>
-              <Label htmlFor="ticket_description">
+              <Label htmlFor="ticket_description" >
                 Feedback Description *
               </Label>
               <Textarea

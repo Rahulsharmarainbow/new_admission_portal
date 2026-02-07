@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { MdOutlineRemoveRedEye, MdFilterList, MdSort, MdClass, MdOutlinePayment } from 'react-icons/md';
+import {
+  MdOutlineRemoveRedEye,
+  MdFilterList,
+  MdSort,
+  MdClass,
+  MdOutlinePayment,
+} from 'react-icons/md';
 import { TbEdit, TbFileTypePdf, TbLoader2 } from 'react-icons/tb';
 import { BsDownload, BsSearch, BsX } from 'react-icons/bs';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
@@ -92,9 +98,6 @@ const getYearOptions = (yearsBack: number = 5): { value: string; label: string }
   return years;
 };
 
-
-
-
 const ApplicationManagementTable: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
@@ -144,19 +147,17 @@ const ApplicationManagementTable: React.FC = () => {
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [downloadingId, setDownloadingId] = useState(null);
 
-
   const [showAddApplicationModal, setShowAddApplicationModal] = useState(false);
-const [addApplicationLoading, setAddApplicationLoading] = useState(false);
-const [academicId, setAcademicId] = useState<string>('');
-const [degreeId, setDegreeId] = useState<string>('');
-const [formConfig, setFormConfig] = useState<any>(null);
-const [addFormData, setAddFormData] = useState<{ [key: string]: any }>({});
-const [addFileData, setAddFileData] = useState<{ [key: string]: any }>({});
-const [addFormErrors, setAddFormErrors] = useState<{ [key: string]: string }>({});
-const [paymentMode, setPaymentMode] = useState<string>('online');
-const [chequeRemark, setChequeRemark] = useState<string>('');
-const [chequeFile, setChequeFile] = useState<File | null>(null);
-
+  const [addApplicationLoading, setAddApplicationLoading] = useState(false);
+  const [academicId, setAcademicId] = useState<string>('');
+  const [degreeId, setDegreeId] = useState<string>('');
+  const [formConfig, setFormConfig] = useState<any>(null);
+  const [addFormData, setAddFormData] = useState<{ [key: string]: any }>({});
+  const [addFileData, setAddFileData] = useState<{ [key: string]: any }>({});
+  const [addFormErrors, setAddFormErrors] = useState<{ [key: string]: string }>({});
+  const [paymentMode, setPaymentMode] = useState<string>('online');
+  const [chequeRemark, setChequeRemark] = useState<string>('');
+  const [chequeFile, setChequeFile] = useState<File | null>(null);
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const apiAssetsUrl = import.meta.env.VITE_ASSET_URL;
@@ -196,33 +197,32 @@ const [chequeFile, setChequeFile] = useState<File | null>(null);
     setActiveFiltersCount(count);
   }, [filters, cdFilters]);
 
-
   const fetchPaymentDetailsApi = async (applicationId) => {
-  try {
-    const response = await fetch(`${apiUrl}/${user?.role}/Applications/getPayableAmount`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // Add authorization header if needed
-        'Authorization': `Bearer ${user?.token}`,
-      },
-      body: JSON.stringify({
-        application_id: applicationId,
-        s_id: user?.id,
-      })
-    });
+    try {
+      const response = await fetch(`${apiUrl}/${user?.role}/Applications/getPayableAmount`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authorization header if needed
+          Authorization: `Bearer ${user?.token}`,
+        },
+        body: JSON.stringify({
+          application_id: applicationId,
+          s_id: user?.id,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching payment details:', error);
+      throw error;
     }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching payment details:', error);
-    throw error;
-  }
-};
+  };
 
   const processPaymentApi = async (applicationId, discount, finalAmount) => {
     // Your API call to process payment
@@ -234,8 +234,8 @@ const [chequeFile, setChequeFile] = useState<File | null>(null);
       body: JSON.stringify({
         applicationId,
         discount,
-        finalAmount
-      })
+        finalAmount,
+      }),
     });
     const data = await response.json();
     return data;
@@ -439,91 +439,91 @@ const [chequeFile, setChequeFile] = useState<File | null>(null);
   };
 
   // Handle download Excel
-    const handleDownloadExcel = async () => {
-      try {
-        setLoading2(true);
+  const handleDownloadExcel = async () => {
+    try {
+      setLoading2(true);
 
-        const requestBody: any = {
-          academic_id: filters.academic_id || '',
-          s_id: user?.id || '',
-          classAppliedFor: filters.classAppliedFor || '',
-          startDate: filters.fromDate || '',
-          endDate: filters.toDate || '',
-          caste: filters.caste || '',
-          annual: filters.annual || '',
-          gender: filters.gender || '',
-          special: filters.special || '',
-          state: filters.state || '',
-          district: filters.district || '',
-          localarea: filters.localarea || '',
-          contact: filters.contact || '',
-          applicationNumber: filters.applicationNumber || '',
-          paymentStatus: filters.paymentStatus || '',
-          email: filters.search.includes('@') ? filters.search : '',
-          year: filters.year || '',
-        };
+      const requestBody: any = {
+        academic_id: filters.academic_id || '',
+        s_id: user?.id || '',
+        classAppliedFor: filters.classAppliedFor || '',
+        startDate: filters.fromDate || '',
+        endDate: filters.toDate || '',
+        caste: filters.caste || '',
+        annual: filters.annual || '',
+        gender: filters.gender || '',
+        special: filters.special || '',
+        state: filters.state || '',
+        district: filters.district || '',
+        localarea: filters.localarea || '',
+        contact: filters.contact || '',
+        applicationNumber: filters.applicationNumber || '',
+        paymentStatus: filters.paymentStatus || '',
+        email: filters.search.includes('@') ? filters.search : '',
+        year: filters.year || '',
+      };
 
-        // Add cdFilters if they exist
-        if (Object.keys(cdFilters).length > 0) {
-          requestBody.cdFilters = cdFilters;
-        }
-
-        const response = await axios.post(
-          `${apiUrl}/${user?.role}/Applications/Export-school-Applications`,
-          requestBody,
-          {
-            headers: {
-              Authorization: `Bearer ${user?.token}`,
-              accept: '/',
-              'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
-              'Content-Type': 'application/json',
-            },
-          },
-        );
-
-        if (response.data.success && response.data.data) {
-          const { filename, excel_base64 } = response.data.data;
-
-          const binaryString = atob(excel_base64);
-          const bytes = new Uint8Array(binaryString.length);
-
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-
-          const blob = new Blob([bytes], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          });
-
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', filename || 'school-applications.xlsx');
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          window.URL.revokeObjectURL(url);
-
-          toast.success('Excel file downloaded successfully!', { id: 'download-excel' });
-        } else {
-          throw new Error(response.data.message || 'Failed to generate Excel file');
-        }
-      } catch (error: any) {
-        console.error('Error downloading Excel:', error);
-
-        if (error.response?.status === 404) {
-          toast.error('No data found to export', { id: 'download-excel' });
-        } else if (error.response?.status === 500) {
-          toast.error('Server error while generating Excel file', { id: 'download-excel' });
-        } else if (error.response?.data?.message) {
-          toast.error(error.response.data.message, { id: 'download-excel' });
-        } else {
-          toast.error('Failed to download Excel file', { id: 'download-excel' });
-        }
-      } finally {
-        setLoading2(false);
+      // Add cdFilters if they exist
+      if (Object.keys(cdFilters).length > 0) {
+        requestBody.cdFilters = cdFilters;
       }
-    };
+
+      const response = await axios.post(
+        `${apiUrl}/${user?.role}/Applications/Export-school-Applications`,
+        requestBody,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            accept: '/',
+            'accept-language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      if (response.data.success && response.data.data) {
+        const { filename, excel_base64 } = response.data.data;
+
+        const binaryString = atob(excel_base64);
+        const bytes = new Uint8Array(binaryString.length);
+
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        const blob = new Blob([bytes], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename || 'school-applications.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        toast.success('Excel file downloaded successfully!', { id: 'download-excel' });
+      } else {
+        throw new Error(response.data.message || 'Failed to generate Excel file');
+      }
+    } catch (error: any) {
+      console.error('Error downloading Excel:', error);
+
+      if (error.response?.status === 404) {
+        toast.error('No data found to export', { id: 'download-excel' });
+      } else if (error.response?.status === 500) {
+        toast.error('Server error while generating Excel file', { id: 'download-excel' });
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message, { id: 'download-excel' });
+      } else {
+        toast.error('Failed to download Excel file', { id: 'download-excel' });
+      }
+    } finally {
+      setLoading2(false);
+    }
+  };
 
   // Handle filter change from sidebar
   const handleFilterChange = (newFilters: Partial<Filters>, newCdFilters?: CdFilters) => {
@@ -611,7 +611,7 @@ const [chequeFile, setChequeFile] = useState<File | null>(null);
                              bg-white focus:ring-blue-500 focus:border-blue-500 
                              placeholder-gray-400 transition-all duration-200"
                 />
-              </div>              
+              </div>
 
               {/* Year Dropdown - Dynamic */}
               <div className="w-full sm:w-48">
@@ -625,19 +625,17 @@ const [chequeFile, setChequeFile] = useState<File | null>(null);
                   classNamePrefix="react-select"
                 />
               </div>
-
             </div>
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3 w-full sm:w-auto">
-
-                <Button
-    onClick={() => setShowAddApplicationModal(true)}
-    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
-  >
-    <Icon icon="solar:add-circle-line-duotone" className="w-4 h-4" />
-    <span>Add Application</span>
-  </Button>
+              <Button
+                onClick={() => setShowAddApplicationModal(true)}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Icon icon="solar:add-circle-line-duotone" className="w-4 h-4" />
+                <span>Add Application</span>
+              </Button>
               {/* Filter Button with Badge - Only Icon */}
               <Button
                 onClick={() => setShowFilterSidebar(!showFilterSidebar)}
@@ -758,16 +756,16 @@ const [chequeFile, setChequeFile] = useState<File | null>(null);
                                             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                             : 'bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700'
                                         }`}
-                                                  >
-                                                    {downloadingId === application.id ? (
-                                                      <TbLoader2 className="w-4 h-4 animate-spin" />
-                                                    ) : (
-                                                      <TbFileTypePdf className="w-4 h-4" />
-                                                    )}
-                                    </button>
+                                  >
+                                    {downloadingId === application.id ? (
+                                      <TbLoader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <TbFileTypePdf className="w-4 h-4" />
+                                    )}
+                                  </button>
                                 </Tooltip>
                               </div>
-                               {/* {application.payment_status == 0 && (
+                              {/* {application.payment_status == 0 && (
                                   <PaymentButton
                                     application={application}
                                     fetchPaymentDetailsApi={fetchPaymentDetailsApi}
@@ -956,14 +954,13 @@ const [chequeFile, setChequeFile] = useState<File | null>(null);
       </div>
 
       <AddApplicationModal
-  isOpen={showAddApplicationModal}
-  onClose={() => setShowAddApplicationModal(false)}
-  user={user}
-  apiUrl={apiUrl}
-  onSuccess={fetchApplications} 
-  type="school"
-/>
-
+        isOpen={showAddApplicationModal}
+        onClose={() => setShowAddApplicationModal(false)}
+        user={user}
+        apiUrl={apiUrl}
+        onSuccess={fetchApplications}
+        type="school"
+      />
 
       {/* Application Detail Modal */}
       <ApplicationDetailModal

@@ -460,7 +460,6 @@ const AddApplicationModal: React.FC<AddApplicationModalProps> = ({
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
   };
-console.log(errors);
   // Handle form submission
 const handleSubmit = async () => {
   if (!validateForm()) {
@@ -477,17 +476,6 @@ const handleSubmit = async () => {
   if (paymentMode == 'cheque') {
     if (!chequeBase64) {
       toast.error('Please upload cheque screenshot');
-      return;
-    }
-    if (!chequeRemark) {
-      toast.error('Please enter cheque remark');
-      return;
-    }
-  }
-
-  if (paymentMode == 'cash') {
-    if (!chequeRemark) {
-      toast.error('Please enter cheque remark');
       return;
     }
   }
@@ -569,22 +557,22 @@ const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
 
   return (
-    <Modal
-      show={isOpen}
-      onClose={onClose}
-      size="full"
-      className="min-h-screen"
-      dismissible={!loading}
-    >
-        <div className="min-h-[90vh] flex flex-col">
-      <ModalHeader className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+<Modal
+  show={isOpen}
+  onClose={onClose}
+  size="full"
+  className="!p-0"
+  dismissible={!loading}
+>
+  <div className="fixed inset-0 w-screen h-screen flex flex-col bg-white">
+      <ModalHeader className="bg-gray-300 p-2">
         <div className="flex items-center gap-3">
           <Icon icon="solar:add-circle-line-duotone" className="w-6 h-6" />
           <span className="text-xl font-bold">Add New Application</span>
         </div>
       </ModalHeader>
       
-      <ModalBody className="p-0 h-[calc(100vh-140px)] overflow-y-auto">
+     <ModalBody className="p-0 flex-1 overflow-y-auto">
         <div className="p-6">
           {step === 0 ? (
             <div className="space-y-6">
@@ -793,7 +781,7 @@ const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
         </div>
       </ModalBody>
 
-      <ModalFooter className="border-t bg-gray-50">
+      <ModalFooter className="border-t bg-gray-50 p-4">
         <div className="flex justify-between w-full">
           <Button
             color="gray"
