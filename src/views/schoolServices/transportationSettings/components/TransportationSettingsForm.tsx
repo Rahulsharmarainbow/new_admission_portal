@@ -28,6 +28,7 @@ interface TransportationSettingsFormProps {
 
 interface FormData {
   academic_id: string;
+  form_id: string;
   paramKey: string;
   paramName: string;
   paramValue: string;
@@ -45,6 +46,7 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
   const [showParamValue, setShowParamValue] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     academic_id: "",
+    form_id: "",
     paramKey: "",
     paramName: "",
     paramValue: "",
@@ -61,6 +63,7 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
       if (editingSetting) {
         setFormData({
           academic_id: editingSetting.academic_id.toString(),
+          form_id: editingSetting.form_id,
           paramKey: editingSetting.param_key,
           paramName: editingSetting.param_name,
           paramValue: editingSetting.param_value,
@@ -68,6 +71,7 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
       } else {
         setFormData({
           academic_id: "",
+          form_id: "",
           paramKey: "",
           paramName: "",
           paramValue: "",
@@ -230,7 +234,7 @@ const TransportationSettingsForm: React.FC<TransportationSettingsFormProps> = ({
                     htmlFor="paramName"
                     className="block mb-1 mt-3 text-sm font-medium text-gray-700"
                   >
-                    Parameter Name <span className="text-red-500">*</span>
+                    Select route <span className="text-red-500">*</span>
                   </label>
                  <RouteDropdown
                     academicId={formData.academic_id}

@@ -632,19 +632,34 @@ const renderFieldValue = (field: FormField) => {
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="text-sm font-medium text-gray-600">Payment Type</span>
+                  <span className="text-sm font-medium text-gray-600">Payment Mode</span>
                   <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white-800 bg-orange-100`}>
-                    {applicationData.payment_type || 'Online'}
+                    {applicationData.payment_mode === 2 ? 'Offline': 'Online'}
                   </span>
                 </div>
                 {
-                  applicationData.payment_type === 'Online' && (
+                  applicationData.remark !== '' && (
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                       <span className="text-sm font-medium text-gray-600">Remark</span>
-                      <span className="text-gray-900 font-medium text-right">{applicationData.remarks}</span>
+                      <span className="text-gray-900 font-medium text-right">{applicationData.remark}</span>
                     </div>
                   )
                 }
+               {(applicationData?.payment_type_manual === 1) && (
+                  <div className="text-center">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Screen Shot
+                    </label>
+                    <div className="flex justify-center">
+                      <img
+                        src={assetUrl +"/" + applicationData.screenshot}
+                        alt="Caste Certificate"
+                        className="w-full max-w-48 h-auto max-h-48 object-contain border-2 border-gray-300 rounded bg-white shadow-sm"
+                        onError={() => handleImageError('casteCertificate')}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
