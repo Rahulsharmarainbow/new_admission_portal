@@ -100,6 +100,7 @@ const Dashboard = () => {
     year: dashboardFilters.year,
     form_id: dashboardFilters.form_id,
     academic: user.role === 'CustomerAdmin' ? user.academic_id : dashboardFilters.academic,
+    payment_type: 0,  
   });
 
   // Year Options - Automatically updates every year
@@ -161,7 +162,8 @@ const Dashboard = () => {
     debouncedSearch,
     filters.year,
     filters.academic,
-    filters.form_id
+    filters.form_id,
+    filters.payment_type
   ]);
 
   // ✅ Initialize filters for CustomerAdmin on component mount
@@ -180,6 +182,15 @@ const Dashboard = () => {
       }));
     }
   }, [user]);
+
+  const handlePaymentTypeChange = (type: number) => {
+  setFilters(prev => ({
+    ...prev,
+    payment_type: type,
+    page: 0, 
+  }));
+};
+
 
   // Sync local filters with context for SuperAdmin/SupportAdmin
   useEffect(() => {
@@ -487,6 +498,26 @@ const Dashboard = () => {
           year={filters.year} 
         /> :
       <>
+      <div className="flex items-center gap-3 m-4 ">
+  {[
+    { label: "All", value: 0 },
+    { label: "Online", value: 1 },
+    { label: "Offline", value: 2 },
+  ].map((item) => (
+    <span
+      key={item.value}
+      onClick={() => handlePaymentTypeChange(item.value)}
+      className={`px-4 py-1.5 rounded-full text-sm font-medium cursor-pointer transition-all ${
+        filters.payment_type === item.value
+          ? "bg-blue-600 text-white shadow-md"
+          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+      }`}
+    >
+      {item.label}
+    </span>
+  ))}
+</div>
+
        {/* Statistics Cards - Row 1 */}
       <div className="grid grid-cols-9 gap-6 mb-6">
         <div className="lg:col-span-3 col-span-12">

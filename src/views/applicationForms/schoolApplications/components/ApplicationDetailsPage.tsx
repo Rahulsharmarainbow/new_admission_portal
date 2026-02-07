@@ -631,6 +631,20 @@ const renderFieldValue = (field: FormField) => {
                     {applicationData.payment_status === '1' ? 'Paid' : 'Unpaid'}
                   </span>
                 </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-600">Payment Type</span>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white-800 bg-orange-100`}>
+                    {applicationData.payment_type || 'Online'}
+                  </span>
+                </div>
+                {
+                  applicationData.payment_type === 'Online' && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="text-sm font-medium text-gray-600">Remark</span>
+                      <span className="text-gray-900 font-medium text-right">{applicationData.remarks}</span>
+                    </div>
+                  )
+                }
               </div>
             </div>
           </div>
